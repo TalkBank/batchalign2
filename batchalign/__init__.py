@@ -1,3 +1,3 @@
 from .document import *
-from .formats.chat.chat import CHATFile
+from .formats import CHATFile
 

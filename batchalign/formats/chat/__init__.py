@@ -1,1 +1,1 @@
-from .chat import CHATFile
+from .parser import CHATFile
