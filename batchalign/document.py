@@ -29,8 +29,8 @@ class Morphology(BaseModel):
 class Form(BaseModel):
     text: str # the text
     time: Optional[Tuple[int, int]] = Field(default=None) # word bullet
-    morphology: Optional[Morphology] = Field(default=None) # mor
-    dependency: Optional[Dependency] = Field(default=None) # gra
+    morphology: Optional[List[Morphology]] = Field(default=None) # mor
+    dependency: Optional[List[Dependency]] = Field(default=None) # gra
 
 class Tier(BaseModel):
     lang: str # en
@@ -92,8 +92,10 @@ class Document(BaseModel):
     def tiers(self):
         results = []
         for i in self.content:
-            if isinstance(line, Utterance):
-                if line.tier not in results:
-                    results.append(line.tier)
+            if isinstance(i, Utterance):
+                if i.tier not in results:
+                    results.append(i.tier)
+
+        return results
 
 

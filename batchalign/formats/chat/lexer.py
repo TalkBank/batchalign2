@@ -1,7 +1,7 @@
 import re
 from enum import Enum
 
-from ...utils import *
+from .utils import *
 from ...constants import *
 
 class ULTokenType(Enum):
@@ -10,6 +10,7 @@ class ULTokenType(Enum):
     FEAT = 2 # (.)
     FP = 3 # &-uh
     ANNOT = 4 # &~ject &~head
+    MORPUNCT = 5 # ‡„,
 
 class UtteranceLexer:
 
@@ -45,9 +46,11 @@ class UtteranceLexer:
             self.__forms.append((form, ULTokenType.ANNOT))
         elif form[0] == "<":
             self.handle_group(form)
-        elif form.strip() == "[/]":
+        elif form.strip() in MOR_PUNCT:
+            self.__forms.append((form.strip(), ULTokenType.MORPUNCT))
+        elif form.strip() == "[/]" or form.strip() == "[//]":
             self.__forms.append((self.__forms.pop(-1)[0], ULTokenType.RETRACE))
-            self.__forms.append(("[/]", ULTokenType.FEAT))
+            self.__forms.append((form.strip(), ULTokenType.FEAT))
         elif annotation_clean(form).strip() == "":
             self.__forms.append((form, ULTokenType.FEAT))
         else:
@@ -68,10 +71,10 @@ class UtteranceLexer:
         # pull the type
         form, num, delim = self.__get_until()
 
-        if form.strip() == "[/]":
+        if form.strip() == "[/]" or form.strip() == "[//]":
             for i in forms:
                 self.__forms.append((i, ULTokenType.RETRACE))
-            self.__forms.append(("[/]", ULTokenType.FEAT))
+            self.__forms.append((form.strip(), ULTokenType.FEAT))
         else:
             raise CHATValidationException(f"Lexer failed! Unexpected group type mark. On line: '{self.raw}', parsed: {form.strip()}")
 

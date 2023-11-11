@@ -1,7 +1,7 @@
 from batchalign import CHATFile
+import json
 
-c = CHATFile("./extern/minga01a.cha")
-
-
+c = CHATFile("./extern/test.cha")
+c.doc.tiers
 
 
