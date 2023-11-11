@@ -10,6 +10,35 @@ import re
 # FILE = "./extern/minga01a.cha"
 
 class CHATFile(BaseFormat):
+    """CHAT File
+
+    Reads and handles a CHAT file into Batchalign document format.
+
+    Attributes
+    ----------
+    doc : Document
+        The Batchalign document representing the file.
+
+    Parameters
+    ----------
+    path : Optional[str]
+        The path of the CHAT file to load from.
+    doc : Optional[Document]
+        Batchalign document to initialize a CHAT file from.
+    doc : Optional[List[str]]
+        The lines of the files to load from.
+
+    Notes
+    -----
+    To initlize the class, choose one of three formats to seed the
+    document. Either provide a path to a CHAT file, a Batchalign
+    Document, or lines to the document.
+
+    Examples
+    --------
+    >>> c = CHATFile("./extern/test.cha")
+    >>> transcript = c.doc.transcript()
+    """
 
     def __init__(self, path=None, doc=None, lines=None):
         if path:
@@ -41,6 +70,26 @@ class CHATFile(BaseFormat):
 
     @classmethod
     def from_lines(cls, lines):
+        """Encode a CHAT files' lines into a Batchalign Document.
+
+        Parameters
+        ----------
+        lines : List[str]
+            The contents of the CHAT file
+
+        Returns
+        -------
+        Document
+            Parsed Batchalign document.
+
+        Raises
+        ------
+        CHATValidationException
+            If the utterance didn't parse correctly, we raise an
+            exception describing the issue.
+        """
+
+
         raw = lines
         # pop off anything that's before @Begin
         while raw[0].strip() != "@Begin":
@@ -153,7 +202,7 @@ class CHATFile(BaseFormat):
 
     @staticmethod
     def parse_utterance(text, mor, gra, wor, additional):
-        """Encode an utterance into a Batchalign utterance.
+        """Encode a CHAT utterance into a Batchalign utterance.
 
         Parameters
         ----------
