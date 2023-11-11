@@ -55,10 +55,13 @@ class Utterance(BaseModel):
     custom_dependencies: List[CustomLine]  = Field(default=[])
 
     def __str__(self):
-        if text != None:
-            return text
+        if self.text != None:
+            return self.text
         else:
-            return detokenize([i.text for i in self.content])
+            return self._detokenize()
+
+    def _detokenize(self):
+        return detokenize([i.text for i in self.content])
 
 class MediaType(Enum):
     UNLINKED_AUDIO = "audio, unlinked"
@@ -76,11 +79,20 @@ class Document(BaseModel):
     media: Optional[Media] = Field(default=None)
     langs: List[str] = Field(default=["eng"])
 
-    def transcript(self, include_tiers=False):
+    def __repr__(self):
+        return "Batchalign Document\n-------------------\n"+"\n".join(self.transcript())+"\n-------------------"
+
+    def __str__(self):
+        return "\n".join(self.transcript())
+
+    def transcript(self, include_tiers=False, strip=False):
         results = []
         for line in self.content:
-            if isinstance(line, Utterance):
-                results.append((line.tier.name+": " if include_tiers
+            if isinstance(line, Utterance) and strip:
+                results.append((line.tier.id+": " if include_tiers
+                                else "")+line._detokenize())
+            elif isinstance(line, Utterance):
+                results.append((line.tier.id+": " if include_tiers
                                 else "")+str(line))
             elif line.content != None:
                 results.append((line.id+": " if include_tiers

@@ -130,7 +130,7 @@ class CHATFile(BaseFormat):
                     t = tiers[tier]
                 except KeyError:
                     raise CHATValidationException(f"Encountered undeclared tier: tier='{tier}', line='{text}'")
-                ut = Utterance.parse_obj({
+                ut = Utterance.model_validate({
                     "tier": t,
                     "content": parsed,
                     "text": text,
@@ -148,7 +148,7 @@ class CHATFile(BaseFormat):
             else:
                 raise CHATValidationException(f"Unknown line in input CHAT: '{line}'")
 
-        doc = Document.parse_obj(results)
+        doc = Document.model_validate(results)
         return cls(doc=doc)
 
     @staticmethod

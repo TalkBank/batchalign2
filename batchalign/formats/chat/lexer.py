@@ -16,7 +16,7 @@ class UtteranceLexer:
 
     def __init__(self, raw):
         self.raw = raw
-        self.__iter = iter(raw)
+        self.__iter = iter(raw.strip())
         self.__forms = []
         self.parse()
 
@@ -25,11 +25,15 @@ class UtteranceLexer:
         return self.__forms
 
     def __get_until(self, end_tokens=[' ']):
+        has_read_nonempty = False
         tokens = []
         while True:
             tok = next(self.__iter, None)
-            if tok != None and tok not in end_tokens:
+            if tok in end_tokens and has_read_nonempty == False:
+                pass
+            elif tok != None and tok not in end_tokens:
                 tokens.append(tok)
+                has_read_nonempty = True
             else:
                 break
 
@@ -38,6 +42,7 @@ class UtteranceLexer:
 
     def __pull(self):
         form, num, delim = self.__get_until()
+
         if num == 0:
             return False
         if form[:2] == "&-":
@@ -62,11 +67,14 @@ class UtteranceLexer:
         forms = [annotation_clean(form)]
 
         # pull the form
-        while form[-1] != ">":
-            form, num, delim = self.__get_until()
-            if form == None:
-                raise CHATValidationException(f"Lexer failed! Unexpected end to utterance within form group. On line: '{self.raw}', parsed group: {str(forms)}")
-            forms.append(annotation_clean(form))
+        try:
+            while form[-1] != ">":
+                form, num, delim = self.__get_until()
+                if form == None:
+                    raise CHATValidationException(f"Lexer failed! Unexpected end to utterance within form group. On line: '{self.raw}', parsed group: {str(forms)}")
+                forms.append(annotation_clean(form))
+        except IndexError:
+            raise CHATValidationException(f"Lexer failed! Unexpected end to utterance within form group. On line: '{self.raw}', parsed group: {str(forms)}")
 
         # pull the type
         form, num, delim = self.__get_until()

@@ -1,6 +1,7 @@
 import re 
 from ...document import *
 from ...constants import *
+from ...errors import *
 
 def parse_gra(mor_str):
     """Parses a gra string into id, dest, type
@@ -17,7 +18,7 @@ def parse_gra(mor_str):
     """
 
     src, dest, type = mor_str.split("|")
-    return Dependency.parse_obj({
+    return Dependency.model_validate({
         "id": src,
         "dep_id": dest,
         "dep_type": type,
@@ -42,12 +43,15 @@ def parse_mor(mor_str):
     if mor_str in ENDING_PUNCT:
         return [Morphology(lemma=mor_str, pos="PUNCT", feats="")]
 
-    mors = [i.split("|") for i in re.split("[~$]", mor_str)]
-    feats = [re.split("[-&]", i[1]) for i in mors]
-    lemmas, feats = zip(*[(i[0], "-".join(i[1:])) for i in feats])
-    pos = [i[0] for i in mors]
+    try:
+        mors = [i.split("|") for i in re.split("[~$]", mor_str)]
+        feats = [re.split("[-&]", i[1]) for i in mors]
+        lemmas, feats = zip(*[(i[0], "-".join(i[1:])) for i in feats])
+        pos = [i[0] for i in mors]
+    except:
+        raise CHATValidationException(f"mor parser recieved invalid mor string: '{mor_str}'")
 
-    mors = [Morphology.parse_obj({
+    mors = [Morphology.model_validate({
         "lemma": l,
         "pos": p,
         "feats": f,
