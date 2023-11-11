@@ -54,11 +54,20 @@ class Utterance(BaseModel):
     alignment: Optional[Tuple[int,int]] = Field(default=None)
     custom_dependencies: List[CustomLine]  = Field(default=[])
 
+    def __getitem__(self, indx):
+        return self.content[indx]
+
+    def __len__(self):
+        return len(self.content)
+
     def __str__(self):
         if self.text != None:
             return self.text
         else:
             return self._detokenize()
+
+    def __repr__(self):
+        return str(self)
 
     def _detokenize(self):
         return detokenize([i.text for i in self.content])
@@ -80,10 +89,16 @@ class Document(BaseModel):
     langs: List[str] = Field(default=["eng"])
 
     def __repr__(self):
-        return "Batchalign Document\n-------------------\n"+"\n".join(self.transcript())+"\n-------------------"
+        return "\n".join(self.transcript())
 
     def __str__(self):
         return "\n".join(self.transcript())
+
+    def __getitem__(self, indx):
+        return self.content[indx]
+
+    def __len__(self):
+        return len(self.content)
 
     def transcript(self, include_tiers=False, strip=False):
         results = []
