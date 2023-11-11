@@ -206,9 +206,7 @@ class CHATFile(BaseFormat):
             mor = [None for i in range(len(lexed_words))]
         else:
             mor = mor.split(" ")
-        if gra == None:
-            gra = [None for i in range(len(lexed_words))]
-        else:
+        if gra != None:
             gra = gra.split(" ")
         if wor == None:
             wor = [None for i in range(len(phonated_words))]
@@ -235,12 +233,19 @@ class CHATFile(BaseFormat):
                 parsed_forms[indx].morphology = mor
 
                 # grab the right lines in dependency
-                deps = []
-                for _ in range(len(mor)):
-                    deps.append(gra.pop(0))
-                if all(i != None for i in deps):
-                    deps = [parse_gra(i) for i in deps]
-                    parsed_forms[indx].dependency = deps
+                if gra != None:
+                    deps = []
+                    for _ in range(len(mor)):
+                        try:
+                            deps.append(gra.pop(0))
+                        except IndexError:
+                            raise CHATValidationException(f"Lengths of mor and gra tiers are misaligned --- gra line too short on line: '{text}'")
+                    if all(i != None for i in deps):
+                        deps = [parse_gra(i) for i in deps]
+                        parsed_forms[indx].dependency = deps
+
+        if all([i != None for i in mor]) and gra != None and len(gra) != 0:
+            raise CHATValidationException(f"Lengths of mor and gra tiers are misaligned --- gra line too long on line: '{text}'")
 
         # insert phonation into the parsed forms
         for (indx, _), w in zip(phonated_words, wor):

@@ -1,0 +1,27 @@
+@UTF8
+@Window:	30_471_890_1011_-1_-1_224_0_224_0
+@Begin
+@Languages:	eng
+@Participants:	PAR0 Participant, INV1 Participant, STU Participant
+@Options:	multi
+@ID:	eng|corpus_name|PAR0|||||Participant|||
+@ID:	eng|corpus_name|INV1|||||Participant|||
+@ID:	eng|corpus_name|STU|||||Participant|||
+@Media:	test, audio
+*PAR0:	Um <I like I like> [/] I like beans . 20780_24300
+%wor:	Um 20780_21330 I 21360_21480 like 21480_21720 I 22180_22310 like 22310_22710 I 22710_22760 like 22760_23270 beans 23300_24300 .
+%mor:	intj|um pron|I-Prs-Nom-S1 verb|like-Fin-Ind-1-Pres
+	noun|bean&ComNeut-Plur .
+%gra:	1|3|DISCOURSE 2|3|NSUBJ 3|4|ROOT 4|3|OBJ 5|3|PUNCT
+*INV1:	so ‡ she doesn't have a list of questions to ask you . 136820_139220
+%mor:	co|so beg|beg pro:sub|she mod|do&3S~neg|not v|have det:art|a n|list
+	prep|of n|question-PL inf|to v|ask pro:per|you .
+%gra:	1|0|BEG 2|1|BEGP 3|6|SUBJ 4|6|AUX 5|4|NEG 6|0|ROOT 7|8|DET 8|6|OBJ
+	9|8|NJCT 10|9|POBJ 11|12|INF 12|6|XJCT 13|12|OBJ 14|6|PUNCT
+*STU:	+< so I was +//. 201235_201933
+%mor:	co|so pro:sub|I cop|be&PAST&13S +//.
+%gra:	1|3|COM 2|3|SUBJ 3|0|ROOT 4|3|PUNCT
+*STU:	+< right , right . 332418_333654
+%mor:	adv|right cm|cm co|right .
+%gra:	1|3|JCT 2|1|LP 3|0|INCROOT 4|3|PUNCT
+@End

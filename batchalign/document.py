@@ -7,7 +7,7 @@ from pydantic.functional_validators import BeforeValidator
 
 from .utils import word_tokenize, sent_tokenize, detokenize
 
-class CustomLineType(Enum):
+class CustomLineType(int, Enum):
     DEPENDENT = 0 # %com
     INDEPENDENT = 1 # @ID
 
@@ -63,7 +63,7 @@ class Utterance(BaseModel):
     def _detokenize(self):
         return detokenize([i.text for i in self.content])
 
-class MediaType(Enum):
+class MediaType(str, Enum):
     UNLINKED_AUDIO = "audio, unlinked"
     UNLINKED_VIDEO = "video, unlinked"
     AUDIO = "audio"
