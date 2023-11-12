@@ -5,6 +5,5 @@ c = CHATFile("./extern/test.cha")
 document = c.doc
 
 
-document
-
+document.transcript(strip=True)
 
