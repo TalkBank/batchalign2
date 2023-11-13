@@ -5,7 +5,7 @@ from typing_extensions import Annotated
 from pydantic import BaseModel, Field
 from pydantic.functional_validators import BeforeValidator
 
-from .utils import word_tokenize, sent_tokenize, detokenize
+from batchalign.utils import word_tokenize, sent_tokenize, detokenize
 
 class CustomLineType(int, Enum):
     DEPENDENT = 0 # %com
@@ -49,7 +49,7 @@ Sentence = Annotated[List[Form], BeforeValidator(tokenize_sentence)]
 class Utterance(BaseModel):
     tier: Tier
     content: Sentence
-    text: Optional[str]
+    text: Optional[str] = Field(default=None)
     delim: str = Field(default=".")
     alignment: Optional[Tuple[int,int]] = Field(default=None)
     custom_dependencies: List[CustomLine]  = Field(default=[])

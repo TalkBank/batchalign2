@@ -18,9 +18,20 @@ setup(
     packages=find_packages(),
     long_description=read('README.md'),
     install_requires=[
-        # 'pocketsphinx',
         "pydantic>=2.4",
         "nltk>=3.8",
+        "montreal-forced-aligner>=3.0.0",
+        "praatio>=6.0.0,<6.1.0",
+        "pytorch>=2.1.0,<2.2.0",
+        "torchaudio>=2.1.0,<2.2.0",
+        "pyAudioAnalysis==0.3.14",
+        "hmmlearn==0.3.0",
+        "eyed7>=0.9.7",
+        "pydub>=0.25.1,<0.26.0",
+        "imblearn",
+        "plotly>=5.18.0",
+        "transformers>=4.35",
+        "tokenizers>=0.14.1",
     ],
     extras_require={
         'dev': [

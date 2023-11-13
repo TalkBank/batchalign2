@@ -1,8 +1,8 @@
 import re
 from enum import Enum
 
-from .utils import *
-from ...constants import *
+from batchalign.formats.chat.utils import *
+from batchalign.constants import *
 
 class ULTokenType(Enum):
     REGULAR = 0 # hello

@@ -1,10 +1,12 @@
-from ...document import *
-from ...utils import *
-from .utils import *
-from ...errors import *
-from ...constants import *
-from .lexer import lex, ULTokenType
-from ..base import BaseFormat
+from batchalign.document import *
+from batchalign.utils import *
+from batchalign.errors import *
+from batchalign.constants import *
+
+from batchalign.formats.base import BaseFormat
+from batchalign.formats.chat.utils import *
+from batchalign.formats.chat.lexer import lex, ULTokenType
+
 import re
 
 # FILE = "./extern/minga01a.cha"
