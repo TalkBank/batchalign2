@@ -17,17 +17,17 @@ MOR_INVALID = "moddo&3S"
 STR_TO_CLEAN = "d-⌋ʔwhat&=um"
 STR_CLEANED = "dwhatum"
 
-# parse_gra
+# chat_parse_gra
 def test_parse_gra():
-    assert parse_gra(GRA_VALID) == GRA_VALID_DOC
+    assert chat_parse_gra(GRA_VALID) == GRA_VALID_DOC
 
 # parse_mor
 def test_parse_mor():
-    assert parse_mor(MOR_VALID) == MOR_VALID_DOC
-    assert parse_mor(MOR_VALID_MULTIFEAT) == MOR_VALID_MULTIFEAT_DOC
+    assert chat_parse_mor(MOR_VALID) == MOR_VALID_DOC
+    assert chat_parse_mor(MOR_VALID_MULTIFEAT) == MOR_VALID_MULTIFEAT_DOC
 def test_parse_mor_throw():
     with pytest.raises(CHATValidationException):
-        parse_mor(MOR_INVALID)
+        chat_parse_mor(MOR_INVALID)
 
 # annotation_clean
 def test_annotation_clean():

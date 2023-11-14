@@ -3,7 +3,7 @@ from ...document import *
 from ...constants import *
 from ...errors import *
 
-def parse_gra(mor_str):
+def chat_parse_gra(mor_str):
     """Parses a gra string into id, dest, type
 
     Parameters
@@ -26,7 +26,7 @@ def parse_gra(mor_str):
 
 
 
-def parse_mor(mor_str):
+def chat_parse_mor(mor_str):
     """Parses a mor string into pos, lemmas, feats.
 
     Parameters

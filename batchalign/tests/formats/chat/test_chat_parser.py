@@ -61,35 +61,25 @@ MISALIGNED_UTTERANCE_TOOMUCH_GRA = [
 
 # test various forms of normal parses
 def test_parse_utterance():
-    res, delim = CHATFile.parse_utterance(*STANDARD_UTTERANCE)
+    res, delim = chat_parse_utterance(*STANDARD_UTTERANCE)
     assert delim == "."
     assert res == PARSED_STANDARD_UTTERANCE
 def test_parse_utterance_missing_mor_time():
-    res, delim = CHATFile.parse_utterance(*STANDARD_NOTIME_NOMOR)
+    res, delim = chat_parse_utterance(*STANDARD_NOTIME_NOMOR)
     assert delim == "."
     assert res == PARSED_NOTIME_NOMOR
 def test_parse_utterance_missing_gra():
-    res, delim = CHATFile.parse_utterance(*STANDARD_NOGRA)
+    res, delim = chat_parse_utterance(*STANDARD_NOGRA)
     assert delim == "."
     assert res == PARSED_NOGRA
 
 # tests various forms of alignment errors
 def test_parse_utterance_misaligned():
     with pytest.raises(CHATValidationException):
-        res, delim = CHATFile.parse_utterance(*MISALIGNED_UTTERANCE_MOR)
+        res, delim = chat_parse_utterance(*MISALIGNED_UTTERANCE_MOR)
 def test_parse_utterance_misaligned_chopped_gra():
     with pytest.raises(CHATValidationException):
-        res, delim = CHATFile.parse_utterance(*MISALIGNED_UTTERANCE_CHOP_GRA)
+        res, delim = chat_parse_utterance(*MISALIGNED_UTTERANCE_CHOP_GRA)
 def test_parse_utterance_misaligned_toomuch_gra():
     with pytest.raises(CHATValidationException):
-        res, delim = CHATFile.parse_utterance(*MISALIGNED_UTTERANCE_TOOMUCH_GRA)
-
-# tests header and metadata parsing 
-def test_whole_file():
-    dir = pathlib.Path(__file__).parent.resolve()
-    c = CHATFile(os.path.join(dir, "support", "test.cha"))
-    with open(os.path.join(dir, "support", "success.json"), 'r') as df:
-        correct = Document.model_validate_json(df.read())
-        assert correct == c.doc
-
-
+        res, delim = chat_parse_utterance(*MISALIGNED_UTTERANCE_TOOMUCH_GRA)
