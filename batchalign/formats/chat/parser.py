@@ -235,7 +235,7 @@ def chat_parse_doc(lines):
             timing = re.findall(rf"\x15(\d+)_(\d+)\x15", text)
             if len(timing) != 0:
                 x,y = timing[0]
-                ut.alignment = (int(x), int(y))
+                ut.time = (int(x), int(y))
             results["content"].append(ut)
 
         # throw error for everything else

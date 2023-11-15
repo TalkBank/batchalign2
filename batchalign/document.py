@@ -2,7 +2,7 @@ from enum import Enum
 from typing import Optional, List, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, computed_field
 from pydantic.functional_validators import BeforeValidator
 
 from batchalign.utils import word_tokenize, sent_tokenize, detokenize
@@ -46,13 +46,28 @@ def tokenize_sentence(input):
     return input
 Sentence = Annotated[List[Form], BeforeValidator(tokenize_sentence)]
 
+## TODO: make a computed_field which is the "alignment", which uses
+## time if time exists, if not uses the first element of the first utterance
+## and the last element of the last utterance
+
 class Utterance(BaseModel):
     tier: Tier
     content: Sentence
     text: Optional[str] = Field(default=None)
     delim: str = Field(default=".")
-    alignment: Optional[Tuple[int,int]] = Field(default=None)
+    time: Optional[Tuple[int,int]] = Field(default=None)
     custom_dependencies: List[CustomLine]  = Field(default=[])
+
+    @computed_field # type: ignore[misc]
+    @property
+    def alignment(self) -> Tuple[int,int]:
+        if self.time == None and (self.content[0].time == None or
+                                  self.content[-1].time == None):
+            return None
+        elif self.time == None: 
+            return (self.content[0].time[0], self.content[-1].time[-1])
+        else: 
+            return self.time
 
     def __getitem__(self, indx):
         return self.content[indx]
@@ -70,7 +85,11 @@ class Utterance(BaseModel):
         return str(self)
 
     def _detokenize(self):
-        return detokenize([i.text for i in self.content])
+        if self.alignment == None:
+            return detokenize([i.text for i in self.content])
+        else:
+            return detokenize([i.text for i in self.content])+f" \x15{str(self.alignment[0])}_{str(self.alignment[1])}\x15"
+
 
 class MediaType(str, Enum):
     UNLINKED_AUDIO = "audio, unlinked"
