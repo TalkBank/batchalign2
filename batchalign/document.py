@@ -85,10 +85,13 @@ class Utterance(BaseModel):
         return str(self)
 
     def _detokenize(self):
+        ## TODO deal with angle brackets for retraces
+        # NOTE: we don't use detokenize here to put spaces
+        # between PUNCT, which should be in CHAT style
         if self.alignment == None:
-            return detokenize([i.text for i in self.content])
+            return " ".join([i.text for i in self.content])
         else:
-            return detokenize([i.text for i in self.content])+f" \x15{str(self.alignment[0])}_{str(self.alignment[1])}\x15"
+            return " ".join([i.text for i in self.content])+f" \x15{str(self.alignment[0])}_{str(self.alignment[1])}\x15"
 
 
 class MediaType(str, Enum):

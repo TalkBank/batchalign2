@@ -3,6 +3,7 @@ import nltk
 from nltk import word_tokenize as WT
 from nltk import sent_tokenize as ST
 from nltk.tokenize.treebank import TreebankWordDetokenizer
+from batchalign.constants import *
 
 def word_tokenize(str):
     """Tokenize a string by word
