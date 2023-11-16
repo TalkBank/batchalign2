@@ -1,0 +1,12 @@
+@UTF8
+@Window:	30_471_890_1011_-1_-1_224_0_224_0
+@Begin
+@Languages:	eng
+@Participants:	PAR0 Participant, INV1 Participant, STU Participant
+@Options:	multi
+@ID:	eng|corpus_name|PAR0|||||Participant|||
+@ID:	eng|corpus_name|INV1|||||Participant|||
+@ID:	eng|corpus_name|STU|||||Participant|||
+@Media:	test, audio, unlinked
+*PAR0:	Um <I like I like> [/] I like beans . 20780_24300
+@End

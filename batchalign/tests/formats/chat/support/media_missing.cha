@@ -1,0 +1,12 @@
+@UTF8
+@Window:	30_471_890_1011_-1_-1_224_0_224_0
+@Begin
+@Languages:	eng
+@Participants:	PAR0 Participant, INV1 Participant, STU Participant
+@Options:	multi
+@ID:	eng|corpus_name|PAR0|||||Participant|||
+@ID:	eng|corpus_name|INV1|||||Participant|||
+@ID:	eng|corpus_name|STU|||||Participant|||
+*PAR0:	Um <I like I like> [/] I like beans . 20780_24300
+%wor:	Um 20780_21330 I 21360_21480 like 21480_21720 I 22180_22310 like 22310_22710 I 22710_22760 like 22760_23270 beans 23300_24300 .
+@End

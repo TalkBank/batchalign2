@@ -12,6 +12,19 @@ import warnings
 # document[3].model_dump()
 
 def utterance_to_chat(utterance: Utterance):
+    """Converts at Utterance to a CHAT string.
+
+    Parameters
+    ----------
+    utterance : Utterance
+        The utterance to be written to string.
+
+    Returns
+    -------
+    str
+        The generated string.
+    """
+    
     main_line = str(utterance)
     tier = utterance.tier
 
@@ -69,4 +82,28 @@ def utterance_to_chat(utterance: Utterance):
             result.append(f"%{special.id}:\t"+special.content)
 
     return "\n".join(result)
+
+def generate_chat_preamble(doc):
+    """Generate header for a Batchalign document.
+
+    Parameters
+    ----------
+    doc : Document
+        The document to generate a CHAT header.
+
+    Returns
+    -------
+    str
+        The generated CHAT preamble.
+    """
+    
+    header = ["@Begin"]
+    header.append("@Languages:\t"+", ".join(doc.langs))
+    header.append("@Options:\tmulti")
+    header.append("@Participants:\t"+", ".join([f"{i.id} {i.name}" for i in doc.tiers]))
+    header.append("\n".join([f"@ID:\t{i.lang}|{i.corpus}|{i.id}|||||{i.name}|||" for i in doc.tiers]))
+    if doc.media:
+        header.append(f"@Media:\t{doc.media.name}, {doc.media.type.value}")
+
+    return "\n".join(header)
 

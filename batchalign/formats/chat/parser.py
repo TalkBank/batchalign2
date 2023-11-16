@@ -175,9 +175,9 @@ def chat_parse_doc(lines):
                 type = MediaType.UNLINKED_AUDIO
             elif "unlinked" in line and "video" in line:
                 type = MediaType.UNLINKED_VIDEO
-            elif "unlinked" in line and "audio" in line:
+            elif "audio" in line:
                 type = MediaType.AUDIO
-            elif "unlinked" in line and "video" in line:
+            elif "video" in line:
                 type = MediaType.VIDEO
 
             media = line.strip("@Media:").split(",")

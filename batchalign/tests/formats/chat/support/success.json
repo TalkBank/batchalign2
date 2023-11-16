@@ -612,7 +612,7 @@
   }
  ],
  "media": {
-  "type": "audio, unlinked",
+  "type": "audio",
   "name": "test",
   "url": null
  },

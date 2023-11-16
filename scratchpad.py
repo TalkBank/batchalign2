@@ -14,6 +14,8 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 c = CHATFile("./extern/test.cha")
 document = c.doc
 
+document
+
 # document[0].model_json_schema()
 # document
 
