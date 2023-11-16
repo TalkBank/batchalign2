@@ -12,7 +12,11 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # - interpolate time backwards if the last form doesn't have a time
 
 c = CHATFile("./extern/test.cha")
-c.write("./tmp.cha")
+# print(str(c))
+# d = c.doc
+# d[0][2].time = None
+# CHATFile(doc=d).write("./tmp.cha")
+# d[0][2]
 # document = c.doc
 
 # document
