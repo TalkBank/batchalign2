@@ -7,6 +7,7 @@ from batchalign.formats.base import BaseFormat
 from batchalign.formats.chat.utils import *
 from batchalign.formats.chat.lexer import lex, ULTokenType
 from batchalign.formats.chat.parser import *
+from batchalign.formats.chat.generator import *
 
 import re
 
@@ -67,7 +68,41 @@ class CHATFile(BaseFormat):
         else:
             self.__doc = doc
 
+    def write(self, path):
+        """Write the CHATFile to file.
+
+        Parameters
+        ----------
+        path : str
+            Path of where the CHAT file should get written.
+        """
+        
+        str_doc = self.__generate(self.__doc)
+
+        with open(path, 'w') as df:
+            df.write(str_doc.strip())
+
+    @staticmethod
+    def __generate(doc:Document):
+        utterances = doc.content
+
+        main = ["@UTF8\n@Begin", generate_chat_preamble(doc)]
+        for i in utterances:
+            if isinstance(i, CustomLine):
+                extra = f"@{i.id}:\t"
+                if i.content != None:
+                    extra += i.content
+                main.append(extra.strip())
+            else:
+                main.append(generate_chat_utterance(i))
+        main.append("@End")
+
+        return "\n".join(main)
+
     @property
     def doc(self):
         return self.__doc
+
+    def __str__(self):
+        return self.__generate(self.__doc)
 
