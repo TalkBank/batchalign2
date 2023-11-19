@@ -1,2 +1,3 @@
 class CHATValidationException(Exception):
     pass
+

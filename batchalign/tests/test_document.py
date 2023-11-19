@@ -19,5 +19,7 @@ def test_utterance_stringification():
     tmp.time = TIME_ADJUSTMENT
     assert str(tmp) == TIME_ADJUSTED_STRINGIFICATION
 
-    
+def test_document_seeding():
+    doc = Document.from_media("test-media-file.wav")
+    assert doc.media.url == "test-media-file.wav"
 

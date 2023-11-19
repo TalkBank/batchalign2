@@ -148,6 +148,7 @@ class WhisperPipeline(object):
         # segment timestamps against the words
         groups = []
 
+        L.info(f"Whisper transcribing file...")
         L.debug("Whisper Preprocessing...")
         if segments is not None:
             secs = np.array(range(len(segments))) * 0.5 + 0.1 / 2.0
@@ -173,7 +174,7 @@ class WhisperPipeline(object):
                 "payload": 0
             })
 
-        L.info("Whisper Transcribing...")
+        L.debug("Whisper Transcribing...")
         words = self.pipe(data.cpu().numpy(),
                           batch_size=1, 
                           generate_kwargs = {
@@ -196,7 +197,7 @@ class WhisperPipeline(object):
         # words = list(filter(lambda x:x["timestamp"] != (0.0, 0.0), words))
 
 
-        L.info("Whisper Postprocessing...")
+        L.debug("Whisper Postprocessing...")
         for word in words:
             groups.append({
                 "type": "text",
@@ -237,13 +238,13 @@ class WhisperPipeline(object):
             "speaker": current_speaker[0] if type(current_speaker) == tuple else current_speaker
         })
 
-        L.info("Whisper Done.")
+        L.debug("Whisper Done.")
         return ({"monologues": turns})
 
 class WhisperEngine(BatchalignEngine):
     capabilities = [ BAEngineType.GENERATE ]
 
-    def __init__(self, model=None, language="en"):
+    def __init__(self, model=None, language="en", num_speakers=2):
 
         if model == None and language == "en":
             model = "talkbank/CHATWhisper-en-large-v1"
@@ -252,9 +253,10 @@ class WhisperEngine(BatchalignEngine):
             
         self.__whisper = WhisperPipeline(model, language=language)
         self.__lang = language
+        self.__num_speakers = num_speakers
 
-    def generate(self, source_path, num_speakers=2):
-        audio,segs = self.__whisper.load(source_path, num_speakers)
+    def generate(self, source_path):
+        audio,segs = self.__whisper.load(source_path, self.__num_speakers)
         res = self.__whisper(audio.all(), segs)
 
         return process_generation(res, self.__lang)

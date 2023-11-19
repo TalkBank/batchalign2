@@ -7,6 +7,8 @@ from pydantic.functional_validators import BeforeValidator
 
 from batchalign.utils import word_tokenize, sent_tokenize, detokenize
 
+from pathlib import Path
+
 class CustomLineType(int, Enum):
     DEPENDENT = 0 # %com
     INDEPENDENT = 1 # @ID
@@ -33,10 +35,10 @@ class Form(BaseModel):
     dependency: Optional[List[Dependency]] = Field(default=None) # gra
 
 class Tier(BaseModel):
-    lang: str # en
-    corpus: str # corpus_name
-    id: str # PAR0
-    name: str # Participant
+    lang: str  = Field(default="eng") # eng
+    corpus: str = Field(default="corpus_name") # corpus_name
+    id: str = Field(default="PAR") # PAR0
+    name: str = Field(default="Participant") # Participant
 
 def tokenize_sentence(input):
     if isinstance(input, str):
@@ -51,7 +53,7 @@ Sentence = Annotated[List[Form], BeforeValidator(tokenize_sentence)]
 ## and the last element of the last utterance
 
 class Utterance(BaseModel):
-    tier: Tier
+    tier: Tier = Field(default=Tier())
     content: Sentence
     text: Optional[str] = Field(default=None)
     delim: str = Field(default=".")
@@ -103,7 +105,7 @@ class MediaType(str, Enum):
 class Media(BaseModel):
     type: MediaType
     name: str
-    url: Optional[str]
+    url: Optional[str] = Field(default=None)
 
 class Document(BaseModel):
     content: List[Union[Utterance, CustomLine]] = Field(default=[])
@@ -121,6 +123,13 @@ class Document(BaseModel):
 
     def __len__(self):
         return len(self.content)
+
+    @classmethod
+    def from_media(cls, media_path:str):
+        media = Media(type=MediaType.UNLINKED_AUDIO,
+                      name=Path(media_path).stem,
+                      url=media_path)
+        return cls(media=media)
 
     def transcript(self, include_tiers=False, strip=False):
         results = []

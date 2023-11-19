@@ -1,4 +1,4 @@
-from batchalign import CHATFile
+from batchalign import *
 import json
 
 import logging as L 
@@ -7,26 +7,24 @@ LOG_FORMAT = '[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s'
 L.basicConfig(format=LOG_FORMAT, level=L.WARNING)
 L.getLogger('batchalign').setLevel(L.DEBUG)
 
-#### TODOS ####
-# - angle brackets for stringification
-# - interpolate time backwards if the last form doesn't have a time
+whisper = WhisperEngine(num_speakers=1)
+pipeline = BatchalignPipeline(generator=whisper)
 
-c = CHATFile("./extern/test.cha")
-# print(str(c))
-# d = c.doc
-# d[0][2].time = None
-# CHATFile(doc=d).write("./tmp.cha")
-# d[0][2]
-# document = c.doc
+result = pipeline("./extern/test.wav")
 
-# document
+result
 
-# document[0].model_json_schema()
-# document
 
-# document[0][0]
-# document[0][2]
+# c = CHATFile("./extern/test.cha")
 
-# document.transcript(strip=True)
-# document.model_copy()
+# doc = c.doc
+
+# doc[3].content
+# doc[3].text
+
+# doc = Document.from_media("./extern/test.wav")
+
+
+
+
 

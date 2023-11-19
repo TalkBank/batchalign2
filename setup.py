@@ -32,6 +32,7 @@ setup(
         "plotly>=5.18.0",
         "transformers>=4.35",
         "tokenizers>=0.14.1",
+        "ffmpeg-python==0.2.0",
     ],
     extras_require={
         'dev': [
