@@ -19,6 +19,8 @@ from batchalign.document import *
 from batchalign.pipelines.base import *
 from batchalign.pipelines.asr.utils import *
 
+import pycountry
+
 import logging
 L = logging.getLogger("batchalign")
 
@@ -246,15 +248,17 @@ class WhisperPipeline(object):
 class WhisperEngine(BatchalignEngine):
     capabilities = [ BAEngineType.GENERATE ]
 
-    def __init__(self, model=None, language="eng", num_speakers=2):
+    def __init__(self, model=None, lang_code="eng", num_speakers=2):
 
-        if model == None and language == "eng":
+        if model == None and lang_code == "eng":
             model = "talkbank/CHATWhisper-en-large-v1"
         elif model == None:
             model = "openai/whisper-large-v2"
+
+        language = pycountry.languages.get(alpha_3=lang_code).name
             
         self.__whisper = WhisperPipeline(model, language=language)
-        self.__lang = language
+        self.__lang = lang_code
         self.__num_speakers = num_speakers
 
     def generate(self, source_path):

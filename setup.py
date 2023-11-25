@@ -33,6 +33,8 @@ setup(
         "transformers>=4.35",
         "tokenizers>=0.14.1",
         "ffmpeg-python==0.2.0",
+        "pycountry>=22.3",
+        "stanza>=1.6",
     ],
     extras_require={
         'dev': [
