@@ -8,12 +8,14 @@ from transformers import pipeline
 from dataclasses import dataclass
 
 from collections import defaultdict
+from pathlib import Path
 
 import torch
 from transformers import WhisperProcessor, WhisperTokenizer, GenerationConfig
 
 from nltk import sent_tokenize
 
+from batchalign.document import *
 from batchalign.pipelines.base import *
 from batchalign.pipelines.asr.utils import *
 
@@ -244,9 +246,9 @@ class WhisperPipeline(object):
 class WhisperEngine(BatchalignEngine):
     capabilities = [ BAEngineType.GENERATE ]
 
-    def __init__(self, model=None, language="en", num_speakers=2):
+    def __init__(self, model=None, language="eng", num_speakers=2):
 
-        if model == None and language == "en":
+        if model == None and language == "eng":
             model = "talkbank/CHATWhisper-en-large-v1"
         elif model == None:
             model = "openai/whisper-large-v2"
@@ -258,8 +260,13 @@ class WhisperEngine(BatchalignEngine):
     def generate(self, source_path):
         audio,segs = self.__whisper.load(source_path, self.__num_speakers)
         res = self.__whisper(audio.all(), segs)
+        doc = process_generation(res, self.__lang)
 
-        return process_generation(res, self.__lang)
+        # define media tier
+        media = Media(type=MediaType.AUDIO, name=Path(source_path).stem, url=source_path)
+        doc.media = media
+
+        return doc
 
 
     # model="openai/whisper-large-v2", language="english"

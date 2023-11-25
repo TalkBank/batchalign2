@@ -5,15 +5,16 @@ from batchalign.document import *
 
 from batchalign.tests.pipelines.fixures import *
 
-PROCESSED_OUTPUT = {'content': [{'tier': {'lang': 'eng', 'corpus': 'corpus_name', 'id': 'PAR', 'name': 'Participant'}, 'content': [{'text': 'This', 'time': None, 'morphology': None, 'dependency': None}, {'text': 'is', 'time': None, 'morphology': None, 'dependency': None}, {'text': 'a', 'time': None, 'morphology': None, 'dependency': None}, {'text': 'test', 'time': None, 'morphology': None, 'dependency': None}, {'text': 'process', 'time': None, 'morphology': None, 'dependency': None}, {'text': '.', 'time': None, 'morphology': None, 'dependency': None}], 'text': None, 'delim': '.', 'time': None, 'custom_dependencies': [], 'alignment': None}], 'media': {'type': 'audio', 'name': 'generator_wuz_here', 'url': None}, 'langs': ['eng']}
-PROCESSED_OUTPUT_GENERATION = {'content': [{'tier': {'lang': 'eng', 'corpus': 'corpus_name', 'id': 'PAR', 'name': 'Participant'}, 'content': [{'text': 'This', 'time': None, 'morphology': None, 'dependency': None}, {'text': 'is', 'time': None, 'morphology': None, 'dependency': None}, {'text': 'a', 'time': None, 'morphology': None, 'dependency': None}, {'text': 'test', 'time': None, 'morphology': None, 'dependency': None}, {'text': 'generation', 'time': None, 'morphology': None, 'dependency': None}, {'text': '.', 'time': None, 'morphology': None, 'dependency': None}], 'text': None, 'delim': '.', 'time': None, 'custom_dependencies': [], 'alignment': None}], 'media': {'type': 'audio', 'name': 'generator_wuz_here', 'url': None}, 'langs': ['eng']}
+PROCESSED_OUTPUT_GENERATION = {'content': [{'tier': {'lang': 'eng', 'corpus': 'corpus_name', 'id': 'PAR', 'name': 'Participant'}, 'content': [{'text': 'This', 'time': None, 'morphology': None, 'dependency': None}, {'text': 'is', 'time': None, 'morphology': None, 'dependency': None}, {'text': 'a', 'time': None, 'morphology': None, 'dependency': None}, {'text': 'test', 'time': None, 'morphology': None, 'dependency': None}, {'text': 'generation', 'time': None, 'morphology': None, 'dependency': None}, {'text': '.', 'time': None, 'morphology': None, 'dependency': None}], 'text': None, 'delim': '.', 'time': None, 'custom_dependencies': [], 'alignment': None}], 'media': {'type': 'audio', 'name': 'generator_wuz_here', 'url': None}, 'langs': ['eng'], 'tiers': [{'lang': 'eng', 'corpus': 'corpus_name', 'id': 'PAR', 'name': 'Participant'}]}
+
+PROCESSED_OUTPUT = {'content': [{'tier': {'lang': 'eng', 'corpus': 'corpus_name', 'id': 'PAR', 'name': 'Participant'}, 'content': [{'text': 'This', 'time': None, 'morphology': None, 'dependency': None}, {'text': 'is', 'time': None, 'morphology': None, 'dependency': None}, {'text': 'a', 'time': None, 'morphology': None, 'dependency': None}, {'text': 'test', 'time': None, 'morphology': None, 'dependency': None}, {'text': 'process', 'time': None, 'morphology': None, 'dependency': None}, {'text': '.', 'time': None, 'morphology': None, 'dependency': None}], 'text': None, 'delim': '.', 'time': None, 'custom_dependencies': [], 'alignment': None}], 'media': {'type': 'audio', 'name': 'generator_wuz_here', 'url': None}, 'langs': ['eng'], 'tiers': [{'lang': 'eng', 'corpus': 'corpus_name', 'id': 'PAR', 'name': 'Participant'}]}
 
 
 def test_standard_pipeline(generator, processor, analyzer):
     pipeline = BatchalignPipeline(generator, [processor], analyzer)
     result = pipeline("path")
 
-    assert PROCESSED_OUTPUT == result
+    assert result == PROCESSED_OUTPUT
 
     pipeline = BatchalignPipeline(generator, [], analyzer)
     result = pipeline("path")

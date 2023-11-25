@@ -63,11 +63,33 @@ class Utterance(BaseModel):
     @computed_field # type: ignore[misc]
     @property
     def alignment(self) -> Tuple[int,int]:
-        if self.time == None and (self.content[0].time == None or
-                                  self.content[-1].time == None):
-            return None
-        elif self.time == None: 
-            return (self.content[0].time[0], self.content[-1].time[-1])
+        if self.time == None: 
+            beginning = None
+            end = None
+
+            # we scan time forward and backward to get the first set of
+            # alignment; this is because we are not exactly sure which of
+            # the input words actually carries a time code; for instance
+            # utterance beginning don't necessarily have them
+
+            # scan forward to get the time possible
+            for i in self.content:
+                if i.time:
+                    beginning = i.time[0]
+                    break
+
+            # scan backward to get the time possible
+            for i in reversed(self.content):
+                if i.time:
+                    end = i.time[-1]
+                    break
+
+            
+            if beginning == None and end == None:
+                return None
+            else:
+                return (beginning, end)
+                
         else: 
             return self.time
 
@@ -146,8 +168,9 @@ class Document(BaseModel):
 
         return results
 
+    @computed_field # type: ignore[misc]
     @property
-    def tiers(self):
+    def tiers(self) -> List[Tier]:
         results = []
         for i in self.content:
             if isinstance(i, Utterance):

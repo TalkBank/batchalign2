@@ -31,7 +31,7 @@ def retokenize(intermediate_output):
 
     return final_outputs
 
-def process_generation(output, lang="en"):
+def process_generation(output, lang="eng"):
     """Process Rev.AI style ASR generation
 
     Parameters
@@ -100,16 +100,18 @@ def process_generation(output, lang="en"):
     final_utterances = []
     for speaker, utterance in results:
         participant = Tier(lang=lang, corpus="corpus_name",
-                        id=f"PAR{speaker}",
-                           name=f"Participant{speaker}")
+                           id=f"PAR{speaker}",
+                           name=f"Participant")
         words = []
         for word, (start,end) in utterance:
-            words.append(Form(text=word, time=(int(start), int(end))))
+            if word not in ENDING_PUNCT:
+                words.append(Form(text=word, time=(int(start), int(end))))
+            else:
+                words.append(Form(text=word, time=None))
 
         final_utterances.append(Utterance(
             tier=participant,
-            content = words,
-            alignment=(words[0].time[0], words[-1].time[1])
+            content = words
         ))
 
     doc.content = final_utterances

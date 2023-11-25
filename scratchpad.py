@@ -14,6 +14,9 @@ result = pipeline("./extern/test.wav")
 
 result
 
+result.media
+CHATFile(doc=result).write("./tmp.cha")
+
 
 # c = CHATFile("./extern/test.cha")
 
