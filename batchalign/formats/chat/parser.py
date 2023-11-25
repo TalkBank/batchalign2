@@ -77,11 +77,12 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
             x, y = re.findall(r"\d+", i)
             wor.append([int(x),int(y)])
 
+
     # check lengths
     if len(lexed_words) != len(mor):
         raise CHATValidationException(f"Lengths of main and mor tiers are unaligned: lens main (filtered for morphology)={len(lexed_words)} mor={len(mor)}; line: '{text}'")
     if len(phonated_words) != len(wor):
-        raise CHATValidationException(f"Lengths of main and wor tiers are unaligned: lens main (filtered for phonation)={len(phonated_words)} mor={len(wor)}; line: '{text}'")
+        raise CHATValidationException(f"Lengths of main and wor tiers are unaligned: lens main (filtered for phonation)={len(phonated_words)} wor={len(wor)}; line: '{text}'")
 
     # insert morphology into the parsed forms
     for (indx, _), m in zip(lexed_words, mor):

@@ -11,6 +11,7 @@ class ULTokenType(Enum):
     FP = 3 # &-uh
     ANNOT = 4 # &~ject &~head
     MORPUNCT = 5 # ‡„,
+    CORRECTION = 6 # test [= test]
 
 class UtteranceLexer:
 
@@ -51,9 +52,11 @@ class UtteranceLexer:
             self.__forms.append((form, ULTokenType.ANNOT))
         elif form[0] == "<":
             self.handle_group(form)
+        elif form[0] == "[":
+            self.handle_group(form, ending="]")
         elif form.strip() in MOR_PUNCT:
             self.__forms.append((form.strip(), ULTokenType.MORPUNCT))
-        elif form.strip() == "[/]" or form.strip() == "[//]":
+        elif form.strip() in REPEAT_GROUP_MARKS:
             self.__forms.append((self.__forms.pop(-1)[0], ULTokenType.RETRACE))
             self.__forms.append((form.strip(), ULTokenType.FEAT))
         elif annotation_clean(form).strip() == "":
@@ -63,12 +66,12 @@ class UtteranceLexer:
 
         return form
 
-    def handle_group(self, form):
+    def handle_group(self, form, ending=">"):
         forms = [annotation_clean(form)]
 
         # pull the form
         try:
-            while form[-1] != ">":
+            while form[-1] != ending:
                 form, num, delim = self.__get_until()
                 if form == None:
                     raise CHATValidationException(f"Lexer failed! Unexpected end to utterance within form group. On line: '{self.raw}', parsed group: {str(forms)}")
@@ -77,14 +80,17 @@ class UtteranceLexer:
             raise CHATValidationException(f"Lexer failed! Unexpected end to utterance within form group. On line: '{self.raw}', parsed group: {str(forms)}")
 
         # pull the type
-        form, num, delim = self.__get_until()
-
-        if form.strip() == "[/]" or form.strip() == "[//]":
+        if ending == ">":
+            form, num, delim = self.__get_until()
+            if form.strip() in REPEAT_GROUP_MARKS:
+                for i in forms:
+                    self.__forms.append((i, ULTokenType.RETRACE))
+                self.__forms.append((form.strip(), ULTokenType.FEAT))
+            else:
+                raise CHATValidationException(f"Lexer failed! Unexpected group type mark. On line: '{self.raw}', parsed: {form.strip()}")
+        elif ending == "]":
             for i in forms:
-                self.__forms.append((i, ULTokenType.RETRACE))
-            self.__forms.append((form.strip(), ULTokenType.FEAT))
-        else:
-            raise CHATValidationException(f"Lexer failed! Unexpected group type mark. On line: '{self.raw}', parsed: {form.strip()}")
+                self.__forms.append((i, ULTokenType.CORRECTION))
 
     def parse(self):
 
