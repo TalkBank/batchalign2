@@ -5,7 +5,7 @@ from batchalign.constants import *
 
 from batchalign.formats.base import BaseFormat
 from batchalign.formats.chat.utils import *
-from batchalign.formats.chat.lexer import lex, ULTokenType
+from batchalign.formats.chat.lexer import lex, TokenType
 
 import re
 
@@ -42,20 +42,20 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
 
     # seperate out main words by whether it should have phonation/morphology and add ending punct
     words = list(enumerate(tokens))
-    lexed_words = [tok for tok in words if tok[1][1] in [ULTokenType.REGULAR,
-                                                            ULTokenType.MORPUNCT]]
-    phonated_words = [tok for tok in words if tok[1][1] in [ULTokenType.REGULAR,
-                                                            ULTokenType.RETRACE,
-                                                            ULTokenType.MORPUNCT,
-                                                            ULTokenType.FP]]
+    lexed_words = [tok for tok in words if tok[1][1] in [TokenType.REGULAR,
+                                                            TokenType.PUNCT]]
+    phonated_words = [tok for tok in words if tok[1][1] in [TokenType.REGULAR,
+                                                            TokenType.RETRACE,
+                                                            TokenType.PUNCT,
+                                                            TokenType.FP]]
     # create base forms
-    parsed_forms = {indx:Form(text=text) for indx, (text, _) in phonated_words}
+    parsed_forms = {indx:Form(text=text, type=type) for indx, (text, type) in phonated_words}
 
     # stamp an eding punct if its not there
     delim = "."
     if words[-1][1][0] in ENDING_PUNCT:
         lexed_words.append(words[-1])
-        parsed_forms[words[-1][0]] = Form(text=words[-1][1][0])
+        parsed_forms[words[-1][0]] = Form(text=words[-1][1][0], regular=True)
         delim = words[-1][1][0]
 
     # parse mor gra wor lines

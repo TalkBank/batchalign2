@@ -9,6 +9,15 @@ from batchalign.utils import word_tokenize, sent_tokenize, detokenize
 
 from pathlib import Path
 
+class TokenType(int, Enum):
+    REGULAR = 0 # hello
+    RETRACE = 1 # <I am I am> [/] 
+    FEAT = 2 # (.)
+    FP = 3 # &-uh
+    ANNOT = 4 # &~ject &~head
+    PUNCT = 5 # ‡„,
+    CORRECTION = 6 # test [= test]
+
 class CustomLineType(int, Enum):
     DEPENDENT = 0 # %com
     INDEPENDENT = 1 # @ID
@@ -33,6 +42,7 @@ class Form(BaseModel):
     time: Optional[Tuple[int, int]] = Field(default=None) # word bullet
     morphology: Optional[List[Morphology]] = Field(default=None) # mor
     dependency: Optional[List[Dependency]] = Field(default=None) # gra
+    type: TokenType = Field(default=TokenType.REGULAR) # whether the field is a regular word (i.e. not a filled pause, not a feature, not a retrace, etc.)
 
 class Tier(BaseModel):
     lang: str  = Field(default="eng") # eng
@@ -116,6 +126,19 @@ class Utterance(BaseModel):
             return " ".join([i.text for i in self.content])
         else:
             return " ".join([i.text for i in self.content])+f" \x15{str(self.alignment[0])}_{str(self.alignment[1])}\x15"
+
+    # def simple(self):
+    #     """Returns a simplified representation of a line.
+
+    #     Returns
+    #     -------
+    #     str
+    #         The simplified representation.
+    #     """
+        
+        # for i in self.content:
+            # if 
+
 
 
 class MediaType(str, Enum):

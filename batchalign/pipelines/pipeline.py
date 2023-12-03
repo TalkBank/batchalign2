@@ -28,7 +28,7 @@ class BatchalignPipeline:
         L.info(f"Pipeline called with engines: generator={self.__generator}, processors={self.__processors}, analyzer={self.__analyzer}")
 
 
-        L.debug(f"Transforming input: {input}")
+        L.debug(f"Transforming input of type: {type(input)}")
         doc = input
         if isinstance(input, str):
             if self.__generator:
@@ -38,9 +38,14 @@ class BatchalignPipeline:
         elif not isinstance(input, Document):
             doc = Document.model_validate(input)
 
-        L.debug(f"Final input: {input}")
+        L.debug(f"Final input type: {type(input)}")
 
-        # perform processing in sequence
+        # perform input validation
+        # checking that the media exists if we have a generator
+        if self.__generator and (doc.media == None or doc.media.url == None):
+            raise ValueError(f"Generative pipeline was called with no media path!\nHint: did you expect the pipeline to generate a transcript from scratch, and pass in a Document/string that points to a media file PATH with which we can use to generate a transcript?")
+
+        # path processing in sequence
         if self.__generator:
             L.debug(f"Calling generator: {self.__generator}")
             doc = self.__generator.generate(doc.media.url)

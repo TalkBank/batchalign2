@@ -4,22 +4,27 @@ import json
 import logging as L 
 
 LOG_FORMAT = '[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s'
-L.basicConfig(format=LOG_FORMAT, level=L.WARNING)
+L.basicConfig(format=LOG_FORMAT, level=L.ERROR)
+L.getLogger("stanza").setLevel(L.ERROR)
 L.getLogger('batchalign').setLevel(L.DEBUG)
-
-
 
 ########
 
-tmp = CHATFile(path="./input.cha")
-tmp.write("./test.cha")
+from batchalign import *
 
+# lead input chat files
+input = CHATFile(path="./extern/test.cha")
 
+# load ASR and morphosyntax engine
+whisper = WhisperEngine(num_speakers=1)
 ud = UDEngine()
-pipeline = BatchalignPipeline(processors=[ud])
-result = pipeline(tmp.doc)
 
-CHATFile(doc=result).write("./test.cha")
+# cosntruct and a pipeline with the engines
+pipeline = BatchalignPipeline(processors=[ud])
+result = pipeline(input.doc)
+
+# write output
+CHATFile(doc=result).write("./extern/tmp.cha")
 
 # result
 # result.media

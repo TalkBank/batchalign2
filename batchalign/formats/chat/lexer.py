@@ -1,17 +1,10 @@
 import re
 from enum import Enum
 
+from batchalign.document import *
 from batchalign.formats.chat.utils import *
 from batchalign.constants import *
 
-class ULTokenType(Enum):
-    REGULAR = 0 # hello
-    RETRACE = 1 # <I am I am> [/] 
-    FEAT = 2 # (.)
-    FP = 3 # &-uh
-    ANNOT = 4 # &~ject &~head
-    MORPUNCT = 5 # ‡„,
-    CORRECTION = 6 # test [= test]
 
 class UtteranceLexer:
 
@@ -47,22 +40,22 @@ class UtteranceLexer:
         if num == 0:
             return False
         if form[:2] == "&-":
-            self.__forms.append((annotation_clean(form), ULTokenType.FP))
+            self.__forms.append((annotation_clean(form), TokenType.FP))
         elif form[:1] == "&":
-            self.__forms.append((form, ULTokenType.ANNOT))
+            self.__forms.append((form, TokenType.ANNOT))
         elif form[0] == "<":
-            self.handle_group(form)
+            self.handle_group(form, ending=">")
+        elif form.strip() in REPEAT_GROUP_MARKS:
+            self.__forms.append((self.__forms.pop(-1)[0], TokenType.RETRACE))
+            self.__forms.append((form.strip(), TokenType.FEAT))
         elif form[0] == "[":
             self.handle_group(form, ending="]")
         elif form.strip() in MOR_PUNCT:
-            self.__forms.append((form.strip(), ULTokenType.MORPUNCT))
-        elif form.strip() in REPEAT_GROUP_MARKS:
-            self.__forms.append((self.__forms.pop(-1)[0], ULTokenType.RETRACE))
-            self.__forms.append((form.strip(), ULTokenType.FEAT))
+            self.__forms.append((form.strip(), TokenType.PUNCT))
         elif annotation_clean(form).strip() == "":
-            self.__forms.append((form, ULTokenType.FEAT))
+            self.__forms.append((form, TokenType.FEAT))
         else:
-            self.__forms.append((annotation_clean(form).strip(), ULTokenType.REGULAR))
+            self.__forms.append((annotation_clean(form).strip(), TokenType.REGULAR))
 
         return form
 
@@ -84,13 +77,13 @@ class UtteranceLexer:
             form, num, delim = self.__get_until()
             if form.strip() in REPEAT_GROUP_MARKS:
                 for i in forms:
-                    self.__forms.append((i, ULTokenType.RETRACE))
-                self.__forms.append((form.strip(), ULTokenType.FEAT))
+                    self.__forms.append((i, TokenType.RETRACE))
+                self.__forms.append((form.strip(), TokenType.FEAT))
             else:
                 raise CHATValidationException(f"Lexer failed! Unexpected group type mark. On line: '{self.raw}', parsed: {form.strip()}")
         elif ending == "]":
             for i in forms:
-                self.__forms.append((i, ULTokenType.CORRECTION))
+                self.__forms.append((i, TokenType.CORRECTION))
 
     def parse(self):
 

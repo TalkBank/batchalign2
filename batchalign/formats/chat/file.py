@@ -5,7 +5,7 @@ from batchalign.constants import *
 
 from batchalign.formats.base import BaseFormat
 from batchalign.formats.chat.utils import *
-from batchalign.formats.chat.lexer import lex, ULTokenType
+from batchalign.formats.chat.lexer import lex
 from batchalign.formats.chat.parser import *
 from batchalign.formats.chat.generator import *
 

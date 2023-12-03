@@ -686,7 +686,7 @@ def morphoanalyze(doc: Document):
         except Exception as e:
             if line.strip() == "leuk is <die he> [>] ?":
                 breakpoint()
-            print(f"\n\nUtterance '{line}' failed parsing because '{e}', skipping...\n")
+            print(f"\n\nUtterance failed parsing because, skipping ud tagging... line='{line}', error='{e}'\n")
 
     return doc
 
