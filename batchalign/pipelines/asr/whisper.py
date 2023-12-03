@@ -13,7 +13,6 @@ from pathlib import Path
 import torch
 from transformers import WhisperProcessor, WhisperTokenizer, GenerationConfig
 
-from nltk import sent_tokenize
 
 from batchalign.document import *
 from batchalign.pipelines.base import *
@@ -101,7 +100,7 @@ class WhisperPipeline(object):
             return_timestamps="word",
         )
         self.__config = GenerationConfig.from_pretrained(base)
-        self.__config.no_repeat_ngram_size = 3
+        self.__config.no_repeat_ngram_size = 5
         processor = WhisperProcessor.from_pretrained(base)
 
         # force decoder IDs to create language
@@ -182,7 +181,7 @@ class WhisperPipeline(object):
         words = self.pipe(data.cpu().numpy(),
                           batch_size=1, 
                           generate_kwargs = {
-                              "repetition_penalty": 1.03,
+                              "repetition_penalty": 1.01,
                               "generation_config": self.__config,
                               "prompt_ids": self.__prompt_ids,
                               "task": "transcribe",

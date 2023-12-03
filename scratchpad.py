@@ -12,12 +12,12 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 from batchalign import *
 
-# lead input chat files
-input = CHATFile(path="./extern/tmp/test.cha")
-doc = input.doc
+# # lead input chat files
+# input = CHATFile(path=)
+# doc = input.doc
 
-import json
-print(json.dumps(doc.model_dump(), indent=2))
+# import json
+# print(json.dumps(doc.model_dump(), indent=2))
 
 # Document
 
@@ -30,12 +30,12 @@ print(json.dumps(doc.model_dump(), indent=2))
 # doc[0][0]
 
 # load ASR and morphosyntax engine
-# whisper = WhisperEngine(num_speakers=1)
+whisper = WhisperEngine(num_speakers=1)
 ud = UDEngine()
 
 # cosntruct and a pipeline with the engines
-pipeline = BatchalignPipeline(processors=[ud])
-result = pipeline(input.doc)
+pipeline = BatchalignPipeline(generator=whisper, processors=[ud])
+result = pipeline("./batchalign/tests/support/test.mp3")
 
 # write output
 CHATFile(doc=result).write("./extern/tmp.cha")

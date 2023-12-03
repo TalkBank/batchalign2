@@ -687,7 +687,7 @@ def morphoanalyze(doc: Document):
         except Exception as e:
             print(f"\n\nUtterance failed parsing, skipping ud tagging... line='{line}', error='{e}'\n")
 
-    L.debug("Stanza finished tagging...")
+    L.debug("Stanza done.")
     return doc
 
 class UDEngine(BatchalignEngine):
