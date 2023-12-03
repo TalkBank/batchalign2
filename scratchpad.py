@@ -13,10 +13,24 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 from batchalign import *
 
 # lead input chat files
-input = CHATFile(path="./extern/test.cha")
+input = CHATFile(path="./extern/tmp/test.cha")
+doc = input.doc
+
+import json
+print(json.dumps(doc.model_dump(), indent=2))
+
+# Document
+
+# doc.model_dump()
+
+
+# for i in doc[0].content:
+    # print(i.type)
+# doc[0].strip()
+# doc[0][0]
 
 # load ASR and morphosyntax engine
-whisper = WhisperEngine(num_speakers=1)
+# whisper = WhisperEngine(num_speakers=1)
 ud = UDEngine()
 
 # cosntruct and a pipeline with the engines

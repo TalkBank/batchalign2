@@ -1,6 +1,7 @@
 from batchalign.document import *
 from batchalign.pipelines.base import *
 from batchalign.pipelines.asr.utils import *
+from batchalign.constants import *
 from batchalign.dp import *
 
 from batchalign.formats.chat.parser import chat_parse_utterance
@@ -593,28 +594,28 @@ def morphoanalyze(doc: Document):
         lang_id_config = {"langid_lang_subset": lang})
 
     for indx, i in enumerate(doc.content):
+        L.debug(f"Stanza processing utterance {indx+1}/{len(doc.content)}")
         if not isinstance(i, Utterance):
             pass
-        line = str(i)
 
-        line = re.sub(r'\d+_\d+', '', line).strip()
-        line = re.sub(r'•\d+_\d+•', '', line).strip()
+        # generate simplified version of the line
+        line = str(i)
 
         # every legal utterance will have an ending delimiter
         # so we split it out
-        ending = line.split(" ")[-1]
+        ending = i.strip(join_with_spaces=True).split(" ")[-1]
 
         if re.findall("\w", ending):
             ending = "."
-            line_cut = line
+            line_cut = i.strip(join_with_spaces=True)
         else:
-            line_cut = line[:-len(ending)].strip()
+            line_cut = i.strip(join_with_spaces=True)[:-len(ending)].strip()
             # ending = ending.replace("+//", "")
 
         # if we don't have anything in line cut, just take the original
         # this is compensating for things that are missing ending decimeters
         if line_cut == '':
-            line_cut = line
+            line_cut = i.strip(join_with_spaces=True)
             ending = '.'
 
         # clean the sentence
@@ -684,10 +685,9 @@ def morphoanalyze(doc: Document):
                 content.dependency = form.dependency
 
         except Exception as e:
-            if line.strip() == "leuk is <die he> [>] ?":
-                breakpoint()
-            print(f"\n\nUtterance failed parsing because, skipping ud tagging... line='{line}', error='{e}'\n")
+            print(f"\n\nUtterance failed parsing, skipping ud tagging... line='{line}', error='{e}'\n")
 
+    L.debug("Stanza finished tagging...")
     return doc
 
 class UDEngine(BatchalignEngine):

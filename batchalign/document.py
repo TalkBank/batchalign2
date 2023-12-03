@@ -1,4 +1,4 @@
-from enum import Enum
+from enum import Enum, IntEnum
 from typing import Optional, List, Tuple, Union
 from typing_extensions import Annotated
 
@@ -9,7 +9,7 @@ from batchalign.utils import word_tokenize, sent_tokenize, detokenize
 
 from pathlib import Path
 
-class TokenType(int, Enum):
+class TokenType(IntEnum):
     REGULAR = 0 # hello
     RETRACE = 1 # <I am I am> [/] 
     FEAT = 2 # (.)
@@ -18,7 +18,7 @@ class TokenType(int, Enum):
     PUNCT = 5 # ‡„,
     CORRECTION = 6 # test [= test]
 
-class CustomLineType(int, Enum):
+class CustomLineType(IntEnum):
     DEPENDENT = 0 # %com
     INDEPENDENT = 1 # @ID
 
@@ -127,20 +127,30 @@ class Utterance(BaseModel):
         else:
             return " ".join([i.text for i in self.content])+f" \x15{str(self.alignment[0])}_{str(self.alignment[1])}\x15"
 
-    # def simple(self):
-    #     """Returns a simplified representation of a line.
+    def strip(self, join_with_spaces=False):
+        """Returns the "core" elements of a sentence, skipping retraces, etc.
 
-    #     Returns
-    #     -------
-    #     str
-    #         The simplified representation.
-    #     """
+        Parameters
+        ----------
+        join_with_spaces : bool
+            Whether to join the simplified utterance with spaces
+            instead of treebank detokenization.
+
+        Returns
+        -------
+        str
+            The simplfied utterance.
+        """
         
-        # for i in self.content:
-            # if 
-
-
-
+        # filter for words and punctations
+        filtered = filter(lambda x:x.type in [TokenType.PUNCT, TokenType.REGULAR],
+                          self.content)
+        # chain them together
+        if join_with_spaces:
+            return " ".join([i.text for i in filtered])
+        else:
+            return detokenize([i.text for i in filtered])
+       
 class MediaType(str, Enum):
     UNLINKED_AUDIO = "audio, unlinked"
     UNLINKED_VIDEO = "video, unlinked"
