@@ -9,6 +9,8 @@ from batchalign.utils import word_tokenize, sent_tokenize, detokenize
 
 from pathlib import Path
 
+from batchalign.errors import *
+
 class TokenType(IntEnum):
     REGULAR = 0 # hello
     RETRACE = 1 # <I am I am> [/] 
@@ -162,8 +164,19 @@ class Media(BaseModel):
     name: str
     url: Optional[str] = Field(default=None)
 
+def tokenize_paragraph(input):
+    if isinstance(input, str):
+        sentences = sent_tokenize(input)
+        sentences = [Utterance(content=i) for i in sentences]
+        return sentences
+    elif isinstance(input, list) and len(input) > 0 and isinstance(input[0], str):
+        sentences = [Utterance(content=i) for i in input]
+        return sentences
+    return input
+Paragraph = Annotated[List[Union[Utterance, CustomLine]], BeforeValidator(tokenize_paragraph)]
+
 class Document(BaseModel):
-    content: List[Union[Utterance, CustomLine]] = Field(default=[])
+    content: Paragraph = Field(default=[])
     media: Optional[Media] = Field(default=None)
     langs: List[str] = Field(default=["eng"])
 
@@ -180,11 +193,22 @@ class Document(BaseModel):
         return len(self.content)
 
     @classmethod
-    def from_media(cls, media_path:str):
-        media = Media(type=MediaType.UNLINKED_AUDIO,
-                      name=Path(media_path).stem,
-                      url=media_path)
-        return cls(media=media)
+    def new(cls, text:Optional[str] = None, media_path:Optional[str] = None, lang:str="eng"):
+        # calculate media header, if anything
+        media = None
+        if media_path:
+            media = Media(type=MediaType.UNLINKED_AUDIO,
+                          name=Path(media_path).stem,
+                          url=media_path)
+        # set the content field to be empty, if needed
+        if text == None:
+            text = []
+        # create the doc and set language, if needed
+        doc = cls(content=text, media=media)
+        if len(doc.tiers) > 0:
+            doc.tiers[0].lang = lang
+
+        return doc
 
     def transcript(self, include_tiers=False, strip=False):
         results = []
@@ -211,5 +235,9 @@ class Document(BaseModel):
                     results.append(i.tier)
 
         return results
+
+    @tiers.setter
+    def tiers(self):
+        raise ValueError("Setting `tiers` globally at the document level has unexpected effect and thus is disabled; please set `tier` of each Utterance or change the field of a tier by setting `doc.tiers[n].value = new`.") 
 
 

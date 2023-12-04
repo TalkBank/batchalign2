@@ -32,7 +32,7 @@ class BatchalignPipeline:
         doc = input
         if isinstance(input, str):
             if self.__generator:
-                doc = Document.from_media(input)
+                doc = Document.new(media_path=input)
             else:
                 raise ValueError(f"Pipeline was provided a string input, but is unable to handle generation as no generation engine was provided. Received input: '{input}'")
         elif not isinstance(input, Document):

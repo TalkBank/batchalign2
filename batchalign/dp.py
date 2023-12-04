@@ -206,8 +206,7 @@ def __dp(payload, reference, t):
 def align(source_payload_sequence,
           target_reference_sequence,
           tqdm=True):
-    """Align two sequences
-    """
+    """Align two sequences"""
 
     if (len(source_payload_sequence) > 0 and
         type(source_payload_sequence[0]) == PayloadTarget):

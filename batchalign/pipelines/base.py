@@ -30,4 +30,17 @@ class BatchalignEngine(ABC):
             raise TypeError(f"Attempted to use engine that does not have analysis capabilities as a analyzer! Engine='{self}', Reported Capabilities='{self.capabilities}'.")
         pass
 
+    def __call__(self, arg):
+        if len(self.capabilities) == 0:
+            raise TypeError(f"Attempted to call default action of an engine that does not report any capabilitie! Engine='{self}', Reported Capabilities='{self.capabilities}'")
+
+        if self.capabilities[0] == BAEngineType.GENERATE:
+            return self.generate(arg)
+        elif self.capabilities[0] == BAEngineType.PROCESS:
+            return self.process(arg)
+        elif self.capabilities[0] == BAEngineType.ANALYZE:
+            return self.analyze(arg)
+
+
+
 

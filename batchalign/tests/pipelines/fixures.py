@@ -9,7 +9,7 @@ def generator():
         capabilities = [ BAEngineType.GENERATE ]
 
         def generate(self, path):
-            tmp = Document.from_media(path)
+            tmp = Document.new(media_path=path)
             tmp.content.append(Utterance(content="This is a test generation ."))
             tmp.media = Media(type=MediaType.AUDIO, name="generator_wuz_here")
 
