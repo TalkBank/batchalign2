@@ -90,6 +90,7 @@ class WhisperPipeline(object):
     """
 
     def __init__(self, model, base="openai/whisper-large-v2", language="english", target_sample_rate=16000):
+        L.debug("Initializing whisper model...")
         self.pipe = pipeline(
             "automatic-speech-recognition",
             model=model,
@@ -99,9 +100,11 @@ class WhisperPipeline(object):
             device=DEVICE,
             return_timestamps="word",
         )
+        L.debug("Done, initalizing processor and config...")
         self.__config = GenerationConfig.from_pretrained(base)
         self.__config.no_repeat_ngram_size = 5
         processor = WhisperProcessor.from_pretrained(base)
+        L.debug("Whisper initialization done.")
 
         # force decoder IDs to create language
         self.lang = language

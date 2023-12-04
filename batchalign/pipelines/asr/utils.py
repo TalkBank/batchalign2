@@ -31,7 +31,44 @@ def retokenize(intermediate_output):
 
     return final_outputs
 
-def process_generation(output, lang="eng"):
+def retokenize_with_engine(intermediate_output, engine):
+    """Retokenize `intermediate_input` given utterance engine `engine`
+
+    This function is different from `retokenize` because it doesn't look
+    at the original punctuation from the document at all; intsead, it retokenizes
+    using a seperate utterance tokenization engine.
+
+    Parameters
+    ----------
+    intermediate_output : List
+        Rev.AI style output.
+        
+    engine : UtteranceEngine
+        The utterance Engine to use.
+    """
+    
+
+    final_outputs = []
+
+    for speaker, utterance in intermediate_output:
+        joined = " ".join([i[0] for i in utterance])
+        split = engine(joined)
+
+        # chop out the final delimiter and split
+        split = [(i[:-1].split(" "), i[-1]) for i in split]
+
+        # align the utterance against original splits and generate final outputs
+        for new_ut, delim in split:
+            tmp = []
+
+            for _ in new_ut:
+                tmp.append(utterance.pop(0))
+
+            final_outputs.append((speaker, tmp+[[delim, [None, None]]]))
+
+    return final_outputs
+
+def process_generation(output, lang="eng", utterance_engine=None):
     """Process Rev.AI style ASR generation
 
     Parameters
@@ -40,6 +77,8 @@ def process_generation(output, lang="eng"):
         The raw Rev.AI style output from your ASR engine.
     lang : str
         The language ID.
+    utterance_engine : optional, UtteranceEngine
+        Utterance segmentation engine to use.
 
     Returns
     -------
@@ -94,8 +133,12 @@ def process_generation(output, lang="eng"):
             if len(final_words) > 0:
                 utterance_col.append((utterance["speaker"], final_words))
 
-
-    results = retokenize(utterance_col)
+    # if we have an uttetrance engine, we will use that to retokenize; otherwise
+    # we retokenize via scanning for punctation
+    if utterance_engine:
+        results = retokenize_with_engine(utterance_col, utterance_engine)
+    else:
+        results = retokenize(utterance_col)
 
     final_utterances = []
     for speaker, utterance in results:

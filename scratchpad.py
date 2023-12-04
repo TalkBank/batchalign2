@@ -30,15 +30,20 @@ from batchalign import *
 # doc[0][0]
 
 # load ASR and morphosyntax engine
-whisper = WhisperEngine(num_speakers=1)
-ud = UDEngine()
+rev = WhisperEngine(num_speakers=1)
+# # ud = UDEngine()
 
-# cosntruct and a pipeline with the engines
-pipeline = BatchalignPipeline(generator=whisper, processors=[ud])
+# # cosntruct and a pipeline with the engines
+pipeline = BatchalignPipeline(generator=rev)
 result = pipeline("./batchalign/tests/support/test.mp3")
 
-# write output
+
+# # write output
 CHATFile(doc=result).write("./extern/tmp.cha")
+
+# from batchalign.pipelines.asr.utils import *
+# from batchalign.pipelines.asr.segment import UtteranceEngine
+
 
 # result
 # result.media

@@ -35,6 +35,7 @@ setup(
         "ffmpeg-python==0.2.0",
         "pycountry>=22.3",
         "stanza>=1.6",
+        "rev_ai>=2.18.0",
     ],
     extras_require={
         'dev': [
