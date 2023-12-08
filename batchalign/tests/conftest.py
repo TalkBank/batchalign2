@@ -7,7 +7,7 @@ import pytest
 from batchalign.document import Document
 
 @pytest.fixture(scope="package")
-def gold_en():
+def en_doc():
     """Tagged gold English document.
 
     This is a gold tagged document, which passes CHATTER and CHECK.
@@ -32,5 +32,22 @@ def gold_en():
 
     return doc
 
-    
+@pytest.fixture(scope="package")
+def en_utterance(en_doc):
+    """Tagged gold English utterance.
 
+    This is a gold tagged document, which passes CHATTER and CHECK.
+    The purpose of this document is to be taken and re-tagged by
+    various pipelines to check whether it is behaving in the way
+    that we expect. For instance, you can pass it through UD again
+    to see if the tagging performs in the way that we want by checking
+    if the document remains the same before and after UD.
+
+    Returns
+    -------
+    Utterance
+        The gold utterance.
+    """
+
+    return en_doc[0]
+   

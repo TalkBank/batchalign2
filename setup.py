@@ -11,12 +11,16 @@ def read(fname):
 
 setup(
     name = "batchalign",
+    author = "Brian MacWhinney, Houjun Liu",
+    author_email = "macw@cmu.edu, houjun@cmu.edu",
     version = "2.0.0",
-    author = "TalkBank",
-    author_email = "macw@cmu.edu",
-    description = (""),
+    description = ("Python Speech Language Sample Analysis"),
     packages=find_packages(),
-    long_description=read('README.md'),
+    package_data={
+        'batchalign': [os.path.basename(i)
+                       for i in glob(os.path.join("batchalign", "pipelines", "cleanup",
+                                                  "support", "*"))],
+    },
     install_requires=[
         "pydantic>=2.4",
         "nltk>=3.8",

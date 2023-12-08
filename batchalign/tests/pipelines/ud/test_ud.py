@@ -1,6 +1,6 @@
 from batchalign.pipelines.ud import morphoanalyze
 
-def test_ud_pipeline(gold_en):
-    assert morphoanalyze(gold_en) == gold_en
+def test_ud_pipeline(en_doc):
+    assert morphoanalyze(en_doc) == en_doc
     
 
