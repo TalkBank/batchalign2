@@ -77,7 +77,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
         The raw Rev.AI style output from your ASR engine.
     lang : str
         The language ID.
-    utterance_engine : optional, UtteranceEngine
+    utterance_engine : optional 
         Utterance segmentation engine to use.
 
     Returns

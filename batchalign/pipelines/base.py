@@ -1,6 +1,7 @@
 from abc import ABC, abstractproperty
 from enum import Enum
 from typing import List
+import copy
 
 from batchalign.document import *
 
@@ -31,6 +32,7 @@ class BatchalignEngine(ABC):
         pass
 
     def __call__(self, arg):
+        arg = copy.deepcopy(arg)
         if len(self.capabilities) == 0:
             raise TypeError(f"Attempted to call default action of an engine that does not report any capabilitie! Engine='{self}', Reported Capabilities='{self.capabilities}'")
 

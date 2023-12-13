@@ -7,7 +7,7 @@ from batchalign.document import *
 from batchalign.pipelines.base import *
 from batchalign.pipelines.asr.utils import *
 
-from batchalign.pipelines.asr.segment import UtteranceEngine
+from batchalign.models.utterance import BertModel
 
 import time
 import pathlib
@@ -31,7 +31,7 @@ class RevEngine(BatchalignEngine):
         self.__client = apiclient.RevAiAPIClient(key)
         if POSTPROCESSOR_LANGS.get(self.__lang) != None:
             L.debug("Initializing utterance model...")
-            self.__engine = UtteranceEngine(POSTPROCESSOR_LANGS.get(self.__lang))
+            self.__engine = BertModel(POSTPROCESSOR_LANGS.get(self.__lang))
             L.debug("Done.")
         else:
             self.__engine = None
