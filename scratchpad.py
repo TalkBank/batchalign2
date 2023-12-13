@@ -12,11 +12,24 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 from batchalign import *
 
-doc = Document.new("Hello my name Jack. How uh are you doing today?")
-doc
+doc = Document.new("This represents apple's remarkable innovation, and deep collaboration between different teams, and reaffirms our commitment to making the world a better place")
+
+# doc[0][0]
+# from nltk.tokenize import word_tokenize
+# tmp = TweetTokenizer()
+# word_tokenize("¡por supuesto, maestro!")
+
+# disf = DisfluencyEngine()
+# # ore = OrthographyReplacementEngine()
+# doc = disf(doc)
+# # oc = disf(ore(doc))
 
 
-# ud = UDEngine()
+ud = UDEngine()
+doc = ud(doc)
+doc[0][0]
+# doc[0][0]
+
 
 
 # # CHATFile(path="./tmp.cha").doc

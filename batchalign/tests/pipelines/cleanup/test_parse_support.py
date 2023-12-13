@@ -8,9 +8,15 @@ def test_parse():
     p = parse("test.test")
     assert p == CORRECT_PARSE
 
+def test_parse_missing():
+    p = parse("test.testmmm")
+    assert p == {}
+
 def test_mark_utterance(en_utterance):
     copy = Utterance.model_validate(en_utterance.model_dump())
     _mark_utterance(copy, "test", TokenType.CORRECTION, "test")
 
     assert copy == Utterance.model_validate(MARKED_MODEL)
+
+
 

@@ -10,6 +10,7 @@ from batchalign.utils import word_tokenize, sent_tokenize, detokenize
 from pathlib import Path
 
 from batchalign.errors import *
+from batchalign.constants import *
 
 class TokenType(IntEnum):
     REGULAR = 0 # hello
@@ -121,15 +122,29 @@ class Utterance(BaseModel):
         return str(self)
 
     def _detokenize(self):
+        # create the result by adding minimal CHAT-style annotations
+        result = []
+        for i in self.content:
+            if i.type == TokenType.FP:
+                result.append("&-"+i.text)
+            else:
+                result.append(i.text)
+        # detokenize
+        detokenized = detokenize(result)
+        # check and seperate punct 
+        for i in ENDING_PUNCT + MOR_PUNCT:
+            detokenized = detokenized.replace(i, f" {i}")
+        detokenized = detokenized.replace("  ", " ")
+
         ## TODO deal with angle brackets for retraces
         # NOTE: we don't use detokenize here to put spaces
         # between PUNCT, which should be in CHAT style
         if self.alignment == None:
-            return " ".join([i.text for i in self.content])
+            return detokenized
         else:
-            return " ".join([i.text for i in self.content])+f" \x15{str(self.alignment[0])}_{str(self.alignment[1])}\x15"
+            return detokenized+f" \x15{str(self.alignment[0])}_{str(self.alignment[1])}\x15"
 
-    def strip(self, join_with_spaces=False):
+    def strip(self, join_with_spaces=False, include_retrace=False):
         """Returns the "core" elements of a sentence, skipping retraces, etc.
 
         Parameters
@@ -137,6 +152,8 @@ class Utterance(BaseModel):
         join_with_spaces : bool
             Whether to join the simplified utterance with spaces
             instead of treebank detokenization.
+        include_retrace : bool
+            Whether to include retracing as a part of stripped output.
 
         Returns
         -------
@@ -145,7 +162,10 @@ class Utterance(BaseModel):
         """
         
         # filter for words and punctations
-        filtered = filter(lambda x:x.type in [TokenType.PUNCT, TokenType.REGULAR],
+        to_include = [TokenType.PUNCT, TokenType.REGULAR]
+        if include_retrace:
+            to_include.append(TokenType.RETRACE)
+        filtered = filter(lambda x:x.type in to_include,
                           self.content)
         # chain them together
         if join_with_spaces:

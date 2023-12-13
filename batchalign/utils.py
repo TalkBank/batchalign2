@@ -3,6 +3,7 @@ import nltk
 from nltk import word_tokenize as WT
 from nltk import sent_tokenize as ST
 from nltk.tokenize.treebank import TreebankWordDetokenizer
+from nltk.tokenize import TweetTokenizer
 from batchalign.constants import *
 
 def word_tokenize(str):
@@ -18,12 +19,14 @@ def word_tokenize(str):
     List[str]
         Word tokens.
     """
+
+    tmp = TweetTokenizer()
     
     try:
-        return WT(str)
+        return tmp.tokenize(str)
     except LookupError:
         nltk.download("punkt")
-        return WT(str)
+        return tmp.tokenize(str)
 
 def sent_tokenize(str):
     """Tokenize a string by sentence

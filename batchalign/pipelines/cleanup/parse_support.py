@@ -25,9 +25,12 @@ def parse(name):
     # parse support fiel by name, ignoring all lines that
     # start with #
     dir = pathlib.Path(__file__).parent.resolve()
-    with open(os.path.join(dir, "support", name), 'r') as df:
-        lines = df.readlines()
-        lines = [i.strip() for i in lines if i[0] != "#"]
+    try:
+        with open(os.path.join(dir, "support", name), 'r') as df:
+            lines = df.readlines()
+            lines = [i.strip() for i in lines if i[0] != "#"]
+    except FileNotFoundError:
+        return {}
     # split the file by space
     lines = [i.split(" ") for i in lines]
 
