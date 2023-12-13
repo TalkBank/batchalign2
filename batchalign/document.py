@@ -69,9 +69,16 @@ class Utterance(BaseModel):
     tier: Tier = Field(default=Tier())
     content: Sentence
     text: Optional[str] = Field(default=None)
-    delim: str = Field(default=".")
     time: Optional[Tuple[int,int]] = Field(default=None)
     custom_dependencies: List[CustomLine]  = Field(default=[])
+
+    @computed_field
+    @property
+    def delim(self) -> str:
+        if len(self.content) == 0 or self.content[-1].text not in ENDING_PUNCT:
+            return '.'
+        else:
+            return self.content[-1].text
 
     @computed_field # type: ignore[misc]
     @property
