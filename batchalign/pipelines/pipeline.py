@@ -106,5 +106,5 @@ class BatchalignPipeline:
             else:
                 raise ValueError(f"Engine provided to pipeline with no apparent purpose (i.e. its not a generator, processor, nor analyzer). Engine = '{i}'")
 
-        return generator, processors, analyzer, _remove_duplicates(capabilities)
+        return generator, processors, analyzer, list(sorted(_remove_duplicates([i for j in capabilities for i in j])))
 

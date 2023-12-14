@@ -18,7 +18,7 @@ doc = Document.new("howdy partner, what's your name?")
 whisper = WhisperEngine()
 ud = UDEngine()
 
-nlp = BatchalignPipeline(whisper, ud)
+nlp = BatchalignPipeline(ud, whisper)
 
 res = nlp("./batchalign/tests/support/test.mp3")
 
