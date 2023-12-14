@@ -12,17 +12,27 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 from batchalign import *
 
-doc = Document.new("howdy partner, what's your name?")
+with open("./batchalign/tests/support/test.json", 'r') as df:
+    d = Document.model_validate(json.load(df))
+
+forms = []
+for utterance in d.content:
+    for form in utterance.content:
+        forms.append(form.text)
+" ".join(forms)
 
 
-whisper = WhisperEngine()
-ud = UDEngine()
+(path=)
 
-nlp = BatchalignPipeline(ud, whisper)
+# doc = Document.new("howdy partner, what's your name?")
+# whisper = WhisperEngine()
+# ud = UDEngine()
 
-res = nlp("./batchalign/tests/support/test.mp3")
+# nlp = BatchalignPipeline(ud, whisper)
 
-nlp.tasks
+# res = nlp(doc)
+
+# nlp.tasks
 
 # tmp
 
