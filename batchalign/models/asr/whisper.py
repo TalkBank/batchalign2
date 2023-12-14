@@ -113,7 +113,7 @@ class WhisperModel(object):
         # save the target sample rate
         self.sample_rate = target_sample_rate
 
-    def load(self, f, num_speakers):
+    def load(self, f):
         """Load an audio file for procesing.
 
         Parameters
@@ -139,17 +139,10 @@ class WhisperModel(object):
         # transpose and mean
         resampled = torch.mean(audio_arr.transpose(0,1), dim=1)
 
-        # perform diarization
-        if num_speakers == 1:
-            dia_cls = None
-        else:
-            L.info("Whisper Diarizing...")
-            dia_cls = speaker_diarization(f, num_speakers, mid_step=0.1, lda_dim=5)[0]
-
         # and return the audio file
-        return ASRAudioFile(f, resampled, self.sample_rate), dia_cls
+        return ASRAudioFile(f, resampled, self.sample_rate)
 
-    def __call__(self, data, segments):
+    def __call__(self, data, segments=None):
         # we now perform the sweep line algorithm to align the
         # segment timestamps against the words
         groups = []

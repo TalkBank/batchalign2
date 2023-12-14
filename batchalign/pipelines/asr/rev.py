@@ -21,7 +21,7 @@ L = logging.getLogger("batchalign")
 POSTPROCESSOR_LANGS = {'en': "talkbank/CHATUtterance-en"}
 
 class RevEngine(BatchalignEngine):
-    capabilities = [ BAEngineType.GENERATE ]
+    tasks = [ Task.ASR, Task.SPEAKER_RECOGNITION, Task.UTTERANCE_SEGMENTATION ]
 
     def __init__(self, key:str, lang_code="eng", num_speakers=2):
 

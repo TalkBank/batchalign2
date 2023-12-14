@@ -13,29 +13,29 @@ MODEL_NO_MEDIA = {'content': [{'tier': {'lang': 'eng', 'corpus': 'corpus_name', 
 
 
 def test_standard_pipeline(generator, processor, analyzer):
-    pipeline = BatchalignPipeline(generator, [processor], analyzer)
+    pipeline = BatchalignPipeline(generator, processor, analyzer)
     result = pipeline("path")
 
     assert result == PROCESSED_OUTPUT
 
-    pipeline = BatchalignPipeline(generator, [], analyzer)
+    pipeline = BatchalignPipeline(generator, analyzer)
     result = pipeline("path")
 
     assert PROCESSED_OUTPUT_GENERATION == result
 
-    pipeline = BatchalignPipeline(generator, [processor])
+    pipeline = BatchalignPipeline(generator, processor)
     result = pipeline("path")
 
     assert Document.model_validate(PROCESSED_OUTPUT) == result
 
 def test_pipeline_with_no_generation(processor):
-    pipeline = BatchalignPipeline(processors=[processor])
+    pipeline = BatchalignPipeline(processor)
 
     with pytest.raises(ValueError):
         pipeline("test")
 
 def test_pipeline_that_cant_generate(generator):
-    pipeline = BatchalignPipeline(generator=generator)
+    pipeline = BatchalignPipeline(generator)
 
     nomedia = Document.model_validate(MODEL_NO_MEDIA)
     nomediapath = Document.model_validate(PROCESSED_OUTPUT)
@@ -46,13 +46,8 @@ def test_pipeline_that_cant_generate(generator):
         pipeline(nomediapath)
 
 def test_wrong_pipeline(generator, processor, analyzer):
-    with pytest.raises(AssertionError):
-        pipeline = BatchalignPipeline(generator=analyzer)
+    with pytest.raises(ValueError):
+        pipeline = BatchalignPipeline(generator, generator)
 
-    with pytest.raises(AssertionError):
-        pipeline = BatchalignPipeline(processors=[analyzer])
-
-    with pytest.raises(AssertionError):
-        pipeline = BatchalignPipeline(analyzer=processor)
-
-
+    with pytest.raises(ValueError):
+        pipeline = BatchalignPipeline(analyzer, generator, processor, processor)

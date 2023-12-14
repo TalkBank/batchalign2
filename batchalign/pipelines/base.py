@@ -5,43 +5,37 @@ import copy
 
 from batchalign.document import *
 
-class BAEngineType(Enum):
-    GENERATE = 0
-    PROCESS = 1
-    ANALYZE = 2
-
 class BatchalignEngine(ABC):
 
     @abstractproperty
-    def capabilities(self) -> List[BAEngineType]:
+    def tasks(self) -> List[Task]:
         pass
 
     def generate(self, source_path: str) -> Document:
-        if BAEngineType.GENERATE not in self.capabilities:
-            raise TypeError(f"Attempted to use engine that does not have generation capabilities as a generator! Engine='{self}', Reported Capabilities='{self.capabilities}'.")
+        raise NotImplementedError(f"Attempted to use an engine as a generator that didn't implement a generation method! Engine='{self}', Reported Tasks='{self.tasks}'.")
         pass
 
     def process(self, doc: Document) -> Document:
-        if BAEngineType.PROCESS not in self.capabilities:
-            raise TypeError(f"Attempted to use engine that does not have processing capabilities as a processor! Engine='{self}', Reported Capabilities='{self.capabilities}'.")
+        raise NotImplementedError(f"Attempted to use an engine as a processor that didn't implement a processing method! Engine='{self}', Reported Tasks='{self.tasks}'.")
         pass
 
     def analyze(self, doc: Document) -> any:
-        if BAEngineType.ANALYZE not in self.capabilities:
-            raise TypeError(f"Attempted to use engine that does not have analysis capabilities as a analyzer! Engine='{self}', Reported Capabilities='{self.capabilities}'.")
+        raise NotImplementedError(f"Attempted to use an engine as an analyzer that didn't implement a analysis method! Engine='{self}', Reported Tasks='{self.tasks}'.")
         pass
 
     def __call__(self, arg):
         arg = copy.deepcopy(arg)
-        if len(self.capabilities) == 0:
-            raise TypeError(f"Attempted to call default action of an engine that does not report any capabilitie! Engine='{self}', Reported Capabilities='{self.capabilities}'")
+        if len(self.tasks) == 0:
+            raise TypeError(f"Attempted to call default action of an engine that does not report any capabilities! Engine='{self}', Reported Capabilities='{self.tasks}'")
 
-        if self.capabilities[0] == BAEngineType.GENERATE:
+        if TypeMap.get(self.tasks[0]) == TaskType.GENERATION:
             return self.generate(arg)
-        elif self.capabilities[0] == BAEngineType.PROCESS:
+        elif TypeMap.get(self.tasks[0]) == TaskType.PROCESSING:
             return self.process(arg)
-        elif self.capabilities[0] == BAEngineType.ANALYZE:
+        elif TypeMap.get(self.tasks[0]) == TaskType.ANALYSIS:
             return self.analyze(arg)
+        else:
+            raise TypeError(f"Attempted to use the default task of an engine whose default task is uninterpretable! Engine='{self}', Default Task='{self.tasks[0]}'")
 
 
 

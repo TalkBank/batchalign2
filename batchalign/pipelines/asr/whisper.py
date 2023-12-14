@@ -6,9 +6,9 @@ from batchalign.models.asr import WhisperModel, WhisperProcessor, WhisperTokeniz
 import pycountry
 
 class WhisperEngine(BatchalignEngine):
-    capabilities = [ BAEngineType.GENERATE ]
+    tasks = [ Task.ASR, Task.UTTERANCE_SEGMENTATION ]
 
-    def __init__(self, model=None, lang_code="eng", num_speakers=2):
+    def __init__(self, model=None, lang_code="eng"):
 
         if model == None and lang_code == "eng":
             model = "talkbank/CHATWhisper-en-large-v1"
@@ -19,11 +19,9 @@ class WhisperEngine(BatchalignEngine):
             
         self.__whisper = WhisperModel(model, language=language)
         self.__lang = lang_code
-        self.__num_speakers = num_speakers
 
     def generate(self, source_path):
-        audio,segs = self.__whisper.load(source_path, self.__num_speakers)
-        res = self.__whisper(audio.all(), segs)
+        res = self.__whisper(self.__whisper.load(source_path).all())
         doc = process_generation(res, self.__lang)
 
         # define media tier

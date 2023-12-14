@@ -691,7 +691,7 @@ def morphoanalyze(doc: Document):
     return doc
 
 class UDEngine(BatchalignEngine):
-    capabilities = [ BAEngineType.PROCESS ]
+    tasks = [ Task.MORPHOSYNTAX ]
 
     def process(self, doc):
         return morphoanalyze(doc)

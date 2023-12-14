@@ -12,6 +12,38 @@ from pathlib import Path
 from batchalign.errors import *
 from batchalign.constants import *
 
+class Task(IntEnum):
+    ASR = 3
+    SPEAKER_RECOGNITION = 4
+    UTTERANCE_SEGMENTATION = 5
+    UTTERANCE_TIMING_RECOVERY = 6 # "bulletize"
+    FORCED_ALIGNMENT = 7
+    MORPHOSYNTAX = 8
+    FEATURE_EXTRACT = 9
+    DISFLUENCY_ANALYSIS = 10
+
+    DEBUG__G = 0
+    DEBUG__P = 1
+    DEBUG__A = 2
+
+class TaskType(IntEnum):
+    GENERATION = 0
+    PROCESSING = 1
+    ANALYSIS = 2
+
+TypeMap = {
+    Task.ASR: TaskType.GENERATION,
+    Task.SPEAKER_RECOGNITION: TaskType.PROCESSING,
+    Task.UTTERANCE_SEGMENTATION: TaskType.PROCESSING,
+    Task.UTTERANCE_TIMING_RECOVERY: TaskType.PROCESSING,
+    Task.FORCED_ALIGNMENT: TaskType.PROCESSING,
+    Task.MORPHOSYNTAX: TaskType.PROCESSING,
+    Task.FEATURE_EXTRACT: TaskType.ANALYSIS,
+    Task.DEBUG__G: TaskType.GENERATION,
+    Task.DEBUG__P: TaskType.PROCESSING,
+    Task.DEBUG__A: TaskType.ANALYSIS,
+}
+
 class TokenType(IntEnum):
     REGULAR = 0 # hello
     RETRACE = 1 # <I am I am> [/] 

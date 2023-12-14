@@ -3,23 +3,33 @@ from typing import List, Optional
 from batchalign.pipelines.base import *
 from batchalign.document import *
 from batchalign.errors import *
+import collections
 
 import logging
 
 L = logging.getLogger('batchalign')
 
+def _remove_duplicates(x):
+    a = []
+    for i in x:
+        if i not in a:
+            a.append(i)
+    return a
+
 class BatchalignPipeline:
-    def __init__(self,
-                 generator:Optional[BatchalignEngine] = None,
-                 processors:List[BatchalignEngine] = [],
-                 analyzer:Optional[BatchalignEngine] = None):
+    def __init__(self, *engines):
         # check the types of the input
-        self.__check_engines(generator, processors, analyzer)
+        generator, processors, analyzer, capabilities = self.__check_engines(engines)
 
         # store the processors 
         self.__generator = generator
         self.__processors = processors
         self.__analyzer = analyzer
+        self.__capabilities = capabilities
+
+    @property
+    def tasks(self):
+        return self.__capabilities
 
     def __call__(self, input):
         # process input; if its a string, process it as a media
@@ -66,16 +76,35 @@ class BatchalignPipeline:
             return doc
 
     @staticmethod
-    def __check_engines(generator, processors, analyzer):
-        if generator:
-            assert BAEngineType.GENERATE in generator.capabilities, f"BatchalignEngine supplied to the pipeline as a generator does not have generation capabilities! Provided engine: {generator}, capabilities: {generator.capabilities}"
-        for processor in processors:
-            assert BAEngineType.PROCESS in processor.capabilities, f"BatchalignEngine supplied to the pipeline as a processor does not have processing capabilities! Provided engine: {processor}, capabilities: {processor.capabilities}"
-        if analyzer:
-            assert BAEngineType.ANALYZE in analyzer.capabilities, f"BatchalignEngine supplied to the pipeline as a analyzer does not have analysis capabilities! Provided engine: {analyzer}, capabilities: {analyzer.capabilities}"
-            
-            
+    def __check_engines(engines):
+        capabilities = [i.tasks for i in engines]
 
+        # we want to ensure that every pipeline has one engine per task
+        duplicates = [item for item, count in
+                      collections.Counter([i for j in capabilities for i in j]).items()
+                      if count > 1]
+        if len(duplicates) > 0:
+            raise ValueError(f"Pipeline called with engines with overlapping capabilities: duplicate abilities='{duplicates}'!\nIf an engine supports initialization with variadic abilities (i.e. turning off an task it usual performs), please do so.")
 
+        # we want to make sure we only have one generator and one analyzer
+        # and we want to construct the rest based on the order they were provided
+        generator = None
+        processors = []
+        analyzer = None
 
+        for i in engines:
+            if TaskType.GENERATION in [TypeMap.get(j) for j in i.tasks] and generator == None:
+                generator = i
+            elif TaskType.GENERATION in [TypeMap.get(j) for j in i.tasks]: 
+                raise ValueError(f"Multiple generators found for the same pipeline! We don't know which one to start with. Current generator = '{generator}' conflicts with other generator = '{i}'")
+            elif TaskType.ANALYSIS in [TypeMap.get(j) for j in i.tasks] and analyzer == None: 
+                analyzer = i
+            elif TaskType.ANALYSIS in [TypeMap.get(j) for j in i.tasks]: 
+                raise ValueError(f"Multiple analyzers found for the same pipeline! We don't know which one to end with. Current analyzer = '{analyzer}' conflicts with other analyzer = '{i}'")
+            elif TaskType.PROCESSING in [TypeMap.get(j) for j in i.tasks]: 
+                processors.append(i)
+            else:
+                raise ValueError(f"Engine provided to pipeline with no apparent purpose (i.e. its not a generator, processor, nor analyzer). Engine = '{i}'")
+
+        return generator, processors, analyzer, _remove_duplicates(capabilities)
 

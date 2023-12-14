@@ -6,7 +6,7 @@ from batchalign.pipelines.base import *
 def generator():
 
     class MyGenerator(BatchalignEngine):
-        capabilities = [ BAEngineType.GENERATE ]
+        tasks = [ Task.DEBUG__G ]
 
         def generate(self, path):
             tmp = Document.new(media_path=path)
@@ -21,7 +21,7 @@ def generator():
 def processor():
 
     class MyProcessor(BatchalignEngine):
-        capabilities = [ BAEngineType.PROCESS ]
+        tasks = [ Task.DEBUG__P ]
 
         def process(self, doc):
             doc.content = [Utterance(content="This is a test process .")]
@@ -34,7 +34,7 @@ def processor():
 def analyzer():
 
     class MyAnalyzer(BatchalignEngine):
-        capabilities = [ BAEngineType.ANALYZE ]
+        tasks = [ Task.DEBUG__A ]
 
         def analyze(self, doc):
             return doc.model_dump()
