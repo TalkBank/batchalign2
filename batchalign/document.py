@@ -74,6 +74,7 @@ class Morphology(BaseModel):
 
 class Form(BaseModel):
     text: str # the text
+    # MILISCEONDS
     time: Optional[Tuple[int, int]] = Field(default=None) # word bullet
     morphology: Optional[List[Morphology]] = Field(default=None) # mor
     dependency: Optional[List[Dependency]] = Field(default=None) # gra
@@ -112,9 +113,9 @@ class Utterance(BaseModel):
         else:
             return self.content[-1].text
 
-    @computed_field # type: ignore[misc]
     @property
     def alignment(self) -> Tuple[int,int]:
+        # MILISCEONDS
         if self.time == None: 
             beginning = None
             end = None
@@ -183,7 +184,7 @@ class Utterance(BaseModel):
         else:
             return detokenized+f" \x15{str(self.alignment[0])}_{str(self.alignment[1])}\x15"
 
-    def strip(self, join_with_spaces=False, include_retrace=False):
+    def strip(self, join_with_spaces=False, include_retrace=False, include_fp=False):
         """Returns the "core" elements of a sentence, skipping retraces, etc.
 
         Parameters
@@ -193,6 +194,8 @@ class Utterance(BaseModel):
             instead of treebank detokenization.
         include_retrace : bool
             Whether to include retracing as a part of stripped output.
+        include_fp : bool
+            Whether to include filled pauses as a part of stripped output.
 
         Returns
         -------
@@ -204,6 +207,8 @@ class Utterance(BaseModel):
         to_include = [TokenType.PUNCT, TokenType.REGULAR]
         if include_retrace:
             to_include.append(TokenType.RETRACE)
+        if include_fp:
+            to_include.append(TokenType.FP)
         filtered = filter(lambda x:x.type in to_include,
                           self.content)
         # chain them together
@@ -292,11 +297,18 @@ class Document(BaseModel):
             if isinstance(i, Utterance):
                 if i.tier not in results:
                     results.append(i.tier)
+                else:
+                    # TODO HACKY: this is to ensure that replacing
+                    # a single copy of a tier results in all utterancs'
+                    # with that same tier being replaced. This is swapping
+                    # out the pointers to the underlying tiers to all
+                    # point to the same tier instance that's returned
+                    i.tier = results[results.index(i.tier)]
 
         return results
 
     @tiers.setter
-    def tiers(self):
+    def tiers(self, x):
         raise ValueError("Setting `tiers` globally at the document level has unexpected effect and thus is disabled; please set `tier` of each Utterance or change the field of a tier by setting `doc.tiers[n].value = new`.") 
 
 

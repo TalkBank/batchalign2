@@ -5,3 +5,4 @@ from .asr import *
 from .ud import UDEngine
 from .cleanup import *
 
+from .fa import *

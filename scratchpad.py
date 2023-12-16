@@ -15,20 +15,60 @@ from batchalign import *
 with open("./batchalign/tests/support/test.json", 'r') as df:
     d = Document.model_validate(json.load(df))
 
-forms = []
-for utterance in d.content:
-    for form in utterance.content:
-        forms.append(form.text)
-" ".join(forms)
+# (d[12].time)[0]/1000
+
+# forms = []
+# for utterance in d.content:
+#     for form in utterance.content:
+#         forms.append(form.text)
+# " ".join(forms)
+
+# tmp = CHATFile(path="./extern/tmp.cha")
+# tmp.doc.media
+
+d.media.url = "./extern/tmp.wav"
+e = WhisperFAEngine()
+
+processing = e(d)
+processing[1][0]
+d[1][0]
+
+CHATFile(doc=processing).write("tmp.cha")
+
+# d[1][0]
+
+# processing[2]
+
+# (path=)
+
+# doc = Document.new("howdy partner, what's your name? my name is joshua")
 
 
-(path=)
-
-# doc = Document.new("howdy partner, what's your name?")
+# doc[0]
 # whisper = WhisperEngine()
+# tmp = whisper("./extern/tmp.wav")
+# doc.tiers
+# doc.tiers[0].corpus = "hey"
+# p = WhisperFAModel()
+# audio = p.load("./batchalign/tests/support/test.mp3")
+# transcript = "Hello . This is a test of Batchalign . I'm some body going to read wants told some random crap as I see on the screen . just to test batchline . the primary area for recording editing and me the world's gonna roll me arranging audio. MIDI and drummer regions divided into different track types . Press command slash for more info . test test . I don't know what to say . but um here's some retracing . so just in this for fun . um I like I like I like beans . beans are fun . thank you very much ."
+
+
+# fa = p(audio.all(), transcript)
+# fa
+
+
+# doc[1].tier
 # ud = UDEngine()
 
 # nlp = BatchalignPipeline(ud, whisper)
+
+# nlp.tasks
+
+
+
+# <I like beans> <I like beans> <I like> I like <beans><beans>.
+
 
 # res = nlp(doc)
 

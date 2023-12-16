@@ -183,7 +183,7 @@ def chat_parse_doc(lines):
 
             media = line.strip("@Media:").split(",")
             results["media"] = Media(type=type, name=media[0].strip(),
-                                        url=None)
+                                     url=None)
         # depenent tiers with @ are counted as "other" and are inserted as-is
         elif line.strip()[0] == "@":
             beg,end = line.strip()[1:].split(":")

@@ -1,17 +1,3 @@
-from batchalign.document import *
-from batchalign.pipelines.base import *
-from batchalign.pipelines.asr.utils import *
-from batchalign.constants import *
-from batchalign.dp import *
-
-from batchalign.formats.chat.parser import chat_parse_utterance
-
-import stanza
-
-import warnings
-import logging
-L = logging.getLogger("batchalign")
-
 # system utils
 import glob, os, re
 from itertools import groupby
@@ -23,7 +9,7 @@ from pathlib import Path
 import stanza
 
 from stanza.utils.conll import CoNLL
-# from stanza import Document
+from stanza import Document
 from stanza.models.common.doc import Token
 from stanza.pipeline.core import CONSTITUENCY
 from stanza import DownloadMethod
@@ -34,15 +20,27 @@ from stanza.pipeline.processor import ProcessorVariant, register_processor_varia
 # the loading bar
 from tqdm import tqdm
 
-# countries
-import pycountry
-
 from bdb import BdbQuit
 
 from nltk import word_tokenize
 from collections import defaultdict
 
 from stanza.utils.conll import CoNLL
+
+# Oneliner of directory-based glob and replace
+globase = lambda path, statement: glob.glob(os.path.join(path, statement))
+repath_file = lambda file_path, new_dir: os.path.join(new_dir, pathlib.Path(file_path).name)
+
+
+from batchalign.document import *
+from batchalign.pipelines.base import *
+        
+from batchalign.dp import *
+
+import logging
+L = logging.getLogger("batchalign")
+
+import pycountry
 
 # one liner to parse features
 def parse_feats(word):
@@ -117,6 +115,10 @@ def handler(word):
     # clean out alternate spellings
     target = target.replace("_", "")
 
+    # door zogen fix
+    if target == "door zogen":
+        target = word.text
+
     return f"{'' if not unknown else '0'}{word.upos.lower()}|{target}"
 
 # POS specific handler
@@ -129,10 +131,10 @@ def handler__PRON(word):
         person = '4'
 
     # parse
-    return (handler(word)+"-"+
-            feats.get("PronType", "Int")+"-"+
-            feats.get("Case", "Acc").replace(",", "")+"-"+
-            feats.get("Number", "S")[0]+person)
+    return (handler(word)+
+            stringify_feats(feats.get("PronType", "Int"),
+                            feats.get("Case","").replace(",", ""),
+                            feats.get("Number", "")[:1]+person))
 
 def handler__DET(word):
     # get the features
@@ -140,8 +142,15 @@ def handler__DET(word):
         feats = parse_feats(word)
     except AttributeError:
         return handler(word)
+
+    # get gender and numer
+    gender_str = "&"+feats.get("Gender", "").replace(",", "")
+
+    # clear defaults
+    if gender_str == "&Com,Neut" or gender_str == "&Com" or gender_str=="&": gender_str=""
+
     # parse
-    return (handler(word)+"-"+
+    return (handler(word)+gender_str+"-"+
             feats.get("Definite", "Def") + stringify_feats(feats.get("PronType", "")))
 
 def handler__ADJ(word):
@@ -223,6 +232,8 @@ def handler__PUNCT(word):
     elif word.text in ['„', '‡']:
         return handler__actual_PUNCT(word)
     # otherwise, if its a word, return the word
+    elif word.text == "da":
+        return "noun|da"
     elif re.match(r"^['\w-]+$", word.text): # we match text here because .text is the ultumate content
                                         # instead of the lemma, which maybe entirely weird
         return f"x|{word.text}"
@@ -562,12 +573,13 @@ def tokenizer_processor(tokenized, lang, sent):
             res.append((conform(i), True))
         elif ("en" in lang) and matches_in(i, "'"):
             res.append((conform(i), True))
+        elif ("nl" in lang) and conform(i).endswith("'s"):
+            res.append((conform(i), False))
         else:
             res.append(i)
         indx += 1
 
     return res
-
 
 ######
 def morphoanalyze(doc: Document):
@@ -594,7 +606,7 @@ def morphoanalyze(doc: Document):
         lang_id_config = {"langid_lang_subset": lang})
 
     for indx, i in enumerate(doc.content):
-        L.debug(f"Stanza processing utterance {indx+1}/{len(doc.content)}")
+        L.info(f"Stanza processing utterance {indx+1}/{len(doc.content)}")
         if not isinstance(i, Utterance):
             pass
 

@@ -111,13 +111,12 @@ class WhisperFAModel(object):
         # its dynamic time warping time
         text_idx, time_idx = dtw(-matrix)
         jumps = np.pad(np.diff(text_idx), (1, 0), constant_values=1).astype(bool)
-        jump_times = time_idx[jumps] * TIME_PRECISION
+        jump_times = time_idx[jumps] * 0.02
         # align jumps against transcript and decode
-        timestamped_tokens = [(self.__processor.decode(i),j) for i,j in zip(tokens, jump_times)
-                            if i < 50200]
-        # TODO Jank most whisper models use 50000somethnig as the logistics tokens; but
-        # other models may not
+        timestamped_tokens = [(self.__processor.decode(i),j) for i,j in zip(tokens, jump_times)]
+        # TODO: 50200 is the locations of special tokens
 
         L.debug("Whisper FA done.")
         # we now return the ruslts for later processing
         return timestamped_tokens
+

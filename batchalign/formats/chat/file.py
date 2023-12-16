@@ -9,9 +9,12 @@ from batchalign.formats.chat.lexer import lex
 from batchalign.formats.chat.parser import *
 from batchalign.formats.chat.generator import *
 
+import os
 import re
 
-# FILE = "./extern/minga01a.cha"
+from glob import glob
+from pathlib import Path
+
 
 class CHATFile(BaseFormat):
     """CHAT File
@@ -63,6 +66,18 @@ class CHATFile(BaseFormat):
                     raw.append(value)
 
             self.__doc = chat_parse_doc(raw)
+            # media file auto-associate
+            if self.__doc.media != None:
+                name = self.__doc.media.name
+                dir = os.path.dirname(path)
+                globs = [os.path.join(dir, i) for i in MEDIA_EXTENSIONS]
+
+                # try to find the media file
+                media_files = sum([glob(i) for i in globs], [])
+
+                # associate
+                if len(media_files) > 0:
+                    self.__doc.media.url = media_files[0]
         elif lines:
             self.__doc = chat_parse_doc(lines)
         else:
