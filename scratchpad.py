@@ -18,12 +18,14 @@ from batchalign import *
 # d = CHATFile(path="../talkbank-alignment/broken2/input/53.cha").doc
 # # (d[12].time)[0]/1000
 
-d = Document.new("this is all so crazy so crazy so so crazy so crazy, everybody everybody seem seem so famous famous I am a big scary dinosaur I am a big scary dinosaur I am a big scary dinosaur.")
-d[0].text = str(d)
+d = Document.new("this um is all so crazy so crazy so so crazy so crazy, everybody everybody seem seem so famous famous I am a big scary dinosaur I am a big um um um um scary dinosaur I am a big scary dinosaur.")
+# d[0].text = str(d)
 
+dis = DisfluencyReplacementEngine()
 nr = NgramRetraceEngine()
 
 dp = nr(d)
+dp
 
 # # forms = []
 # # for utterance in d.content:

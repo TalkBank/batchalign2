@@ -167,11 +167,30 @@ class Utterance(BaseModel):
     def _detokenize(self):
         # create the result by adding minimal CHAT-style annotations
         result = []
-        for i in self.content:
+        for indx, i in enumerate(self.content):
             if i.type == TokenType.FP:
                 result.append("&-"+i.text)
+            elif i.type == TokenType.RETRACE:
+                # if the next token is a retrace as well, add retrace symbol [/]
+                # note that retraces are never the last element in a sentence,
+                # this should crash if it
+                if indx + 1 >= len(self.content):
+                    raise DocumentValidationException(f"Weirdly, a retrace was the last token in an utterance. We cannot parse that.\nHint: there should be another copy of the retrace text after which is the 'regular' text. Check your document format.\nUtterance:{self.strip(True, True, True)}")
+                if (self.content[indx+1].type == TokenType.RETRACE and
+                    indx > 0 and self.content[indx-1].type == TokenType.REGULAR):
+                    result.append("<"+i.text)
+                elif self.content[indx+1].type == TokenType.REGULAR:
+                    if indx > 0 and self.content[indx-1].type == TokenType.RETRACE:
+                        result.append(i.text+">")
+                        result.append("[/]")
+                    else:
+                        result.append(i.text)
+                        result.append("[/]")
+                else:
+                    result.append(i.text)
             else:
                 result.append(i.text)
+
         # detokenize
         detokenized = detokenize(result)
         # check and seperate punct 

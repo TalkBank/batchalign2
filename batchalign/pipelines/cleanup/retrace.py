@@ -2,19 +2,24 @@ from batchalign.pipelines.base import *
 from batchalign.document import *
 from batchalign.pipelines.cleanup.parse_support import _mark_utterance
 
+import warnings
+
 import re
+
+RETRACE_WARNING = "Retracing analysis detected that an utterance has an existing text line, for instance from an original input file. This has been removed!\n\nBatchalign will re-render the utterance text on its own accord if retracing or disfluency analysis is needed, instead of attempting to modify the original line.\n\nHint: You should only run Batchalign retracing engine on a newly minted document for instance from ASR."
 
 class NgramRetraceEngine(BatchalignEngine):
 
     tasks = [ Task.RETRACE_ANALYSIS ]
 
     def process(self, doc):
+        has_text = False
 
         for ut in doc.content:
             # get only the main content (we don't want to double-mark retrace)
             content = []
             for i in ut.content:
-                if i.type in [TokenType.REGULAR, TokenType.PUNCT]:
+                if i.type in [TokenType.REGULAR, TokenType.PUNCT, TokenType.FP]:
                     content.append(i)
             # scan for n-gram retraces
             for n in range(1, len(content)):
@@ -36,13 +41,23 @@ class NgramRetraceEngine(BatchalignEngine):
                     # DOUBLE next
                     while tuple(content[root+n:root+2*n]) == gram:
                         for j in content[begin:begin+n]:
-                            j.type = TokenType.RETRACE
+                            if j.type != TokenType.FP:
+                                j.type = TokenType.RETRACE
                         root = root+n
                         # we bump begin forward until AFTER the retrace
                         # and the main content
                         begin = root-1
                     # we scan grams forward one by one
                     begin += 1
-            breakpoint()
+
+            # give up
+            if ut.text:
+                has_text = True
+                ut.text = None
+
+        if has_text:
+            warnings.warn(RETRACE_WARNING)
+
+        return doc
 
 
