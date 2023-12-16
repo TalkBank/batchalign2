@@ -31,12 +31,33 @@ class BatchalignPipeline:
     def tasks(self):
         return self.__capabilities
 
-    def __call__(self, input):
+    def __call__(self, input, callback=None):
+        """Call the pipeline.
+
+        Parameters
+        ----------
+        input : any
+            The input to the pipeline.
+        callback : callable
+            The callback function to send a new tick to for progress reporting, if any.
+
+        Return
+        ------
+        Document
+            The Processed document.
+        """
+        
         # process input; if its a string, process it as a media
         # only doc seeded from the string. If its not a document,
         # process it as a object to be seeded into a json.
         L.info(f"Pipeline called with engines: generator={self.__generator}, processors={self.__processors}, analyzer={self.__analyzer}")
 
+        counter = 0 
+        total_tasks = len(self.__processors) + 0 if self.__generator == None else 1 + 0 if self.__analyzer == None else 1
+
+        # call callback, if needed
+        if callback:
+            callback(counter,total_tasks, None)
 
         L.debug(f"Transforming input of type: {type(input)}")
         doc = input
@@ -59,6 +80,9 @@ class BatchalignPipeline:
         if self.__generator:
             L.debug(f"Calling generator: {self.__generator}")
             doc = self.__generator.generate(doc.media.url)
+            counter += 1
+            if callback:
+                callback(counter,total_tasks, self.__generator.tasks)
 
         # duplicate the doc
         doc = doc.model_copy(deep=True)
@@ -68,10 +92,19 @@ class BatchalignPipeline:
             L.debug(f"Calling processor: processor {indx+1}/{len(self.__processors)}, {p}")
             doc = p.process(doc)
 
+            counter += 1
+            if callback:
+                callback(counter, total_tasks, p.tasks)
+
+
         # if needed, perform analysis
         if self.__analyzer:
             L.debug(f"Calling analyzer: {self.__analyzer}")
-            return self.__analyzer.analyze(doc)
+            doc = self.__analyzer.analyze(doc)
+            counter += 1
+            if callback:
+                callback(counter, total_tasks, self.__analyzer.tasks)
+            return doc
         else:
             return doc
 

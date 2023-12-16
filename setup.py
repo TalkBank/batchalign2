@@ -16,6 +16,7 @@ setup(
     version = "2.0.0",
     description = ("Python Speech Language Sample Analysis"),
     packages=find_packages(),
+    long_description=read('README.md'),
     package_data={
         'batchalign': [os.path.basename(i)
                        for i in glob(os.path.join("batchalign", "pipelines", "cleanup",
@@ -36,11 +37,11 @@ setup(
         "plotly>=5.18.0",
         "transformers>=4.35",
         "tokenizers>=0.14.1",
-        "ffmpeg-python==0.2.0",
         "pycountry>=22.3",
         "stanza>=1.6",
         "scipy~=1.11",
         "rev_ai>=2.18.0",
+        "rich~=13.6"
     ],
     extras_require={
         'dev': [
