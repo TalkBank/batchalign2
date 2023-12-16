@@ -104,7 +104,12 @@ class WhisperFAModel(object):
 
         # perform smoothing on attention activations + scale them
         weights = median_filter(weights, self.__model.config.median_filter_width)
+        # average weights across heads
         matrix = weights.mean(axis=0)
+        matrix[0] = matrix.mean() # jank way of fixing weird 0th token output
+        # see: https://media.discordapp.net/attachments/870073176380563460/1185486042753679390/image.png?ex=658fc8e9&is=657d53e9&hm=28ba60b6035fd8976e44f3e53628558d59d5f578917d36ad22c3d63b5563582e&=&format=webp&quality=lossless&width=1050&height=1164
+        # essentially, the 0th token (<sos>) gets attention jammed across the entire rest of the sequence
+        # because its padding; which screws everything else up
 
         L.debug("Applying dynamic time warping...")
 

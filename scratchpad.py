@@ -12,9 +12,10 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 from batchalign import *
 
-with open("./batchalign/tests/support/test.json", 'r') as df:
-    d = Document.model_validate(json.load(df))
+# with open("./batchalign/tests/support/test.json", 'r') as df:
+#     d = Document.model_validate(json.load(df))
 
+d = CHATFile(path="./test.cha").doc
 # (d[12].time)[0]/1000
 
 # forms = []
@@ -30,8 +31,8 @@ d.media.url = "./extern/tmp.wav"
 e = WhisperFAEngine()
 
 processing = e(d)
-processing[1][0]
-d[1][0]
+# d[3]
+# d[1][0]
 
 CHATFile(doc=processing).write("tmp.cha")
 

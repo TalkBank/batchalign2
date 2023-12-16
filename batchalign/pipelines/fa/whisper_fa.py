@@ -3,6 +3,7 @@ from batchalign.document import *
 from batchalign.pipelines.base import *
 from batchalign.dp import *
 from batchalign.utils import *
+from batchalign.constants import *
 
 import logging
 L = logging.getLogger("batchalign")
@@ -44,7 +45,7 @@ class WhisperFAEngine(BatchalignEngine):
                 warnings.warn("Cannot force-align an utterance without utterance-level segmentation; please run a pipeline that includes `Task.UTTERANCE_TIMING_RECOVERY` (\"bulletize\") before running forced-alignment.")
 
             # pop the previous group onto the stack
-            if (i.alignment[-1] - seg_start) > 30*1000:
+            if (i.alignment[-1] - seg_start) > 28*1000:
                 groups.append(group)
                 group = []
                 seg_start = i.alignment[0]
@@ -58,15 +59,16 @@ class WhisperFAEngine(BatchalignEngine):
         L.debug(f"Begin Whisper Inference...")
 
         for indx, grp in enumerate(groups):
-            L.info(f"Whisper FA processing segment {indx+1}/{len(groups)}")
+            L.info(f"Whisper FA processing segment {indx+1}/{len(groups)}...")
 
             # perform alignment
+            # we take a 2 second buffer in each direction
             res = self.__whisper(audio=f.chunk(grp[0][1][0], grp[-1][1][1]),
                                  text=detokenize(word[0].text for word in grp))
 
             # create reference backplates, which are the word ids to set the timing for
             ref_targets = []
-            for indx, (word, time) in enumerate(grp):
+            for indx, (word, _) in enumerate(grp):
                 for char in word.text:
                     ref_targets.append(ReferenceTarget(char, payload=indx))
             # create target backplates for the timings
@@ -95,8 +97,13 @@ class WhisperFAEngine(BatchalignEngine):
         # we now set the end alignment of each word to the start of the next
         for ut in doc.content:
             # correct each word by bumping it forward
+            # and if its not a word we remove the timing
             for indx, w in enumerate(ut.content):
-                if indx != len(ut.content)-1:
+                if w.type in [TokenType.PUNCT, TokenType.FEAT, TokenType.ANNOT]:
+                    w.time = None
+                elif indx == len(ut.content)-1 and w.text in ENDING_PUNCT:
+                    w.time = None
+                elif indx != len(ut.content)-1:
                     w.time = (w.time[0], ut.content[indx+1].time[0])
             # clear any built-in timing (i.e. we should use utterance-derived timing)
             ut.time = None
