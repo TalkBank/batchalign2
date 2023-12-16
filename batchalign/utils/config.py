@@ -57,10 +57,10 @@ def interactive_setup():
             rev_key = Prompt.ask("Your Rev.ai API key", console=C, password=True)
             rev_key_confirm = Prompt.ask("Just in case, let's do that again. Your Rev.ai key please", console=C, password=True)
 
-        config["asr"]["default"] = "rev"
+        config["asr"]["engine"] = "rev"
         config["asr"]["key"] = rev_key.strip()
     else:
-        config["asr"]["default"] = "whisper"
+        config["asr"]["engine"] = "whisper"
 
     C.print(Markdown(FOLDERS))
     C.print("\n[bold green]Alrighty, let's rock and roll![/bold green] Continuing with Batchalign...\n")
@@ -68,7 +68,24 @@ def interactive_setup():
     with open(Path.home()/".batchalign.ini", 'w') as df:
         config.write(df)
 
-# interactive_setup()
+def config_read(interactive=False):
+    try:
+        with open(Path.home()/".batchalign.ini", 'r') as df:
+            config = configparser.ConfigParser()
+            config.read_file(df)
+    except FileNotFoundError:
+        if interactive:
+            interactive_setup()
+        # else:
+            
+        
+
+    # breakpoint()
+
+    return config
+
+
+# config_read()
 
 # from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
 # import time

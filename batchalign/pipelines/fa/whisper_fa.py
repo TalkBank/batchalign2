@@ -1,8 +1,8 @@
 from batchalign.models.fa import WhisperFAModel
 from batchalign.document import *
 from batchalign.pipelines.base import *
-from batchalign.dp import *
 from batchalign.utils import *
+from batchalign.utils.dp import *
 from batchalign.constants import *
 
 import logging

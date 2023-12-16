@@ -35,7 +35,7 @@ repath_file = lambda file_path, new_dir: os.path.join(new_dir, pathlib.Path(file
 from batchalign.document import *
 from batchalign.pipelines.base import *
         
-from batchalign.dp import *
+from batchalign.utils.dp import *
 
 import logging
 L = logging.getLogger("batchalign")
