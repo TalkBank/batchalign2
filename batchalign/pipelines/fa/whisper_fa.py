@@ -108,9 +108,13 @@ class WhisperFAEngine(BatchalignEngine):
             # clear any built-in timing (i.e. we should use utterance-derived timing)
             ut.time = None
             # correct the text 
-            if ut.alignment:
-                ut.text = re.sub("\x15\d+_\d+\x15", f"\x15{ut.alignment[0]}_{ut.alignment[1]}\x15", ut.text).strip()
-            else:
+            if ut.alignment and ut.text != None:
+                if '\x15' not in ut.text:
+                    ut.text = (ut.text+f" \x15{ut.alignment[0]}_{ut.alignment[1]}\x15").strip()
+                else:
+                    ut.text = re.sub("\x15\d+_\d+\x15",
+                                     f"\x15{ut.alignment[0]}_{ut.alignment[1]}\x15", ut.text).strip()
+            elif ut.text != None:
                 ut.text = re.sub("\x15\d+_\d+\x15", f"", ut.text).strip()
 
         return doc

@@ -15,26 +15,33 @@ from batchalign import *
 # with open("./batchalign/tests/support/test.json", 'r') as df:
 #     d = Document.model_validate(json.load(df))
 
-d = CHATFile(path="./test.cha").doc
-# (d[12].time)[0]/1000
+# d = CHATFile(path="../talkbank-alignment/broken2/input/53.cha").doc
+# # (d[12].time)[0]/1000
 
-# forms = []
-# for utterance in d.content:
-#     for form in utterance.content:
-#         forms.append(form.text)
-# " ".join(forms)
+d = Document.new("this is all so crazy so crazy so so crazy so crazy, everybody everybody seem seem so famous famous I am a big scary dinosaur I am a big scary dinosaur I am a big scary dinosaur.")
+d[0].text = str(d)
 
-# tmp = CHATFile(path="./extern/tmp.cha")
-# tmp.doc.media
+nr = NgramRetraceEngine()
 
-d.media.url = "./extern/tmp.wav"
-e = WhisperFAEngine()
+dp = nr(d)
 
-processing = e(d)
-# d[3]
-# d[1][0]
+# # forms = []
+# # for utterance in d.content:
+# #     for form in utterance.content:
+# #         forms.append(form.text)
+# # " ".join(forms)
 
-CHATFile(doc=processing).write("tmp.cha")
+# # tmp = CHATFile(path="./extern/tmp.cha")
+# # tmp.doc.media
+
+# # d.media.url = "./extern/tmp.wav"
+# e = WhisperFAEngine()
+
+# processing = e(d)
+# # d[3]
+# # d[1][0]
+
+# CHATFile(doc=processing).write("tmp.cha")
 
 # d[1][0]
 
