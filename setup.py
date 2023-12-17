@@ -29,7 +29,7 @@ setup(
         "pydantic>=2.4",
         "nltk>=3.8",
         "praatio>=6.0.0,<6.1.0",
-        "torch>=2.0.1,<2.2.0",
+        "torch>=2.0.1",
         "torchaudio>=2.1.0,<2.2.0",
         "pyAudioAnalysis==0.3.14",
         "hmmlearn==0.3.0",
