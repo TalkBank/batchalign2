@@ -102,9 +102,11 @@ def _dispatch(command, lang, num_speakers,
     if len(errors) > 0:
         for file, trcbk, e in errors:
             C.print(f"[bold red]ERROR[/bold red] on file [italic]{Path(file).name}[/italic]: {e}")
-            if ctx.obj["verbose"] >= 1:
+            if ctx.obj["verbose"] == 1:
                 C.print(trcbk)
                 C.print("\n")
+            elif ctx.obj["verbose"] > 1:
+                Console().print(trcbk)
     else:
         C.print(f"All done. Results saved to {out_dir}!\n")
     if ctx.obj["verbose"] > 1:
