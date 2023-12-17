@@ -7,5 +7,9 @@ class DocumentValidationException(Exception):
 class ConfigNotFoundError(Exception):
     pass
 
+class ConfigError(Exception):
+    pass
+
+
 
 

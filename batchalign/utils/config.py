@@ -81,5 +81,5 @@ def config_read(interactive=False):
         if interactive:
             return interactive_setup()
         else:
-            raise ConfigNotFoundError("Batchalign cannot find a configuration file. Run `python -m batchalign` to generate one, or write one yourself and place it at `~/.batchalign.ini`.\nHint: did you try to use Rev.AI without supplying an API key?")
+            raise ConfigNotFoundError("Batchalign cannot find a configuration file. Run 'batchalign' in the command line to generate one, or write one yourself and place it at `~/.batchalign.ini`.\nHint: did you try to use Rev.AI without supplying an API key?")
 

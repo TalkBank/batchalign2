@@ -37,7 +37,7 @@ class WhisperFAModel(object):
 
     def __init__(self, model="openai/whisper-large-v2", target_sample_rate=16000):
         L.debug("Initializing whisper FA model...")
-        self.__model = WhisperForConditionalGeneration.from_pretrained(model)
+        self.__model = WhisperForConditionalGeneration.from_pretrained(model, attn_implementation="eager")
         L.debug("Done, initalizing processor and config...")
         self.__processor = WhisperProcessor.from_pretrained(model)
         L.debug("Whisper FA initialization done.")

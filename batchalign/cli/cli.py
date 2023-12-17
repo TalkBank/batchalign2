@@ -14,6 +14,7 @@ from multiprocessing import Process, freeze_support
 
 from batchalign.pipelines import BatchalignPipeline
 
+from rich.traceback import install
 from rich.console import Console
 from rich.panel import Panel
 from pathlib import Path
@@ -91,6 +92,7 @@ def batchalign(ctx, verbose):
     ctx.obj["config"] = config.config_read(True)
     # make everything look better
     pretty.install()
+    install()
 
 #################### ALIGN ################################
 
@@ -159,6 +161,16 @@ def morphotag(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     _dispatch("morphotag", lang, num_speakers, files, ctx,
               in_dir, out_dir,
               loader, writer, C)
+
+
+#################### SETUP ################################
+
+@batchalign.command()
+@click.pass_context
+def setup(ctx):
+    """Reconfigure Batchalign settings, such as Rev.AI key."""
+
+    config.interactive_setup()
 
 #################### VERSION ################################
 

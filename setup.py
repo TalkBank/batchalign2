@@ -1,6 +1,7 @@
 import os
 from glob import glob
 from setuptools import setup, find_packages
+from pathlib import Path
 
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
@@ -27,31 +28,32 @@ setup(
         'batchalign': ([os.path.basename(i)
                        for i in glob(os.path.join("batchalign", "pipelines",
                                                   "cleanup", "support", "*"))]+
-                       [os.path.basename(os.path.join("batchalign", "version"])]),
+                       [os.path.basename(os.path.join("batchalign", "version"))]),
     },
     install_requires=[
         "pydantic>=2.4",
         "nltk>=3.8",
-        "montreal-forced-aligner>=3.0.0",
         "praatio>=6.0.0,<6.1.0",
-        "pytorch>=2.1.0,<2.2.0",
+        "torch>=2.0.1,<2.2.0",
         "torchaudio>=2.1.0,<2.2.0",
         "pyAudioAnalysis==0.3.14",
         "hmmlearn==0.3.0",
-        "eyed7>=0.9.7",
+        "eyed3~=0.9.7",
         "pydub>=0.25.1,<0.26.0",
         "imblearn",
         "plotly>=5.18.0",
         "transformers>=4.35",
         "tokenizers>=0.14.1",
         "pycountry>=22.3",
-        "stanza>=1.6",
+        "stanza>=1.7",
         "scipy~=1.11",
         "rev_ai>=2.18.0",
-        "rich~=13.6"
-        "click~=8.1"
+        "rich~=13.6",
+        "click~=8.1",
+        "matplotlib>=3.8.0,<4.0.0",
         "pyfiglet==1.0.2",
-        "typing-extensions"
+        "soundfile~=0.12.0",
+        "typing-extensions",
     ],
     extras_require={
         'dev': [

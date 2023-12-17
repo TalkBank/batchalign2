@@ -8,6 +8,8 @@ from batchalign.pipelines.base import *
 from batchalign.pipelines.asr.utils import *
 from batchalign.utils.config import config_read
 
+from batchalign.errors import *
+
 from batchalign.models.utterance import BertModel
 
 import time
@@ -28,7 +30,10 @@ class RevEngine(BatchalignEngine):
 
         if key == None or key.strip() == "":
             config = config_read()
-            key = config["asr"]["engine.rev.key"] 
+            try:
+                key = config["asr"]["engine.rev.key"] 
+            except KeyError:
+                raise ConfigError("No Rev.AI key found. Rev.AI was not set up! Please set up Rev.ai through the initial setup process by running 'batchalign setup' in the command line to generate one, or write one yourself and place it at `~/.batchalign.ini`.")
 
         self.__lang_code = lang_code
         self.__num_speakers = num_speakers
