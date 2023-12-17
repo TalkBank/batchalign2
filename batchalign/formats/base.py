@@ -6,3 +6,6 @@ class BaseFormat:
     def doc(self):
         pass
 
+    @abstractmethod
+    def write(self, path):
+        pass

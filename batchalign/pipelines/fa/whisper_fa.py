@@ -41,6 +41,8 @@ class WhisperFAEngine(BatchalignEngine):
         L.debug(f"Whisper FA finished loading media.")
 
         for i in doc.content:
+            if not isinstance(i, Utterance):
+                continue
             if i.alignment == None:
                 warnings.warn("Cannot force-align an utterance without utterance-level segmentation; please run a pipeline that includes `Task.UTTERANCE_TIMING_RECOVERY` (\"bulletize\") before running forced-alignment.")
 
@@ -96,6 +98,9 @@ class WhisperFAEngine(BatchalignEngine):
 
         # we now set the end alignment of each word to the start of the next
         for ut in doc.content:
+            if not isinstance(ut, Utterance):
+                continue
+
             # correct each word by bumping it forward
             # and if its not a word we remove the timing
             for indx, w in enumerate(ut.content):
@@ -104,7 +109,14 @@ class WhisperFAEngine(BatchalignEngine):
                 elif indx == len(ut.content)-1 and w.text in ENDING_PUNCT:
                     w.time = None
                 elif indx != len(ut.content)-1:
-                    w.time = (w.time[0], ut.content[indx+1].time[0])
+                    # search forward for the next compatible time
+                    tmp = indx+1
+                    while ut.content[tmp].time == None and tmp < len(ut.content):
+                        tmp += 1
+                    if ut.content[tmp].time == None:
+                        w.time = (w.time[0], w.time[0]+1000) # give a second because we don't know
+                    else:
+                        w.time = (w.time[0], ut.content[tmp].time[0])
             # clear any built-in timing (i.e. we should use utterance-derived timing)
             ut.time = None
             # correct the text 

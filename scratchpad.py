@@ -6,7 +6,7 @@ import logging as L
 LOG_FORMAT = '[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s'
 L.basicConfig(format=LOG_FORMAT, level=L.ERROR)
 L.getLogger("stanza").setLevel(L.ERROR)
-L.getLogger('batchalign').setLevel(L.WARN)
+L.getLogger('batchalign').setLevel(L.DEBUG)
 
 ########
 
@@ -22,6 +22,8 @@ from batchalign import *
 
 # with open("./batchalign/tests/support/test.json", 'r') as df:
 #     d = Document.model_validate(json.load(df))
+
+
 
 # d
 
