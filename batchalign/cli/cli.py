@@ -4,7 +4,7 @@ The Batchalign command-line interface
 """
 
 import multiprocessing
-import click
+import rich_click as click
 import functools
 
 import os

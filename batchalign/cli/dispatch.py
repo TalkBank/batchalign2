@@ -47,8 +47,7 @@ def _dispatch(command, lang, num_speakers,
         __tf = tempfile.NamedTemporaryFile(delete=True, mode='w')
         C = Console(file=__tf)
 
-    C.print("\n")
-    C.print(f"Mode: [blue]{command}[/blue]; got [bold cyan]{len(files)}[/bold cyan] transcript{'s' if len(files) > 1 else ''} to process from {in_dir}:\n")
+    C.print(f"\nMode: [blue]{command}[/blue]; got [bold cyan]{len(files)}[/bold cyan] transcript{'s' if len(files) > 1 else ''} to process from {in_dir}:\n")
 
     # create the spinner
     prog = Progress(SpinnerColumn(), *Progress.get_default_columns()[:-1],
