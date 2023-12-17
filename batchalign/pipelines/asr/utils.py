@@ -158,6 +158,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
         ))
 
     doc.content = final_utterances
+    doc.langs = [lang]
 
     return doc
 
