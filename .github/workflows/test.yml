@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["pypy3.9", "pypy3.10", "3.9", "3.10", "3.11", "3.12"]
+        python-version: ["pypy3.10", "3.10", "3.11", "3.12"]
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python ${{ matrix.python-version }}
@@ -19,7 +19,7 @@ jobs:
       - name: Install setup dependencies
         run: python -m pip install --upgrade pip setuptools wheel
       - name: Install Batchalign
-        run: python -m pip install -e . [dev]
+        run: python -m pip install -e ".[dev]"
       - name: Run tests
         run: python -m pytest batchalign
 
