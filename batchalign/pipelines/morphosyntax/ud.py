@@ -702,7 +702,7 @@ def morphoanalyze(doc: Document):
     L.debug("Stanza done.")
     return doc
 
-class UDEngine(BatchalignEngine):
+class StanzaEngine(BatchalignEngine):
     tasks = [ Task.MORPHOSYNTAX ]
 
     def process(self, doc):

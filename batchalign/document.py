@@ -12,16 +12,22 @@ from pathlib import Path
 from batchalign.errors import *
 from batchalign.constants import *
 
+# THE ORDERING OF THESE NUMBERS MATTERS
+# this is the order in which the processors are applied
+# and even if the user requests a different ordering the
+# pipeline WILL apply them in this order. So ensure that
+# this order is sensible!
 class Task(IntEnum):
     ASR = 3
-    SPEAKER_RECOGNITION = 4
-    UTTERANCE_SEGMENTATION = 5
-    UTTERANCE_TIMING_RECOVERY = 6 # "bulletize"
-    FORCED_ALIGNMENT = 7
-    MORPHOSYNTAX = 8
-    FEATURE_EXTRACT = 9
-    DISFLUENCY_ANALYSIS = 10
-    RETRACE_ANALYSIS = 11
+    UTTERANCE_SEGMENTATION = 4
+    SPEAKER_RECOGNITION = 5
+    DISFLUENCY_ANALYSIS = 6
+    RETRACE_ANALYSIS = 7
+    UTTERANCE_TIMING_RECOVERY = 8 # "bulletize"
+    FORCED_ALIGNMENT = 9
+    FEATURE_EXTRACT = 10
+    MORPHOSYNTAX = 11
+
 
     DEBUG__G = 0
     DEBUG__P = 1

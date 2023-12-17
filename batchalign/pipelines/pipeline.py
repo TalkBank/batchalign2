@@ -3,6 +3,7 @@ from typing import List, Optional
 from batchalign.pipelines.base import *
 from batchalign.document import *
 from batchalign.errors import *
+
 import collections
 
 import logging
@@ -30,6 +31,29 @@ class BatchalignPipeline:
     @property
     def tasks(self):
         return self.__capabilities
+
+    @staticmethod
+    def new(tasks:str, lang_code="eng", n_speakers=2):
+        """Create the pipeline.
+
+        Parameters
+        ----------
+        tasks : str
+            The tasks you want the pipeline to do, in a
+            comma-seperated list such as `asr,fa,morphosyntax`.
+        lang_code : str
+            ISO 3 letter language code.
+        n_speakers : int
+            Number of speakers.
+
+        Returns
+        -------
+        BatchalignPipeline
+            The pipeline to run.
+        """
+        
+        from batchalign._dispatch import dispatch_pipeline
+        return dispatch_pipeline(tasks, lang_code, n_speakers)
 
     def __call__(self, input, callback=None):
         """Call the pipeline.
@@ -139,5 +163,6 @@ class BatchalignPipeline:
             else:
                 raise ValueError(f"Engine provided to pipeline with no apparent purpose (i.e. its not a generator, processor, nor analyzer). Engine = '{i}'")
 
-        return generator, processors, analyzer, list(sorted(_remove_duplicates([i for j in capabilities for i in j])))
+        
+        return generator, sorted(processors, key=lambda x:x.tasks[0]), analyzer, list(sorted(_remove_duplicates([i for j in capabilities for i in j])))
 

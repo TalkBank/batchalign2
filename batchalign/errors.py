@@ -4,5 +4,8 @@ class CHATValidationException(Exception):
 class DocumentValidationException(Exception):
     pass
 
+class ConfigNotFoundError(Exception):
+    pass
+
 
 

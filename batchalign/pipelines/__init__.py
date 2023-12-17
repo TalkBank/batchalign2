@@ -2,7 +2,7 @@ from .pipeline import BatchalignPipeline
 from .base import BatchalignEngine
 from .asr import *
 
-from .ud import UDEngine
+from .morphosyntax import *
 from .cleanup import *
 
 from .fa import *

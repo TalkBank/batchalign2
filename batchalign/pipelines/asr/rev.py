@@ -6,6 +6,7 @@ Support for Rev.ai, a commerical ASR service
 from batchalign.document import *
 from batchalign.pipelines.base import *
 from batchalign.pipelines.asr.utils import *
+from batchalign.utils.config import config_read
 
 from batchalign.models.utterance import BertModel
 
@@ -23,7 +24,11 @@ POSTPROCESSOR_LANGS = {'en': "talkbank/CHATUtterance-en"}
 class RevEngine(BatchalignEngine):
     tasks = [ Task.ASR, Task.SPEAKER_RECOGNITION, Task.UTTERANCE_SEGMENTATION ]
 
-    def __init__(self, key:str, lang_code="eng", num_speakers=2):
+    def __init__(self, key:str=None, lang_code="eng", num_speakers=2):
+
+        if key == None or key.strip() == "":
+            config = config_read()
+            key = config["asr"]["engine.rev.key"] 
 
         self.__lang_code = lang_code
         self.__num_speakers = num_speakers

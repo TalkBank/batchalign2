@@ -12,6 +12,11 @@ L.getLogger('batchalign').setLevel(L.INFO)
 
 from batchalign import *
 
+# engine = RevEngine()
+pipe = BatchalignPipeline.new("morphosyntax")
+
+pipe.tasks
+
 # with open("./batchalign/tests/support/test.json", 'r') as df:
 #     d = Document.model_validate(json.load(df))
 

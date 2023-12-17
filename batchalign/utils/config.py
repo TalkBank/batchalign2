@@ -5,6 +5,8 @@ from rich.markdown import Markdown
 from pathlib import Path
 import configparser
 
+from batchalign.errors import *
+
 C = Console()
 
 WELCOME = """
@@ -58,7 +60,7 @@ def interactive_setup():
             rev_key_confirm = Prompt.ask("Just in case, let's do that again. Your Rev.ai key please", console=C, password=True)
 
         config["asr"]["engine"] = "rev"
-        config["asr"]["key"] = rev_key.strip()
+        config["asr"]["engine.rev.key"] = rev_key.strip()
     else:
         config["asr"]["engine"] = "whisper"
 
@@ -76,32 +78,10 @@ def config_read(interactive=False):
     except FileNotFoundError:
         if interactive:
             interactive_setup()
-        # else:
-            
-        
-
-    # breakpoint()
+        else:
+            raise ConfigNotFoundError("Batchalign cannot find a configuration file. Run `python -m batchalign` to generate one, or write one yourself and place it at `~/.batchalign.ini`.\nHint: did you try to use Rev.AI without supplying an API key?")
 
     return config
 
 
-# config_read()
-
-# from rich.progress import Progress, SpinnerColumn, TimeElapsedColumn
-# import time
-
-# import time
-
-# progress = Progress(
-#     SpinnerColumn(),
-#     *Progress.get_default_columns(),
-#     TimeElapsedColumn(),
-# )
-
-# with progress:
-#     task1= progress.add_task("tmp", total = 1000)
-
-#     while not progress.finished:
-#         progress.update(task1, advance=0.5)
-#         time.sleep(0.1)
-
+# interactive_setup()
