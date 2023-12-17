@@ -24,12 +24,7 @@ setup(
     entry_points = {
         'console_scripts': ['batchalign=batchalign.cli.cli:batchalign'],
     },
-    package_data={
-        'batchalign': ([os.path.basename(i)
-                       for i in glob(os.path.join("batchalign", "pipelines",
-                                                  "cleanup", "support", "*"))]+
-                       [os.path.basename(os.path.join("batchalign", "version"))]),
-    },
+    long_description_content_type='text/markdown',
     install_requires=[
         "pydantic>=2.4",
         "nltk>=3.8",
