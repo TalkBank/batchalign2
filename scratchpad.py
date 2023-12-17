@@ -3,17 +3,17 @@ import json
 
 import logging as L 
 
-# LOG_FORMAT = '[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s'
-# L.basicConfig(format=LOG_FORMAT, level=L.ERROR)
-# L.getLogger("stanza").setLevel(L.ERROR)
-# L.getLogger('batchalign').setLevel(L.WARN)
+LOG_FORMAT = '[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s'
+L.basicConfig(format=LOG_FORMAT, level=L.ERROR)
+L.getLogger("stanza").setLevel(L.ERROR)
+L.getLogger('batchalign').setLevel(L.WARN)
 
 ########
 
 from batchalign import *
 
-if __name__ == "__main__":
-    cli()
+# if __name__ == "__main__":
+#     cli()
 # engine = RevEngine()
 # pipe = BatchalignPipeline.new("fa,morphosyntax")
 # pipe.tasks
