@@ -97,17 +97,16 @@ def _dispatch(command, lang, num_speakers,
                 progress_callback(file, 0, 0, e)
                 errors.append((file, traceback.format_exc(), e))
 
-    C.print("\n")
     if len(errors) > 0:
+        C.print()
         for file, trcbk, e in errors:
-            C.print(f"[bold red]ERROR[/bold red] on file [italic]{Path(file).name}[/italic]: {e}")
+            C.print(f"[bold red]ERROR[/bold red] on file [italic]{Path(file).name}[/italic]: {e}\n")
             if ctx.obj["verbose"] == 1:
                 C.print(trcbk)
-                C.print("\n")
             elif ctx.obj["verbose"] > 1:
                 Console().print(trcbk)
     else:
-        C.print(f"All done. Results saved to {out_dir}!\n")
+        C.print(f"\nAll done. Results saved to {out_dir}!\n")
     if ctx.obj["verbose"] > 1:
         C.end_capture()
 
