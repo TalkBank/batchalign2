@@ -25,7 +25,11 @@ if __name__ == "__main__":
 
 # d
 
-# d = CHATFile(path="../talkbank-alignment/broken2/input/53.cha").doc
+# d = CHATFile(path="../talkbank-alignment/testing_playground_2/output/test.cha").doc
+# nr = NgramRetraceEngine()
+# d = nr(d)
+# d[-3].content
+
 # # (d[12].time)[0]/1000
 
 # d = Document.new("this um is all so crazy so crazy so so crazy so crazy, everybody everybody seem seem so famous famous I am a big scary dinosaur I am a big um um um um scary dinosaur I am a big scary dinosaur.")

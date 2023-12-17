@@ -27,7 +27,7 @@ class NgramRetraceEngine(BatchalignEngine):
                 while begin < len(content)-(n+1):
                     # get the n gram info; we convert it to
                     # a tuple to make it hashable
-                    gram = tuple(content[begin:begin+n])
+                    gram = tuple([i.text for i in content[begin:begin+n]])
                     # and compare forward, marking retraces 
                     # as needed. recall that content[] contain
                     # *pointers* to forms so we can just modify them
@@ -39,14 +39,11 @@ class NgramRetraceEngine(BatchalignEngine):
                     # is not a retrace: <hello pie hello pie> [/] hello pie .
                     # so that's why if we check the next ngram against the
                     # DOUBLE next
-                    while tuple(content[root+n:root+2*n]) == gram:
+                    while tuple([i.text for i in content[root+n:root+2*n]]) == gram:
                         for j in content[begin:begin+n]:
                             if j.type != TokenType.FP:
                                 j.type = TokenType.RETRACE
                         root = root+n
-                        # we bump begin forward until AFTER the retrace
-                        # and the main content
-                        begin = root-1
                     # we scan grams forward one by one
                     begin += 1
 

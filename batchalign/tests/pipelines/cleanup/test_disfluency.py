@@ -4,13 +4,16 @@ from batchalign.document import *
 import copy
 import pytest
 
-BOTH = 'this &-um is all <so crazy> [/] so crazy <so so crazy> [/] so crazy , everybody [/] everybody seem [/] seem so famous [/] famous I am a big scary dinosaur I am a big &-um &-um &-um &-um scary dinosaur I am a big scary dinosaur .'
+BOTH = 'this &-um is all <so crazy so crazy so so crazy> [/] so crazy , everybody [/] everybody seem [/] seem so famous [/] famous I am a big scary dinosaur I am a big &-um &-um &-um &-um scary dinosaur I am a big scary dinosaur .'
 DISF = 'this &-um is all so crazy so crazy so so crazy so crazy , everybody everybody seem seem so famous famous I am a big scary dinosaur I am a big &-um &-um &-um &-um scary dinosaur I am a big scary dinosaur .'
-RET = 'this um is all <so crazy> [/] so crazy <so so crazy> [/] so crazy , everybody [/] everybody seem [/] seem so famous [/] famous I am a big scary dinosaur I am a big <um um um> [/] um scary dinosaur I am a big scary dinosaur .'
+RET = 'this um is all <so crazy so crazy so so crazy> [/] so crazy , everybody [/] everybody seem [/] seem so famous [/] famous I am a big scary dinosaur I am a big <um um um> [/] um scary dinosaur I am a big scary dinosaur .'
+SRC = "this um is all so crazy so crazy so so crazy so crazy, everybody everybody seem seem so famous famous I am a big scary dinosaur I am a big um um um um scary dinosaur I am a big scary dinosaur."
+
+RET_WITH_DISFLUENCY = 'um this is this is a retrace'
 
 @pytest.fixture(scope="module")
 def doc():
-    return Document.new("this um is all so crazy so crazy so so crazy so crazy, everybody everybody seem seem so famous famous I am a big scary dinosaur I am a big um um um um scary dinosaur I am a big scary dinosaur.")
+    return Document.new(SRC)
 
 @pytest.fixture(scope="module")
 def nr():
@@ -50,4 +53,15 @@ def test_retrace_and_disf(doc, dr, nr):
 
     assert str(dp1) == BOTH
     assert str(dp2) == BOTH
+
+# regression #idk
+def test_retrace_with_disfluency(nr):
+    doc = Document.new(RET_WITH_DISFLUENCY)
+    doc[0][0].type == TokenType.FP
+    doc[0][1].type == TokenType.RETRACE
+    doc[0][2].type == TokenType.RETRACE
+
+    docp = nr(doc)
+    assert str(docp) == "um <this is> [/] this is a retrace"
+
 
