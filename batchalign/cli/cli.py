@@ -13,7 +13,6 @@ from glob import glob
 from multiprocessing import Process, freeze_support
 
 from batchalign.pipelines import BatchalignPipeline
-from batchalign.constants import VERSION_NUMBER, RELEASE_DATE, RELEASE_NOTES
 
 from rich.console import Console
 from rich.panel import Panel
@@ -35,6 +34,9 @@ import logging as L
 baL = L.getLogger('batchalign')
 
 C = Console()
+
+with open(Path(__file__).parent.parent / "version", 'r') as df:
+    VERSION_NUMBER, RELEASE_DATE, RELEASE_NOTES = df.readlines()[:3]
 
 #################### OPTIONS ################################
 
@@ -166,7 +168,7 @@ def version(ctx, **kwargs):
     """Print program version info and exit."""
 
     ptr = (pyfiglet.figlet_format("Batchalign2")+"\n" +
-           f"Version: [bold]{VERSION_NUMBER}[/bold], released {RELEASE_DATE}\n" +
-           f"[italic]{RELEASE_NOTES}[/italic]"+"\n" +
+           f"Version: [bold]{VERSION_NUMBER.strip()}[/bold], released {RELEASE_DATE.strip()}\n" +
+           f"[italic]{RELEASE_NOTES.strip()}[/italic]"+"\n" +
            "\nDeveloped by Brian MacWhinney and Houjun Liu")
     C.print("\n\n"+ptr+"\n\n")
