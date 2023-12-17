@@ -3,19 +3,22 @@ import json
 
 import logging as L 
 
-LOG_FORMAT = '[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s'
-L.basicConfig(format=LOG_FORMAT, level=L.ERROR)
-L.getLogger("stanza").setLevel(L.ERROR)
-L.getLogger('batchalign').setLevel(L.INFO)
+# LOG_FORMAT = '[%(asctime)s] [%(name)s] [%(levelname)s] %(message)s'
+# L.basicConfig(format=LOG_FORMAT, level=L.ERROR)
+# L.getLogger("stanza").setLevel(L.ERROR)
+# L.getLogger('batchalign').setLevel(L.WARN)
 
 ########
 
 from batchalign import *
 
+if __name__ == "__main__":
+    cli()
 # engine = RevEngine()
-pipe = BatchalignPipeline.new("morphosyntax")
+# pipe = BatchalignPipeline.new("fa,morphosyntax")
+# pipe.tasks
 
-pipe.tasks
+# pipe.tasks
 
 # with open("./batchalign/tests/support/test.json", 'r') as df:
 #     d = Document.model_validate(json.load(df))

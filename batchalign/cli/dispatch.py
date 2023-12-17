@@ -1,0 +1,107 @@
+"""
+dispatch.py
+CLI runner dispatch. Essentially the translation layer between `command` in CLI
+and actual BatchalignPipeline.
+"""
+
+from rich.progress import Progress, SpinnerColumn, TextColumn
+
+import os
+import glob
+
+from rich.console import Console
+from batchalign.pipelines import BatchalignPipeline
+from batchalign.document import *
+from batchalign.formats.chat import CHATFile
+from batchalign.utils import config
+
+# Oneliner of directory-based glob and replace
+globase = lambda path, statement: glob(os.path.join(path, statement))
+repath_file = lambda file_path, new_dir: os.path.join(new_dir, Path(file_path).name)
+
+import tempfile
+
+import traceback
+import logging as L 
+baL = L.getLogger('batchalign')
+
+# this dictionary maps what commands are executed
+# against what BatchalignPipeline tasks are actually ran 
+Cmd2Task = {
+    "align": "fa",
+}
+
+# this is the main runner used by all functions
+def _dispatch(command, files, ctx, in_dir, out_dir,
+              loader:callable, writer:callable, console,
+              **kwargs):
+
+    C = console
+
+    __tf = None
+    # output file
+    if ctx.obj["verbose"] > 1:
+        __tf = tempfile.NamedTemporaryFile(delete=True, mode='w')
+        C = Console(file=__tf)
+
+    C.print("\n")
+    C.print(f"Mode: [blue]{command}[/blue]; got [bold cyan]{len(files)}[/bold cyan] transcript{'s' if len(files) > 1 else ''} to process from '{in_dir}':\n")
+
+    # create the spinner
+    prog = Progress(SpinnerColumn(), *Progress.get_default_columns(),
+                    TextColumn("[cyan]{task.fields[processor]}[/cyan]"), console=C) 
+    # cache the errors
+    errors = []
+
+    with prog as prog:
+        tasks = {}
+        outputs = []
+        errors = []
+        # create the spinner bars
+        for f in files:
+            tasks[f] = prog.add_task(Path(f).name, start=False, processor="")
+            outputs.append(repath_file(f, out_dir))
+
+        # create pipeline and read files
+        baL.debug("Attempting to create BatchalignPipeline for CLI...")
+        pipeline = BatchalignPipeline.new(Cmd2Task[command])
+        baL.debug(f"Successfully created BatchalignPipeline... {pipeline}")
+
+        # create callback used to update spinner
+        def progress_callback(file, step, total, tools):
+            # total = 0 signals there is an error
+            if total == 0:
+                prog.update(tasks[file], total=0, start=True, processor=f"[bold red]FAIL[/bold red]")
+            elif total == step:
+                prog.update(tasks[file], total=total, completed=step, start=True, processor=f"[bold green]DONE[/bold green]")
+            else:
+                prog.update(tasks[file], total=total, completed=step, processor=tools[0] if tools else "")
+                # call the pipeline
+        for file, output in zip(files, outputs):
+            try:
+                # set the file as started
+                prog.start_task(tasks[file])
+                # parse the input format, as needed
+                doc = loader(os.path.abspath(file))
+                # RUN THE PUPPY!
+                doc = pipeline(doc, callback=lambda *args:progress_callback(file, *args))
+                # write the format, as needed
+                writer(doc, output)
+            except Exception as e:
+                progress_callback(file, 0, 0, e)
+                errors.append((file, traceback.format_exc(), e))
+
+    C.print("\n")
+    if len(errors) > 0:
+        for file, trcbk, e in errors:
+            C.print(f"[bold red]ERROR[/bold red] on file [italic]{Path(file).name}[/italic]: {e}")
+            if ctx.obj["verbose"] >= 1:
+                C.print(trcbk)
+                C.print("\n")
+    else:
+        C.print(f"All done. Results saved to '{out_dir}'!\n")
+    if ctx.obj["verbose"] > 1:
+        C.end_capture()
+
+    if __tf:
+        __tf.close()

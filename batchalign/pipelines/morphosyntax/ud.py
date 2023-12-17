@@ -25,6 +25,8 @@ from bdb import BdbQuit
 from nltk import word_tokenize
 from collections import defaultdict
 
+import warnings
+
 from stanza.utils.conll import CoNLL
 
 # Oneliner of directory-based glob and replace
@@ -34,6 +36,7 @@ repath_file = lambda file_path, new_dir: os.path.join(new_dir, pathlib.Path(file
 
 from batchalign.document import *
 from batchalign.pipelines.base import *
+from batchalign.formats.chat.parser import chat_parse_utterance
         
 from batchalign.utils.dp import *
 
@@ -608,14 +611,17 @@ def morphoanalyze(doc: Document):
     for indx, i in enumerate(doc.content):
         L.info(f"Stanza processing utterance {indx+1}/{len(doc.content)}")
         if not isinstance(i, Utterance):
-            pass
+            continue
 
         # generate simplified version of the line
         line = str(i)
 
         # every legal utterance will have an ending delimiter
         # so we split it out
-        ending = i.strip(join_with_spaces=True).split(" ")[-1]
+        try:
+            ending = i.strip(join_with_spaces=True).split(" ")[-1]
+        except AttributeError:
+            breakpoint()
 
         if re.findall("\w", ending):
             ending = "."
@@ -697,7 +703,7 @@ def morphoanalyze(doc: Document):
                 content.dependency = form.dependency
 
         except Exception as e:
-            print(f"\n\nUtterance failed parsing, skipping ud tagging... line='{line}', error='{e}'\n")
+            warnings.warn(f"\n\nUtterance failed parsing, skipping ud tagging... line='{line}', error='{e}'\n")
 
     L.debug("Stanza done.")
     return doc

@@ -29,7 +29,7 @@ LANGUAGE_OVERRIDE_PACKAGES = {
     }
 }
 
-def dispatch_pipeline(pkg_str, lang, n_speakers=None):
+def dispatch_pipeline(pkg_str, lang, n_speakers=None, **arg_overrides):
     """Dispatch pipeline with sane defaults.
 
     Parameters
@@ -79,6 +79,8 @@ def dispatch_pipeline(pkg_str, lang, n_speakers=None):
         engine = overrides.get(key, engine)
         # apply user preference
         engine = dict(config.get(key, {})).get("engine", engine)
+        # apply argument-level overrides
+        engine = arg_overrides.get(key, engine)
 
         L.info(f"| {key: <12} | {engine:>12} |")
         L.info(f"-------------------------------")

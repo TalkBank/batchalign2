@@ -2,6 +2,8 @@ import os
 from glob import glob
 from setuptools import setup, find_packages
 
+from batchalign.constants import VERSION_NUMBER
+
 # Utility function to read the README file.
 # Used for the long_description.  It's nice, because now 1) we have a top level
 # README file and 2) it's easier to type in the README file than to put a raw
@@ -13,7 +15,7 @@ setup(
     name = "batchalign",
     author = "Brian MacWhinney, Houjun Liu",
     author_email = "macw@cmu.edu, houjun@cmu.edu",
-    version = "0.4.0",
+    version = VERSION_NUMBER,
     description = ("Python Speech Language Sample Analysis"),
     packages=find_packages(),
     long_description=read('README.md'),
@@ -42,6 +44,8 @@ setup(
         "scipy~=1.11",
         "rev_ai>=2.18.0",
         "rich~=13.6"
+        "click~=8.1"
+        "pyfiglet==1.0.2"
     ],
     extras_require={
         'dev': [

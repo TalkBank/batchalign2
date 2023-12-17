@@ -33,7 +33,7 @@ class BatchalignPipeline:
         return self.__capabilities
 
     @staticmethod
-    def new(tasks:str, lang_code="eng", n_speakers=2):
+    def new(tasks:str, lang_code="eng", n_speakers=2, **arg_overrides):
         """Create the pipeline.
 
         Parameters
@@ -46,14 +46,18 @@ class BatchalignPipeline:
         n_speakers : int
             Number of speakers.
 
+        kwargs
+        ------
+        Special package-level overrides.
+
         Returns
         -------
         BatchalignPipeline
             The pipeline to run.
         """
         
-        from batchalign._dispatch import dispatch_pipeline
-        return dispatch_pipeline(tasks, lang_code, n_speakers)
+        from batchalign.pipelines.dispatch import dispatch_pipeline
+        return dispatch_pipeline(tasks, lang_code, n_speakers, **arg_overrides)
 
     def __call__(self, input, callback=None):
         """Call the pipeline.
@@ -74,7 +78,7 @@ class BatchalignPipeline:
         # process input; if its a string, process it as a media
         # only doc seeded from the string. If its not a document,
         # process it as a object to be seeded into a json.
-        L.info(f"Pipeline called with engines: generator={self.__generator}, processors={self.__processors}, analyzer={self.__analyzer}")
+        L.info(f"Pipeline called with engines: generator={self.__generator}, processors={self.__processors}, analyzer={self.__analyzer} on input of type {type(input)}")
 
         counter = 0 
         total_tasks = len(self.__processors) + 0 if self.__generator == None else 1 + 0 if self.__analyzer == None else 1
@@ -134,7 +138,10 @@ class BatchalignPipeline:
 
     @staticmethod
     def __check_engines(engines):
-        capabilities = [i.tasks for i in engines]
+        try:
+            capabilities = [i.tasks for i in engines]
+        except AttributeError as e:
+            raise AttributeError(f"{e}\nPass only initalized engines to BatchalignPipeline!\nHint: did you accidentally call BatchalignPipeline(\"engines,here\") when you meant BatchalignPipeline.new(\"engines,here\")?")
 
         # we want to ensure that every pipeline has one engine per task
         duplicates = [item for item, count in

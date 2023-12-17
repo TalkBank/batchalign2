@@ -69,19 +69,17 @@ def interactive_setup():
 
     with open(Path.home()/".batchalign.ini", 'w') as df:
         config.write(df)
+    return config
 
 def config_read(interactive=False):
     try:
         with open(Path.home()/".batchalign.ini", 'r') as df:
             config = configparser.ConfigParser()
             config.read_file(df)
+            return config
     except FileNotFoundError:
         if interactive:
-            interactive_setup()
+            return interactive_setup()
         else:
             raise ConfigNotFoundError("Batchalign cannot find a configuration file. Run `python -m batchalign` to generate one, or write one yourself and place it at `~/.batchalign.ini`.\nHint: did you try to use Rev.AI without supplying an API key?")
 
-    return config
-
-
-# interactive_setup()
