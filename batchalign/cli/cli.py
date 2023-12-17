@@ -95,7 +95,7 @@ def batchalign(ctx, verbose):
 @batchalign.command()
 @common_options
 @click.pass_context
-def align(ctx, in_dir, out_dir, **kwargs):
+def align(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     """Align transcripts against corresponding media files."""
     files = glob(str(Path(in_dir)/ "*.cha"))
 
@@ -105,9 +105,66 @@ def align(ctx, in_dir, out_dir, **kwargs):
     def writer(doc, output):
         CHATFile(doc=doc).write(output)
 
-    _dispatch("align", files, ctx,
+    _dispatch("align", lang, num_speakers,
+              files, ctx,
               in_dir, out_dir,
               loader, writer, C, **kwargs)
+
+#################### TRANSCRIBE ################################
+
+@batchalign.command()
+@common_options
+@click.option("--whisper/--rev",
+              default=False, help="Use OpenAI Whisper (ASR) instead of Rev.AI (default).")
+@click.pass_context
+def transcribe(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
+    """Create a transcript from audio files."""
+    files = (glob(str(Path(in_dir)/ "*.wav")) +
+             glob(str(Path(in_dir)/ "*.mp3")) +
+             glob(str(Path(in_dir)/ "*.mp4")))
+
+
+    def loader(file):
+        return file
+
+    def writer(doc, output):
+        CHATFile(doc=doc).write(output
+                                .replace(".wav", ".cha")
+                                .replace(".mp4", ".cha")
+                                .replace(".mp3", ".cha"))
+
+    _dispatch("transcribe", lang, num_speakers, files, ctx,
+              in_dir, out_dir,
+              loader, writer, C,
+              asr="whisper" if whisper else "rev")
+
+#################### TRANSCRIBE ################################
+
+@batchalign.command()
+@common_options
+@click.option("--whisper/--rev",
+              default=False, help="Use OpenAI Whisper (ASR) instead of Rev.AI (default).")
+@click.pass_context
+def transcribe(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
+    """Create a transcript from audio files."""
+    files = (glob(str(Path(in_dir)/ "*.wav")) +
+             glob(str(Path(in_dir)/ "*.mp3")) +
+             glob(str(Path(in_dir)/ "*.mp4")))
+
+
+    def loader(file):
+        return file
+
+    def writer(doc, output):
+        CHATFile(doc=doc).write(output
+                                .replace(".wav", ".cha")
+                                .replace(".mp4", ".cha")
+                                .replace(".mp3", ".cha"))
+
+    _dispatch("transcribe", lang, num_speakers, files, ctx,
+              in_dir, out_dir,
+              loader, writer, C,
+              asr="whisper" if whisper else "rev")
 
 #################### VERSION ################################
 

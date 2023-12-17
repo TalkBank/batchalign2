@@ -33,7 +33,7 @@ class BatchalignPipeline:
         return self.__capabilities
 
     @staticmethod
-    def new(tasks:str, lang_code="eng", n_speakers=2, **arg_overrides):
+    def new(tasks:str, lang_code="eng", num_speakers=2, **arg_overrides):
         """Create the pipeline.
 
         Parameters
@@ -43,7 +43,7 @@ class BatchalignPipeline:
             comma-seperated list such as `asr,fa,morphosyntax`.
         lang_code : str
             ISO 3 letter language code.
-        n_speakers : int
+        num_speakers : int
             Number of speakers.
 
         kwargs
@@ -57,7 +57,7 @@ class BatchalignPipeline:
         """
         
         from batchalign.pipelines.dispatch import dispatch_pipeline
-        return dispatch_pipeline(tasks, lang_code, n_speakers, **arg_overrides)
+        return dispatch_pipeline(tasks, lang=lang_code, n_speakers=num_speakers, **arg_overrides)
 
     def __call__(self, input, callback=None):
         """Call the pipeline.
@@ -80,12 +80,11 @@ class BatchalignPipeline:
         # process it as a object to be seeded into a json.
         L.info(f"Pipeline called with engines: generator={self.__generator}, processors={self.__processors}, analyzer={self.__analyzer} on input of type {type(input)}")
 
-        counter = 0 
-        total_tasks = len(self.__processors) + 0 if self.__generator == None else 1 + 0 if self.__analyzer == None else 1
+        total_tasks = len(self.__processors) + (0 if self.__generator == None else 1) + (0 if self.__analyzer == None else 1)
 
         # call callback, if needed
         if callback:
-            callback(counter,total_tasks, None)
+            callback(0,total_tasks, None)
 
         L.debug(f"Transforming input of type: {type(input)}")
         doc = input
@@ -107,31 +106,38 @@ class BatchalignPipeline:
         # path processing in sequence
         if self.__generator:
             L.debug(f"Calling generator: {self.__generator}")
-            doc = self.__generator.generate(doc.media.url)
-            counter += 1
             if callback:
-                callback(counter,total_tasks, self.__generator.tasks)
+                callback(0,total_tasks, self.__generator.tasks)
+            doc = self.__generator.generate(doc.media.url)
+            if callback:
+                callback(1,total_tasks, self.__generator.tasks)
 
         # duplicate the doc
         doc = doc.model_copy(deep=True)
 
         # perform processing
+        base = 1 if self.__generator != None else 0
         for indx, p in enumerate(self.__processors):
             L.debug(f"Calling processor: processor {indx+1}/{len(self.__processors)}, {p}")
+            if callback:
+                callback(base+indx,total_tasks, p.tasks)
+
             doc = p.process(doc)
 
-            counter += 1
             if callback:
-                callback(counter, total_tasks, p.tasks)
+                callback(base+indx+1, total_tasks, p.tasks)
 
 
         # if needed, perform analysis
+        base = (1 if self.__generator != None else 0) + len(self.__processors)
         if self.__analyzer:
             L.debug(f"Calling analyzer: {self.__analyzer}")
-            doc = self.__analyzer.analyze(doc)
-            counter += 1
             if callback:
-                callback(counter, total_tasks, self.__analyzer.tasks)
+                callback(base, total_tasks, self.__analyzer.tasks)
+
+            doc = self.__analyzer.analyze(doc)
+            if callback:
+                callback(base+1, total_tasks, self.__analyzer.tasks)
             return doc
         else:
             return doc
