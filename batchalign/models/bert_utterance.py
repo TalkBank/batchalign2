@@ -24,7 +24,7 @@ from tqdm import tqdm
 DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
 # seed model
-class BertModel(object):
+class BertUtteranceModel(object):
 
     def __init__(self, model):
         # seed tokenizers and model

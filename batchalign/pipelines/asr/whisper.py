@@ -1,7 +1,7 @@
 from batchalign.document import *
 from batchalign.pipelines.base import *
 from batchalign.pipelines.asr.utils import *
-from batchalign.models.asr import WhisperModel, WhisperProcessor, WhisperTokenizer
+from batchalign.models import WhisperASRModel
 
 import pycountry
 
@@ -17,7 +17,7 @@ class WhisperEngine(BatchalignEngine):
 
         language = pycountry.languages.get(alpha_3=lang_code).name
             
-        self.__whisper = WhisperModel(model, language=language)
+        self.__whisper = WhisperASRModel(model, language=language)
         self.__lang = lang_code
 
     def generate(self, source_path):

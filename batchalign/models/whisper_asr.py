@@ -72,7 +72,7 @@ class ASRAudioFile:
         return self.tensor
 
 # inference engine
-class WhisperModel(object):
+class WhisperASRModel(object):
     """An ASR Engine
 
     Parameters

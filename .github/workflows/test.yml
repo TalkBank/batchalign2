@@ -1,0 +1,26 @@
+name: Run Tests
+
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["pypy3.9", "pypy3.10", "3.9", "3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Display Python version
+        run: python -c "import sys; print(sys.version)"
+      - name: Install setup dependencies
+        run: python -m pip install --upgrade pip setuptools wheel
+      - name: Install Batchalign
+        run: python -m pip install -e . [dev]
+      - name: Run tests
+        run: python -m pytest batchalign
+
+      

@@ -7,7 +7,7 @@ from scipy.ndimage import median_filter
 from transformers.models.whisper.modeling_whisper import _dynamic_time_warping as dtw
 from transformers.models.whisper.modeling_whisper import _median_filter as median_filter
 
-from batchalign.models.asr.whisper import ASRAudioFile
+from batchalign.models import ASRAudioFile
 
 import numpy as np
 

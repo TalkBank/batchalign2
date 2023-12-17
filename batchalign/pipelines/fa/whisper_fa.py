@@ -1,4 +1,4 @@
-from batchalign.models.fa import WhisperFAModel
+from batchalign.models import WhisperFAModel
 from batchalign.document import *
 from batchalign.pipelines.base import *
 from batchalign.utils import *
