@@ -138,33 +138,25 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
               loader, writer, C,
               asr="whisper" if whisper else "rev")
 
-#################### TRANSCRIBE ################################
+#################### MORPHOTAG ################################
 
 @batchalign.command()
 @common_options
-@click.option("--whisper/--rev",
-              default=False, help="Use OpenAI Whisper (ASR) instead of Rev.AI (default).")
 @click.pass_context
-def transcribe(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
-    """Create a transcript from audio files."""
-    files = (glob(str(Path(in_dir)/ "*.wav")) +
-             glob(str(Path(in_dir)/ "*.mp3")) +
-             glob(str(Path(in_dir)/ "*.mp4")))
+def morphotag(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
+    """Perform morphosyntactic analysis on transcripts."""
 
-
+    files = glob(str(Path(in_dir)/ "*.cha"))
+    
     def loader(file):
-        return file
+        return CHATFile(path=os.path.abspath(file)).doc
 
     def writer(doc, output):
-        CHATFile(doc=doc).write(output
-                                .replace(".wav", ".cha")
-                                .replace(".mp4", ".cha")
-                                .replace(".mp3", ".cha"))
+        CHATFile(doc=doc).write(output)
 
-    _dispatch("transcribe", lang, num_speakers, files, ctx,
+    _dispatch("morphotag", lang, num_speakers, files, ctx,
               in_dir, out_dir,
-              loader, writer, C,
-              asr="whisper" if whisper else "rev")
+              loader, writer, C)
 
 #################### VERSION ################################
 

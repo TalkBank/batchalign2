@@ -60,7 +60,7 @@ TaskFriendlyName = {
     Task.UTTERANCE_SEGMENTATION: "Utterance Segmentation",
     Task.UTTERANCE_TIMING_RECOVERY: "Utterance Timing Recovery",
     Task.FORCED_ALIGNMENT: "Forced Alignment",
-    Task.MORPHOSYNTAX: "Morphosyntax",
+    Task.MORPHOSYNTAX: "Morpho-Syntax",
     Task.FEATURE_EXTRACT: "Feature Extraction",
     Task.RETRACE_ANALYSIS:  "Retrace Analysis",
     Task.DISFLUENCY_ANALYSIS:  "Disfluncy Analysis",
