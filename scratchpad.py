@@ -21,11 +21,27 @@ from batchalign import *
 # pipe.tasks
 
 # with open("./batchalign/tests/support/test.json", 'r') as df:
-#     d = Document.model_validate(json.load(df))
+#     doc = Document.model_validate(json.load(df))
 
 
+# c = CHATFile(path="../talkbank-alignment/testing_playground_2/output/test.cha")
+# tmp = c.doc.model_dump()
+# print(str(c))
+# str(c.doc)
+# with open("test.json",'w') as df:
+#     df.write(json.dumps(c.doc.model_dump(), indent=4))
 
-# d
+# tg = TextGridFile("word", doc=)
+# tg.write("word.TextGrid")
+# c.doc
+
+# tg 
+# tg.doc
+
+# d.transcript(False, True)
+
+# doc[10].strip(False, True, True)
+# doc[10].tier
 
 # d = CHATFile(path="../talkbank-alignment/testing_playground_2/output/test.cha").doc
 # nr = NgramRetraceEngine()

@@ -1,0 +1,1124 @@
+{
+    "content": [
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant"
+            },
+            "content": [
+                {
+                    "text": "hello",
+                    "time": [
+                        0,
+                        420
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                }
+            ],
+            "text": "hello . \u00150_420\u0015",
+            "time": [
+                0,
+                420
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR1",
+                "name": "Participant"
+            },
+            "content": [
+                {
+                    "text": "this",
+                    "time": [
+                        880,
+                        1280
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "is",
+                    "time": [
+                        1280,
+                        1420
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "a",
+                    "time": [
+                        1420,
+                        1520
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "test",
+                    "time": [
+                        1520,
+                        1740
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "of",
+                    "time": [
+                        1740,
+                        1880
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "batchline",
+                    "time": [
+                        1880,
+                        2320
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                }
+            ],
+            "text": "this is a test of batchline . \u0015880_2320\u0015",
+            "time": [
+                880,
+                2320
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant"
+            },
+            "content": [
+                {
+                    "text": "I'm",
+                    "time": [
+                        2500,
+                        2740
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "going",
+                    "time": [
+                        2740,
+                        2880
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "to",
+                    "time": [
+                        2880,
+                        3020
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "read",
+                    "time": [
+                        3020,
+                        3180
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "some",
+                    "time": [
+                        3180,
+                        3360
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "random",
+                    "time": [
+                        3360,
+                        3700
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "crap",
+                    "time": [
+                        3700,
+                        4100
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "as",
+                    "time": [
+                        4100,
+                        4420
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "I",
+                    "time": [
+                        4420,
+                        4540
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "see",
+                    "time": [
+                        4540,
+                        4720
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "on",
+                    "time": [
+                        4720,
+                        4860
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "the",
+                    "time": [
+                        4860,
+                        4960
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "screen",
+                    "time": [
+                        4960,
+                        5260
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "just",
+                    "time": [
+                        5260,
+                        5600
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "to",
+                    "time": [
+                        5600,
+                        5740
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "test",
+                    "time": [
+                        5740,
+                        5940
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "batchline",
+                    "time": [
+                        5940,
+                        6480
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                }
+            ],
+            "text": "I'm going to read some random crap as I see on the screen just to test batchline . \u00152500_6480\u0015",
+            "time": [
+                2500,
+                6480
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant"
+            },
+            "content": [
+                {
+                    "text": "the",
+                    "time": [
+                        6960,
+                        7300
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "primary",
+                    "time": [
+                        7300,
+                        7640
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "area",
+                    "time": [
+                        7640,
+                        8020
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "for",
+                    "time": [
+                        8020,
+                        8320
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "recording",
+                    "time": [
+                        8320,
+                        8760
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": ",",
+                    "time": [
+                        8760,
+                        8900
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 5
+                },
+                {
+                    "text": "editing",
+                    "time": [
+                        8900,
+                        9120
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "and",
+                    "time": [
+                        9120,
+                        9320
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "arranging",
+                    "time": [
+                        9320,
+                        9700
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "audio",
+                    "time": [
+                        9700,
+                        10040
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                }
+            ],
+            "text": "the primary area for recording , editing and arranging audio . \u00156960_10040\u0015",
+            "time": [
+                6960,
+                10040
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR1",
+                "name": "Participant"
+            },
+            "content": [
+                {
+                    "text": "MIDI",
+                    "time": [
+                        10200,
+                        10340
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "and",
+                    "time": [
+                        10340,
+                        10540
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "drummer",
+                    "time": [
+                        10540,
+                        10780
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "regions",
+                    "time": [
+                        10780,
+                        11160
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "divided",
+                    "time": [
+                        11160,
+                        11700
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "into",
+                    "time": [
+                        11700,
+                        11960
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "different",
+                    "time": [
+                        11960,
+                        12240
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "track",
+                    "time": [
+                        12240,
+                        12520
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "types",
+                    "time": [
+                        12520,
+                        12820
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                }
+            ],
+            "text": "MIDI and drummer regions divided into different track types . \u001510200_12820\u0015",
+            "time": [
+                10200,
+                12820
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant"
+            },
+            "content": [
+                {
+                    "text": "press",
+                    "time": [
+                        13220,
+                        13520
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "command",
+                    "time": [
+                        13520,
+                        13760
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "slash",
+                    "time": [
+                        13760,
+                        14100
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "for",
+                    "time": [
+                        14100,
+                        14300
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "more",
+                    "time": [
+                        14300,
+                        14520
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "info",
+                    "time": [
+                        14520,
+                        14820
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                }
+            ],
+            "text": "press command slash for more info . \u001513220_14820\u0015",
+            "time": [
+                13220,
+                14820
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant"
+            },
+            "content": [
+                {
+                    "text": "test",
+                    "time": [
+                        15380,
+                        15620
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 1
+                },
+                {
+                    "text": "test",
+                    "time": [
+                        15620,
+                        15940
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                }
+            ],
+            "text": "test [/] test . \u001515380_15940\u0015",
+            "time": [
+                15380,
+                15940
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant"
+            },
+            "content": [
+                {
+                    "text": "I",
+                    "time": [
+                        16400,
+                        16800
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "don't",
+                    "time": [
+                        16800,
+                        16900
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "know",
+                    "time": [
+                        16900,
+                        17000
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "what",
+                    "time": [
+                        17000,
+                        17140
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "to",
+                    "time": [
+                        17140,
+                        17240
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "say",
+                    "time": [
+                        17240,
+                        17460
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "but",
+                    "time": [
+                        17460,
+                        17700
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "um",
+                    "time": [
+                        17700,
+                        18000
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 3
+                },
+                {
+                    "text": "here's",
+                    "time": [
+                        18000,
+                        18620
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "some",
+                    "time": [
+                        18620,
+                        18740
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "retracing",
+                    "time": [
+                        18740,
+                        19180
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                }
+            ],
+            "text": "I don't know what to say but &-um here's some retracing . \u001516400_19180\u0015",
+            "time": [
+                16400,
+                19180
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR1",
+                "name": "Participant"
+            },
+            "content": [
+                {
+                    "text": "so",
+                    "time": [
+                        19420,
+                        19540
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "just",
+                    "time": [
+                        19540,
+                        19760
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "for",
+                    "time": [
+                        19760,
+                        19900
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "fun",
+                    "time": [
+                        19900,
+                        20160
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                }
+            ],
+            "text": "so just for fun . \u001519420_20160\u0015",
+            "time": [
+                19420,
+                20160
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR1",
+                "name": "Participant"
+            },
+            "content": [
+                {
+                    "text": "um",
+                    "time": [
+                        20800,
+                        21140
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 3
+                },
+                {
+                    "text": "I",
+                    "time": [
+                        21140,
+                        21480
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 1
+                },
+                {
+                    "text": "like",
+                    "time": [
+                        21480,
+                        21720
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 1
+                },
+                {
+                    "text": "I",
+                    "time": [
+                        21720,
+                        22300
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 1
+                },
+                {
+                    "text": "like",
+                    "time": [
+                        22300,
+                        22600
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 1
+                },
+                {
+                    "text": "I",
+                    "time": [
+                        22600,
+                        22760
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "like",
+                    "time": [
+                        22760,
+                        23120
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "beans",
+                    "time": [
+                        23120,
+                        24140
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                }
+            ],
+            "text": "&-um <I like I like> [/] I like beans . \u001520800_24140\u0015",
+            "time": [
+                20800,
+                24140
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant"
+            },
+            "content": [
+                {
+                    "text": "beans",
+                    "time": [
+                        24380,
+                        24600
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "are",
+                    "time": [
+                        24600,
+                        24800
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "fun",
+                    "time": [
+                        24800,
+                        25080
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                }
+            ],
+            "text": "beans are fun . \u001524380_25080\u0015",
+            "time": [
+                24380,
+                25080
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant"
+            },
+            "content": [
+                {
+                    "text": "thank",
+                    "time": [
+                        25280,
+                        25440
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "you",
+                    "time": [
+                        25440,
+                        25520
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "very",
+                    "time": [
+                        25520,
+                        25660
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": "much",
+                    "time": [
+                        25660,
+                        25940
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 0
+                }
+            ],
+            "text": "thank you very much . \u001525280_25940\u0015",
+            "time": [
+                25280,
+                25940
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        }
+    ],
+    "media": {
+        "type": "audio",
+        "name": "test",
+        "url": "../talkbank-alignment/testing_playground_2/output/test.wav"
+    },
+    "langs": [
+        "eng"
+    ],
+    "tiers": [
+        {
+            "lang": "eng",
+            "corpus": "corpus_name",
+            "id": "PAR0",
+            "name": "Participant"
+        },
+        {
+            "lang": "eng",
+            "corpus": "corpus_name",
+            "id": "PAR1",
+            "name": "Participant"
+        }
+    ]
+}

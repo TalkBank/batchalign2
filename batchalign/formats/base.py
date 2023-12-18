@@ -9,3 +9,7 @@ class BaseFormat:
     @abstractmethod
     def write(self, path):
         pass
+
+    @abstractmethod
+    def __str__(self):
+        pass

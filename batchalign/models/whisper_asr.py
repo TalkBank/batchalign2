@@ -1,6 +1,5 @@
 from torchaudio import transforms as T
 from torchaudio import load
-from pyAudioAnalysis.audioSegmentation import speaker_diarization
 import numpy as np 
 
 from transformers import pipeline

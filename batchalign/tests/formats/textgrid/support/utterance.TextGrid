@@ -1,0 +1,116 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 25.94 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "PAR0" 
+        xmin = 0 
+        xmax = 25.94 
+        intervals: size = 15 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.42 
+            text = "hello." 
+        intervals [2]:
+            xmin = 0.42 
+            xmax = 2.5 
+            text = "" 
+        intervals [3]:
+            xmin = 2.5 
+            xmax = 6.48 
+            text = "I'm going to read some random crap as I see on the screen just to test batchline." 
+        intervals [4]:
+            xmin = 6.48 
+            xmax = 6.96 
+            text = "" 
+        intervals [5]:
+            xmin = 6.96 
+            xmax = 10.04 
+            text = "the primary area for recording, editing and arranging audio." 
+        intervals [6]:
+            xmin = 10.04 
+            xmax = 13.22 
+            text = "" 
+        intervals [7]:
+            xmin = 13.22 
+            xmax = 14.82 
+            text = "press command slash for more info." 
+        intervals [8]:
+            xmin = 14.82 
+            xmax = 15.38 
+            text = "" 
+        intervals [9]:
+            xmin = 15.38 
+            xmax = 15.94 
+            text = "test test." 
+        intervals [10]:
+            xmin = 15.94 
+            xmax = 16.4 
+            text = "" 
+        intervals [11]:
+            xmin = 16.4 
+            xmax = 19.18 
+            text = "I don't know what to say but um here's some retracing." 
+        intervals [12]:
+            xmin = 19.18 
+            xmax = 24.38 
+            text = "" 
+        intervals [13]:
+            xmin = 24.38 
+            xmax = 25.08 
+            text = "beans are fun." 
+        intervals [14]:
+            xmin = 25.08 
+            xmax = 25.28 
+            text = "" 
+        intervals [15]:
+            xmin = 25.28 
+            xmax = 25.94 
+            text = "thank you very much." 
+    item [2]:
+        class = "IntervalTier" 
+        name = "PAR1" 
+        xmin = 0.88 
+        xmax = 24.14 
+        intervals: size = 9 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.88 
+            text = "" 
+        intervals [2]:
+            xmin = 0.88 
+            xmax = 2.32 
+            text = "this is a test of batchline." 
+        intervals [3]:
+            xmin = 2.32 
+            xmax = 10.2 
+            text = "" 
+        intervals [4]:
+            xmin = 10.2 
+            xmax = 12.82 
+            text = "MIDI and drummer regions divided into different track types." 
+        intervals [5]:
+            xmin = 12.82 
+            xmax = 19.42 
+            text = "" 
+        intervals [6]:
+            xmin = 19.42 
+            xmax = 20.16 
+            text = "so just for fun." 
+        intervals [7]:
+            xmin = 20.16 
+            xmax = 20.8 
+            text = "" 
+        intervals [8]:
+            xmin = 20.8 
+            xmax = 24.14 
+            text = "um I like I like I like beans." 
+        intervals [9]:
+            xmin = 24.14 
+            xmax = 25.94 
+            text = "" 

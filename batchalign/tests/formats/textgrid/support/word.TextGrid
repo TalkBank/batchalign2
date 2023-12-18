@@ -1,0 +1,392 @@
+File type = "ooTextFile"
+Object class = "TextGrid"
+
+xmin = 0 
+xmax = 25.94 
+tiers? <exists> 
+size = 2 
+item []: 
+    item [1]:
+        class = "IntervalTier" 
+        name = "PAR0" 
+        xmin = 0 
+        xmax = 25.94 
+        intervals: size = 61 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.42 
+            text = "hello" 
+        intervals [2]:
+            xmin = 0.42 
+            xmax = 2.5 
+            text = "" 
+        intervals [3]:
+            xmin = 2.5 
+            xmax = 2.74 
+            text = "I'm" 
+        intervals [4]:
+            xmin = 2.74 
+            xmax = 2.88 
+            text = "going" 
+        intervals [5]:
+            xmin = 2.88 
+            xmax = 3.02 
+            text = "to" 
+        intervals [6]:
+            xmin = 3.02 
+            xmax = 3.18 
+            text = "read" 
+        intervals [7]:
+            xmin = 3.18 
+            xmax = 3.36 
+            text = "some" 
+        intervals [8]:
+            xmin = 3.36 
+            xmax = 3.7 
+            text = "random" 
+        intervals [9]:
+            xmin = 3.7 
+            xmax = 4.1 
+            text = "crap" 
+        intervals [10]:
+            xmin = 4.1 
+            xmax = 4.42 
+            text = "as" 
+        intervals [11]:
+            xmin = 4.42 
+            xmax = 4.54 
+            text = "I" 
+        intervals [12]:
+            xmin = 4.54 
+            xmax = 4.72 
+            text = "see" 
+        intervals [13]:
+            xmin = 4.72 
+            xmax = 4.86 
+            text = "on" 
+        intervals [14]:
+            xmin = 4.86 
+            xmax = 4.96 
+            text = "the" 
+        intervals [15]:
+            xmin = 4.96 
+            xmax = 5.26 
+            text = "screen" 
+        intervals [16]:
+            xmin = 5.26 
+            xmax = 5.6 
+            text = "just" 
+        intervals [17]:
+            xmin = 5.6 
+            xmax = 5.74 
+            text = "to" 
+        intervals [18]:
+            xmin = 5.74 
+            xmax = 5.94 
+            text = "test" 
+        intervals [19]:
+            xmin = 5.94 
+            xmax = 6.48 
+            text = "batchline" 
+        intervals [20]:
+            xmin = 6.48 
+            xmax = 6.96 
+            text = "" 
+        intervals [21]:
+            xmin = 6.96 
+            xmax = 7.3 
+            text = "the" 
+        intervals [22]:
+            xmin = 7.3 
+            xmax = 7.64 
+            text = "primary" 
+        intervals [23]:
+            xmin = 7.64 
+            xmax = 8.02 
+            text = "area" 
+        intervals [24]:
+            xmin = 8.02 
+            xmax = 8.32 
+            text = "for" 
+        intervals [25]:
+            xmin = 8.32 
+            xmax = 8.76 
+            text = "recording" 
+        intervals [26]:
+            xmin = 8.76 
+            xmax = 8.9 
+            text = "" 
+        intervals [27]:
+            xmin = 8.9 
+            xmax = 9.12 
+            text = "editing" 
+        intervals [28]:
+            xmin = 9.12 
+            xmax = 9.32 
+            text = "and" 
+        intervals [29]:
+            xmin = 9.32 
+            xmax = 9.7 
+            text = "arranging" 
+        intervals [30]:
+            xmin = 9.7 
+            xmax = 10.04 
+            text = "audio" 
+        intervals [31]:
+            xmin = 10.04 
+            xmax = 13.22 
+            text = "" 
+        intervals [32]:
+            xmin = 13.22 
+            xmax = 13.52 
+            text = "press" 
+        intervals [33]:
+            xmin = 13.52 
+            xmax = 13.76 
+            text = "command" 
+        intervals [34]:
+            xmin = 13.76 
+            xmax = 14.1 
+            text = "slash" 
+        intervals [35]:
+            xmin = 14.1 
+            xmax = 14.3 
+            text = "for" 
+        intervals [36]:
+            xmin = 14.3 
+            xmax = 14.52 
+            text = "more" 
+        intervals [37]:
+            xmin = 14.52 
+            xmax = 14.82 
+            text = "info" 
+        intervals [38]:
+            xmin = 14.82 
+            xmax = 15.38 
+            text = "" 
+        intervals [39]:
+            xmin = 15.38 
+            xmax = 15.62 
+            text = "test" 
+        intervals [40]:
+            xmin = 15.62 
+            xmax = 15.94 
+            text = "test" 
+        intervals [41]:
+            xmin = 15.94 
+            xmax = 16.4 
+            text = "" 
+        intervals [42]:
+            xmin = 16.4 
+            xmax = 16.8 
+            text = "I" 
+        intervals [43]:
+            xmin = 16.8 
+            xmax = 16.9 
+            text = "don't" 
+        intervals [44]:
+            xmin = 16.9 
+            xmax = 17 
+            text = "know" 
+        intervals [45]:
+            xmin = 17 
+            xmax = 17.14 
+            text = "what" 
+        intervals [46]:
+            xmin = 17.14 
+            xmax = 17.24 
+            text = "to" 
+        intervals [47]:
+            xmin = 17.24 
+            xmax = 17.46 
+            text = "say" 
+        intervals [48]:
+            xmin = 17.46 
+            xmax = 17.7 
+            text = "but" 
+        intervals [49]:
+            xmin = 17.7 
+            xmax = 18 
+            text = "um" 
+        intervals [50]:
+            xmin = 18 
+            xmax = 18.62 
+            text = "here's" 
+        intervals [51]:
+            xmin = 18.62 
+            xmax = 18.74 
+            text = "some" 
+        intervals [52]:
+            xmin = 18.74 
+            xmax = 19.18 
+            text = "retracing" 
+        intervals [53]:
+            xmin = 19.18 
+            xmax = 24.38 
+            text = "" 
+        intervals [54]:
+            xmin = 24.38 
+            xmax = 24.6 
+            text = "beans" 
+        intervals [55]:
+            xmin = 24.6 
+            xmax = 24.8 
+            text = "are" 
+        intervals [56]:
+            xmin = 24.8 
+            xmax = 25.08 
+            text = "fun" 
+        intervals [57]:
+            xmin = 25.08 
+            xmax = 25.28 
+            text = "" 
+        intervals [58]:
+            xmin = 25.28 
+            xmax = 25.44 
+            text = "thank" 
+        intervals [59]:
+            xmin = 25.44 
+            xmax = 25.52 
+            text = "you" 
+        intervals [60]:
+            xmin = 25.52 
+            xmax = 25.66 
+            text = "very" 
+        intervals [61]:
+            xmin = 25.66 
+            xmax = 25.94 
+            text = "much" 
+    item [2]:
+        class = "IntervalTier" 
+        name = "PAR1" 
+        xmin = 0.88 
+        xmax = 24.14 
+        intervals: size = 32 
+        intervals [1]:
+            xmin = 0 
+            xmax = 0.88 
+            text = "" 
+        intervals [2]:
+            xmin = 0.88 
+            xmax = 1.28 
+            text = "this" 
+        intervals [3]:
+            xmin = 1.28 
+            xmax = 1.42 
+            text = "is" 
+        intervals [4]:
+            xmin = 1.42 
+            xmax = 1.52 
+            text = "a" 
+        intervals [5]:
+            xmin = 1.52 
+            xmax = 1.74 
+            text = "test" 
+        intervals [6]:
+            xmin = 1.74 
+            xmax = 1.88 
+            text = "of" 
+        intervals [7]:
+            xmin = 1.88 
+            xmax = 2.32 
+            text = "batchline" 
+        intervals [8]:
+            xmin = 2.32 
+            xmax = 10.2 
+            text = "" 
+        intervals [9]:
+            xmin = 10.2 
+            xmax = 10.34 
+            text = "MIDI" 
+        intervals [10]:
+            xmin = 10.34 
+            xmax = 10.54 
+            text = "and" 
+        intervals [11]:
+            xmin = 10.54 
+            xmax = 10.78 
+            text = "drummer" 
+        intervals [12]:
+            xmin = 10.78 
+            xmax = 11.16 
+            text = "regions" 
+        intervals [13]:
+            xmin = 11.16 
+            xmax = 11.7 
+            text = "divided" 
+        intervals [14]:
+            xmin = 11.7 
+            xmax = 11.96 
+            text = "into" 
+        intervals [15]:
+            xmin = 11.96 
+            xmax = 12.24 
+            text = "different" 
+        intervals [16]:
+            xmin = 12.24 
+            xmax = 12.52 
+            text = "track" 
+        intervals [17]:
+            xmin = 12.52 
+            xmax = 12.82 
+            text = "types" 
+        intervals [18]:
+            xmin = 12.82 
+            xmax = 19.42 
+            text = "" 
+        intervals [19]:
+            xmin = 19.42 
+            xmax = 19.54 
+            text = "so" 
+        intervals [20]:
+            xmin = 19.54 
+            xmax = 19.76 
+            text = "just" 
+        intervals [21]:
+            xmin = 19.76 
+            xmax = 19.9 
+            text = "for" 
+        intervals [22]:
+            xmin = 19.9 
+            xmax = 20.16 
+            text = "fun" 
+        intervals [23]:
+            xmin = 20.16 
+            xmax = 20.8 
+            text = "" 
+        intervals [24]:
+            xmin = 20.8 
+            xmax = 21.14 
+            text = "um" 
+        intervals [25]:
+            xmin = 21.14 
+            xmax = 21.48 
+            text = "I" 
+        intervals [26]:
+            xmin = 21.48 
+            xmax = 21.72 
+            text = "like" 
+        intervals [27]:
+            xmin = 21.72 
+            xmax = 22.3 
+            text = "I" 
+        intervals [28]:
+            xmin = 22.3 
+            xmax = 22.6 
+            text = "like" 
+        intervals [29]:
+            xmin = 22.6 
+            xmax = 22.76 
+            text = "I" 
+        intervals [30]:
+            xmin = 22.76 
+            xmax = 23.12 
+            text = "like" 
+        intervals [31]:
+            xmin = 23.12 
+            xmax = 24.14 
+            text = "beans" 
+        intervals [32]:
+            xmin = 24.14 
+            xmax = 25.94 
+            text = "" 

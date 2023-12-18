@@ -111,10 +111,16 @@ class Tier(BaseModel):
     id: str = Field(default="PAR") # PAR0
     name: str = Field(default="Participant") # Participant
 
+def get_token_type(str):
+    if str in ENDING_PUNCT or str in MOR_PUNCT:
+        return TokenType.PUNCT
+    else:
+        return TokenType.REGULAR
+
 def tokenize_sentence(input):
     if isinstance(input, str):
         words = word_tokenize(input)
-        words = [Form(text=i) for i in words]
+        words = [Form(text=i, type=get_token_type(i)) for i in words]
         return words
     return input
 Sentence = Annotated[List[Form], BeforeValidator(tokenize_sentence)]
@@ -323,7 +329,7 @@ class Document(BaseModel):
         for line in self.content:
             if isinstance(line, Utterance) and strip:
                 results.append((line.tier.id+": " if include_tiers
-                                else "")+line._detokenize())
+                                else "")+line.strip())
             elif isinstance(line, Utterance):
                 results.append((line.tier.id+": " if include_tiers
                                 else "")+str(line))
