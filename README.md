@@ -110,11 +110,6 @@ morphosyntax = ba.StanzaEngine()
 
 # create a pipeline
 nlp = ba.BatchalignPipeline(whisper, retrace, disfluency, morphosyntax)
-tasks = nlp.tasks # tasks = [<Task.ASR: 3>, 
-                             <Task.UTTERANCE_SEGMENTATION: 4>, 
-                             <Task.DISFLUENCY_ANALYSIS: 6>, 
-                             <Task.RETRACE_ANALYSIS: 7>, 
-                             <Task.MORPHOSYNTAX: 11>]
                              
 # and run it!                             
 doc = nlp("audio.mp3") 
