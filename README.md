@@ -39,6 +39,61 @@ There are two main ways of interacting with Batchalign. Batchalign can be used a
 - to get started on the Batchalign CHAT program, [tap here](#-quick-start-python)
 - to get started on the Batchalign Python library, [tap here](#-quick-start-command-line)
 
+## 💻 Quick Start: Command Line
+
+### Basic Usage 
+
+Once installed, you can invoke the Batchalign CLI program via the `batchalign` command.
+
+It is used in the following basic way:
+
+```
+batchalign [verb] [input_dir] [output_dir]
+```
+
+Where `verb` includes:
+
+1. `transcribe` - placing only an audio of video file (`.mp3/.mp4/.wav`) in the input directory, perform ASR on the audio, diarizes utterances, identifies some basic conversational features like retracing and filled pauses, and generate word-level alignments
+2. `align` - placing both an audio of video file (`.mp3/.mp4/.wav`) and an *utterance-aligned* CHAT file in the input directory, generate word-level alignments
+3. `morphotag` - placing a CHAT file in the input directory, uses Stanford NLP Stanza to generate morphological and dependency analyses; note that the flag `--lang=[two letter ISO language code]`, like `--lang=en` is needed to tell Stanza what language we are working with
+<!-- 4. `bulletize` - placing both an audio of video file (`.mp3/.mp4/.wav`) and an *unlinked* CHAT file in the input directory, generate utterance-level alignments through ASR -->
+
+Follow instructions from
+
+```
+batchalign --help
+```
+
+and 
+
+```
+batchalign [verb] --help
+```
+
+to learn more about other options.
+
+### Verbosity
+
+Placing one or multiple `-v` *behind the word `batchalign`* (i.e. behind the `[verb]` will not work) increases the verbosity of Batchalign. The default mode and one `-v` will use the normal Batchalign interface, whereas Batchalign with more than 1 `-v` will switch to the text-based "logging" interface.
+
+For instance, here is the instruction for running Batchalign to perform forced-alignment:
+
+```
+batchalign align input output
+```
+
+With one `-v`, you can get stack trace information about any files that crashes: 
+
+```
+batchalign -v align input output
+```
+
+and with two `-vv`, we will ditch the loading bar user interface and instead switch to a logging-based interface that has more information about what Batchalign is doing under the hood:
+
+```
+batchalign -vv align input output
+```
+
 ## 🐍 Quick Start: Python
 
 Let's begin!
@@ -158,70 +213,6 @@ tg_word = ba.TextGridFile("word", doc=doc2)
 tg_utterance.write("tg_ut.TextGrid")
 tg_word.write("tg_w.TextGrid")
 ```
-
-## 💻 Quick Start: Command Line
-
-### Basic Usage 
-
-Once installed, you can invoke the Batchalign CLI program via the `batchalign` command.
-
-It is used in the following basic way:
-
-```
-batchalign [verb] [input_dir] [output_dir]
-```
-
-Where `verb` includes:
-
-1. `transcribe` - placing only an audio of video file (`.mp3/.mp4/.wav`) in the input directory, perform ASR on the audio, diarizes utterances, identifies some basic conversational features like retracing and filled pauses, and generate word-level alignments
-2. `align` - placing both an audio of video file (`.mp3/.mp4/.wav`) and an *utterance-aligned* CHAT file in the input directory, generate word-level alignments
-3. `morphotag` - placing a CHAT file in the input directory, uses Stanford NLP Stanza to generate morphological and dependency analyses; note that the flag `--lang=[two letter ISO language code]`, like `--lang=en` is needed to tell Stanza what language we are working with
-<!-- 4. `bulletize` - placing both an audio of video file (`.mp3/.mp4/.wav`) and an *unlinked* CHAT file in the input directory, generate utterance-level alignments through ASR -->
-
-Follow instructions from
-
-```
-batchalign --help
-```
-
-and 
-
-```
-batchalign [verb] --help
-```
-
-to learn more about other options.
-
-### Verbosity
-
-Placing one or multiple `-v` *behind the word `batchalign`* (i.e. behind the `[verb]` will not work) increases the verbosity of Batchalign. The default mode and one `-v` will use the normal Batchalign interface, whereas Batchalign with more than 1 `-v` will switch to the text-based "logging" interface.
-
-For instance, here is Batchalign running normally with a single crashing file:
-
-```
-batchalign align input output
-```
-
-<img width="649" alt="image" src="https://github.com/TalkBank/batchalign2/assets/28765741/d1c31f98-19fb-4fba-bdeb-ca9cd242b7b6">
-
-With one `-v`: 
-
-```
-batchalign -v align input output
-```
-
-<img width="645" alt="image" src="https://github.com/TalkBank/batchalign2/assets/28765741/a516347e-5acc-4857-b0a0-9583906d2f55">
-
-and with two `-vv`:
-
-```
-batchalign -vv align input output
-```
-
-<img width="641" alt="image" src="https://github.com/TalkBank/batchalign2/assets/28765741/9c4ffbf2-6dab-4574-a69d-ffce6e1761a8">
-
-Once we get to 2 `-v`s, Batchalign switches to logging based interface that will give more detail under the hood.
-
 ## 🙌 Questions?
 If you have any questions or concerns, please reach out! If something isn't working right, [open an issue on GitHub](https://github.com/TalkBank/batchalign2/issues); if you need support, please feel free to email `houjun@cmu.edu` and `macw@cmu.edu`.
 
