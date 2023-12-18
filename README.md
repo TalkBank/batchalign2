@@ -53,9 +53,9 @@ batchalign [verb] [input_dir] [output_dir]
 
 Where `verb` includes:
 
-1. `transcribe` - placing only an audio of video file (`.mp3/.mp4/.wav`) in the input directory, perform ASR on the audio, diarizes utterances, identifies some basic conversational features like retracing and filled pauses, and generate word-level alignments
+1. `transcribe` - placing only an audio of video file (`.mp3/.mp4/.wav`) in the input directory, perform ASR on the audio, diarizes utterances, identifies some basic conversational features like retracing and filled pauses, and generate word-level alignments. You must supply a language code flag: `--lang=[three letter ISO language code]` for the ASR system to know what language the transcript is in. You can choose the flags `--rev` to use Rev.AI, a commercial ASR service, or `--whisper`, to use a local copy of OpenAI Whisper.
 2. `align` - placing both an audio of video file (`.mp3/.mp4/.wav`) and an *utterance-aligned* CHAT file in the input directory, generate word-level alignments
-3. `morphotag` - placing a CHAT file in the input directory, uses Stanford NLP Stanza to generate morphological and dependency analyses; note that the flag `--lang=[two letter ISO language code]`, like `--lang=en` is needed to tell Stanza what language we are working with
+3. `morphotag` - placing a CHAT file in the input directory, uses Stanford NLP Stanza to generate morphological and dependency analyses
 <!-- 4. `bulletize` - placing both an audio of video file (`.mp3/.mp4/.wav`) and an *unlinked* CHAT file in the input directory, generate utterance-level alignments through ASR -->
 
 Follow instructions from
