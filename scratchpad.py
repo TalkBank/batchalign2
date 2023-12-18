@@ -12,6 +12,32 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 from batchalign import *
 
+# doc = ba.Document.new("Hello, this is a transcript! I have two utterances.", )
+# doc.transcript(include_tiers=False, strip=True)
+
+# ba.TokenType.PUNCT
+# # ba.Document.new(media_path="test")
+
+# whisper = ba.WhisperEngine()
+# whisper = ba.StanzaEngine()
+# # nlp = ba.BatchalignPipeline.new("asr,morphosyntax", lang_code="eng", num_speakers=
+
+# # ASR
+# whisper = ba.WhisperEngine(lang_code="eng")
+# # retracing and disfluency analysis
+# retrace = ba.NgramRetraceEngine()
+# disfluency = ba.DisfluencyReplacementEngine()
+# # morphosyntax
+# morphosyntax = ba.StanzaEngine()
+
+# # create a pipeline
+# nlp = ba.BatchalignPipeline(whisper, retrace, disfluency, morphosyntax)
+# nlp.tasks
+
+
+
+
+
 # if __name__ == "__main__":
 #     cli()
 # engine = RevEngine()
