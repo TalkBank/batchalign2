@@ -6,6 +6,8 @@ and actual BatchalignPipeline.
 
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, BarColumn
 
+import warnings
+
 import os
 import glob
 
@@ -88,8 +90,13 @@ def _dispatch(command, lang, num_speakers,
                 # parse the input format, as needed
                 doc = loader(os.path.abspath(file))
                 # RUN THE PUPPY!
-                doc = pipeline(doc,
-                               callback=lambda *args:progress_callback(file, *args))
+                with warnings.catch_warnings(record=True) as w:
+                    doc = pipeline(doc,
+                                callback=lambda *args:progress_callback(file, *args))
+                msgs = [str(i.message).strip() for i in w]
+                # print any warnings
+                if len(msgs) > 0:
+                    prog.console.print(f"[bold yellow]WARN[/bold yellow] on {file}:\n","\n".join(msgs)+"\n")
                 # write the format, as needed
                 writer(doc, output)
                 prog.update(tasks[file], processor=f"[bold green]DONE[/bold green]")

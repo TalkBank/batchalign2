@@ -80,7 +80,8 @@ class BatchalignPipeline:
         # process it as a object to be seeded into a json.
         L.info(f"Pipeline called with engines: generator={self.__generator}, processors={self.__processors}, analyzer={self.__analyzer} on input of type {type(input)}")
 
-        total_tasks = len(self.__processors) + (0 if self.__generator == None else 1) + (0 if self.__analyzer == None else 1)
+        tt = len(self.__processors) + (0 if self.__generator == None else 1) + (0 if self.__analyzer == None else 1)
+        total_tasks = tt
 
         # call callback, if needed
         if callback:
@@ -122,7 +123,9 @@ class BatchalignPipeline:
             if callback:
                 callback(base+indx,total_tasks, p.tasks)
 
+            p._hook_status(lambda x,y:callback(base+indx+x,total_tasks+y, p.tasks))
             doc = p.process(doc)
+            p._hook_status(None)
 
             if callback:
                 callback(base+indx+1, total_tasks, p.tasks)

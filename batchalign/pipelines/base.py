@@ -37,6 +37,13 @@ class BatchalignEngine(ABC):
         else:
             raise TypeError(f"Attempted to use the default task of an engine whose default task is uninterpretable! Engine='{self}', Default Task='{self.tasks[0]}'")
 
+    def _hook_status(self, status_hook):
+        # get current status of the engine; i.e. "processed n out of n"
+        # any engines that support status hooking will call status_hook
+        # to update status
+        return
+        
+
 
 
 

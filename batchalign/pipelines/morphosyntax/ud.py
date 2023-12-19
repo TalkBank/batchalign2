@@ -586,7 +586,7 @@ def tokenizer_processor(tokenized, lang, sent):
     return res
 
 ######
-def morphoanalyze(doc: Document):
+def morphoanalyze(doc: Document, status_hook:callable = None):
     L.debug("Starting Stanza...")
     inputs = []
 
@@ -687,6 +687,8 @@ def morphoanalyze(doc: Document):
         if len(sents) == 0:
             continue
 
+        if status_hook:
+            status_hook(indx+1, len(doc.content))
 
         try:
             # parse the stanza output
@@ -712,6 +714,10 @@ def morphoanalyze(doc: Document):
 
 class StanzaEngine(BatchalignEngine):
     tasks = [ Task.MORPHOSYNTAX ]
+    status_hook = None
+
+    def _hook_status(self, status_hook):
+        self.status_hook = status_hook
 
     def process(self, doc):
-        return morphoanalyze(doc)
+        return morphoanalyze(doc, self.status_hook)
