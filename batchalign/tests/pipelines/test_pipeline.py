@@ -51,3 +51,7 @@ def test_wrong_pipeline(generator, processor, analyzer):
 
     with pytest.raises(ValueError):
         pipeline = BatchalignPipeline(analyzer, generator, processor, processor)
+
+def test_pipeline_error_creation():
+    with pytest.raises(ValueError):
+        pipeline = BatchalignPipeline.new("chicken")

@@ -82,6 +82,9 @@ def dispatch_pipeline(pkg_str, lang, n_speakers=None, **arg_overrides):
         # apply argument-level overrides
         engine = arg_overrides.get(key, engine)
 
+        if engine == None:
+            raise ValueError(f"Unknown task short name; we can't get a package automatically for that. Provided task: '{key}'.")
+
         L.info(f"| {key: <12} | {engine:>12} |")
         L.info(f"-------------------------------")
 

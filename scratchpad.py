@@ -1,5 +1,9 @@
 from batchalign import *
 import json
+from glob import glob
+from pathlib import Path
+from rich.console import Console
+import os
 
 import logging as L 
 
@@ -12,173 +16,62 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 from batchalign import *
 
-# doc = ba.Document.new("Hello, this is a transcript! I have two utterances.", )
-# doc.transcript(include_tiers=False, strip=True)
+### The Batchalign Test Harness ###
+from batchalign.formats.chat.parser import chat_parse_utterance
 
-# ba.TokenType.PUNCT
-# # ba.Document.new(media_path="test")
+# text = "est ce que la +/."
 
-# whisper = ba.WhisperEngine()
-# whisper = ba.StanzaEngine()
-# # nlp = ba.BatchalignPipeline.new("asr,morphosyntax", lang_code="eng", num_speakers=
+# function = "morphosyntax"
+# lang = "fra"
+# num_speakers = 1
 
-# # ASR
-# whisper = ba.WhisperEngine(lang_code="eng")
-# # retracing and disfluency analysis
-# retrace = ba.NgramRetraceEngine()
-# disfluency = ba.DisfluencyReplacementEngine()
-# # morphosyntax
-# morphosyntax = ba.StanzaEngine()
+# forms, delim = chat_parse_utterance(text, None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim)
 
-# # create a pipeline
-# nlp = ba.BatchalignPipeline(whisper, retrace, disfluency, morphosyntax)
-# nlp.tasks
+# ut = Document(content=[utterance], langs=[lang])
+# pipeline = BatchalignPipeline.new(function, lang_code=lang, num_speakers=num_speakers)
 
+# doc = pipeline(ut)
 
+### The Batchalign CLI Harness ###
+# from batchalign.cli.dispatch import _dispatch
 
+# in_dir = "../talkbank-alignment/test_harness/input/"
+# out_dir = "../talkbank-alignment/test_harness/output/"
+# in_files = glob(str(Path(in_dir)/"*.cha"))
 
+# function = "morphotag"
+# lang = "fra"
+# num_speakers = 1
 
-# if __name__ == "__main__":
-#     cli()
-# engine = RevEngine()
-# pipe = BatchalignPipeline.new("fa,morphosyntax")
-# pipe.tasks
+# class Context:
+#     obj = {"verbose": 3}
 
-# pipe.tasks
+# def loader(file):
+#     try:
+#         return CHATFile(path=os.path.abspath(file)).doc
+#     except:
+#         breakpoint()
 
-# with open("./batchalign/tests/support/test.json", 'r') as df:
-#     doc = Document.model_validate(json.load(df))
+#     # return file
 
+# def writer(doc, output):
+#     CHATFile(doc=doc).write(output)
+#     # CHATFile(doc=doc).write(output
+#     #                         .replace(".wav", ".cha")
+#     #                         .replace(".mp4", ".cha")
+#     #                         .replace(".mp3", ".cha"))
 
-# c = CHATFile(path="../talkbank-alignment/testing_playground_2/output/test.cha")
-# tmp = c.doc.model_dump()
-# print(str(c))
-# str(c.doc)
-# with open("test.json",'w') as df:
-#     df.write(json.dumps(c.doc.model_dump(), indent=4))
+# _dispatch(function, lang, num_speakers, in_files, Context(),
+#             in_dir, out_dir,
+#             loader, writer, Console())
 
-# tg = TextGridFile("word", doc=)
-# tg.write("word.TextGrid")
-# c.doc
+### The Batchalign CHAT Test Tarness ####
+# from batchalign.formats.chat.parser import chat_parse_utterance
 
-# tg 
-# tg.doc
+# main = "xxx; crocodile , crocodile ."
+# mor = "noun|crocodile&Masc cm|cm noun|crocodile&Masc ."
+# gra = "1|3|ROOT 2|3|PUNCT 3|1|NMOD 4|1|PUNCT"
 
-# d.transcript(False, True)
+# chat_parse_utterance(main, mor, gra, None, None)
 
-# doc[10].strip(False, True, True)
-# doc[10].tier
-
-# d = CHATFile(path="../talkbank-alignment/testing_playground_2/output/test.cha").doc
-# nr = NgramRetraceEngine()
-# d = nr(d)
-# d[-3].content
-
-# # (d[12].time)[0]/1000
-
-# d = Document.new("this um is all so crazy so crazy so so crazy so crazy, everybody everybody seem seem so famous famous I am a big scary dinosaur I am a big um um um um scary dinosaur I am a big scary dinosaur.")
-# # d[0].text = str(d)
-
-# dis = DisfluencyReplacementEngine()
-# nr = NgramRetraceEngine()
-
-# dp = nr(d
-# dp
-
-# # forms = []
-# # for utterance in d.content:
-# #     for form in utterance.content:
-# #         forms.append(form.text)
-# # " ".join(forms)
-
-# # tmp = CHATFile(path="./extern/tmp.cha")
-# # tmp.doc.media
-
-# # d.media.url = "./extern/tmp.wav"
-# e = WhisperFAEngine()
-
-# processing = e(d)
-# # d[3]
-# # d[1][0]
-
-# CHATFile(doc=processing).write("tmp.cha")
-
-# d[1][0]
-
-# processing[2]
-
-# (path=)
-
-# doc = Document.new("howdy partner, what's your name? my name is joshua")
-
-
-# doc[0]
-# whisper = WhisperEngine()
-# tmp = whisper("./extern/tmp.wav")
-# doc.tiers
-# doc.tiers[0].corpus = "hey"
-# p = WhisperFAModel()
-# audio = p.load("./batchalign/tests/support/test.mp3")
-# transcript = "Hello . This is a test of Batchalign . I'm some body going to read wants told some random crap as I see on the screen . just to test batchline . the primary area for recording editing and me the world's gonna roll me arranging audio. MIDI and drummer regions divided into different track types . Press command slash for more info . test test . I don't know what to say . but um here's some retracing . so just in this for fun . um I like I like I like beans . beans are fun . thank you very much ."
-
-
-# fa = p(audio.all(), transcript)
-# fa
-
-
-# doc[1].tier
-# ud = UDEngine()
-
-# nlp = BatchalignPipeline(ud, whisper)
-
-# nlp.tasks
-
-
-
-# <I like beans> <I like beans> <I like> I like <beans><beans>.
-
-
-# res = nlp(doc)
-
-# nlp.tasks
-
-# tmp
-
-# - engine capabilities: 
-#  -- revise to a list of tasks each engine performs
-#  -- and the pipeline takes a series of engines, and orders them in the sensical order based on their tasks
-#  -- each engine can perform multiple tasks
-
-# doc[0][0]
-# from nltk.tokenize import word_tokenize
-# tmp = TweetTokenizer()
-# word_tokenize("¡por supuesto, maestro!")
-
-# disf = DisfluencyEngine()
-# # ore = OrthographyReplacementEngine()
-# doc = disf(tmp)
-# doc
-# # oc = disf(ore(doc))
-# from transformers import WhisperForConditionalGeneration
-# tmp = WhisperForConditionalGeneration.from_pretrained("talkbank/CHATWhisper-en-large-v1")
-
-
-# ud = UDEngine()
-# doc = ud(doc)
-# doc[0][0]
-# doc[0][0]
-# doc[0][0]
-
-
-
-# # CHATFile(path="./tmp.cha").doc
-
-# whisper = WhisperEngine(num_speakers=1)
-# doc = whisper.generate("./batchalign/tests/support/test.mp3")
-
-
-# doc = ud(doc)
-
-# doc[0][0].type
-
-# doc.model_dump()

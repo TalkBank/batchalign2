@@ -59,6 +59,31 @@ MISALIGNED_UTTERANCE_TOOMUCH_GRA = [
     []
 ]
 
+LINE_WITH_COLON = [
+    "@Begin",
+    "@Situation:\tlol:colon.",
+    "@End",
+]
+
+EDGE_CASES = [
+    # email dec192023 10:31AM: wack ending
+    [
+        "quand j'aurai quarante ans +...",
+        "sconj|quand pron|moi-Prs-Acc-S1~verb|avoir-Fin-Ind-1-Pres num|quarante noun|an&Masc-Plur +...", 
+        "1|3|MARK 2|3|NSUBJ 3|5|ROOT 4|5|NUMMOD 5|3|OBJ 6|3|PUNCT"
+    ], [
+    # email dec192023 10:31AM: xxx
+        "xxx; Grégoire .",
+        "noun|Grégoire&ComNeut .", 
+        "1|1|ROOT 2|1|PUNCT"
+    ], [
+    # email dec192023 10:31AM: wack group
+        "fouf@c [= moufle]; moufle .",
+        "x|fouf noun|moufle&Fem .", 
+        "1|2|FLAT 2|1|NMOD 3|1|PUNCT"
+    ]
+]
+
 # test various forms of normal parses
 def test_parse_utterance():
     res, delim = chat_parse_utterance(*STANDARD_UTTERANCE)
@@ -83,3 +108,11 @@ def test_parse_utterance_misaligned_chopped_gra():
 def test_parse_utterance_misaligned_toomuch_gra():
     with pytest.raises(CHATValidationException):
         res, delim = chat_parse_utterance(*MISALIGNED_UTTERANCE_TOOMUCH_GRA)
+
+# email dec192023 10:31AM
+def test_special_line_with_colon():
+    tmp = chat_parse_doc(LINE_WITH_COLON)
+
+def test_edge_cases():
+    for i,j,k in EDGE_CASES:
+        chat_parse_utterance(i, j, k, None, None)

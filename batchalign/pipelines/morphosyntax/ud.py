@@ -311,6 +311,8 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
             # if its a _l', we have one more thing to check
             if lang=="fr" and token.text.strip() == "_l'":
                 auxiliaries.append(token.id[0])
+        # elif lang=="fr" and (token.text.strip() == "c’" or token.text.strip() == "c'"):
+            # auxiliaries.append(token.id[-1])
         elif token.text.strip()[0] == "~":
             auxiliaries.append(token.id[0]-1)
         elif lang=="it" and token.text.strip()[-3:] == "ll'":
@@ -321,7 +323,6 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
             auxiliaries.append(token.id[-1])
         elif lang=="it" and (token.text.strip() == "c’" or token.text.strip() == "c'"):
             auxiliaries.append(token.id[-1])
-
         elif lang=="it" and token.text.strip() == "qual'":
             auxiliaries.append(token.id[-1])
         # elif lang=="fr" and token.text.strip() == "qu'":
@@ -686,12 +687,13 @@ def morphoanalyze(doc: Document):
         if len(sents) == 0:
             continue
 
+
         try:
             # parse the stanza output
-            mor, gra = parse_sentence(sents[0], ending, special_forms_cleaned, lang)
+            mor, gra = parse_sentence(sents[0], ending, special_forms_cleaned, lang[0])
 
             # insert morphology into the parsed forms
-            forms, delim = chat_parse_utterance(line, mor, gra, None, None)
+            forms, _ = chat_parse_utterance(line, mor, gra, None, None)
 
             if len(doc.content[indx].content) != len(forms):
                 warnings.warn(f"Generated UD output has length mismatch with the main tier! Line =  '{line}'. Skipping...")

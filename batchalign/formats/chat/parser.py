@@ -54,8 +54,9 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
     # stamp an eding punct if its not there
     delim = "."
     if words[-1][1][0] in ENDING_PUNCT:
-        lexed_words.append(words[-1])
-        parsed_forms[words[-1][0]] = Form(text=words[-1][1][0], regular=True)
+        if words[-1][1][1] == TokenType.REGULAR:
+            lexed_words.append(words[-1])
+        parsed_forms[words[-1][0]] = Form(text=words[-1][1][0], type=TokenType.PUNCT)
         delim = words[-1][1][0]
 
     # parse mor gra wor lines
@@ -76,7 +77,6 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
                 continue
             x, y = re.findall(r"\d+", i)
             wor.append([int(x),int(y)])
-
 
     # check lengths
     if len(lexed_words) != len(mor):
@@ -186,7 +186,7 @@ def chat_parse_doc(lines):
                                      url=None)
         # depenent tiers with @ are counted as "other" and are inserted as-is
         elif line.strip()[0] == "@":
-            beg,end = line.strip()[1:].split(":")
+            beg,end = line.strip()[1:].split(":\t")
             line = CustomLine(id=beg.strip(),
                                 type=CustomLineType.INDEPENDENT,
                                 content=end.strip())

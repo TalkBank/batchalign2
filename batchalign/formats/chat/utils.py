@@ -112,7 +112,7 @@ def annotation_clean(content):
     cleaned_word = cleaned_word.replace("š","").replace("ˈ","")
     cleaned_word = cleaned_word.replace("ˌ","").replace("‹","")
     cleaned_word = cleaned_word.replace("›","").replace("〔","")
-    cleaned_word = cleaned_word.replace("〕","").replace("//","")
+    cleaned_word = cleaned_word.replace("〕","").replace("//","").replace(";","")
     cleaned_word = re.sub(r"@.", '', cleaned_word)
     cleaned_word = re.sub(r"&.", '', cleaned_word)
 

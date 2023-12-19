@@ -51,13 +51,13 @@ def interactive_setup():
     if configure_rev:
         C.print(Markdown(REV))
 
-        rev_key = Prompt.ask("\nYour Rev.ai API key", console=C, password=True)
-        rev_key_confirm = Prompt.ask("Just in case, let's do that again. Your Rev.ai key please", console=C, password=True)
+        rev_key = Prompt.ask("\nYour Rev.ai API key", console=C)
+        rev_key_confirm = Prompt.ask("Just in case, let's do that again. Your Rev.ai key please", console=C)
 
         while rev_key != rev_key_confirm:
             C.print("\n[italic red]That did not match.[/italic red] Let's try again!\n")
-            rev_key = Prompt.ask("Your Rev.ai API key", console=C, password=True)
-            rev_key_confirm = Prompt.ask("Just in case, let's do that again. Your Rev.ai key please", console=C, password=True)
+            rev_key = Prompt.ask("Your Rev.ai API key", console=C)
+            rev_key_confirm = Prompt.ask("Just in case, let's do that again. Your Rev.ai key please", console=C)
 
         config["asr"]["engine"] = "rev"
         config["asr"]["engine.rev.key"] = rev_key.strip()

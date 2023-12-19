@@ -41,6 +41,8 @@ class UtteranceLexer:
             return False
         if form[:2] == "&-":
             self.__forms.append((annotation_clean(form), TokenType.FP))
+        elif form in ENDING_PUNCT:
+            self.__forms.append((form, TokenType.PUNCT))
         elif form[:1] == "&":
             self.__forms.append((form, TokenType.ANNOT))
         elif form[0] == "<":
@@ -54,6 +56,8 @@ class UtteranceLexer:
             self.__forms.append((form.strip(), TokenType.PUNCT))
         elif annotation_clean(form).strip() == "":
             self.__forms.append((form, TokenType.FEAT))
+        elif annotation_clean(form).strip() in CHAT_IGNORE:
+            self.__forms.append((annotation_clean(form).strip(), TokenType.ANNOT))
         else:
             self.__forms.append((annotation_clean(form).strip(), TokenType.REGULAR))
 
@@ -64,7 +68,7 @@ class UtteranceLexer:
 
         # pull the form
         try:
-            while form[-1] != ending:
+            while ending not in form:
                 form, num, delim = self.__get_until()
                 if form == None:
                     raise CHATValidationException(f"Lexer failed! Unexpected end to utterance within form group. On line: '{self.raw}', parsed group: {str(forms)}")
@@ -89,7 +93,7 @@ class UtteranceLexer:
 
         while True:
             res = self.__pull()
-            if res == False or res[-1] in ENDING_PUNCT:
+            if res == False or res in ENDING_PUNCT or res[-1] in ENDING_PUNCT:
                 break
 
 def lex(utterance):

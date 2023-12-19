@@ -222,8 +222,9 @@ class Utterance(BaseModel):
         # detokenize
         detokenized = detokenize(result)
         # check and seperate punct 
-        for i in ENDING_PUNCT + MOR_PUNCT:
-            detokenized = detokenized.replace(i, f" {i}")
+        last_tok = detokenized.split(" ")[-1]
+        if last_tok in ENDING_PUNCT + MOR_PUNCT:
+            detokenized = detokenized.replace(last_tok, f" {last_tok}")
         detokenized = detokenized.replace("  ", " ")
 
         ## TODO deal with angle brackets for retraces
@@ -321,6 +322,8 @@ class Document(BaseModel):
         doc = cls(content=text, media=media)
         if len(doc.tiers) > 0:
             doc.tiers[0].lang = lang
+
+        doc.langs = [lang]
 
         return doc
 
