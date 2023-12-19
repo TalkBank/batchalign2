@@ -220,9 +220,9 @@ class Utterance(BaseModel):
                 result.append(i.text)
 
         # detokenize
-        detokenized = detokenize(result)
+        detokenized = " ".join(result)
         # check and seperate punct 
-        last_tok = detokenized.split(" ")[-1]
+        last_tok = result[-1]
         if last_tok in ENDING_PUNCT + MOR_PUNCT:
             detokenized = detokenized.replace(last_tok, f" {last_tok}")
         detokenized = detokenized.replace("  ", " ")

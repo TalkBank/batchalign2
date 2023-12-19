@@ -33,6 +33,12 @@ from batchalign import *
 
 # doc = pipeline(ut, type=5
 
+from batchalign.formats.chat.lexer import lex
+BROKEN_GROUP_LEX_STR1 = "   Um <I like I like"
+
+lex(BROKEN_GROUP_LEX_STR1)
+
+
 ########### The Batchalign Parser Harness ###########
 # from batchalign.formats.chat import CHATFile
 

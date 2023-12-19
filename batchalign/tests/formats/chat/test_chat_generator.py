@@ -11,14 +11,14 @@ EVERYTHING_UTTERANCE = {'tier': {'lang': 'eng', 'corpus': 'corpus_name', 'id': '
 EVERYTHING_CORRECT = '*PAR0:\tUm <I like I like> [/] I like beans . \x1520780_24300\x15\n%mor:\tintj|um pron|I-Prs-Nom-S1 verb|like-Fin-Ind-1-Pres noun|bean&ComNeut-Plur .\n%gra:\t1|3|DISCOURSE 2|3|NSUBJ 3|4|ROOT 4|3|OBJ 5|3|PUNCT\n%wor:\tUm \x1520780_21330\x15 I \x1521360_21480\x15 like \x1521480_21720\x15 I \x1522180_22310\x15 like \x1522310_22710\x15 I \x1522710_22760\x15 like \x1522760_23270\x15 beans \x1523300_24300\x15 .'
 
 # utterance which doesn't have an string text field which therefore needs to be detokenized manually
-DETOK_UTTERANCE = {'tier': {'lang': 'eng', 'corpus': 'corpus_name', 'id': 'STU', 'name': 'Participant'}, 'content': [{'text': 'right', 'time': None, 'morphology': [{'lemma': 'right', 'pos': 'adv', 'feats': ''}], 'dependency': [{'id': 1, 'dep_id': 3, 'dep_type': 'JCT'}]}, {'text': ',', 'time': None, 'morphology': [{'lemma': 'cm', 'pos': 'cm', 'feats': ''}], 'dependency': [{'id': 2, 'dep_id': 1, 'dep_type': 'LP'}]}, {'text': 'right', 'time': None, 'morphology': [{'lemma': 'right', 'pos': 'co', 'feats': ''}], 'dependency': [{'id': 3, 'dep_id': 0, 'dep_type': 'INCROOT'}]}, {'text': '.', 'time': None, 'morphology': [{'lemma': '.', 'pos': 'PUNCT', 'feats': ''}], 'dependency': [{'id': 4, 'dep_id': 3, 'dep_type': 'PUNCT'}]}], 'text': None, 'delim': '.', 'time': (332418, 333654), 'custom_dependencies': [], 'alignment': (332418, 333654)}
+DETOK_UTTERANCE = {'tier': {'lang': 'eng', 'corpus': 'corpus_name', 'id': 'STU', 'name': 'Participant'}, 'content': [{'text': 'right', 'time': None, 'morphology': [{'lemma': 'right', 'pos': 'adv', 'feats': ''}], 'dependency': [{'id': 1, 'dep_id': 3, 'dep_type': 'JCT'}]}, {'text': ',', 'time': None, 'morphology': [{'lemma': 'cm', 'pos': 'cm', 'feats': ''}], 'dependency': [{'id': 2, 'dep_id': 1, 'dep_type': 'LP'}]}, {'text': 'right', 'time': None, 'morphology': [{'lemma': 'right', 'pos': 'co', 'feats': ''}], 'dependency': [{'id': 3, 'dep_id': 0, 'dep_type': 'INCROOT'}]}, {'type': 5, 'text': '.', 'time': None, 'morphology': [{'lemma': '.', 'pos': 'PUNCT', 'feats': ''}], 'dependency': [{'id': 4, 'dep_id': 3, 'dep_type': 'PUNCT'}]}], 'text': None, 'delim': '.', 'time': (332418, 333654), 'custom_dependencies': [], 'alignment': (332418, 333654)}
 DETOK_CORRECT = '*STU:\tright , right . \x15332418_333654\x15\n%mor:\tadv|right cm|cm co|right .\n%gra:\t1|3|JCT 2|1|LP 3|0|INCROOT 4|3|PUNCT'
 
 CORRECT_HEADER = '@Languages:\teng\n@Participants:\tPAR0 Participant, INV1 Participant, STU Participant\n@Options:\tmulti\n@ID:\teng|corpus_name|PAR0|||||Participant|||\n@ID:\teng|corpus_name|INV1|||||Participant|||\n@ID:\teng|corpus_name|STU|||||Participant|||\n@Media:\ttest, audio'
 
 def test_utterance_to_chat():
-    assert generate_chat_utterance(Utterance.model_validate(EVERYTHING_UTTERANCE)) == EVERYTHING_CORRECT
     assert generate_chat_utterance(Utterance.model_validate(DETOK_UTTERANCE)) == DETOK_CORRECT
+    assert generate_chat_utterance(Utterance.model_validate(EVERYTHING_UTTERANCE)) == EVERYTHING_CORRECT
 
 def test_preamble_generation():
     dir = pathlib.Path(__file__).parent.resolve()

@@ -153,20 +153,16 @@
                             "dep_type": "PUNCT"
                         }
                     ],
-                    "type": 0
+                    "type": 5
                 }
             ],
             "text": "Um <I like I like> [/] I like beans . \u001520780_24300\u0015",
-            "delim": ".",
             "time": [
                 20780,
                 24300
             ],
             "custom_dependencies": [],
-            "alignment": [
-                20780,
-                24300
-            ]
+            "delim": "."
         },
         {
             "tier": {
@@ -431,20 +427,16 @@
                             "dep_type": "PUNCT"
                         }
                     ],
-                    "type": 0
+                    "type": 5
                 }
             ],
             "text": "so \u2021 she doesn't have a list of questions to ask you . \u0015136820_139220\u0015",
-            "delim": ".",
             "time": [
                 136820,
                 139220
             ],
             "custom_dependencies": [],
-            "alignment": [
-                136820,
-                139220
-            ]
+            "delim": "."
         },
         {
             "tier": {
@@ -528,20 +520,16 @@
                             "dep_type": "PUNCT"
                         }
                     ],
-                    "type": 0
+                    "type": 5
                 }
             ],
             "text": "+< so I was +//. \u0015201235_201933\u0015",
-            "delim": "+//.",
             "time": [
                 201235,
                 201933
             ],
             "custom_dependencies": [],
-            "alignment": [
-                201235,
-                201933
-            ]
+            "delim": "+//."
         },
         {
             "tier": {
@@ -625,20 +613,16 @@
                             "dep_type": "PUNCT"
                         }
                     ],
-                    "type": 0
+                    "type": 5
                 }
             ],
             "text": "+< right , right . \u0015332418_333654\u0015",
-            "delim": ".",
             "time": [
                 332418,
                 333654
             ],
             "custom_dependencies": [],
-            "alignment": [
-                332418,
-                333654
-            ]
+            "delim": "."
         }
     ],
     "media": {

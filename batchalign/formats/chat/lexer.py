@@ -73,10 +73,10 @@ class UtteranceLexer:
         try:
             while ending not in form:
                 form, num, delim = self.__get_until()
+                if form == None or num == 0:
+                    raise CHATValidationException(f"Lexer failed! Unexpected end to utterance within form group. On line: '{self.raw}', parsed group: {str(forms)}")
                 if annotation_clean(form).strip() == "":
                     continue
-                if form == None:
-                    raise CHATValidationException(f"Lexer failed! Unexpected end to utterance within form group. On line: '{self.raw}', parsed group: {str(forms)}")
                 forms.append(annotation_clean(form))
         except IndexError:
             raise CHATValidationException(f"Lexer failed! Unexpected end to utterance within form group. On line: '{self.raw}', parsed group: {str(forms)}")

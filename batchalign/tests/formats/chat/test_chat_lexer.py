@@ -7,7 +7,7 @@ from batchalign.errors import *
 
 # checks for extra spaces, single and double repetation, and filed pauses
 STANDARD_LEX_STR = "   Um <I like I like> [/] I like &-um beans [//] beans         .   "
-STANDARD_LEX = [('Um', TokenType.REGULAR), ('I', TokenType.RETRACE), ('like', TokenType.RETRACE), ('I', TokenType.RETRACE), ('like', TokenType.RETRACE), ('[/]', TokenType.FEAT), ('I', TokenType.REGULAR), ('like', TokenType.REGULAR), ('um', TokenType.FP), ('beans', TokenType.RETRACE), ('[//]', TokenType.FEAT), ('beans', TokenType.REGULAR), ('.', TokenType.FEAT)]
+STANDARD_LEX = [('Um', TokenType.REGULAR), ('I', TokenType.RETRACE), ('like', TokenType.RETRACE), ('I', TokenType.RETRACE), ('like', TokenType.RETRACE), ('[/]', TokenType.FEAT), ('I', TokenType.REGULAR), ('like', TokenType.REGULAR), ('um', TokenType.FP), ('beans', TokenType.RETRACE), ('[//]', TokenType.FEAT), ('beans', TokenType.REGULAR), ('.', TokenType.PUNCT)]
 # checks for groups that don't end, with the wrong group spec, or with extra spaces
 BROKEN_GROUP_LEX_STR1 = "   Um <I like I like >"
 BROKEN_GROUP_LEX_STR2 = "   Um <I like I like"
