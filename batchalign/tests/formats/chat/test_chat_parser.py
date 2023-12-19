@@ -16,7 +16,7 @@ STANDARD_UTTERANCE = [
     "I'm \x152530_2720\x15 going \x152720_2910\x15 to read \x153000_3200\x15 .",
     []
 ]
-PARSED_STANDARD_UTTERANCE = [Form(text="I'm", time=(2530, 2720), morphology=[Morphology(lemma='I', pos='pron', feats='Prs-Nom-S1'), Morphology(lemma='be', pos='aux', feats='Fin-Ind-1-Pres')], dependency=[Dependency(id=1, dep_id=3, dep_type='NSUBJ'), Dependency(id=2, dep_id=3, dep_type='AUX')]), Form(text='going', time=(2720, 2910), morphology=[Morphology(lemma='go', pos='verb', feats='Part-Pres')], dependency=[Dependency(id=3, dep_id=18, dep_type='ROOT')]), Form(text='to', time=None, morphology=[Morphology(lemma='to', pos='part', feats='')], dependency=[Dependency(id=4, dep_id=5, dep_type='MARK')]), Form(text='read', time=(3000, 3200), morphology=[Morphology(lemma='read', pos='verb', feats='Inf')], dependency=[Dependency(id=5, dep_id=3, dep_type='XCOMP')]), Form(text='.', time=None, morphology=[Morphology(lemma='.', pos='PUNCT', feats='')], dependency=[Dependency(id=6, dep_id=3, dep_type='PUNCT')])]
+PARSED_STANDARD_UTTERANCE = [Form(text="I'm", time=(2530, 2720), morphology=[Morphology(lemma='I', pos='pron', feats='Prs-Nom-S1'), Morphology(lemma='be', pos='aux', feats='Fin-Ind-1-Pres')], dependency=[Dependency(id=1, dep_id=3, dep_type='NSUBJ'), Dependency(id=2, dep_id=3, dep_type='AUX')]), Form(text='going', time=(2720, 2910), morphology=[Morphology(lemma='go', pos='verb', feats='Part-Pres')], dependency=[Dependency(id=3, dep_id=18, dep_type='ROOT')]), Form(text='to', time=None, morphology=[Morphology(lemma='to', pos='part', feats='')], dependency=[Dependency(id=4, dep_id=5, dep_type='MARK')]), Form(text='read', time=(3000, 3200), morphology=[Morphology(lemma='read', pos='verb', feats='Inf')], dependency=[Dependency(id=5, dep_id=3, dep_type='XCOMP')]), Form(text='.', time=None, morphology=[Morphology(lemma='.', pos='PUNCT', feats='')], dependency=[Dependency(id=6, dep_id=3, dep_type='PUNCT')], type=5)]
 
 STANDARD_NOTIME_NOMOR = [
     "I'm going to read .",
@@ -25,7 +25,7 @@ STANDARD_NOTIME_NOMOR = [
     None,
     []
 ]
-PARSED_NOTIME_NOMOR = [Form(text="I'm", time=None, morphology=None, dependency=None), Form(text='going', time=None, morphology=None, dependency=None), Form(text='to', time=None, morphology=None, dependency=None), Form(text='read', time=None, morphology=None, dependency=None), Form(text='.', time=None, morphology=None, dependency=None)]
+PARSED_NOTIME_NOMOR = [Form(text="I'm", time=None, morphology=None, dependency=None), Form(text='going', time=None, morphology=None, dependency=None), Form(text='to', time=None, morphology=None, dependency=None), Form(text='read', time=None, morphology=None, dependency=None), Form(text='.', time=None, morphology=None, dependency=None, type=5)]
 
 STANDARD_NOGRA = [
     "I'm going to read . \x152530_6490\x15",
@@ -34,7 +34,7 @@ STANDARD_NOGRA = [
     None,
     []
 ]
-PARSED_NOGRA = [Form(text="I'm", time=None, morphology=[Morphology(lemma='I', pos='pron', feats='Prs-Nom-S1'), Morphology(lemma='be', pos='aux', feats='Fin-Ind-1-Pres')], dependency=None), Form(text='going', time=None, morphology=[Morphology(lemma='go', pos='verb', feats='Part-Pres')], dependency=None), Form(text='to', time=None, morphology=[Morphology(lemma='to', pos='part', feats='')], dependency=None), Form(text='read', time=None, morphology=[Morphology(lemma='read', pos='verb', feats='Inf')], dependency=None), Form(text='.', time=None, morphology=[Morphology(lemma='.', pos='PUNCT', feats='')], dependency=None)]
+PARSED_NOGRA = [Form(text="I'm", time=None, morphology=[Morphology(lemma='I', pos='pron', feats='Prs-Nom-S1'), Morphology(lemma='be', pos='aux', feats='Fin-Ind-1-Pres')], dependency=None), Form(text='going', time=None, morphology=[Morphology(lemma='go', pos='verb', feats='Part-Pres')], dependency=None), Form(text='to', time=None, morphology=[Morphology(lemma='to', pos='part', feats='')], dependency=None), Form(text='read', time=None, morphology=[Morphology(lemma='read', pos='verb', feats='Inf')], dependency=None), Form(text='.', time=None, morphology=[Morphology(lemma='.', pos='PUNCT', feats='')], dependency=None, type=5)]
 
 
 MISALIGNED_UTTERANCE_MOR = [
@@ -72,16 +72,29 @@ EDGE_CASES = [
         "sconj|quand pron|moi-Prs-Acc-S1~verb|avoir-Fin-Ind-1-Pres num|quarante noun|an&Masc-Plur +...", 
         "1|3|MARK 2|3|NSUBJ 3|5|ROOT 4|5|NUMMOD 5|3|OBJ 6|3|PUNCT"
     ], [
-    # email dec192023 10:31AM: xxx
+        # email dec192023 10:31AM: xxx
         "xxx; Grégoire .",
         "noun|Grégoire&ComNeut .", 
         "1|1|ROOT 2|1|PUNCT"
     ], [
-    # email dec192023 10:31AM: wack group
+        # email dec192023 10:31AM: wack group
         "fouf@c [= moufle]; moufle .",
         "x|fouf noun|moufle&Fem .", 
         "1|2|FLAT 2|1|NMOD 3|1|PUNCT"
+    ],
+    [
+        # email dec192023 10:31AM: group whose beginning ends with an ENDING_PUNCT
+        "je fais [=? j'ai fait] amadouadou@si dehors avec une (pe)tite fille de trois ans .",
+        "pron|moi-Prs-Acc-S1 verb|faire-Fin-Ind-1-Pres x|amadouadou adv|dehors adp|avec det|un-Ind-Art adj|petit-Pos-S-1 noun|fille&Fem adp|de num|trois noun|an&Masc-Plur .", 
+        "1|2|NSUBJ 2|11|ROOT 3|2|FLAT 4|2|ADVMOD 5|8|CASE 6|8|DET 7|8|AMOD 8|2|OBL-MOD 9|11|CASE 10|11|NUMMOD 11|8|NMOD 12|2|PUNCT"
+    ],
+    [
+        # email dec192023 10:31AM: group which has spaces near the group markers
+        "< (ç)a coule > [?] .",
+        "pron|ça-Dem-Acc-S3 verb|couler-Fin-Ind-3-Pres .", 
+        "1|2|NSUBJ 2|2|ROOT 3|2|PUNCT"
     ]
+    
 ]
 
 # test various forms of normal parses

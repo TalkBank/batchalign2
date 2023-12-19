@@ -81,7 +81,9 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
     # check lengths
     if len(lexed_words) != len(mor):
         raise CHATValidationException(f"Lengths of main and mor tiers are unaligned: lens main (filtered for morphology)={len(lexed_words)} mor={len(mor)}; line: '{text}'")
-    if len(phonated_words) != len(wor):
+    if (len(phonated_words) > 0 and
+        phonated_words[-1][1][1] == TokenType.PUNCT and # because we don't track last ending PUNCT
+        (len(phonated_words)-1 != len(wor))) and (len(phonated_words) != len(wor)):
         raise CHATValidationException(f"Lengths of main and wor tiers are unaligned: lens main (filtered for phonation)={len(phonated_words)} wor={len(wor)}; line: '{text}'")
 
     # insert morphology into the parsed forms

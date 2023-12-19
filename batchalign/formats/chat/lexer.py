@@ -64,12 +64,17 @@ class UtteranceLexer:
         return form
 
     def handle_group(self, form, ending=">"):
-        forms = [annotation_clean(form)]
+        initial_form = form
+        forms = []
+        if annotation_clean(form) != "": 
+            forms.append(annotation_clean(form))
 
         # pull the form
         try:
             while ending not in form:
                 form, num, delim = self.__get_until()
+                if annotation_clean(form).strip() == "":
+                    continue
                 if form == None:
                     raise CHATValidationException(f"Lexer failed! Unexpected end to utterance within form group. On line: '{self.raw}', parsed group: {str(forms)}")
                 forms.append(annotation_clean(form))
@@ -83,6 +88,10 @@ class UtteranceLexer:
                 for i in forms:
                     self.__forms.append((i, TokenType.RETRACE))
                 self.__forms.append((form.strip(), TokenType.FEAT))
+            elif form.strip() in NORMAL_GROUP_MARKS:
+                for i in forms:
+                    self.__forms.append((i, TokenType.REGULAR))
+                self.__forms.append((form.strip(), TokenType.FEAT))
             else:
                 raise CHATValidationException(f"Lexer failed! Unexpected group type mark. On line: '{self.raw}', parsed: {form.strip()}")
         elif ending == "]":
@@ -93,7 +102,8 @@ class UtteranceLexer:
 
         while True:
             res = self.__pull()
-            if res == False or res in ENDING_PUNCT or res[-1] in ENDING_PUNCT:
+            if res == False or res in ENDING_PUNCT or (res[-1] in ENDING_PUNCT
+                                                       and re.findall("\w", res)):
                 break
 
 def lex(utterance):
