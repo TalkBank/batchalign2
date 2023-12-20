@@ -16,6 +16,7 @@ from batchalign.pipelines import BatchalignPipeline
 from batchalign.document import *
 from batchalign.formats.chat import CHATFile
 from batchalign.utils import config
+from rich.markup import escape
 
 # Oneliner of directory-based glob and replace
 globase = lambda path, statement: glob(os.path.join(path, statement))
@@ -107,7 +108,7 @@ def _dispatch(command, lang, num_speakers,
     if len(errors) > 0:
         C.print()
         for file, trcbk, e in errors:
-            C.print(f"[bold red]ERROR[/bold red] on file [italic]{Path(file).name}[/italic]: {e}\n")
+            C.print(f"[bold red]ERROR[/bold red] on file [italic]{Path(file).name}[/italic]: {escape(str(e))}\n")
             if ctx.obj["verbose"] == 1:
                 C.print(trcbk)
             elif ctx.obj["verbose"] > 1:
