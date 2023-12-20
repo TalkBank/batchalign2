@@ -71,7 +71,7 @@ def _dispatch(command, lang, num_speakers,
         # create pipeline and read files
         baL.debug("Attempting to create BatchalignPipeline for CLI...")
         pipeline = BatchalignPipeline.new(Cmd2Task[command],
-                                          lang_code=lang, num_speakers=num_speakers, **kwargs)
+                                          lang=lang, num_speakers=num_speakers, **kwargs)
         baL.debug(f"Successfully created BatchalignPipeline... {pipeline}")
 
         # create callback used to update spinner
@@ -94,12 +94,12 @@ def _dispatch(command, lang, num_speakers,
                 with warnings.catch_warnings(record=True) as w:
                     doc = pipeline(doc,
                                 callback=lambda *args:progress_callback(file, *args))
-                msgs = [str(i.message).strip() for i in w]
-                # print any warnings
-                if len(msgs) > 0:
-                    prog.console.print(f"[bold yellow]WARN[/bold yellow] on {file}:\n","\n".join(msgs)+"\n")
+                msgs = [escape(str(i.message).strip()) for i in w]
                 # write the format, as needed
                 writer(doc, output)
+                # print any warnings
+                if len(msgs) > 0:
+                    Console().print(f"[bold yellow]WARN[/bold yellow] on {file}:\n","\n".join(msgs)+"\n")
                 prog.update(tasks[file], processor=f"[bold green]DONE[/bold green]")
             except Exception as e:
                 progress_callback(file, 0, 0, e)
@@ -110,9 +110,9 @@ def _dispatch(command, lang, num_speakers,
         for file, trcbk, e in errors:
             C.print(f"[bold red]ERROR[/bold red] on file [italic]{Path(file).name}[/italic]: {escape(str(e))}\n")
             if ctx.obj["verbose"] == 1:
-                C.print(trcbk)
+                C.print(escape(str(trcbk)))
             elif ctx.obj["verbose"] > 1:
-                Console().print(trcbk)
+                Console().print(escape(str(trcbk)))
     else:
         C.print(f"\nAll done. Results saved to {out_dir}!\n")
     if ctx.obj["verbose"] > 1:

@@ -29,7 +29,7 @@ LANGUAGE_OVERRIDE_PACKAGES = {
     }
 }
 
-def dispatch_pipeline(pkg_str, lang, n_speakers=None, **arg_overrides):
+def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
     """Dispatch pipeline with sane defaults.
 
     Parameters
@@ -38,7 +38,7 @@ def dispatch_pipeline(pkg_str, lang, n_speakers=None, **arg_overrides):
         The user requested pipeline string description.
     lang : str
         Lang code, 3 letters.
-    n_speakers : Optional[int]
+    num_speakers : Optional[int]
         Number of speakers
 
     Returns
@@ -91,9 +91,9 @@ def dispatch_pipeline(pkg_str, lang, n_speakers=None, **arg_overrides):
        
         # decode and initialize
         if engine == "whisper":
-            engines.append(WhisperEngine(lang_code=lang))
+            engines.append(WhisperEngine(lang=lang))
         elif engine == "rev":
-            engines.append(RevEngine(lang_code=lang, num_speakers=n_speakers))
+            engines.append(RevEngine(lang=lang, num_speakers=num_speakers))
         elif engine == "stanza":
             engines.append(StanzaEngine())
         elif engine == "replacement":

@@ -65,6 +65,15 @@ LINE_WITH_COLON = [
     "@End",
 ]
 
+LINE_WITH_BRAKET_GROUPS = "mais il [= the tap] <est> [% sch=va] trop fort ."
+PARSED_BRAKET_GROUPS = ([Form(text='mais'),
+                         Form(text='il'),
+                         Form(text='est'),
+                         Form(text='trop'),
+                         Form(text='fort'),
+                         Form(text='.', type=5)],
+                        '.')
+
 EDGE_CASES = [
     # email dec192023 10:31AM: wack ending
     [
@@ -94,7 +103,6 @@ EDGE_CASES = [
         "pron|ça-Dem-Acc-S3 verb|couler-Fin-Ind-3-Pres .", 
         "1|2|NSUBJ 2|2|ROOT 3|2|PUNCT"
     ]
-    
 ]
 
 # test various forms of normal parses
@@ -129,3 +137,8 @@ def test_special_line_with_colon():
 def test_edge_cases():
     for i,j,k in EDGE_CASES:
         chat_parse_utterance(i, j, k, None, None)
+
+# email dec202023 10:02AM
+def test_group_markers():
+    assert (chat_parse_utterance(LINE_WITH_BRAKET_GROUPS, None, None, None, None) ==
+            PARSED_BRAKET_GROUPS)

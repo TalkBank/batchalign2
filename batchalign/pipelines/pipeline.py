@@ -33,7 +33,7 @@ class BatchalignPipeline:
         return self.__capabilities
 
     @staticmethod
-    def new(tasks:str, lang_code="eng", num_speakers=2, **arg_overrides):
+    def new(tasks:str, lang="eng", num_speakers=2, **arg_overrides):
         """Create the pipeline.
 
         Parameters
@@ -41,7 +41,7 @@ class BatchalignPipeline:
         tasks : str
             The tasks you want the pipeline to do, in a
             comma-seperated list such as `asr,fa,morphosyntax`.
-        lang_code : str
+        lang : str
             ISO 3 letter language code.
         num_speakers : int
             Number of speakers.
@@ -57,7 +57,7 @@ class BatchalignPipeline:
         """
         
         from batchalign.pipelines.dispatch import dispatch_pipeline
-        return dispatch_pipeline(tasks, lang=lang_code, n_speakers=num_speakers, **arg_overrides)
+        return dispatch_pipeline(tasks, lang=lang, num_speakers=num_speakers, **arg_overrides)
 
     def __call__(self, input, callback=None):
         """Call the pipeline.

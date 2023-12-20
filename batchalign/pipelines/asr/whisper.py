@@ -8,17 +8,17 @@ import pycountry
 class WhisperEngine(BatchalignEngine):
     tasks = [ Task.ASR, Task.UTTERANCE_SEGMENTATION ]
 
-    def __init__(self, model=None, lang_code="eng"):
+    def __init__(self, model=None, lang="eng"):
 
-        if model == None and lang_code == "eng":
+        if model == None and lang == "eng":
             model = "talkbank/CHATWhisper-en-large-v1"
         elif model == None:
             model = "openai/whisper-large-v2"
 
-        language = pycountry.languages.get(alpha_3=lang_code).name
+        language = pycountry.languages.get(alpha_3=lang).name
             
         self.__whisper = WhisperASRModel(model, language=language)
-        self.__lang = lang_code
+        self.__lang = lang
 
     def generate(self, source_path):
         res = self.__whisper(self.__whisper.load(source_path).all())

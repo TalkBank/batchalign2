@@ -5,6 +5,8 @@ from batchalign.document import *
 from batchalign.formats.chat.utils import *
 from batchalign.constants import *
 
+import warnings
+
 
 class UtteranceLexer:
 
@@ -92,8 +94,12 @@ class UtteranceLexer:
                 for i in forms:
                     self.__forms.append((i, TokenType.REGULAR))
                 self.__forms.append((form.strip(), TokenType.FEAT))
+            elif len(form) > 0 and form.strip()[0] == "[":
+                for i in forms:
+                    self.__forms.append((i, TokenType.REGULAR))
+                self.handle_group(form, ending="]")
             else:
-                raise CHATValidationException(f"Lexer failed! Unexpected group type mark. On line: '{self.raw}', parsed: {form.strip()}")
+                raise CHATValidationException(f"Lexer falied! Unexpected group type mark. On line: '{self.raw}', parsed: {form.strip()}")
         elif ending == "]":
             for i in forms:
                 self.__forms.append((i, TokenType.CORRECTION))

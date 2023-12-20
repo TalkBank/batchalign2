@@ -89,13 +89,13 @@ class CHATFile(BaseFormat):
         Parameters
         ----------
         path : str
-            Path of where the CHAT file should get written.
+            Path of where the CHAT file should get str.
         """
         
         str_doc = self.__generate(self.__doc)
 
         with open(path, 'w') as df:
-            df.write(str_doc.strip())
+            df.write(str_doc)
 
     @staticmethod
     def __generate(doc:Document):

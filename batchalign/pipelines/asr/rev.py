@@ -26,7 +26,7 @@ POSTPROCESSOR_LANGS = {'en': "talkbank/CHATUtterance-en"}
 class RevEngine(BatchalignEngine):
     tasks = [ Task.ASR, Task.SPEAKER_RECOGNITION, Task.UTTERANCE_SEGMENTATION ]
 
-    def __init__(self, key:str=None, lang_code="eng", num_speakers=2):
+    def __init__(self, key:str=None, lang="eng", num_speakers=2):
 
         if key == None or key.strip() == "":
             config = config_read()
@@ -35,9 +35,9 @@ class RevEngine(BatchalignEngine):
             except KeyError:
                 raise ConfigError("No Rev.AI key found. Rev.AI was not set up! Please set up Rev.ai through the initial setup process by running 'batchalign setup' in the command line to generate one, or write one yourself and place it at `~/.batchalign.ini`.")
 
-        self.__lang_code = lang_code
+        self.__lang_code = lang
         self.__num_speakers = num_speakers
-        self.__lang = pycountry.languages.get(alpha_3=lang_code).alpha_2
+        self.__lang = pycountry.languages.get(alpha_3=lang).alpha_2
         self.__client = apiclient.RevAiAPIClient(key)
         if POSTPROCESSOR_LANGS.get(self.__lang) != None:
             L.debug("Initializing utterance model...")

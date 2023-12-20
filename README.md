@@ -134,7 +134,7 @@ doc = ba.Document.new(media_path="audio.mp3", lang="eng")
 Say you wanted to perform ASR, and then tag morphology of the resulting output.
 
 ```python
-nlp = ba.BatchalignPipeline.new("asr,morphosyntax", lang_code="eng", num_speakers=2)
+nlp = ba.BatchalignPipeline.new("asr,morphosyntax", lang="eng", num_speakers=2)
 doc = ba.Document.new(media_path="audio.mp3", lang="eng")
 doc = nlp(doc) # this is equivalent to nlp("audio.mp3"), we will make the initial doc for you
 
@@ -156,7 +156,7 @@ Batchalign ships with a plurality of engines which preform the actual processing
 
 ```python
 # ASR
-whisper = ba.WhisperEngine(lang_code="eng")
+whisper = ba.WhisperEngine(lang="eng")
 # retracing and disfluency analysis
 retrace = ba.NgramRetraceEngine()
 disfluency = ba.DisfluencyReplacementEngine()

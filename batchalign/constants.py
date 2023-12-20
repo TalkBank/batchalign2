@@ -4,7 +4,7 @@ MOR_PUNCT = ["‡", "„", ","]
 CHAT_IGNORE = ["xxx", "yyy", "www"]
 
 # chat marks
-REPEAT_GROUP_MARKS = ["[/]", "[//]", "[>]", "[<]"]
+REPEAT_GROUP_MARKS = ["[/]", "[//]", "[///]", "[////]", "[/////]", "[>]", "[<]"]
 NORMAL_GROUP_MARKS = ["[?]", "[!!]"]
 
 # ud specific things for CHAT generation
