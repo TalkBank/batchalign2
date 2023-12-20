@@ -26,5 +26,11 @@ def test_preamble_generation():
 
     assert generate_chat_preamble(c.doc) == CORRECT_HEADER
 
+def test_last_line(en_doc):
+    chat = CHATFile(doc=en_doc)
+    chatstr = str(chat)
+
+    assert chatstr[-5:] == "@End\n"
+
 
 

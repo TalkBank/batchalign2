@@ -110,7 +110,7 @@ class CHATFile(BaseFormat):
                 main.append(extra.strip())
             else:
                 main.append(generate_chat_utterance(i))
-        main.append("@End")
+        main.append("@End\n")
 
         return "\n".join(main)
 
