@@ -123,7 +123,8 @@ class BatchalignPipeline:
             if callback:
                 callback(base+indx,total_tasks, p.tasks)
 
-            p._hook_status(lambda x,y:callback(base+indx+x,total_tasks+y, p.tasks))
+            if callback:
+                p._hook_status(lambda x,y:callback(base+indx+x,total_tasks+y, p.tasks))
             doc = p.process(doc)
             p._hook_status(None)
 

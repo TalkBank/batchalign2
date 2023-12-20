@@ -575,6 +575,14 @@ def tokenizer_processor(tokenized, lang, sent):
             indx += 1
         elif ("fr" in lang) and matches(i, "au"):
             res.append((conform(i), True))
+        elif ("fr" in lang) and re.match(r"\w'\w+", conform(i)):
+            before,after = conform(i).split("'")
+            res.append((f'{before}\'', False))
+            res.append((after, False))
+        elif ("fr" in lang) and conform(i).split("'")[0] in ["jusqu", "puisqu", "quelqu", "aujourd"]:
+            before,after = conform(i).split("'")
+            res.append((f'{before}\'', False))
+            res.append((after, False))
         elif ("en" in lang) and matches_in(i, "'"):
             res.append((conform(i), True))
         elif ("nl" in lang) and conform(i).endswith("'s"):
@@ -678,7 +686,7 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
         line_cut = line_cut.replace(",", " ,")
         line_cut = line_cut.replace("+ ,", "+,")
         line_cut = line_cut.replace("  ", " ")
-        line_cut = line_cut.replace("c'est", "c' est")
+        # line_cut = line_cut.replace("c'est", "c' est")
 
         # try:
         inputs.append(line_cut)
