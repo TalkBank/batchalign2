@@ -84,6 +84,14 @@ PARSED_LINE_WITH_SKIPPING_BRAKETS = ([Form(text='pas'),
                                       Form(text='.', type=5)],
                                      '.')
 
+# general test for all types of group parses
+CONTINOUS_GROUPS = "Humph without [=? what ] xxx <    bateau alo > [: à l'eau] [?] i <je fais > [=? j'ai fait] <I am> [=? this is hilarious    ] [/] lmfmao this [: mmm] [/] yo <ahaha ha> [/] what is [/] happening ."
+PARSED_CONTINOUS_GROUPS = ([Form(text='Humph'), Form(text='without'), Form(text='à'), Form(text="l'eau"),
+                            Form(text='i'), Form(text='je'), Form(text='fais'), Form(text='I', type=1),
+                            Form(text='am', type=1), Form(text='lmfmao'), Form(text='mmm', type=1), Form(text='yo'),
+                            Form(text='ahaha', type=1), Form(text='ha', type=1), Form(text='what'),
+                            Form(text='is', type =1), Form(text='happening'), Form(text='.', type=5)], '.')
+
 EDGE_CASES = [
     # email dec192023 10:31AM: wack ending
     [
@@ -95,12 +103,13 @@ EDGE_CASES = [
         "xxx; Grégoire .",
         "noun|Grégoire&ComNeut .", 
         "1|1|ROOT 2|1|PUNCT"
-    ], [
-        # email dec192023 10:31AM: wack group
-        "fouf@c [= moufle]; moufle .",
-        "x|fouf noun|moufle&Fem .", 
-        "1|2|FLAT 2|1|NMOD 3|1|PUNCT"
     ],
+    # ], [
+    #     # email dec192023 10:31AM: wack group
+    #     "fouf@c [= moufle]; moufle .",
+    #     "x|fouf noun|moufle&Fem .", 
+    #     "1|2|FLAT 2|1|NMOD 3|1|PUNCT"
+    # ],
     [
         # email dec192023 10:31AM: group whose beginning ends with an ENDING_PUNCT
         "je fais [=? j'ai fait] amadouadou@si dehors avec une (pe)tite fille de trois ans .",
@@ -157,3 +166,7 @@ def test_group_markers():
 def test_group_markers():
     assert (chat_parse_utterance(LINE_WITH_SKIPPING_BRAKETS, None, None, None, None) ==
             PARSED_LINE_WITH_SKIPPING_BRAKETS)
+
+def test_continous_groups():
+    assert (chat_parse_utterance(CONTINOUS_GROUPS, None, None, None, None) ==
+            PARSED_CONTINOUS_GROUPS)

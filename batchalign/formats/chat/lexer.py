@@ -36,9 +36,8 @@ class UtteranceLexer:
 
         return "".join(tokens), len(tokens), tok
 
-    def __pull(self):
-        form, num, delim = self.__get_until()
 
+    def __handle(self, form, num, delim): 
         if num == 0:
             return False
         if form[:2] == "&-":
@@ -48,12 +47,15 @@ class UtteranceLexer:
         elif form[:1] == "&":
             self.__forms.append((form, TokenType.ANNOT))
         elif form[0] == "<":
-            self.handle_group(form, ending=">")
+            self.handle_group(form, type=">")
         elif form.strip() in REPEAT_GROUP_MARKS:
             self.__forms.append((self.__forms.pop(-1)[0], TokenType.RETRACE))
             self.__forms.append((form.strip(), TokenType.FEAT))
-        elif form[0] == "[":
-            self.handle_group(form, ending="]")
+        elif form[0] == "[" and form[:2] != "[:":
+            self.handle_group(form, type="]")
+        elif form[:2] == "[:":
+            self.__forms.pop(-1)
+            self.handle_group(form, type="]")
         elif form.strip() in MOR_PUNCT:
             self.__forms.append((form.strip(), TokenType.PUNCT))
         elif annotation_clean(form).strip() == "":
@@ -63,82 +65,170 @@ class UtteranceLexer:
         else:
             self.__forms.append((annotation_clean(form).strip(), TokenType.REGULAR))
 
+    def __pull(self):
+        form, num, delim = self.__get_until()
+
+        self.__handle(form, num, delim)
+
         return form
 
-    def handle_group(self, form, ending=">"):
-        initial_form = form
-        forms = []
-        if annotation_clean(form) != "": 
-            forms.append(annotation_clean(form))
+    def __get_group(self, form, type):
+        group = [form]
 
-        # pull the form
-        try:
-            while ending not in form:
-                form, num, delim = self.__get_until()
-                if form == None or num == 0:
-                    raise CHATValidationException(f"Lexer failed! Unexpected end to utterance within form group. On line: '{self.raw}', parsed group: {str(forms)}")
-                if annotation_clean(form).strip() == "" and form not in MOR_PUNCT and form not in ENDING_PUNCT:
-                    continue
-                if form in MOR_PUNCT or form in ENDING_PUNCT:
-                    forms.append(form)
-                else:
-                    forms.append(annotation_clean(form))
-        except IndexError:
-            raise CHATValidationException(f"Lexer failed! Unexpected end to utterance within form group. On line: '{self.raw}', parsed group: {str(forms)}")
-
-        # pull the type
-        if ending == ">":
+        # scan forward until we have the first actual form, if
+        # its a selection group
+        if type == ">" and annotation_clean(form) == "":
             form, num, delim = self.__get_until()
-            if form.strip() in REPEAT_GROUP_MARKS:
-                for i in forms:
-                    self.__forms.append((i, TokenType.RETRACE))
-                self.__forms.append((form.strip(), TokenType.FEAT))
-            elif form.strip() in NORMAL_GROUP_MARKS:
-                for i in forms:
-                    self.__forms.append((i, TokenType.REGULAR))
-                self.__forms.append((form.strip(), TokenType.FEAT))
-            elif len(form) > 0 and form.strip()[0] == "[":
-                while num != 0 and form.strip()[0] == "[" and form.strip()[-1] != "]":
-                    self.handle_group(form, ending="]")
-                    form, num, delim = self.__get_until()
-                # I am very sorry to everybody who has the
-                # need to see this.
-                #
-                # But I really can't figure out a better way to do this
-                if form.strip() in REPEAT_GROUP_MARKS:
-                    for i in forms:
-                        self.__forms.append((i, TokenType.RETRACE))
-                    self.__forms.append((form.strip(), TokenType.FEAT))
-                elif form.strip()[-1] == "]" and form.strip() not in NORMAL_GROUP_MARKS:
-                    raise CHATValidationException(f"Lexer falied! Unexpected group type mark. On line: '{self.raw}', parsed: {form.strip()}")
-                else:
-                    cur_form = form
-                    if cur_form.strip() not in NORMAL_GROUP_MARKS:
-                        forms.append(cur_form)
-                    for form in forms:
-                        if form.strip() in MOR_PUNCT:
-                            self.__forms.append((form.strip(), TokenType.PUNCT))
-                        elif annotation_clean(form).strip() == "":
-                            self.__forms.append((form, TokenType.FEAT))
-                        elif annotation_clean(form).strip() in CHAT_IGNORE:
-                            self.__forms.append((annotation_clean(form).strip(), TokenType.ANNOT))
-                        else:
-                            self.__forms.append((annotation_clean(form).strip(), TokenType.REGULAR))
-                    if cur_form.strip() in NORMAL_GROUP_MARKS:
-                        self.__forms.append((form.strip(), TokenType.FEAT))
+            group = [group.pop(0).strip()+annotation_clean(form)]
+
+        # grab forward the entire group 
+        while type not in form:
+            form, num, delim = self.__get_until()
+            if form == None or num == 0:
+                raise CHATValidationException(f"Lexer failed! Unexpected end to utterance within form group. On line: '{self.raw}', parsed group: {str(group)}")
+            group.append(form)
+
+        # get rid 
+        special = [re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ']").sub("", i).strip() for i in group]
+        words = [re.compile(r"[^A-Za-zÀ-ÖØ-öø-ÿ']").sub("", i).strip() for i in group
+                 if re.compile(r"[^A-Za-zÀ-ÖØ-öø-ÿ']").sub("", i).strip()!= ""]
+
+        return words, special[0]
+
+    def handle_group(self, form, type=">"):
+        # scan the group
+        words, special = self.__get_group(form, type)
+
+        # get the next token
+        form, num, delim = self.__get_until()
+
+
+        # continue handling until we get the final form
+        while len(form) > 0 and form[0] == "[" and form.strip() not in NORMAL_GROUP_MARKS + REPEAT_GROUP_MARKS:
+            # read any replacements that exist
+            if form[:2] == "[:":
+                # this means that "words" need to be replaced
+                # with whatever is in the *NEXT* group
+                words, special = self.__get_group(form, type="]")
+            # in all other cases, we get the next group and ignore it
             else:
-                raise CHATValidationException(f"Lexer falied! Unexpected group type mark. On line: '{self.raw}', parsed: {form.strip()}")
-        elif ending == "]":
-            for i in forms:
-                self.__forms.append((i, TokenType.CORRECTION))
+                grp = self.__get_group(form, type="]")
+            # fetch the next form
+            form, num, delim = self.__get_until()
+
+        # we just go through all the words and add the type that is appropriate
+        if form in NORMAL_GROUP_MARKS:
+            for f in words:
+                self.__forms.append((annotation_clean(f).strip(), TokenType.REGULAR))
+            self.__forms.append((form.strip(), TokenType.FEAT))
+        elif form in REPEAT_GROUP_MARKS:
+            for f in words:
+                self.__forms.append((annotation_clean(f).strip(), TokenType.RETRACE))
+            self.__forms.append((form.strip(), TokenType.FEAT))
+        else:
+            if special[0] != "[" or special[:2] == "[:":
+                for f in words:
+                    self.__forms.append((annotation_clean(f).strip(), TokenType.REGULAR))               
+            if len(form) == 0:
+                raise CHATValidationException(f"Lexer failed! Nothing was annotated after a group; we don't know what the group does. On line: '{self.raw}'; parsed: '{words}'")
+            if form[0] != "<":
+                self.__handle(form, num, delim)
+            else:
+                self.handle_group(form, type=">")
+
+
+
+        # form
+        # breakpoint()
+        # initial_form = form
+        # forms = []
+        # if annotation_clean(form) != "": 
+        #     forms.append(annotation_clean(form))
+
+        # # pull the form
+        # try:
+        #     while ending not in form:
+        #         form, num, delim = self.__get_until()
+        #         if form == None or num == 0:
+        #             raise CHATValidationException(f"Lexer failed! Unexpected end to utterance within form group. On line: '{self.raw}', parsed group: {str(forms)}")
+        #         if annotation_clean(form).strip() == "" and form not in MOR_PUNCT and form not in ENDING_PUNCT:
+        #             continue
+        #         if form in MOR_PUNCT or form in ENDING_PUNCT:
+        #             forms.append(form)
+        #         else:
+        #             forms.append(annotation_clean(form))
+        # except IndexError:
+        #     raise CHATValidationException(f"Lexer failed! Unexpected end to utterance within form group. On line: '{self.raw}', parsed group: {str(forms)}")
+
+        # # pull the type
+        # if ending == ">":
+        #     form, num, delim = self.__get_until()
+        #     if form.strip() in REPEAT_GROUP_MARKS:
+        #         for i in forms:
+        #             self.__forms.append((i, TokenType.RETRACE))
+        #         self.__forms.append((form.strip(), TokenType.FEAT))
+        #     elif form.strip() in NORMAL_GROUP_MARKS:
+        #         for i in forms:
+        #             self.__forms.append((i, TokenType.REGULAR))
+        #         self.__forms.append((form.strip(), TokenType.FEAT))
+        #     elif len(form) > 0 and form.strip()[0] == "[":
+        #         group_header = form.strip()
+        #         while num != 0 and form.strip()[0] == "[" and form.strip()[-1] != "]":
+        #             self.handle_group(form, ending="]")
+        #             form, num, delim = self.__get_until()
+
+        #         # I am very sorry to everybody who has the
+        #         # need to see this.
+        #         #
+        #         # But I really can't figure out a better way to do this
+        #         if form.strip() in REPEAT_GROUP_MARKS and group_header != "[:":
+        #             for i in forms:
+        #                 self.__forms.append((i, TokenType.RETRACE))
+        #             self.__forms.append((form.strip(), TokenType.FEAT))
+        #         elif form.strip()[-1] == "]" and form.strip() not in NORMAL_GROUP_MARKS:
+        #             raise CHATValidationException(f"Lexer falied! Unexpected group type mark. On line: '{self.raw}', parsed: {form.strip()}")
+        #         else:
+        #             cur_form = form
+        #             if cur_form.strip() not in NORMAL_GROUP_MARKS:
+        #                 forms.append(cur_form)
+        #             if group_header != "[:":
+        #                 for form in forms:
+        #                     if form.strip() in MOR_PUNCT:
+        #                         self.__forms.append((form.strip(), TokenType.PUNCT))
+        #                     elif annotation_clean(form).strip() == "":
+        #                         self.__forms.append((form, TokenType.FEAT))
+        #                     elif annotation_clean(form).strip() in CHAT_IGNORE:
+        #                         self.__forms.append((annotation_clean(form).strip(), TokenType.ANNOT))
+        #                     else:
+        #                         self.__forms.append((annotation_clean(form).strip(), TokenType.REGULAR))
+        #                 if cur_form.strip() in NORMAL_GROUP_MARKS:
+        #                     self.__forms.append((form.strip(), TokenType.FEAT))
+        #             else:
+        #                 if cur_form.strip() not in NORMAL_GROUP_MARKS:
+        #                     self.__forms.append((annotation_clean(form).strip(), TokenType.REGULAR))
+        #                 elif cur_form.strip() in NORMAL_GROUP_MARKS:
+        #                     self.__forms.append((annotation_clean(form).strip(), TokenType.FEAT))
+
+
+        #     else:
+        #         raise CHATValidationException(f"Lexer falied! Unexpected group type mark. On line: '{self.raw}', parsed: {form.strip()}")
+        # elif ending == "]":
+        #     for i in forms: 
+        #         if initial_form != "[:":
+        #             self.__forms.append((i, TokenType.CORRECTION))
+        #         else:
+        #             self.__forms.append((i, TokenType.REGULAR))
 
     def parse(self):
 
         while True:
             res = self.__pull()
-            if res == False or res in ENDING_PUNCT or (res[-1] in ENDING_PUNCT
-                                                       and re.findall("\w", res)):
-                break
+            try:
+                if res == False or res in ENDING_PUNCT or (res[-1] in ENDING_PUNCT
+                                                        and re.findall("\w", res)):
+                    break
+            except IndexError:
+                raise CHATValidationException(f"Lexer failed! Utterance ended without ending punct.")
 
 def lex(utterance):
     ut = UtteranceLexer(utterance)

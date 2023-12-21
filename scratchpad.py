@@ -85,10 +85,12 @@ from batchalign import *
 
 ########## The Batchalign CHAT Test Tarness ##########
 # from batchalign.formats.chat.parser import chat_parse_utterance
+# from batchalign.formats.chat.lexer import lex
 
-# main = "   Um <I like I like> [/] chickens"
+# main = "Um <I like I like> [chicken] hi ."
+# # main = "je fais [=? j'ai fait] amadouadou@si dehors avec une (pe)tite fille de trois ans ."
 # mor = None
 # gra = None
 
 # chat_parse_utterance(main, mor, gra, None, None)
-
+# # lex(main)
