@@ -84,13 +84,14 @@ from batchalign import *
 #             loader, writer, Console())
 
 ########## The Batchalign CHAT Test Tarness ##########
-# from batchalign.formats.chat.parser import chat_parse_utterance
-# from batchalign.formats.chat.lexer import lex
 
-# main = "+< en dan rennen ze ↫≠al↫allebei weg."
-# # main = "je fais [=? j'ai fait] amadouadou@si dehors avec une (pe)tite fille de trois ans ."
-# mor = None
-# gra = None
+from batchalign.formats.chat.parser import chat_parse_utterance
+from batchalign.formats.chat.lexer import lex
 
-# chat_parse_utterance(main, mor, gra, None, None)
-# # lex(main)
+main = "maison méla [: caméra] . [+ pimit]"
+# main = "je fais [=? j'ai fait] amadouadou@si dehors avec une (pe)tite fille de trois ans ."
+mor = None
+gra = None
+
+chat_parse_utterance(main, mor, gra, None, None)
+# lex(main)

@@ -115,6 +115,7 @@ class UtteranceLexer:
             # fetch the next form
             form, num, delim = self.__get_until()
 
+        
         # we just go through all the words and add the type that is appropriate
         if form in NORMAL_GROUP_MARKS:
             for f in words:
@@ -129,7 +130,8 @@ class UtteranceLexer:
                 for f in words:
                     self.__forms.append((annotation_clean(f).strip(), TokenType.REGULAR))               
             if len(form) == 0:
-                raise CHATValidationException(f"Lexer failed! Nothing was annotated after a group; we don't know what the group does. On line: '{self.raw}'; parsed: '{words}'")
+                warnings.warn(f"Lexer failed! Nothing was annotated after a group; we don't know what the group does. We are ignoring this group! On line: '{self.raw}'; parsed: '{words}'")
+                return
             if form[0] != "<":
                 self.__handle(form, num, delim)
             else:
