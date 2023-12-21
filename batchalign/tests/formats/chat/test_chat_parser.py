@@ -74,6 +74,16 @@ PARSED_BRAKET_GROUPS = ([Form(text='mais'),
                          Form(text='.', type=5)],
                         '.')
 
+# email dec202023 7:19pm
+LINE_WITH_SKIPPING_BRAKETS = "pas <des> [% sch=de] [/] des [/] des formes ."
+PARSED_LINE_WITH_SKIPPING_BRAKETS = ([Form(text='pas'),
+                                      Form(text='des', type=1),
+                                      Form(text='des', type=1),
+                                      Form(text='des', type=0),
+                                      Form(text='formes'),
+                                      Form(text='.', type=5)],
+                                     '.')
+
 EDGE_CASES = [
     # email dec192023 10:31AM: wack ending
     [
@@ -142,3 +152,8 @@ def test_edge_cases():
 def test_group_markers():
     assert (chat_parse_utterance(LINE_WITH_BRAKET_GROUPS, None, None, None, None) ==
             PARSED_BRAKET_GROUPS)
+
+# email dec202023 7:19pm
+def test_group_markers():
+    assert (chat_parse_utterance(LINE_WITH_SKIPPING_BRAKETS, None, None, None, None) ==
+            PARSED_LINE_WITH_SKIPPING_BRAKETS)

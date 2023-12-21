@@ -54,39 +54,39 @@ from batchalign import *
 #         raise e
 
 ########### The Batchalign CLI Harness ###########
-from batchalign.cli.dispatch import _dispatch
+# from batchalign.cli.dispatch import _dispatch
 
-in_dir = "../talkbank-alignment/test_harness/input/"
-out_dir = "../talkbank-alignment/test_harness/output/"
-in_files = glob(str(Path(in_dir)/"*.cha"))
+# in_dir = "../talkbank-alignment/test_harness/input/"
+# out_dir = "../talkbank-alignment/test_harness/output/"
+# in_files = glob(str(Path(in_dir)/"*.cha"))
 
-function = "morphotag"
-lang = "fra"
-num_speakers = 1
+# function = "morphotag"
+# lang = "fra"
+# num_speakers = 1
 
-class Context:
-    obj = {"verbose": 3}
+# class Context:
+#     obj = {"verbose": 3}
 
-def loader(file):
-    return CHATFile(path=os.path.abspath(file)).doc
+# def loader(file):
+#     return CHATFile(path=os.path.abspath(file)).doc
 
-    # return file
+#     # return file
 
-def writer(doc, output):
-    CHATFile(doc=doc).write(output)
-    # CHATFile(doc=doc).write(output
-    #                         .replace(".wav", ".cha")
-    #                         .replace(".mp4", ".cha")
-    #                         .replace(".mp3", ".cha"))
+# def writer(doc, output):
+#     CHATFile(doc=doc).write(output)
+#     # CHATFile(doc=doc).write(output
+#     #                         .replace(".wav", ".cha")
+#     #                         .replace(".mp4", ".cha")
+#     #                         .replace(".mp3", ".cha"))
 
-_dispatch(function, lang, num_speakers, in_files, Context(),
-            in_dir, out_dir,
-            loader, writer, Console())
+# _dispatch(function, lang, num_speakers, in_files, Context(),
+#             in_dir, out_dir,
+#             loader, writer, Console())
 
 ########## The Batchalign CHAT Test Tarness ##########
 # from batchalign.formats.chat.parser import chat_parse_utterance
 
-# main = "c'est [///] elle va au dessus , cette pièce là ."
+# main = "   Um <I like I like> [/] chickens"
 # mor = None
 # gra = None
 

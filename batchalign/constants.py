@@ -5,7 +5,7 @@ CHAT_IGNORE = ["xxx", "yyy", "www"]
 
 # chat marks
 REPEAT_GROUP_MARKS = ["[/]", "[//]", "[///]", "[////]", "[/////]", "[>]", "[<]"]
-NORMAL_GROUP_MARKS = ["[?]", "[!!]"]
+NORMAL_GROUP_MARKS = ["[?]", "[!!]", "[!]"]
 
 # ud specific things for CHAT generation
 UD__GENDERS = ["Masc", "Fem", "Neut", "ComNeut"]
