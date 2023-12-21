@@ -37,8 +37,39 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
         exception describing the issue.
     """
 
+    # scan the timing
     # lex the utterance
-    tokens = lex(text)
+    to_lex = re.compile("\x15\d+_\d+\x15").sub("", text).strip()
+
+    # if the first form has a < in it and has no words,
+    # its probably a beginning delimiter which we do not lex
+    if (len(text) > 0 and
+        "<" in text.split(" ")[0] and
+        not re.findall("\w", text.split(" ")[0])):
+        beg = text.split(" ")[0]
+        to_lex = to_lex.replace(beg, "")
+
+    # fix commas for people that don't annotate commas with a space
+    to_lex = to_lex.replace(",", " ,")
+
+    # fix all the things we just don't tag
+    to_lex = to_lex.replace("<", " <")
+    to_lex = to_lex.replace("]", "] ")
+    to_lex = to_lex.replace("[", " [")
+    to_lex = to_lex.replace(">", "> ")
+    to_lex = re.sub(r"\([\d.]+\)", "", to_lex)
+    to_lex = re.sub(r"↫.*?↫", "", to_lex)
+
+
+    # if there is a punct, move it
+    for end in sorted(ENDING_PUNCT, key=len, reverse=True):
+        if end in to_lex:
+            to_lex = to_lex.replace(end, f" {end}")
+            break
+
+    to_lex = to_lex.replace("  ", " ")
+
+    tokens = lex(to_lex)
 
     # seperate out main words by whether it should have phonation/morphology and add ending punct
     words = list(enumerate(tokens))
