@@ -44,8 +44,8 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
     # if the first form has a < in it and has no words,
     # its probably a beginning delimiter which we do not lex
     if (len(text) > 0 and
-        "<" in text.split(" ")[0] and
-        not re.findall("\w", text.split(" ")[0])):
+        ("<" in text.split(" ")[0]  or "+" in text.split(" ")[0] )
+        and not re.findall("\w", text.split(" ")[0])):
         beg = text.split(" ")[0]
         to_lex = to_lex.replace(beg, "")
 

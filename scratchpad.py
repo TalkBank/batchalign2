@@ -88,7 +88,7 @@ from batchalign import *
 from batchalign.formats.chat.parser import chat_parse_utterance
 from batchalign.formats.chat.lexer import lex
 
-main = "maison méla [: caméra] . [+ pimit]"
+main = "+, maison méla [: caméra] . [+ pimit]"
 # main = "je fais [=? j'ai fait] amadouadou@si dehors avec une (pe)tite fille de trois ans ."
 mor = None
 gra = None
