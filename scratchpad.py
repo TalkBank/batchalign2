@@ -17,29 +17,26 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 from batchalign import *
 
 ########### The Batchalign Core Test Harness ###########
-from batchalign.formats.chat.parser import chat_parse_utterance
+# from batchalign.formats.chat.parser import chat_parse_utterance
 
-text = "mais moi , j(e) aime bien l'eau [///] euh j(e) aime pas l'eau (.) euh <dans le> [% sch=du] robinet ."
+# text = "Pirate-des-Caraïbes !"
 
-function = "morphosyntax"
-lang = "fra"
-num_speakers = 1
+# function = "morphosyntax"
+# lang = "fra"
+# num_speakers = 1
 
-forms, delim = chat_parse_utterance(text, None, None, None, None)
-utterance = Utterance(content=forms, delim=delim)
+# forms, delim = chat_parse_utterance(text, None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim)
 
-# utterance = Utterance(content=text)
+# # utterance = Utterance(content=text)
 
-ut = Document(content=[utterance], langs=[lang])
-pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers)
+# ut = Document(content=[utterance, CustomLine(id="Birthday of CHI",
+#                                              content="tmp", type=CustomLineType.INDEPENDENT)], langs=[lang])
+# pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers)
+# doc = pipeline(ut)
+# doc[0][-2].model_dump()
 
-doc = pipeline(ut)
-doc[0][-2].model_dump()
-
-print(str(CHATFile(doc=doc)))
-
-
-
+# print(str(CHATFile(doc=doc)))
 
 ########### The Batchalign Parser Harness ###########
 # from batchalign.formats.chat import CHATFile
@@ -57,42 +54,39 @@ print(str(CHATFile(doc=doc)))
 #         raise e
 
 ########### The Batchalign CLI Harness ###########
-# from batchalign.cli.dispatch import _dispatch
+from batchalign.cli.dispatch import _dispatch
 
-# in_dir = "../talkbank-alignment/test_harness/input/"
-# out_dir = "../talkbank-alignment/test_harness/output/"
-# in_files = glob(str(Path(in_dir)/"*.cha"))
+in_dir = "../talkbank-alignment/test_harness/input/"
+out_dir = "../talkbank-alignment/test_harness/output/"
+in_files = glob(str(Path(in_dir)/"*.cha"))
 
-# function = "morphotag"
-# lang = "fra"
-# num_speakers = 1
+function = "morphotag"
+lang = "fra"
+num_speakers = 1
 
-# class Contextd
-#     obj = {"verbose": 3}
+class Context:
+    obj = {"verbose": 3}
 
-# def loader(file):
-#     try:
-#         return CHATFile(path=os.path.abspath(file)).doc
-#     except:
-#         breakpoint()
+def loader(file):
+    return CHATFile(path=os.path.abspath(file)).doc
 
-#     # return file
+    # return file
 
-# def writer(doc, output):
-#     CHATFile(doc=doc).write(output)
-#     # CHATFile(doc=doc).write(output
-#     #                         .replace(".wav", ".cha")
-#     #                         .replace(".mp4", ".cha")
-#     #                         .replace(".mp3", ".cha"))
+def writer(doc, output):
+    CHATFile(doc=doc).write(output)
+    # CHATFile(doc=doc).write(output
+    #                         .replace(".wav", ".cha")
+    #                         .replace(".mp4", ".cha")
+    #                         .replace(".mp3", ".cha"))
 
-# _dispatch(function, lang, num_speakers, in_files, Context(),
-#             in_dir, out_dir,
-#             loader, writer, Console())
+_dispatch(function, lang, num_speakers, in_files, Context(),
+            in_dir, out_dir,
+            loader, writer, Console())
 
 ########## The Batchalign CHAT Test Tarness ##########
 # from batchalign.formats.chat.parser import chat_parse_utterance
 
-# main = "mais il [= the tap] <est> [% sch=va] trop fort ."
+# main = "c'est [///] elle va au dessus , cette pièce là ."
 # mor = None
 # gra = None
 

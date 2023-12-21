@@ -82,13 +82,16 @@ def generate_chat_utterance(utterance: Utterance):
 
     return "\n".join(result)
 
-def generate_chat_preamble(doc):
+def generate_chat_preamble(doc, birthdays=[]):
     """Generate header for a Batchalign document.
 
     Parameters
     ----------
     doc : Document
         The document to generate a CHAT header.
+    birthdays : List[CustomLine]
+        A list of custom lines for which the id mentions "Birthday"
+        (It's apparently a CHAT requirement to put them right after @ID)
 
     Returns
     -------
@@ -101,6 +104,8 @@ def generate_chat_preamble(doc):
     header.append("@Participants:\t"+", ".join([f"{i.id} {i.name}" for i in doc.tiers]))
     header.append("@Options:\tmulti")
     header.append("\n".join([f"@ID:\t{i.lang}|{i.corpus}|{i.id}|||||{i.name}|||" for i in doc.tiers]))
+    for i in birthdays:
+        header.append(f"@{i.id}:\t{i.content}")
     if doc.media:
         header.append(f"@Media:\t{doc.media.name}, {doc.media.type.value}")
 

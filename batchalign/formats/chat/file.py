@@ -101,13 +101,18 @@ class CHATFile(BaseFormat):
     def __generate(doc:Document):
         utterances = doc.content
 
-        main = ["@UTF8\n@Begin", generate_chat_preamble(doc)]
+        def __get_birthdays(line):
+            return isinstance(line, CustomLine) and "birth" in line.id.lower()
+
+        main = ["@UTF8\n@Begin", generate_chat_preamble(doc, filter(__get_birthdays,
+                                                                    utterances))]
         for i in utterances:
             if isinstance(i, CustomLine):
-                extra = f"@{i.id}:\t"
-                if i.content != None:
-                    extra += i.content
-                main.append(extra.strip())
+                if "birth" not in i.id.lower():
+                    extra = f"@{i.id}:\t"
+                    if i.content != None:
+                        extra += i.content
+                    main.append(extra.strip())
             else:
                 main.append(generate_chat_utterance(i))
         main.append("@End\n")
