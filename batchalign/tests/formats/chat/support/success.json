@@ -80,7 +80,7 @@
                         {
                             "lemma": "I",
                             "pos": "pron",
-                            "feats": "Prs-Nom-S1"
+                            "feats": "Prs&Nom&S1"
                         }
                     ],
                     "dependency": [
@@ -102,7 +102,7 @@
                         {
                             "lemma": "like",
                             "pos": "verb",
-                            "feats": "Fin-Ind-1-Pres"
+                            "feats": "Fin&Ind&1&Pres"
                         }
                     ],
                     "dependency": [
@@ -124,7 +124,7 @@
                         {
                             "lemma": "bean",
                             "pos": "noun",
-                            "feats": "ComNeut-Plur"
+                            "feats": "ComNeut&Plur"
                         }
                     ],
                     "dependency": [
@@ -491,7 +491,7 @@
                         {
                             "lemma": "be",
                             "pos": "cop",
-                            "feats": "PAST-13S"
+                            "feats": "PAST&13S"
                         }
                     ],
                     "dependency": [

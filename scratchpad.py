@@ -48,40 +48,42 @@ from batchalign import *
 
 # for file in in_files:
 #     try:
-#         CHATFile(path=os.path.abspath(file))
+#         f = CHATFile(path=os.path.abspath(file))
 #     except Exception as e:
 #         print(file)
 #         raise e
 
+# f.doc[1][1]
+
 ########### The Batchalign CLI Harness ###########
-from batchalign.cli.dispatch import _dispatch
+# from batchalign.cli.dispatch import _dispatch
 
-in_dir = "../talkbank-alignment/test_harness/input/"
-out_dir = "../talkbank-alignment/test_harness/output/"
-in_format = "cha"
+# in_dir = "../talkbank-alignment/test_harness/input/"
+# out_dir = "../talkbank-alignment/test_harness/output/"
+# in_format = "cha"
 
-function = "morphotag"
-lang = "fra"
-num_speakers = 1
+# function = "morphotag"
+# lang = "fra"
+# num_speakers = 1
 
-class Context:
-    obj = {"verbose": 3}
+# class Context:
+#     obj = {"verbose": 3}
 
-def loader(file):
-    return CHATFile(path=os.path.abspath(file)).doc
+# def loader(file):
+#     return CHATFile(path=os.path.abspath(file)).doc
 
-    # return file
+#     # return file
 
-def writer(doc, output):
-    CHATFile(doc=doc).write(output)
-    # CHATFile(doc=doc).write(output
-    #                         .replace(".wav", ".cha")
-    #                         .replace(".mp4", ".cha")
-    #                         .replace(".mp3", ".cha"))
+# def writer(doc, output):
+#     CHATFile(doc=doc).write(output)
+#     # CHATFile(doc=doc).write(output
+#     #                         .replace(".wav", ".cha")
+#     #                         .replace(".mp4", ".cha")
+#     #                         .replace(".mp3", ".cha"))
 
-_dispatch(function, lang, num_speakers, [in_format], Context(),
-            in_dir, out_dir,
-            loader, writer, Console())
+# _dispatch(function, lang, num_speakers, [in_format], Context(),
+#             in_dir, out_dir,
+#             loader, writer, Console())
 
 ########## The Batchalign CHAT Test Tarness ##########
 

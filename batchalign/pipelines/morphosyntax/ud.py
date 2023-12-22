@@ -53,9 +53,9 @@ def parse_feats(word):
         return {}
 # one liner to join feature string
 def stringify_feats(*feats):
-    template= ("-"+"-".join(filter(lambda x: x!= "", feats))).strip()
+    template= ("&"+"&".join(filter(lambda x: x!= "", feats))).strip()
 
-    if template == "-": return ""
+    if template == "&": return ""
     else: return template.replace(",", "")
 
 # the following is a list of feature-extracting handlers
@@ -93,15 +93,16 @@ def handler(word):
     target = target.replace(".", "")
 
     # if we have a clitic that's broken off, we remove the extra dash
-    if target != "" and target[0] == "-":
+    if target != "" and target[0] == "&":
         target = target[1:]
 
     # if we have a dash marker in the end, we remove the extra dash
-    if target != "" and target[-1] == "-":
+    if target != "" and target[-1] == "&":
         target = target[:-1]
 
     # replace double dashes
     target = target.replace("--", "-")
+    target = target.replace("&&", "&")
     target = target.replace("<unk>", "")
     target = target.replace("<SOS>", "")
 
@@ -153,7 +154,7 @@ def handler__DET(word):
     if gender_str == "&Com,Neut" or gender_str == "&Com" or gender_str=="&": gender_str=""
 
     # parse
-    return (handler(word)+gender_str+"-"+
+    return (handler(word)+gender_str+"&"+
             feats.get("Definite", "Def") + stringify_feats(feats.get("PronType", "")))
 
 def handler__ADJ(word):
@@ -175,14 +176,14 @@ def handler__NOUN(word):
 
     # get gender and numer
     gender_str = "&"+feats.get("Gender", "ComNeut").replace(",", "")
-    number_str = "-"+feats.get("Number", "Sing")
+    number_str = "&"+feats.get("Number", "Sing")
     case  = feats.get("Case", "").replace(",", "")
     type  = feats.get("PronType", "")
 
 
     # clear defaults
     if gender_str == "&Com,Neut" or gender_str == "&Com": gender_str=""
-    if number_str == "-Sing": number_str=""
+    if number_str == "&Sing": number_str=""
 
     return handler(word)+gender_str+number_str+stringify_feats(case, type)
 
@@ -197,10 +198,10 @@ def handler__VERB(word):
     # seed flag
     flag = ""
     # append number and form if needed
-    flag += "-"+feats.get("VerbForm", "Inf").replace(",", "")
+    flag += "&"+feats.get("VerbForm", "Inf").replace(",", "")
     number = feats.get("Number", "Sing")
     if number != "Sing":
-        flag += f"-{number}"
+        flag += f"&{number}"
     # append tense
     aspect = feats.get("Aspect", "")
     mood = feats.get("Mood", "")

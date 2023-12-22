@@ -3,8 +3,8 @@ from batchalign.document import *
 
 import warnings
 
-CEST_TAGGED = [{'lemma': 'ce', 'pos': 'pron', 'feats': 'Dem-S3'},
-               {'lemma': 'être', 'pos': 'aux', 'feats': 'Fin-Ind-3-Pres'}]
+CEST_TAGGED = [{'lemma': 'ce', 'pos': 'pron', 'feats': 'Dem&S3'},
+               {'lemma': 'être', 'pos': 'aux', 'feats': 'Fin&Ind&3&Pres'}]
 
 JUSQU_AU_TAGGED = {'text': "jusqu'au",
                    'time': None,

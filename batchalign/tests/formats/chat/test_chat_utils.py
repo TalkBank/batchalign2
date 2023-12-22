@@ -10,8 +10,8 @@ GRA_VALID_DOC = Dependency(id=5, dep_id=3, dep_type="XCOMP")
 MOR_VALID = "mod|do&3S~neg|not"
 MOR_VALID_DOC = [Morphology(lemma='do', pos='mod', feats='3S'),
                  Morphology(lemma='not', pos='neg', feats='')]
-MOR_VALID_MULTIFEAT = "mod|do&3S-2n"
-MOR_VALID_MULTIFEAT_DOC = [Morphology(lemma='do', pos='mod', feats='3S-2n')]
+MOR_VALID_MULTIFEAT = "mod|do&3S&2n"
+MOR_VALID_MULTIFEAT_DOC = [Morphology(lemma='do', pos='mod', feats='3S&2n')]
 MOR_INVALID = "moddo&3S"
 
 STR_TO_CLEAN = "d-⌋ʔwhat&=um"

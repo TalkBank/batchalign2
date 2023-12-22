@@ -16,7 +16,7 @@ STANDARD_UTTERANCE = [
     "I'm \x152530_2720\x15 going \x152720_2910\x15 to read \x153000_3200\x15 .",
     []
 ]
-PARSED_STANDARD_UTTERANCE = [Form(text="I'm", time=(2530, 2720), morphology=[Morphology(lemma='I', pos='pron', feats='Prs-Nom-S1'), Morphology(lemma='be', pos='aux', feats='Fin-Ind-1-Pres')], dependency=[Dependency(id=1, dep_id=3, dep_type='NSUBJ'), Dependency(id=2, dep_id=3, dep_type='AUX')]), Form(text='going', time=(2720, 2910), morphology=[Morphology(lemma='go', pos='verb', feats='Part-Pres')], dependency=[Dependency(id=3, dep_id=18, dep_type='ROOT')]), Form(text='to', time=None, morphology=[Morphology(lemma='to', pos='part', feats='')], dependency=[Dependency(id=4, dep_id=5, dep_type='MARK')]), Form(text='read', time=(3000, 3200), morphology=[Morphology(lemma='read', pos='verb', feats='Inf')], dependency=[Dependency(id=5, dep_id=3, dep_type='XCOMP')]), Form(text='.', time=None, morphology=[Morphology(lemma='.', pos='PUNCT', feats='')], dependency=[Dependency(id=6, dep_id=3, dep_type='PUNCT')], type=5)]
+PARSED_STANDARD_UTTERANCE = [Form(text="I'm", time=(2530, 2720), morphology=[Morphology(lemma='I', pos='pron', feats='Prs&Nom&S1'), Morphology(lemma='be', pos='aux', feats='Fin&Ind&1&Pres')], dependency=[Dependency(id=1, dep_id=3, dep_type='NSUBJ'), Dependency(id=2, dep_id=3, dep_type='AUX')]), Form(text='going', time=(2720, 2910), morphology=[Morphology(lemma='go', pos='verb', feats='Part&Pres')], dependency=[Dependency(id=3, dep_id=18, dep_type='ROOT')]), Form(text='to', time=None, morphology=[Morphology(lemma='to', pos='part', feats='')], dependency=[Dependency(id=4, dep_id=5, dep_type='MARK')]), Form(text='read', time=(3000, 3200), morphology=[Morphology(lemma='read', pos='verb', feats='Inf')], dependency=[Dependency(id=5, dep_id=3, dep_type='XCOMP')]), Form(text='.', time=None, morphology=[Morphology(lemma='.', pos='PUNCT', feats='')], dependency=[Dependency(id=6, dep_id=3, dep_type='PUNCT')], type=5)]
 
 STANDARD_NOTIME_NOMOR = [
     "I'm going to read .",
@@ -34,7 +34,7 @@ STANDARD_NOGRA = [
     None,
     []
 ]
-PARSED_NOGRA = [Form(text="I'm", time=None, morphology=[Morphology(lemma='I', pos='pron', feats='Prs-Nom-S1'), Morphology(lemma='be', pos='aux', feats='Fin-Ind-1-Pres')], dependency=None), Form(text='going', time=None, morphology=[Morphology(lemma='go', pos='verb', feats='Part-Pres')], dependency=None), Form(text='to', time=None, morphology=[Morphology(lemma='to', pos='part', feats='')], dependency=None), Form(text='read', time=None, morphology=[Morphology(lemma='read', pos='verb', feats='Inf')], dependency=None), Form(text='.', time=None, morphology=[Morphology(lemma='.', pos='PUNCT', feats='')], dependency=None, type=5)]
+PARSED_NOGRA = [Form(text="I'm", time=None, morphology=[Morphology(lemma='I', pos='pron', feats='Prs&Nom&S1'), Morphology(lemma='be', pos='aux', feats='Fin&Ind&1&Pres')], dependency=None), Form(text='going', time=None, morphology=[Morphology(lemma='go', pos='verb', feats='Part&Pres')], dependency=None), Form(text='to', time=None, morphology=[Morphology(lemma='to', pos='part', feats='')], dependency=None), Form(text='read', time=None, morphology=[Morphology(lemma='read', pos='verb', feats='Inf')], dependency=None), Form(text='.', time=None, morphology=[Morphology(lemma='.', pos='PUNCT', feats='')], dependency=None, type=5)]
 
 
 MISALIGNED_UTTERANCE_MOR = [
