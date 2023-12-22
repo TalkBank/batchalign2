@@ -72,6 +72,12 @@ def handle_verbosity(verbosity):
         L.getLogger('batchalign').setLevel(L.INFO)
     if verbosity >= 3:
         L.getLogger('batchalign').setLevel(L.DEBUG)
+    if verbosity >= 4:
+        L.getLogger('batchalign').setLevel(L.DEBUG)
+        L.getLogger('stanza').handlers.clear()
+        L.getLogger('transformers').handlers.clear()
+        L.getLogger('transformers').setLevel(L.INFO)
+        L.getLogger('stanza').setLevel(L.INFO)
 
 @click.group()
 @click.pass_context
@@ -101,8 +107,6 @@ def batchalign(ctx, verbose):
 @click.pass_context
 def align(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     """Align transcripts against corresponding media files."""
-    files = glob(str(Path(in_dir)/ "*.cha"))
-
     def loader(file):
         return CHATFile(path=os.path.abspath(file)).doc
 
@@ -110,7 +114,7 @@ def align(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
         CHATFile(doc=doc).write(output)
 
     _dispatch("align", lang, num_speakers,
-              files, ctx,
+              ["cha"], ctx,
               in_dir, out_dir,
               loader, writer, C, **kwargs)
 
@@ -123,11 +127,6 @@ def align(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
 @click.pass_context
 def transcribe(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
     """Create a transcript from audio files."""
-    files = (glob(str(Path(in_dir)/ "*.wav")) +
-             glob(str(Path(in_dir)/ "*.mp3")) +
-             glob(str(Path(in_dir)/ "*.mp4")))
-
-
     def loader(file):
         return file
 
@@ -137,7 +136,7 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
                                 .replace(".mp4", ".cha")
                                 .replace(".mp3", ".cha"))
 
-    _dispatch("transcribe", lang, num_speakers, files, ctx,
+    _dispatch("transcribe", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
               in_dir, out_dir,
               loader, writer, C,
               asr="whisper" if whisper else "rev")
@@ -150,15 +149,14 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
 def morphotag(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     """Perform morphosyntactic analysis on transcripts."""
 
-    files = glob(str(Path(in_dir)/ "*.cha"))
-    
+   
     def loader(file):
         return CHATFile(path=os.path.abspath(file)).doc
 
     def writer(doc, output):
         CHATFile(doc=doc).write(output)
 
-    _dispatch("morphotag", lang, num_speakers, files, ctx,
+    _dispatch("morphotag", lang, num_speakers, ["cha"], ctx,
               in_dir, out_dir,
               loader, writer, C)
 

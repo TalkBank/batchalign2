@@ -54,44 +54,42 @@ from batchalign import *
 #         raise e
 
 ########### The Batchalign CLI Harness ###########
-# from batchalign.cli.dispatch import _dispatch
+from batchalign.cli.dispatch import _dispatch
 
-# in_dir = "../talkbank-alignment/test_harness/input/"
-# out_dir = "../talkbank-alignment/test_harness/output/"
-# in_files = glob(str(Path(in_dir)/"*.cha"))
+in_dir = "../talkbank-alignment/test_harness/input/"
+out_dir = "../talkbank-alignment/test_harness/output/"
+in_format = "cha"
 
-# function = "morphotag"
-# lang = "fra"
-# num_speakers = 1
+function = "morphotag"
+lang = "fra"
+num_speakers = 1
 
-# class Context:
-#     obj = {"verbose": 3}
+class Context:
+    obj = {"verbose": 3}
 
-# def loader(file):
-#     return CHATFile(path=os.path.abspath(file)).doc
+def loader(file):
+    return CHATFile(path=os.path.abspath(file)).doc
 
-#     # return file
+    # return file
 
-# def writer(doc, output):
-#     CHATFile(doc=doc).write(output)
-#     # CHATFile(doc=doc).write(output
-#     #                         .replace(".wav", ".cha")
-#     #                         .replace(".mp4", ".cha")
-#     #                         .replace(".mp3", ".cha"))
+def writer(doc, output):
+    CHATFile(doc=doc).write(output)
+    # CHATFile(doc=doc).write(output
+    #                         .replace(".wav", ".cha")
+    #                         .replace(".mp4", ".cha")
+    #                         .replace(".mp3", ".cha"))
 
-# _dispatch(function, lang, num_speakers, in_files, Context(),
-#             in_dir, out_dir,
-#             loader, writer, Console())
+_dispatch(function, lang, num_speakers, [in_format], Context(),
+            in_dir, out_dir,
+            loader, writer, Console())
 
 ########## The Batchalign CHAT Test Tarness ##########
 
-from batchalign.formats.chat.parser import chat_parse_utterance
-from batchalign.formats.chat.lexer import lex
+# from batchalign.formats.chat.parser import chat_parse_utterance
+# from batchalign.formats.chat.lexer import lex
 
-main = "+, maison méla [: caméra] . [+ pimit]"
-# main = "je fais [=? j'ai fait] amadouadou@si dehors avec une (pe)tite fille de trois ans ."
-mor = None
-gra = None
+# main = "+, maison méla [: caméra] . [+ pimit]"
+# mor = None
+# gra = None
 
-chat_parse_utterance(main, mor, gra, None, None)
-# lex(main)
+# chat_parse_utterance(main, mor, gra, None, None)

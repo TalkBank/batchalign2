@@ -8,6 +8,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 import warnings
 
+import shutil
 import os
 import glob
 
@@ -17,6 +18,8 @@ from batchalign.document import *
 from batchalign.formats.chat import CHATFile
 from batchalign.utils import config
 from rich.markup import escape
+
+from pathlib import Path
 
 # Oneliner of directory-based glob and replace
 globase = lambda path, statement: glob(os.path.join(path, statement))
@@ -38,11 +41,36 @@ Cmd2Task = {
 
 # this is the main runner used by all functions
 def _dispatch(command, lang, num_speakers,
-              files, ctx, in_dir, out_dir,
+              extensions, ctx, in_dir, out_dir,
               loader:callable, writer:callable, console,
               **kwargs):
 
     C = console
+
+    # get files by walking the directory
+    files = []
+    outputs = []
+
+    for basedir, _, fs in os.walk(in_dir):
+        for f in fs:
+            path = Path(os.path.join(basedir, f))
+            ext = path.suffix.strip(".").strip()
+
+            # repath the file to the output
+            rel = os.path.relpath(str(path), in_dir)
+            repathed = Path(os.path.join(out_dir, rel))
+            # make the repathed dir, if it doesn't exist
+            parent = repathed.parent.absolute()
+            os.makedirs(parent, exist_ok=True)
+
+            # if the file needs to get processed, append it to the list
+            # to be processed and compute the output 
+            if ext in extensions:
+                files.append(str(path))
+                outputs.append(str(repathed))
+            # otherwise just copy the file
+            else:
+                shutil.copy2(str(path), str(repathed))
 
     __tf = None
     # output file
@@ -61,12 +89,10 @@ def _dispatch(command, lang, num_speakers,
 
     with prog as prog:
         tasks = {}
-        outputs = []
         errors = []
         # create the spinner bars
         for f in files:
             tasks[f] = prog.add_task(Path(f).name, start=False, processor="")
-            outputs.append(repath_file(f, out_dir))
 
         # create pipeline and read files
         baL.debug("Attempting to create BatchalignPipeline for CLI...")
