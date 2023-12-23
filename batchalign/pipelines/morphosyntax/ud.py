@@ -9,7 +9,7 @@ from pathlib import Path
 import stanza
 
 from stanza.utils.conll import CoNLL
-from stanza import Document
+from stanza import Document, DownloadMethod
 from stanza.models.common.doc import Token
 from stanza.pipeline.core import CONSTITUENCY
 from stanza import DownloadMethod
@@ -625,7 +625,9 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
 
     nlp = stanza.MultilingualPipeline(
         lang_configs = configs,
-        lang_id_config = {"langid_lang_subset": lang})
+        lang_id_config = {"langid_lang_subset": lang},
+        download_method=DownloadMethod.REUSE_RESOURCES
+    )
 
     for indx, i in enumerate(doc.content):
         L.info(f"Stanza processing utterance {indx+1}/{len(doc.content)}")
@@ -634,6 +636,10 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
 
         # generate simplified version of the line
         line = str(i)
+
+        # if we have nothing except a punctuuation, we give up
+        if line.strip() in ENDING_PUNCT:
+            continue
 
         # every legal utterance will have an ending delimiter
         # so we split it out
@@ -698,8 +704,10 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
         line_cut = line_cut.replace("  ", " ")
         # line_cut = line_cut.replace("c'est", "c' est")
 
+
         # try:
         inputs.append(line_cut)
+
         sents = nlp(line_cut.strip()).sentences
 
         if len(sents) == 0:

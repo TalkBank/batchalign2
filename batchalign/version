@@ -1,3 +1,3 @@
-0.4.0-alpha.5
-December 22nd, 2023
-Further fixes to morphology parsing and French clitics
+0.4.0-alpha.6
+December 23rd, 2023
+Be more verbose about model downloading and less verbose about certain UD CHAT parse errors; Merry Christmas

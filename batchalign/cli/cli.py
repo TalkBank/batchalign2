@@ -64,20 +64,19 @@ def common_options(f):
 ###################### UTILS ##############################
 
 def handle_verbosity(verbosity):
-    L.basicConfig(format="%(message)s", level=L.ERROR, handlers=[RichHandler(rich_tracebacks=True)])
-    L.getLogger("stanza").setLevel(L.ERROR)
-    L.getLogger('batchalign').setLevel(L.ERROR)
+    L.getLogger('stanza').handlers.clear()
+    L.getLogger('transformers').handlers.clear()
+    L.getLogger("stanza").setLevel(L.INFO)
+    L.getLogger('batchalign').setLevel(L.WARN)
 
     if verbosity >= 2:
+        L.basicConfig(format="%(message)s", level=L.ERROR, handlers=[RichHandler(rich_tracebacks=True)])
         L.getLogger('batchalign').setLevel(L.INFO)
     if verbosity >= 3:
         L.getLogger('batchalign').setLevel(L.DEBUG)
     if verbosity >= 4:
         L.getLogger('batchalign').setLevel(L.DEBUG)
-        L.getLogger('stanza').handlers.clear()
-        L.getLogger('transformers').handlers.clear()
         L.getLogger('transformers').setLevel(L.INFO)
-        L.getLogger('stanza').setLevel(L.INFO)
 
 @click.group()
 @click.pass_context

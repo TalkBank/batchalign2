@@ -19,7 +19,7 @@ from batchalign import *
 ########### The Batchalign Core Test Harness ###########
 # from batchalign.formats.chat.parser import chat_parse_utterance
  
-# text = "tu <xxx lui> [?] montrer le drôle de monsieur Patate ."
+# text = "&~eu &~cho xxx+//."
 
 # function = "morphosyntax"
 # lang = "fra"
@@ -31,11 +31,12 @@ from batchalign import *
 # # utterance = Utterance(content=text)
 
 # ut = Document(content=[utterance], langs=[lang])
+
 # pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers)
 # doc = pipeline(ut)
-# doc[0][-2].model_dump()
+# # doc[0][-2].model_dump()
 
-# doc[0].content[-2]
+# # doc[0].content[-2]
 
 # print(str(CHATFile(doc=doc)))
 

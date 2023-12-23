@@ -73,9 +73,19 @@ def interactive_setup():
 
 def config_read(interactive=False):
     try:
-        with open(Path.home()/".batchalign.ini", 'r') as df:
+        with open(Path.home()/".batchalign.ini", 'r+') as df:
             config = configparser.ConfigParser()
             config.read_file(df)
+
+            # dec232023 - patch in Stanza model version as we stopped downloading
+            # models unless explicitly requested
+            if not config.has_option("ud","model_version"):
+                if not config.has_section("ud"):
+                    config["ud"] = {}
+                config["ud"]["model_version"] = "1.7.0"
+                df.seek(0)
+                config.write(df)
+
             return config
     except FileNotFoundError:
         if interactive:

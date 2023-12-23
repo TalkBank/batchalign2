@@ -42,3 +42,20 @@ def test_ud_triple_clitics():
         res = morphoanalyze(Document.new("pour essayer d'l'attraper.", lang="fra"))
         assert res[0][-2].model_dump() == TRIPLE_CLITIC_FORM
 
+
+# email emaildec232023-08:3 
+# utterance that's fundimentally empty
+def test_empty_utterance():
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+
+        from batchalign.formats.chat.parser import chat_parse_utterance
+
+        text = "&~eu &~cho xxx+//."
+
+        forms, delim = chat_parse_utterance(text, None, None, None, None)
+        utterance = Utterance(content=forms, delim=delim)
+        ut = Document(content=[utterance], langs=["fra"])
+
+        morphoanalyze(ut)
+
