@@ -114,10 +114,10 @@ def _dispatch(command, lang, num_speakers,
             try:
                 # set the file as started
                 prog.start_task(tasks[file])
-                # parse the input format, as needed
-                doc = loader(os.path.abspath(file))
-                # RUN THE PUPPY!
                 with warnings.catch_warnings(record=True) as w:
+                    # parse the input format, as needed
+                    doc = loader(os.path.abspath(file))
+                    # RUN THE PUPPY!
                     doc = pipeline(doc,
                                 callback=lambda *args:progress_callback(file, *args))
                 msgs = [escape(str(i.message).strip()) for i in w]
