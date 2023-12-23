@@ -14,6 +14,8 @@ JUSQU_AU_TAGGED = {'text': "jusqu'au",
                                   {'id': 5, 'dep_id': 3, 'dep_type': 'ADVMOD'}],
                    'type': 0}
 
+TRIPLE_CLITIC_FORM = {'text': "d'l'attraper", 'time': None, 'morphology': [{'lemma': 'de', 'pos': 'adp', 'feats': ''}, {'lemma': 'lui', 'pos': 'pron', 'feats': 'Prs&S3'}, {'lemma': 'attraper', 'pos': 'verb', 'feats': 'Inf'}], 'dependency': [{'id': 3, 'dep_id': 5, 'dep_type': 'MARK'}, {'id': 4, 'dep_id': 5, 'dep_type': 'OBJ'}, {'id': 5, 'dep_id': 2, 'dep_type': 'XCOMP'}], 'type': 0}
+
 def test_ud_pipeline(en_doc):
     assert morphoanalyze(en_doc) == en_doc
     
@@ -32,5 +34,11 @@ def test_ud_jusqu():
         res = morphoanalyze(Document.new("tu vas aller jusqu'au.", lang="fra"))
         assert res[0][-2].model_dump() == JUSQU_AU_TAGGED
 
-
+# email dec222023-05:57
+# based utterance
+def test_ud_triple_clitics():
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        res = morphoanalyze(Document.new("pour essayer d'l'attraper.", lang="fra"))
+        assert res[0][-2].model_dump() == TRIPLE_CLITIC_FORM
 

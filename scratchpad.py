@@ -17,41 +17,48 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 from batchalign import *
 
 ########### The Batchalign Core Test Harness ###########
-# from batchalign.formats.chat.parser import chat_parse_utterance
+from batchalign.formats.chat.parser import chat_parse_utterance
+ 
+text = "pour essayer d'l'attraper."
 
-# text = "Pirate-des-Caraïbes !"
+function = "morphosyntax"
+lang = "fra"
+num_speakers = 1
 
-# function = "morphosyntax"
-# lang = "fra"
-# num_speakers = 1
+forms, delim = chat_parse_utterance(text, None, None, None, None)
+utterance = Utterance(content=forms, delim=delim)
 
-# forms, delim = chat_parse_utterance(text, None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim)
+# utterance = Utterance(content=text)
 
-# # utterance = Utterance(content=text)
+ut = Document(content=[utterance], langs=[lang])
+pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers)
+doc = pipeline(ut)
+doc[0][-2].model_dump()
 
-# ut = Document(content=[utterance, CustomLine(id="Birthday of CHI",
-#                                              content="tmp", type=CustomLineType.INDEPENDENT)], langs=[lang])
-# pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers)
-# doc = pipeline(ut)
-# doc[0][-2].model_dump()
+doc[0].content[-2]
 
-# print(str(CHATFile(doc=doc)))
+print(str(CHATFile(doc=doc)))
 
 ########### The Batchalign Parser Harness ###########
-# from batchalign.formats.chat import CHATFile
+from batchalign.formats.chat import CHATFile
 
-# in_dir = "../talkbank-alignment/test_harness/input/"
-# out_dir = "../talkbank-alignment/test_harness/output/"
+in_dir = "../talkbank-alignment/test_harness/input/"
+out_dir = "../talkbank-alignment/test_harness/output/"
 
-# in_files = glob(str(Path(in_dir)/"*.cha"))
+in_files = glob(str(Path(in_dir)/"*.cha"))
+parent, _, files = zip(*list(os.walk(in_dir)))
 
-# for file in in_files:
-#     try:
-#         f = CHATFile(path=os.path.abspath(file))
-#     except Exception as e:
-#         print(file)
-#         raise e
+in_files = [os.path.join(a,i)
+            for a,b in zip(parent, files)
+            for i in b
+            if ".cha" in i]
+
+for file in in_files:
+    try:
+        f = CHATFile(path=os.path.abspath(file))
+    except Exception as e:
+        print(file)
+        raise e
 
 # f.doc[1][1]
 
@@ -90,7 +97,7 @@ from batchalign import *
 # from batchalign.formats.chat.parser import chat_parse_utterance
 # from batchalign.formats.chat.lexer import lex
 
-# main = "+, maison méla [: caméra] . [+ pimit]"
+# main = "une betisse [% d] ."
 # mor = None
 # gra = None
 

@@ -578,10 +578,14 @@ def tokenizer_processor(tokenized, lang, sent):
             indx += 1
         elif ("fr" in lang) and matches(i, "au"):
             res.append((conform(i), True))
-        elif ("fr" in lang) and re.match(r"\w'\w+", conform(i)):
-            before,after = conform(i).split("'")
-            res.append((f'{before}\'', False))
-            res.append((after, False))
+        # we need to triple clitics...
+        # "pour essayer d'l'attraper"
+        elif ("fr" in lang) and re.match(r"(\w')+\w+", conform(i)):
+            parts = conform(i).split("'")
+            with_clitic, without = parts[:-1], parts[-1]
+            for elem in with_clitic:
+                res.append((f'{elem}\'', False))
+            res.append((f'{without}', False))
         elif ("fr" in lang) and conform(i).split("'")[0] in ["jusqu", "puisqu", "quelqu", "aujourd"]:
             before,after = conform(i).split("'")
             res.append((f'{before}\'', False))
