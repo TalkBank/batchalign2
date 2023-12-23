@@ -119,7 +119,8 @@ class UtteranceLexer:
         # we just go through all the words and add the type that is appropriate
         if form in NORMAL_GROUP_MARKS:
             for f in words:
-                self.__forms.append((annotation_clean(f).strip(), TokenType.REGULAR))
+                self.__handle(f, num, delim)
+                # self.__forms.append((annotation_clean(f).strip(), TokenType.REGULAR))
             self.__forms.append((form.strip(), TokenType.FEAT))
         elif form in REPEAT_GROUP_MARKS:
             for f in words:

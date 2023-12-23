@@ -536,7 +536,10 @@ def tokenizer_processor(tokenized, lang, sent):
     # belongs to the same group (i.e. orthographically
     # the same unit), we combine it into one
     groups = []
-    alignments = groupby(align(targets, refs, tqdm=False), lambda x:x.reference_payload)
+    alignment = align(targets, refs, tqdm=False)
+    if any([isinstance(i, Extra) for i in alignment]):
+        breakpoint()
+    alignments = groupby(alignment, lambda x:x.reference_payload)
     for key, grp in alignments:
         group = []
         for elem in grp:
