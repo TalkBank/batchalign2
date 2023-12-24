@@ -40,26 +40,28 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
     # scan the timing
     # lex the utterance
     to_lex = re.compile("\x15\d+_\d+\x15").sub("", text).strip()
+    # fix all spacing issues
+    to_lex = to_lex.replace("< ", "<")
+    to_lex = to_lex.replace(" ]", "]")
+    to_lex = to_lex.replace("[ ", "[")
+    to_lex = to_lex.replace(" >", ">")
+    to_lex = to_lex.replace("  ", " ") # we do this twice
+    to_lex = to_lex.replace("  ", " ")
 
     # if the first form has a < in it and has no words,
     # its probably a beginning delimiter which we do not lex
-    if (len(text) > 0 and
-        ("<" in text.split(" ")[0]  or "+" in text.split(" ")[0] )
-        and not re.findall("\w", text.split(" ")[0])):
-        beg = text.split(" ")[0]
+    if (len(to_lex) > 0 and
+        ("<" in to_lex.split(" ")[0]  or "+" in to_lex.split(" ")[0] )
+        and not re.findall("\w", to_lex.split(" ")[0])):
+        beg = to_lex.split(" ")[0]
         to_lex = to_lex.replace(beg, "")
+
 
     # fix commas for people that don't annotate commas with a space
     to_lex = to_lex.replace(",", " ,")
 
-    # fix all the things we just don't tag
-    to_lex = to_lex.replace("<", " <")
-    to_lex = to_lex.replace("]", "] ")
-    to_lex = to_lex.replace("[", " [")
-    to_lex = to_lex.replace(">", "> ")
     to_lex = re.sub(r"\([\d.]+\)", "", to_lex)
     to_lex = re.sub(r"↫.*?↫", "", to_lex)
-
 
     # if there is a punct, move it
     for end in sorted(ENDING_PUNCT, key=len, reverse=True):

@@ -19,7 +19,7 @@ from batchalign import *
 ########### The Batchalign Core Test Harness ###########
 # from batchalign.formats.chat.parser import chat_parse_utterance
  
-# text = "&~eu &~cho xxx+//."
+# text = "<xxx no hay> [<] (es)to no hay ."
 
 # function = "morphosyntax"
 # lang = "fra"
@@ -98,8 +98,11 @@ from batchalign import *
 # from batchalign.formats.chat.parser import chat_parse_utterance
 # from batchalign.formats.chat.lexer import lex
 
-# main = "tu <xxx lui> [?] montrer le drôle de monsieur Patate ."
+# main = "+< <(es)tá (a)brien(d)o [= la puerta del salón] [: lol psych this is a retrace] [/] (.) ábrele sometimes> [?] no it [=! susurrando] [/] isn't, or is [/] it +... [=a tmp]"
 # mor = None
 # gra = None
 
 # chat_parse_utterance(main, mor, gra, None, None)
+
+
+

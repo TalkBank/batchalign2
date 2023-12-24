@@ -92,6 +92,17 @@ PARSED_CONTINOUS_GROUPS = ([Form(text='Humph'), Form(text='without'), Form(text=
                             Form(text='ahaha', type=1), Form(text='ha', type=1), Form(text='what'),
                             Form(text='is', type =1), Form(text='happening'), Form(text='.', type=5)], '.')
 
+# general test for recursive groups parses as well as special symbols
+# emali DEC232023 0723
+RECURSIVE_GROUPS = "+< <(es)tá (a)brien(d)o [= la puerta del salón] [: lol psych this is a retrace] [/] (.) ábrele sometimes> [?] no it [=! susurrando] [/] isn't, or is [/] it +... [=a tmp]"
+PARSED_RECURSIVE_GROUPS = ([Form(text='está', type=0), Form(text='lol', type=1), Form(text='psych', type=1),
+                            Form(text='this', type=1), Form(text='is', type=1), Form(text='a', type=1),
+                            Form(text='retrace', type=1), Form(text='ábrele', type=0), Form(text='sometimes', type=0),
+                            Form(text='no', type=0), Form(text='it', type=1), Form(text="isn't", type=0),
+                            Form(text=',', type=5), Form(text='or', type=0), Form(text='is', type=1),
+                            Form(text='it', type=0), Form(text='+...', type=5)], '+...')
+
+
 EDGE_CASES = [
     # email dec192023 10:31AM: wack ending
     [
@@ -170,3 +181,8 @@ def test_group_markers():
 def test_continous_groups():
     assert (chat_parse_utterance(CONTINOUS_GROUPS, None, None, None, None) ==
             PARSED_CONTINOUS_GROUPS)
+
+# email dec232023 7:23pm
+def test_recursive_groups():
+    assert (chat_parse_utterance(RECURSIVE_GROUPS, None, None, None, None) ==
+            PARSED_RECURSIVE_GROUPS)
