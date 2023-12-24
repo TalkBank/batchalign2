@@ -42,11 +42,8 @@ class UtteranceLexer:
             # be whatever the sub-clause's new target is
             else:
                 res = UtteranceLexer.decode(content)
-                for i,t in res:
-                    if t == TokenType.REGULAR:
-                        decoded.append((i, type))
-                    else:
-                        decoded.append((i, t))
+                for i,_ in res:
+                    decoded.append((i, type))
         return decoded
 
     def __get_until(self, end_tokens=[' ']):
