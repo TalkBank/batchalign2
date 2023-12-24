@@ -102,6 +102,12 @@ PARSED_RECURSIVE_GROUPS = ([Form(text='está', type=0), Form(text='lol', type=1)
                             Form(text=',', type=5), Form(text='or', type=0), Form(text='is', type=1),
                             Form(text='it', type=0), Form(text='+...', type=5)], '+...')
 
+# nested groups
+# Email DEC142024 1208
+NESTED_GROUPS = "<chiquitito <se pu> [//] <no quier> [///] se quería bañar> [=! cantando] +..."
+PARSED_NESTED_GROUPS = ([Form(text='chiquitito'), Form(text='se', type=1), Form(text='pu', type=1),
+                         Form(text='no', type=1), Form(text='quier', type=1), Form(text='se'),
+                         Form(text='quería'), Form(text='bañar'), Form(text='+...', type=5)], '+...')
 
 EDGE_CASES = [
     # email dec192023 10:31AM: wack ending
@@ -186,3 +192,16 @@ def test_continous_groups():
 def test_recursive_groups():
     assert (chat_parse_utterance(RECURSIVE_GROUPS, None, None, None, None) ==
             PARSED_RECURSIVE_GROUPS)
+
+# email dec242023 12:08PM
+def test_nested_groups():
+    assert (chat_parse_utterance(NESTED_GROUPS, None, None, None, None) ==
+            PARSED_NESTED_GROUPS)
+def test_ca_marks():
+    assert len(chat_parse_utterance("⌊&=tararea⌋ . •458470_458480•", None, None, None, None)[0]) == 1
+def test_repeated_marks_in_same_lex():
+    assert len(chat_parse_utterance("[- eng] <mind if I borrow xxx>[<][*] ?", None, None, None, None)[0]) == 5
+
+
+
+

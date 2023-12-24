@@ -56,6 +56,8 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
         beg = to_lex.split(" ")[0]
         to_lex = to_lex.replace(beg, "")
 
+    # get rid of CA delimiters
+    to_lex = re.compile("⌊&=[ A-Za-zÀ-ÖØ-öø-ÿ'-]+⌋").sub("", to_lex).strip()
 
     # fix commas for people that don't annotate commas with a space
     to_lex = to_lex.replace(",", " ,")
@@ -221,7 +223,12 @@ def chat_parse_doc(lines):
                                      url=None)
         # depenent tiers with @ are counted as "other" and are inserted as-is
         elif line.strip()[0] == "@":
-            beg,end = line.strip()[1:].split(":\t")
+            try:
+                beg,end = line.strip()[1:].split(":\t")
+            except ValueError:
+                # we only have one
+                beg = line.strip()[1:].strip()
+                end = ""
             line = CustomLine(id=beg.strip(),
                                 type=CustomLineType.INDEPENDENT,
                                 content=end.strip())

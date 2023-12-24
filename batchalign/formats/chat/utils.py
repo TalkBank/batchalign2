@@ -59,13 +59,15 @@ def chat_parse_mor(mor_str):
 
     return mors
     
-def annotation_clean(content):
+def annotation_clean(content, special=False):
     """Clean anotation marks from string.
 
     Parameters
     ----------
     content : str
         The string from which annotation marks should be cleaned.
+    special : bool
+        Ignore certain types of forms which distract a parser.
 
     Returns
     -------
@@ -76,7 +78,8 @@ def annotation_clean(content):
     word = content
     cleaned_word = word.replace("[/]","") # because of weird spacing inclusions
     cleaned_word = re.sub(r"\x15\d+_\d+\x15", '', cleaned_word)
-    cleaned_word = re.sub(r"&~\w+", '', cleaned_word)
+    if not special:
+        cleaned_word = re.sub(r"&~\w+", '', cleaned_word)
     cleaned_word = cleaned_word.replace("(","").replace(")","")
     cleaned_word = cleaned_word.replace("[","").replace("]","")
     cleaned_word = cleaned_word.replace("<","").replace(">","")
@@ -112,6 +115,8 @@ def annotation_clean(content):
     cleaned_word = cleaned_word.replace("š","").replace("ˈ","")
     cleaned_word = cleaned_word.replace("ˌ","").replace("‹","")
     cleaned_word = cleaned_word.replace("›","").replace("〔","")
+    cleaned_word = cleaned_word.replace("~","").replace("&~","")
+    cleaned_word = cleaned_word.replace(">","").replace("<","")
     cleaned_word = cleaned_word.replace("〕","").replace("//","").replace(";","")
     cleaned_word = re.sub(r"@.", '', cleaned_word)
     cleaned_word = re.sub(r"&.", '', cleaned_word)

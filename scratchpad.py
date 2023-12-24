@@ -41,25 +41,25 @@ from batchalign import *
 # print(str(CHATFile(doc=doc)))
 
 ########### The Batchalign Parser Harness ###########
-# from batchalign.formats.chat import CHATFile
+from batchalign.formats.chat import CHATFile
 
-# in_dir = "../talkbank-alignment/test_harness/input/"
-# out_dir = "../talkbank-alignment/test_harness/output/"
+in_dir = "../talkbank-alignment/test_harness/input/"
+out_dir = "../talkbank-alignment/test_harness/output/"
 
-# in_files = glob(str(Path(in_dir)/"*.cha"))
-# parent, _, files = zip(*list(os.walk(in_dir)))
+in_files = glob(str(Path(in_dir)/"*.cha"))
+parent, _, files = zip(*list(os.walk(in_dir)))
 
-# in_files = [os.path.join(a,i)
-#             for a,b in zip(parent, files)
-#             for i in b
-#             if ".cha" in i]
+in_files = [os.path.join(a,i)
+            for a,b in zip(parent, files)
+            for i in b
+            if ".cha" in i]
 
-# for file in in_files:
-#     try:
-#         f = CHATFile(path=os.path.abspath(file))
-#     except Exception as e:
-#         print(file)
-#         raise e
+for file in in_files:
+    try:
+        f = CHATFile(path=os.path.abspath(file))
+    except Exception as e:
+        print(file)
+        raise e
 
 # f.doc[1][1]
 
@@ -95,14 +95,19 @@ from batchalign import *
 
 ########## The Batchalign CHAT Test Tarness ##########
 
-# from batchalign.formats.chat.parser import chat_parse_utterance
-# from batchalign.formats.chat.lexer import lex
+from batchalign.formats.chat.parser import chat_parse_utterance
+from batchalign.formats.chat.lexer import lex
 
-# main = "<la dame et ça , c'est> [/] e(lle) che(r)che quoi , la dame ?"
-# mor = None
-# gra = None
+from batchalign.formats.chat.utils import annotation_clean
 
-# chat_parse_utterance(main, mor, gra, None, None)
+# # annotation_clean("<&~yuuuu>")
+
+main = "<ha &~yuuuu> [<] &~uuuuu"
+mor = None
+gra = None
+
+chat_parse_utterance(main, mor, gra, None, None)
 
 
 
+# 

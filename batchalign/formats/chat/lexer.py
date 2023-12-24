@@ -1,5 +1,6 @@
 import re
 from enum import Enum
+import copy
 
 from batchalign.document import *
 from batchalign.formats.chat.utils import *
@@ -104,36 +105,61 @@ class UtteranceLexer:
         text = ""
         group = [form]
 
+
+        nesting = 0
+        # print(form)
+
         # scan forward until we have the first actual form, if
         # its a selection group
-        if type == ">" and annotation_clean(form) == "":
+        if type == ">" and annotation_clean(form, special=True) == "":
             form, num, delim = self.__get_until()
             group = [group.pop(0).strip()+annotation_clean(form)]
 
+
+        # decrement nesting first
+        if form not in REPEAT_GROUP_MARKS and form not in NORMAL_GROUP_MARKS:
+            if type == ">" and ">" in form:
+                nesting -= 1
+            elif type == "]" and "]" in form:
+                nesting -= 1
+
         # grab forward the entire group 
-        while type not in form:
+        while (type not in form) or (nesting != -1):
             form, num, delim = self.__get_until()
+
+            sform = copy.deepcopy(form)
+            for i in REPEAT_GROUP_MARKS + NORMAL_GROUP_MARKS:
+                sform = sform.replace(i, "").strip()
+                
+            # print("A", form, sform, nesting, type)
+            # we want to capture a group at the same nesting level
+            if type == ">":
+                nesting += sform.count("<")
+            elif type == "]":
+                nesting += sform.count("[")
+            if type == ">":
+                nesting -= sform.count(">")
+            elif type == "]":
+                nesting -= sform.count("]")
+            # print("B", form, sform, nesting, type)
+
             if form == None or num == 0:
                 raise CHATValidationException(f"Lexer failed! Unexpected end to utterance within form group. On line: '{self.raw}', parsed group: {str(group)}")
-            # if form[0] == "<" or form[0] == "[":
-            #     group.append(form)
-            #     # recursively handle a recursive group
-            #     if form[0] == "<":
-            #         recurse, form = self.handle_group(form, ">")
-            #     elif form[0] == "[":
-            #         recurse, form = self.handle_group(form, "]")
-            #     for i,_,_ in recurse:
-            #         group.append(i)
-            #     continue
+
             group.append(form)
             text += (" "+form)
+
 
         # get rid 
         special = [re.compile(r"[A-Za-zÀ-ÖØ-öø-ÿ']").sub("", i).strip() for i in group]
         words = [re.compile(r"[^A-Za-zÀ-ÖØ-öø-ÿ']").sub("", i).strip() for i in group
                  if re.compile(r"[^A-Za-zÀ-ÖØ-öø-ÿ']").sub("", i).strip()!= ""]
 
-        return words, special[0], text
+
+        if type == "]":
+            return words, special[0], text
+        else:
+            return words, "<", text
 
     def handle_group(self, form, type=">"):
         orig_form = form
@@ -145,84 +171,24 @@ class UtteranceLexer:
         if len(text.strip()) == 0:
             raise CHATValidationException(f"There is a group with nothing within. Batchalign is really confused. Stopping all parses of this file. line='{self.raw}', group='{text}'")
 
+        if annotation_clean(text).strip() == "":
+            return []
+
         # parse the internal text of the group
         # without the outside group boundary
         # if the group is a "selection" i.e. < and >
-        if text[0] == "<" and text[-1] == ">":
-            lexer = UtteranceLexer(text.strip()[1:-1])
+        if text[0] == "<":
+            lexer = UtteranceLexer(text.strip(special).strip(">"))
             forms = lexer.forms
-        elif text[0] == "[" and text[-1] == "]":
+        elif text[0] == "[":
             text = text.strip(special).strip("]").strip()
             lexer = UtteranceLexer(text)
             forms = lexer.forms
-
+        else:
+            raise CHATValidationException(f"Encountered unexpected group with no clear type; giving up. line='{self.raw}'; group='{text}'")
 
         return forms
-
-        # for other groups, we simply need to parse the inside
-        # by scanning what it is
-        
-
-        
-
-        # if len(forms) == 0:
-            # breakpoint()
-
-        # for each type of notation, we parse it individually
-        # this is a replacement; it should replace whatever we
-        # had parsed before
-        # if forms[0][0] == ":" and :
-
-        # breakpoint()
-
-        # # get the next token
-        # form, num, delim = self.__get_until()
-
-        # # collect forms to handle
-        # to_handle = []
-
-        # # continue handling until we get the final form
-        # while len(form) > 0 and form[0] == "[" and form.strip() not in NORMAL_GROUP_MARKS + REPEAT_GROUP_MARKS:
-        #     # read any replacements that exist
-        #     if form[:2] == "[:":
-        #         # this means that "words" need to be replaced
-        #         # with whatever is in the *NEXT* group
-        #         words, special, _ = self.__get_group(form, type="]")
-        #     # in all other cases, we get the next group and ignore it
-        #     else:
-        #         grp = self.__get_group(form, type="]")
-        #     # fetch the next form
-        #     form, num, delim = self.__get_until()
-
-        
-        # # we just go through all the words and add the type that is appropriate
-        # if form in NORMAL_GROUP_MARKS:
-        #     for f in words:
-        #         to_handle.append((f, num, delim))
-        #         # self.__forms.append((annotation_clean(f).strip(), TokenType.REGULAR))
-        #     self.__forms.append((form.strip(), TokenType.FEAT))
-        # elif form in REPEAT_GROUP_MARKS:
-        #     for f in words:
-        #         self.__forms.append((annotation_clean(f).strip(), TokenType.RETRACE))
-        #     self.__forms.append((form.strip(), TokenType.FEAT))
-        # else:
-        #     if special[0] != "[" or special[:2] == "[:":
-        #         for f in words:
-        #             to_handle.append((f, num, delim))
-        #     if len(form) == 0:
-        #         if special.strip() != "[+":
-        #             warnings.warn(f"Lexer failed! Nothing was annotated after a group; we don't know what the group does. We are ignoring this group! On line: '{self.raw}'; parsed: '{words}'")
-        #         # otherwise its an utterance end delimiter and we truly don't care
-        #         return
-        #     if form[0] != "<":
-        #         to_handle.append((form, num, delim))
-        #     else:
-        #         to_handle += self.handle_group(form, type=">")
-
-        # print("HANDLING", to_handle)
-
-        # return to_handle, form
-        
+       
 
     def parse(self):
 
