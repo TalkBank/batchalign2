@@ -76,9 +76,11 @@ class UtteranceLexer:
             self.__clauses.append((self.handle_group(form, type=">"), TokenType.REGULAR))
         elif form.strip() in REPEAT_GROUP_MARKS:
             self.__clauses.append((self.__clauses.pop(-1)[0], TokenType.RETRACE))
-            self.__clauses.append((form.strip(), TokenType.FEAT))
+            # self.__clauses.append((form.strip(), TokenType.FEAT))
         elif form.strip() in NORMAL_GROUP_MARKS:
-            self.__clauses.append((form.strip(), TokenType.FEAT))
+            # basically ignore the form
+            pass
+            # self.__clauses.append((form.strip(), TokenType.FEAT))
         elif form[0] == "[" and form[:2] != "[:":
             # we ignore all other things which are simple annotations
             self.handle_group(form, type="]")

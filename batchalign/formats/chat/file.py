@@ -109,9 +109,9 @@ class CHATFile(BaseFormat):
         for i in utterances:
             if isinstance(i, CustomLine):
                 if "birth" not in i.id.lower():
-                    extra = f"@{i.id}:\t"
+                    extra = f"@{i.id}"
                     if i.content != None:
-                        extra += i.content
+                        extra += ":\t"+i.content
                     main.append(extra.strip())
             else:
                 main.append(generate_chat_utterance(i))

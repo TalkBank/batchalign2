@@ -228,10 +228,10 @@ def chat_parse_doc(lines):
             except ValueError:
                 # we only have one
                 beg = line.strip()[1:].strip()
-                end = ""
+                end = None
             line = CustomLine(id=beg.strip(),
                                 type=CustomLineType.INDEPENDENT,
-                                content=end.strip())
+                                content=end.strip() if end != None else None)
             results["content"].append(line)
         # we now parse main tiers
         elif line.strip()[0] == "*":
