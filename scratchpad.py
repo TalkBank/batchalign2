@@ -19,7 +19,7 @@ from batchalign import *
 ########### The Batchalign Core Test Harness ###########
 # from batchalign.formats.chat.parser import chat_parse_utterance
  
-# text = "xxx ."
+# text = "&=pone:crema . •24441_28051•"
 
 # function = "morphosyntax"
 # lang = "fra"
@@ -102,7 +102,7 @@ from batchalign import *
 
 # # # annotation_clean("<&~yuuuu>")
 
-# main = "ése <sienta e@c> [?] [//] <e@c sienta e@c> [?] [//] (sen)tadita [//] &~te [?] [/] quiere (sen)tadita ."
+# main = "&=pone:crema . •24441_28051•"
 # mor = None
 # gra = None
 

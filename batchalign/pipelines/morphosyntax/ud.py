@@ -720,6 +720,10 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
             # parse the stanza output
             mor, gra = parse_sentence(sents[0], ending, special_forms_cleaned, lang[0])
 
+            if mor.strip() == "":
+                L.debug(f"Encountered an utterance that's likely devoid of morphological information; skipping... utterance='{doc.content[indx]}'")
+                continue
+
             # insert morphology into the parsed forms
             forms, _ = chat_parse_utterance(line, mor, gra, None, None)
 
@@ -733,7 +737,7 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
                 content.dependency = form.dependency
 
         except Exception as e:
-            warnings.warn(f"\n\nUtterance failed parsing, skipping ud tagging... line='{line}', error='{e}'\n")
+            warnings.warn(f"Utterance failed parsing, skipping ud tagging... line='{line}', error='{e}'.\n")
 
     L.debug("Stanza done.")
     return doc

@@ -120,12 +120,15 @@ def _dispatch(command, lang, num_speakers,
                     # RUN THE PUPPY!
                     doc = pipeline(doc,
                                 callback=lambda *args:progress_callback(file, *args))
-                msgs = [escape(str(i.message).strip()) for i in w]
+                msgs = [escape(str(i.message)).strip() for i in w]
                 # write the format, as needed
                 writer(doc, output)
                 # print any warnings
                 if len(msgs) > 0:
-                    Console().print(f"[bold yellow]WARN[/bold yellow] on {file}:\n","\n".join(msgs)+"\n")
+                    if ctx.obj["verbose"] > 1:
+                        Console().print(f"\n[bold yellow]WARN[/bold yellow] on {file}:\n","\n".join(msgs)+"\n")
+                    else:
+                        prog.console.print(f"[bold yellow]WARN[/bold yellow] on {file}:\n","\n".join(msgs)+"\n")
                 prog.update(tasks[file], processor=f"[bold green]DONE[/bold green]")
             except Exception as e:
                 progress_callback(file, 0, 0, e)
