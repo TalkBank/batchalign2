@@ -137,7 +137,7 @@ def _dispatch(command, lang, num_speakers,
     if len(errors) > 0:
         C.print()
         for file, trcbk, e in errors:
-            C.print(f"[bold red]ERROR[/bold red] on file [italic]{Path(file).name}[/italic]: {escape(str(e))}\n")
+            C.print(f"[bold red]ERROR[/bold red] on file [italic]{os.path.relpath(str(Path(file).absolute()), in_dir)}[/italic]: {escape(str(e))}\n")
             if ctx.obj["verbose"] == 1:
                 C.print(escape(str(trcbk)))
             elif ctx.obj["verbose"] > 1:

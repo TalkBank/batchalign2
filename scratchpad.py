@@ -17,9 +17,9 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 from batchalign import *
 
 ########### The Batchalign Core Test Harness ###########
-# from batchalign.formats.chat.parser import chat_parse_utterance
+from batchalign.formats.chat.parser import chat_parse_utterance
  
-# text = "&=pone:crema . •24441_28051•"
+# text = "moi <je l'ai lui> [/] < j(e) l'ai> [/] j'ai lui [*] ."
 
 # function = "morphosyntax"
 # lang = "fra"
@@ -102,7 +102,7 @@ from batchalign import *
 
 # # # annotation_clean("<&~yuuuu>")
 
-# main = "&=pone:crema . •24441_28051•"
+# main = "moi <je l'ai lui> [/] < j(e) l'ai> [/] j'ai lui [*] ."
 # mor = None
 # gra = None
 
