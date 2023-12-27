@@ -11,7 +11,7 @@ from batchalign.errors import *
 # tests typical utterance with full alignment and one missing bullet
 STANDARD_UTTERANCE = [
     "I'm going to read . \x152530_6490\x15",
-    'pron|I-Prs-Nom-S1~aux|be-Fin-Ind-1-Pres verb|go-Part-Pres part|to verb|read-Inf .',
+    'pron|I&Prs&Nom&S1~aux|be&Fin&Ind&1&Pres verb|go&Part&Pres part|to verb|read&Inf .',
     '1|3|NSUBJ 2|3|AUX 3|18|ROOT 4|5|MARK 5|3|XCOMP 6|3|PUNCT',
     "I'm \x152530_2720\x15 going \x152720_2910\x15 to read \x153000_3200\x15 .",
     []
@@ -29,7 +29,7 @@ PARSED_NOTIME_NOMOR = [Form(text="I'm", time=None, morphology=None, dependency=N
 
 STANDARD_NOGRA = [
     "I'm going to read . \x152530_6490\x15",
-    'pron|I-Prs-Nom-S1~aux|be-Fin-Ind-1-Pres verb|go-Part-Pres part|to verb|read-Inf .',
+    'pron|I&Prs&Nom&S1~aux|be&Fin&Ind&1&Pres verb|go&Part&Pres part|to verb|read&Inf .',
     None,
     None,
     []
@@ -146,6 +146,7 @@ def test_parse_utterance():
     res, delim = chat_parse_utterance(*STANDARD_UTTERANCE)
     assert delim == "."
     assert res == PARSED_STANDARD_UTTERANCE
+
 def test_parse_utterance_missing_mor_time():
     res, delim = chat_parse_utterance(*STANDARD_NOTIME_NOMOR)
     assert delim == "."

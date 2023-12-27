@@ -4,7 +4,7 @@ from batchalign.document import *
 import warnings
 
 CEST_TAGGED = [{'lemma': 'ce', 'pos': 'pron', 'feats': 'Dem&S3'},
-               {'lemma': 'être', 'pos': 'aux', 'feats': 'Fin&Ind&3&Pres'}]
+               {'lemma': 'être', 'pos': 'aux', 'feats': 'Fin&Ind&Pres&S3'}]
 
 JUSQU_AU_TAGGED = {'text': "jusqu'au",
                    'time': None,
@@ -14,7 +14,7 @@ JUSQU_AU_TAGGED = {'text': "jusqu'au",
                                   {'id': 5, 'dep_id': 3, 'dep_type': 'ADVMOD'}],
                    'type': 0}
 
-TRIPLE_CLITIC_FORM = {'text': "d'l'attraper", 'time': None, 'morphology': [{'lemma': 'de', 'pos': 'adp', 'feats': ''}, {'lemma': 'lui', 'pos': 'pron', 'feats': 'Prs&S3'}, {'lemma': 'attraper', 'pos': 'verb', 'feats': 'Inf'}], 'dependency': [{'id': 3, 'dep_id': 5, 'dep_type': 'MARK'}, {'id': 4, 'dep_id': 5, 'dep_type': 'OBJ'}, {'id': 5, 'dep_id': 2, 'dep_type': 'XCOMP'}], 'type': 0}
+TRIPLE_CLITIC_FORM = {'text': "d'l'attraper", 'time': None, 'morphology': [{'lemma': 'de', 'pos': 'adp', 'feats': ''}, {'lemma': 'lui', 'pos': 'pron', 'feats': 'Prs&S3'}, {'lemma': 'attraper', 'pos': 'verb', 'feats': 'Inf&S'}], 'dependency': [{'id': 3, 'dep_id': 5, 'dep_type': 'MARK'}, {'id': 4, 'dep_id': 5, 'dep_type': 'OBJ'}, {'id': 5, 'dep_id': 2, 'dep_type': 'XCOMP'}], 'type': 0}
 
 def test_ud_pipeline(en_doc):
     assert morphoanalyze(en_doc) == en_doc

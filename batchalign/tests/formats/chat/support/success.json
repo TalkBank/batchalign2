@@ -10,10 +10,7 @@
             "content": [
                 {
                     "text": "Um",
-                    "time": [
-                        20780,
-                        21330
-                    ],
+                    "time": null,
                     "morphology": [
                         {
                             "lemma": "um",
@@ -32,50 +29,35 @@
                 },
                 {
                     "text": "I",
-                    "time": [
-                        21360,
-                        21480
-                    ],
+                    "time": null,
                     "morphology": null,
                     "dependency": null,
                     "type": 1
                 },
                 {
                     "text": "like",
-                    "time": [
-                        21480,
-                        21720
-                    ],
+                    "time": null,
                     "morphology": null,
                     "dependency": null,
                     "type": 1
                 },
                 {
                     "text": "I",
-                    "time": [
-                        22180,
-                        22310
-                    ],
+                    "time": null,
                     "morphology": null,
                     "dependency": null,
                     "type": 1
                 },
                 {
                     "text": "like",
-                    "time": [
-                        22310,
-                        22710
-                    ],
+                    "time": null,
                     "morphology": null,
                     "dependency": null,
                     "type": 1
                 },
                 {
                     "text": "I",
-                    "time": [
-                        22710,
-                        22760
-                    ],
+                    "time": null,
                     "morphology": [
                         {
                             "lemma": "I",
@@ -94,15 +76,12 @@
                 },
                 {
                     "text": "like",
-                    "time": [
-                        22760,
-                        23270
-                    ],
+                    "time": null,
                     "morphology": [
                         {
                             "lemma": "like",
                             "pos": "verb",
-                            "feats": "Fin&Ind&1&Pres"
+                            "feats": "Fin&Ind&1&Pres&S1"
                         }
                     ],
                     "dependency": [
@@ -116,10 +95,7 @@
                 },
                 {
                     "text": "beans",
-                    "time": [
-                        23300,
-                        24300
-                    ],
+                    "time": null,
                     "morphology": [
                         {
                             "lemma": "bean",
@@ -178,15 +154,15 @@
                     "morphology": [
                         {
                             "lemma": "so",
-                            "pos": "co",
+                            "pos": "adv",
                             "feats": ""
                         }
                     ],
                     "dependency": [
                         {
                             "id": 1,
-                            "dep_id": 0,
-                            "dep_type": "BEG"
+                            "dep_id": 6,
+                            "dep_type": "ADVMOD"
                         }
                     ],
                     "type": 0
@@ -196,16 +172,16 @@
                     "time": null,
                     "morphology": [
                         {
-                            "lemma": "beg",
-                            "pos": "beg",
+                            "lemma": "begin",
+                            "pos": "cm",
                             "feats": ""
                         }
                     ],
                     "dependency": [
                         {
                             "id": 2,
-                            "dep_id": 1,
-                            "dep_type": "BEGP"
+                            "dep_id": 6,
+                            "dep_type": "PUNCT"
                         }
                     ],
                     "type": 5
@@ -216,15 +192,15 @@
                     "morphology": [
                         {
                             "lemma": "she",
-                            "pos": "pro:sub",
-                            "feats": ""
+                            "pos": "pron",
+                            "feats": "Prs&Nom&S3"
                         }
                     ],
                     "dependency": [
                         {
                             "id": 3,
                             "dep_id": 6,
-                            "dep_type": "SUBJ"
+                            "dep_type": "NSUBJ"
                         }
                     ],
                     "type": 0
@@ -235,12 +211,12 @@
                     "morphology": [
                         {
                             "lemma": "do",
-                            "pos": "mod",
-                            "feats": "3S"
+                            "pos": "aux",
+                            "feats": "Fin&Ind&3&Pres&S3"
                         },
                         {
                             "lemma": "not",
-                            "pos": "neg",
+                            "pos": "part",
                             "feats": ""
                         }
                     ],
@@ -252,8 +228,8 @@
                         },
                         {
                             "id": 5,
-                            "dep_id": 4,
-                            "dep_type": "NEG"
+                            "dep_id": 6,
+                            "dep_type": "ADVMOD"
                         }
                     ],
                     "type": 0
@@ -264,14 +240,14 @@
                     "morphology": [
                         {
                             "lemma": "have",
-                            "pos": "v",
-                            "feats": ""
+                            "pos": "verb",
+                            "feats": "Inf&S"
                         }
                     ],
                     "dependency": [
                         {
                             "id": 6,
-                            "dep_id": 0,
+                            "dep_id": 13,
                             "dep_type": "ROOT"
                         }
                     ],
@@ -283,8 +259,8 @@
                     "morphology": [
                         {
                             "lemma": "a",
-                            "pos": "det:art",
-                            "feats": ""
+                            "pos": "det",
+                            "feats": "Ind&Art"
                         }
                     ],
                     "dependency": [
@@ -302,8 +278,8 @@
                     "morphology": [
                         {
                             "lemma": "list",
-                            "pos": "n",
-                            "feats": ""
+                            "pos": "noun",
+                            "feats": "ComNeut"
                         }
                     ],
                     "dependency": [
@@ -321,15 +297,15 @@
                     "morphology": [
                         {
                             "lemma": "of",
-                            "pos": "prep",
+                            "pos": "adp",
                             "feats": ""
                         }
                     ],
                     "dependency": [
                         {
                             "id": 9,
-                            "dep_id": 8,
-                            "dep_type": "NJCT"
+                            "dep_id": 10,
+                            "dep_type": "CASE"
                         }
                     ],
                     "type": 0
@@ -340,15 +316,15 @@
                     "morphology": [
                         {
                             "lemma": "question",
-                            "pos": "n",
-                            "feats": "PL"
+                            "pos": "noun",
+                            "feats": "ComNeut&Plur"
                         }
                     ],
                     "dependency": [
                         {
                             "id": 10,
-                            "dep_id": 9,
-                            "dep_type": "POBJ"
+                            "dep_id": 8,
+                            "dep_type": "NMOD"
                         }
                     ],
                     "type": 0
@@ -359,7 +335,7 @@
                     "morphology": [
                         {
                             "lemma": "to",
-                            "pos": "inf",
+                            "pos": "part",
                             "feats": ""
                         }
                     ],
@@ -367,7 +343,7 @@
                         {
                             "id": 11,
                             "dep_id": 12,
-                            "dep_type": "INF"
+                            "dep_type": "MARK"
                         }
                     ],
                     "type": 0
@@ -378,15 +354,15 @@
                     "morphology": [
                         {
                             "lemma": "ask",
-                            "pos": "v",
-                            "feats": ""
+                            "pos": "verb",
+                            "feats": "Inf&S"
                         }
                     ],
                     "dependency": [
                         {
                             "id": 12,
                             "dep_id": 6,
-                            "dep_type": "XJCT"
+                            "dep_type": "ADVCL"
                         }
                     ],
                     "type": 0
@@ -397,15 +373,15 @@
                     "morphology": [
                         {
                             "lemma": "you",
-                            "pos": "pro:per",
-                            "feats": ""
+                            "pos": "pron",
+                            "feats": "Prs&Acc&S2"
                         }
                     ],
                     "dependency": [
                         {
                             "id": 13,
                             "dep_id": 12,
-                            "dep_type": "OBJ"
+                            "dep_type": "IOBJ"
                         }
                     ],
                     "type": 0
@@ -452,7 +428,7 @@
                     "morphology": [
                         {
                             "lemma": "so",
-                            "pos": "co",
+                            "pos": "adv",
                             "feats": ""
                         }
                     ],
@@ -460,7 +436,7 @@
                         {
                             "id": 1,
                             "dep_id": 3,
-                            "dep_type": "COM"
+                            "dep_type": "ADVMOD"
                         }
                     ],
                     "type": 0
@@ -471,15 +447,15 @@
                     "morphology": [
                         {
                             "lemma": "I",
-                            "pos": "pro:sub",
-                            "feats": ""
+                            "pos": "pron",
+                            "feats": "Prs&Nom&S1"
                         }
                     ],
                     "dependency": [
                         {
                             "id": 2,
                             "dep_id": 3,
-                            "dep_type": "SUBJ"
+                            "dep_type": "NSUBJ"
                         }
                     ],
                     "type": 0
@@ -490,14 +466,14 @@
                     "morphology": [
                         {
                             "lemma": "be",
-                            "pos": "cop",
-                            "feats": "PAST&13S"
+                            "pos": "verb",
+                            "feats": "Fin&Ind&1&Past&S1"
                         }
                     ],
                     "dependency": [
                         {
                             "id": 3,
-                            "dep_id": 0,
+                            "dep_id": 3,
                             "dep_type": "ROOT"
                         }
                     ],
@@ -545,15 +521,15 @@
                     "morphology": [
                         {
                             "lemma": "right",
-                            "pos": "adv",
-                            "feats": ""
+                            "pos": "adj",
+                            "feats": "Pos&S1"
                         }
                     ],
                     "dependency": [
                         {
                             "id": 1,
                             "dep_id": 3,
-                            "dep_type": "JCT"
+                            "dep_type": "ROOT"
                         }
                     ],
                     "type": 0
@@ -572,7 +548,7 @@
                         {
                             "id": 2,
                             "dep_id": 1,
-                            "dep_type": "LP"
+                            "dep_type": "PUNCT"
                         }
                     ],
                     "type": 5
@@ -583,15 +559,15 @@
                     "morphology": [
                         {
                             "lemma": "right",
-                            "pos": "co",
-                            "feats": ""
+                            "pos": "adj",
+                            "feats": "Pos&S1"
                         }
                     ],
                     "dependency": [
                         {
                             "id": 3,
-                            "dep_id": 0,
-                            "dep_type": "INCROOT"
+                            "dep_id": 1,
+                            "dep_type": "DISCOURSE"
                         }
                     ],
                     "type": 0
@@ -609,7 +585,7 @@
                     "dependency": [
                         {
                             "id": 4,
-                            "dep_id": 3,
+                            "dep_id": 1,
                             "dep_type": "PUNCT"
                         }
                     ],

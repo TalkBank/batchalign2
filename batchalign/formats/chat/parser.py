@@ -75,6 +75,16 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
 
     tokens = lex(to_lex)
 
+    # correct 0 forms
+    res = []
+    for i,j in tokens:
+        if i.strip() != "" and i[0] == '0':
+            res.append((i[1:], TokenType.CORRECTION))
+        else:
+            res.append((i,j))
+
+    tokens = res
+
     # seperate out main words by whether it should have phonation/morphology and add ending punct
     words = list(enumerate(tokens))
     lexed_words = [tok for tok in words if tok[1][1] in [TokenType.REGULAR,

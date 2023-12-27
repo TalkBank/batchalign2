@@ -138,7 +138,7 @@ def handler__PRON(word):
     return (handler(word)+
             stringify_feats(feats.get("PronType", "Int"),
                             feats.get("Case","").replace(",", ""),
-                            feats.get("Number", "")[:1]+person))
+                            feats.get("Number", "S")[:1]+person))
 
 def handler__DET(word):
     # get the features
@@ -168,7 +168,7 @@ def handler__ADJ(word):
     if person == "0":
         person = '4'
         
-    return handler(word)+stringify_feats(deg, case, number, person)
+    return handler(word)+stringify_feats(deg, case, number[:1]+person)
 
 def handler__NOUN(word):
     # get the features
@@ -199,9 +199,6 @@ def handler__VERB(word):
     flag = ""
     # append number and form if needed
     flag += "&"+feats.get("VerbForm", "Inf").replace(",", "")
-    number = feats.get("Number", "Sing")
-    if number != "Sing":
-        flag += f"&{number}"
     # append tense
     aspect = feats.get("Aspect", "")
     mood = feats.get("Mood", "")
@@ -209,12 +206,14 @@ def handler__VERB(word):
 
     if person == "0":
         person = '4'
+    number = feats.get("Number", "Sing")
         
     tense = feats.get("Tense", "")
     polarity = feats.get("Polarity", "")
     polite = feats.get("Polite", "")
-    return handler(word)+flag+stringify_feats(aspect, mood, person,
-                                              tense, polarity, polite)
+    return handler(word)+flag+stringify_feats(aspect, mood,
+                                              tense, polarity, polite,
+                                              number[:1]+person)
 
 def handler__actual_PUNCT(word):
     # actual punctuation handler

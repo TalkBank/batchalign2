@@ -1,5 +1,4 @@
 @UTF8
-@Window:	30_471_890_1011_-1_-1_224_0_224_0
 @Begin
 @Languages:	eng
 @Participants:	PAR0 Participant, INV1 Participant, STU Participant
@@ -9,19 +8,15 @@
 @ID:	eng|corpus_name|STU|||||Participant|||
 @Media:	test, audio
 *PAR0:	Um <I like I like> [/] I like beans . 20780_24300
-%wor:	Um 20780_21330 I 21360_21480 like 21480_21720 I 22180_22310 like 22310_22710 I 22710_22760 like 22760_23270 beans 23300_24300 .
-%mor:	intj|um pron|I-Prs-Nom-S1 verb|like-Fin-Ind-1-Pres
-	noun|bean&ComNeut-Plur .
+%mor:	intj|um pron|I&Prs&Nom&S1 verb|like&Fin&Ind&1&Pres&S1 noun|bean&ComNeut&Plur .
 %gra:	1|3|DISCOURSE 2|3|NSUBJ 3|4|ROOT 4|3|OBJ 5|3|PUNCT
 *INV1:	so ‡ she doesn't have a list of questions to ask you . 136820_139220
-%mor:	co|so beg|beg pro:sub|she mod|do&3S~neg|not v|have det:art|a n|list
-	prep|of n|question-PL inf|to v|ask pro:per|you .
-%gra:	1|0|BEG 2|1|BEGP 3|6|SUBJ 4|6|AUX 5|4|NEG 6|0|ROOT 7|8|DET 8|6|OBJ
-	9|8|NJCT 10|9|POBJ 11|12|INF 12|6|XJCT 13|12|OBJ 14|6|PUNCT
+%mor:	adv|so cm|begin pron|she&Prs&Nom&S3 aux|do&Fin&Ind&3&Pres&S3~part|not verb|have&Inf&S det|a&Ind&Art noun|list&ComNeut adp|of noun|question&ComNeut&Plur part|to verb|ask&Inf&S pron|you&Prs&Acc&S2 .
+%gra:	1|6|ADVMOD 2|6|PUNCT 3|6|NSUBJ 4|6|AUX 5|6|ADVMOD 6|13|ROOT 7|8|DET 8|6|OBJ 9|10|CASE 10|8|NMOD 11|12|MARK 12|6|ADVCL 13|12|IOBJ 14|6|PUNCT
 *STU:	+< so I was +//. 201235_201933
-%mor:	co|so pro:sub|I cop|be&PAST&13S +//.
-%gra:	1|3|COM 2|3|SUBJ 3|0|ROOT 4|3|PUNCT
+%mor:	adv|so pron|I&Prs&Nom&S1 verb|be&Fin&Ind&1&Past&S1 +//.
+%gra:	1|3|ADVMOD 2|3|NSUBJ 3|3|ROOT 4|3|PUNCT
 *STU:	+< right , right . 332418_333654
-%mor:	adv|right cm|cm co|right .
-%gra:	1|3|JCT 2|1|LP 3|0|INCROOT 4|3|PUNCT
+%mor:	adj|right&Pos&S1 cm|cm adj|right&Pos&S1 .
+%gra:	1|3|ROOT 2|1|PUNCT 3|1|DISCOURSE 4|1|PUNCT
 @End
