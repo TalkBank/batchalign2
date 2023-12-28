@@ -707,15 +707,16 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
         # try:
         inputs.append(line_cut)
 
-        sents = nlp(line_cut.strip()).sentences
-
-        if len(sents) == 0:
-            continue
-
-        if status_hook:
-            status_hook(indx+1, len(doc.content))
-
         try:
+            sents = nlp(line_cut.strip()).sentences
+
+            if len(sents) == 0:
+                continue
+
+            if status_hook:
+                status_hook(indx+1, len(doc.content))
+
+
             # parse the stanza output
             mor, gra = parse_sentence(sents[0], ending, special_forms_cleaned, lang[0])
 
