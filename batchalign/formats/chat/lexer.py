@@ -66,11 +66,11 @@ class UtteranceLexer:
     def __handle(self, form, num, delim): 
         if num == 0:
             return False
-        if form[:2] == "&-":
+        if form.strip("⌈")[:2] == "&-":
             self.__clauses.append((annotation_clean(form), TokenType.FP))
         elif form in ENDING_PUNCT:
             self.__clauses.append((form, TokenType.PUNCT))
-        elif form[:1] == "&":
+        elif form.strip("⌈")[:1] == "&":
             self.__clauses.append((form, TokenType.ANNOT))
         elif form[0] == "<":
             self.__clauses.append((self.handle_group(form, type=">"), TokenType.REGULAR))

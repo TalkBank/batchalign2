@@ -199,101 +199,109 @@ def chat_parse_doc(lines):
 
     # read data
     while raw[0].strip() != "@End":
-        line = raw.pop(0)
+        try:
+            line = raw.pop(0)
 
-        # we throw away participants because there are duplicate
-        # info of the same thing in @ID
-        if "@Participants" in line or "@Options" in line:
-            continue
-        # we split because there are multiple languages possible 
-        elif "@Languages" in line.strip():
-            results["langs"] = [i.strip() for i in line.strip("@Languages:").strip().split(",")]
-        # parse participants; the number of | delinates the metedata field
-        elif "@ID" in line.strip():
-            participant = line.strip("@ID:").strip().split("|")
+            # we throw away participants because there are duplicate
+            # info of the same thing in @ID
+            if "@Participants" in line or "@Options" in line:
+                continue
+            # we split because there are multiple languages possible 
+            elif "@Languages" in line.strip():
+                results["langs"] = [i.strip() for i in line.strip("@Languages:").strip().split(",")]
+            # parse participants; the number of | delinates the metedata field
+            elif "@ID" in line.strip():
+                participant = line.strip("@ID:").strip().split("|")
 
-            tier = Tier(lang=participant[0], corpus=participant[1], 
-                        id=participant[2], name=participant[7])
-            tiers[participant[2]] = tier
-        # parse media type
-        elif "@Media" in line.strip():
-            type = MediaType.UNLINKED_AUDIO
-
-            if "unlinked" in line and "audio" in line:
+                tier = Tier(lang=participant[0], corpus=participant[1], 
+                            id=participant[2], name=participant[7])
+                tiers[participant[2]] = tier
+            # parse media type
+            elif "@Media" in line.strip():
                 type = MediaType.UNLINKED_AUDIO
-            elif "unlinked" in line and "video" in line:
-                type = MediaType.UNLINKED_VIDEO
-            elif "audio" in line:
-                type = MediaType.AUDIO
-            elif "video" in line:
-                type = MediaType.VIDEO
 
-            media = line.strip("@Media:").split(",")
-            results["media"] = Media(type=type, name=media[0].strip(),
-                                     url=None)
-        # depenent tiers with @ are counted as "other" and are inserted as-is
-        elif line.strip()[0] == "@":
-            try:
-                beg,end = line.strip()[1:].split(":\t")
-            except ValueError:
-                # we only have one
-                beg = line.strip()[1:].strip()
-                end = None
-            line = CustomLine(id=beg.strip(),
-                                type=CustomLineType.INDEPENDENT,
-                                content=end.strip() if end != None else None)
-            results["content"].append(line)
-        # we now parse main tiers
-        elif line.strip()[0] == "*":
-            utterance = {}
-            tier,text = line.strip()[1:].split(":\t")
-            utterance["text"] = text
+                if "unlinked" in line and "audio" in line:
+                    type = MediaType.UNLINKED_AUDIO
+                elif "unlinked" in line and "video" in line:
+                    type = MediaType.UNLINKED_VIDEO
+                elif "audio" in line:
+                    type = MediaType.AUDIO
+                elif "video" in line:
+                    type = MediaType.VIDEO
 
-            # parse mor and gra lines, and append all other tiers
-            mor = None
-            gra = None
-            wor = None
-            additional = []
+                media = line.strip("@Media:").split(",")
+                results["media"] = Media(type=type, name=media[0].strip(),
+                                        url=None)
+            # depenent tiers with @ are counted as "other" and are inserted as-is
+            elif line.strip()[0] == "@":
+                try:
+                    beg,end = line.strip()[1:].split(":\t")
+                except ValueError:
+                    # we only have one
+                    beg = line.strip()[1:].strip()
+                    end = None
+                line = CustomLine(id=beg.strip(),
+                                    type=CustomLineType.INDEPENDENT,
+                                    content=end.strip() if end != None else None)
+                results["content"].append(line)
+            # we now parse main tiers
+            elif line.strip()[0] == "*":
+                utterance = {}
+                tier,text = line.strip()[1:].split(":\t")
+                utterance["text"] = text
 
-            while raw[0][0] == "%":
-                line = raw.pop(0)
-                beg,line = line.strip()[1:].split(":\t")
-                if beg.strip() == "mor":
-                    mor = line
-                elif beg.strip() == "gra":
-                    gra = line
-                elif beg.strip() == "wor" or beg.strip() == "xwor":
-                    wor = line
-                else:
-                    additional.append(CustomLine(id=beg.strip(),
-                                                    type=CustomLineType.DEPENDENT,
-                                                    content=line.strip()))
+                # parse mor and gra lines, and append all other tiers
+                mor = None
+                gra = None
+                wor = None
+                additional = []
 
-            # parse the actual utterance
-            parsed, delim = chat_parse_utterance(text, mor, gra, wor, additional)
+                while raw[0][0] == "%":
+                    line = raw.pop(0)
+                    beg,line = line.strip()[1:].split(":\t")
+                    if beg.strip() == "mor":
+                        mor = line
+                    elif beg.strip() == "gra":
+                        gra = line
+                    elif beg.strip() == "wor" or beg.strip() == "xwor":
+                        wor = line
+                    else:
+                        additional.append(CustomLine(id=beg.strip(),
+                                                        type=CustomLineType.DEPENDENT,
+                                                        content=line.strip()))
 
-            # get the timing of the utterance
-            try:
-                t = tiers[tier]
-            except KeyError:
-                raise CHATValidationException(f"Encountered undeclared tier: tier='{tier}', line='{text}'")
-            ut = Utterance.model_validate({
-                "tier": t,
-                "content": parsed,
-                "text": text,
-                "delim": delim,
-                "custom_dependencies": additional
-            })
+                # parse the actual utterance
+                parsed, delim = chat_parse_utterance(text, mor, gra, wor, additional)
 
-            timing = re.findall(rf"\x15(\d+)_(\d+)\x15", text)
-            if len(timing) != 0:
-                x,y = timing[0]
-                ut.time = (int(x), int(y))
-            results["content"].append(ut)
+                # get the timing of the utterance
+                try:
+                    t = tiers[tier]
+                except KeyError:
+                    raise CHATValidationException(f"Encountered undeclared tier: tier='{tier}', line='{text}'")
+                ut = Utterance.model_validate({
+                    "tier": t,
+                    "content": parsed,
+                    "text": text,
+                    "delim": delim,
+                    "custom_dependencies": additional
+                })
 
-        # throw error for everything else
-        else:
-            raise CHATValidationException(f"Unknown line in input CHAT: '{line}'")
+                timing = re.findall(rf"\x15(\d+)_(\d+)\x15", text)
+                if len(timing) != 0:
+                    x,y = timing[0]
+                    ut.time = (int(x), int(y))
+                results["content"].append(ut)
+
+            # throw error for everything else
+            else:
+                raise CHATValidationException(f"Unknown line in input CHAT: '{line}'")
+        except Exception as e:
+            if isinstance(e, CHATValidationException):
+                raise e
+            if len(raw) > 0:
+                raise ValueError(f"Unexpected Batchalign error when parsing CHAT: line='{raw[0].strip()}', error='{str(e)}'")
+            else:
+                raise ValueError(f"Unexpected Batchalign error when parsing CHAT: file is exausted, error='{str(e)}'")
 
     doc = Document.model_validate(results)
     return doc

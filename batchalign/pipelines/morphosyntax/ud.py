@@ -728,7 +728,7 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
             forms, _ = chat_parse_utterance(line, mor, gra, None, None)
 
             if len(doc.content[indx].content) != len(forms):
-                warnings.warn(f"Generated UD output has length mismatch with the main tier! Line =  '{line}'. Skipping...")
+                warnings.warn(f"Generated UD output has length mismatch with the main tier! line='{line}'. Skipping...")
                 continue
 
             # stitch the morphology back
