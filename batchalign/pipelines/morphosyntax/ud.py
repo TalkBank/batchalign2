@@ -62,7 +62,7 @@ def stringify_feats(*feats):
 # it is used to extract features from specific parts of
 # speech. 
 
-def handler(word):
+def handler(word, lang=None):
     """The generic handler"""
 
     # if the lemma is ", return the word
@@ -126,7 +126,7 @@ def handler(word):
     return f"{'' if not unknown else '0'}{word.upos.lower()}|{target}"
 
 # POS specific handler
-def handler__PRON(word):
+def handler__PRON(word, lang=None):
     # get the features
     feats = parse_feats(word)
     person = str(feats.get("Person", 1))
@@ -134,13 +134,18 @@ def handler__PRON(word):
     if person == "0":
         person = '4'
 
+    case = feats.get("Case","")
+    if lang == "fr":
+        from batchalign.pipelines.morphosyntax.fr.case import case as caser
+        case = caser(word.text)
+
     # parse
-    return (handler(word)+
+    return (handler(word, lang)+
             stringify_feats(feats.get("PronType", "Int"),
-                            feats.get("Case","").replace(",", ""),
+                            case.replace(",", ""),
                             feats.get("Number", "S")[:1]+person))
 
-def handler__DET(word):
+def handler__DET(word, lang=None):
     # get the features
     try:
         feats = parse_feats(word)
@@ -154,10 +159,10 @@ def handler__DET(word):
     if gender_str == "&Com,Neut" or gender_str == "&Com" or gender_str=="&": gender_str=""
 
     # parse
-    return (handler(word)+gender_str+"&"+
+    return (handler(word, lang)+gender_str+"&"+
             feats.get("Definite", "Def") + stringify_feats(feats.get("PronType", "")))
 
-def handler__ADJ(word):
+def handler__ADJ(word, lang=None):
     # get the features
     feats = parse_feats(word)
     # if there is a non-degree
@@ -168,9 +173,9 @@ def handler__ADJ(word):
     if person == "0":
         person = '4'
         
-    return handler(word)+stringify_feats(deg, case, number[:1]+person)
+    return handler(word, lang)+stringify_feats(deg, case, number[:1]+person)
 
-def handler__NOUN(word):
+def handler__NOUN(word, lang=None):
     # get the features
     feats = parse_feats(word)
 
@@ -185,14 +190,14 @@ def handler__NOUN(word):
     if gender_str == "&Com,Neut" or gender_str == "&Com": gender_str=""
     if number_str == "&Sing": number_str=""
 
-    return handler(word)+gender_str+number_str+stringify_feats(case, type)
+    return handler(word, lang)+gender_str+number_str+stringify_feats(case, type)
 
-def handler__PROPN(word):
+def handler__PROPN(word, lang=None):
     # code as noun
     parsed = handler__NOUN(word)
     return parsed.replace("propn", "noun")
 
-def handler__VERB(word):
+def handler__VERB(word, lang=None):
     # get the features
     feats = parse_feats(word)
     # seed flag
@@ -211,11 +216,11 @@ def handler__VERB(word):
     tense = feats.get("Tense", "")
     polarity = feats.get("Polarity", "")
     polite = feats.get("Polite", "")
-    return handler(word)+flag+stringify_feats(aspect, mood,
+    return handler(word, lang)+flag+stringify_feats(aspect, mood,
                                               tense, polarity, polite,
                                               number[:1]+person)
 
-def handler__actual_PUNCT(word):
+def handler__actual_PUNCT(word, lang=None):
     # actual punctuation handler
     if word.lemma=="," or word.lemma=="$,":
         return "cm|cm"
@@ -226,14 +231,14 @@ def handler__actual_PUNCT(word):
     elif word.text in '„':
         return "end|end"
 
-def handler__PUNCT(word):
+def handler__PUNCT(word, lang=None):
     # no idea why SYM and PUNCT returns punctuation
     # or sometimes straight up words, but  so it goes
     # either punctuation or inflection words
     if word.lemma in ['.', '!', '?', ',', '$,']:
-        return handler__actual_PUNCT(word)
+        return handler__actual_PUNCT(word, lang)
     elif word.text in ['„', '‡']:
-        return handler__actual_PUNCT(word)
+        return handler__actual_PUNCT(word, lang)
     # otherwise, if its a word, return the word
     elif word.text == "da":
         return "noun|da"
@@ -354,7 +359,7 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
         # append the appropriate mor line
         # by trying all handlers, and defaulting
         # to the default handler
-        mor_word = HANDLERS.get(word.upos, handler)(word)
+        mor_word = HANDLERS.get(word.upos, handler)(word, lang)
         # exception: if the word is 0, it is probably 0word
         # occationally Stanza screws up and makes forms like 0thing as 2 tokens:
         # 0 and thing 
