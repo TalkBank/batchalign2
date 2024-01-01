@@ -11,6 +11,8 @@ SRC = "this um is all so crazy so crazy so so crazy so crazy, everybody everybod
 
 RET_WITH_DISFLUENCY = 'um this is this is a retrace'
 
+BEG_WITH_DISFLUENCY = 'um this is um this is a retrace'
+
 @pytest.fixture(scope="module")
 def doc():
     return Document.new(SRC)
@@ -63,5 +65,15 @@ def test_retrace_with_disfluency(nr):
 
     docp = nr(doc)
     assert str(docp) == "um <this is> [/] this is a retrace"
+
+# regression email 01/01/2024 10:01AM
+def test_beg_with_disfluency(nr):
+    doc = Document.new(BEG_WITH_DISFLUENCY)
+    doc[0][0].type == TokenType.RETRACE
+    doc[0][1].type == TokenType.RETRACE
+    doc[0][2].type == TokenType.RETRACE
+
+    docp = nr(doc)
+    assert str(docp) == "<um this is> [/] um this is a retrace"
 
 

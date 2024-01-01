@@ -19,9 +19,9 @@ from batchalign import *
 ########### The Batchalign Core Test Harness ###########
 # from batchalign.formats.chat.parser import chat_parse_utterance
  
-# text = "⌈&=mira:Mamá⌉ . •232030_234008•"
+# text = "I am I am a chicken ."
 
-# function = "morphosyntax"
+# function = "retracing"
 # lang = "fra"
 # num_speakers = 1
 
