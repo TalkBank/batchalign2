@@ -17,28 +17,29 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 from batchalign import *
 
 ########### The Batchalign Core Test Harness ###########
-# from batchalign.formats.chat.parser import chat_parse_utterance
+from batchalign.formats.chat.parser import chat_parse_utterance
  
-# text = "I am I am a chicken ."
+text = "test test"
 
-# function = "retracing"
-# lang = "fra"
-# num_speakers = 1
+function = "retracing"
+lang = "fra"
+num_speakers = 1
 
-# forms, delim = chat_parse_utterance(text, None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim)
+forms, delim = chat_parse_utterance(text, None, None, None, None)
+utterance = Utterance(content=forms, delim=delim)
 
-# # utterance = Utterance(content=text)
+# utterance = Utterance(content=text)
 
-# ut = Document(content=[utterance], langs=[lang])
+ut = Document(content=[utterance], langs=[lang])
 
-# pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers)
-# doc = pipeline(ut)
-# # doc[0][-2].model_dump()
+pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers)
+doc = pipeline(ut)
+# doc[0][-1]
+# doc[0][-2].model_dump()
 
-# # doc[0].content[-2]
+# doc[0].content[-2]
 
-# print(str(CHATFile(doc=doc)))
+print(str(CHATFile(doc=doc)))
 
 ########### The Batchalign Parser Harness ###########
 # from batchalign.formats.chat import CHATFile

@@ -24,7 +24,7 @@ class NgramRetraceEngine(BatchalignEngine):
             # scan for n-gram retraces
             for n in range(1, len(content)):
                 begin = 0
-                while begin < len(content)-(n+1):
+                while begin < len(content)-(n):
                     # get the n gram info; we convert it to
                     # a tuple to make it hashable
                     gram = tuple([i.text for i in content[begin:begin+n]])
