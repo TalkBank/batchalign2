@@ -96,8 +96,8 @@ def process_generation(output, lang="eng", utterance_engine=None):
         # coallate words (not punct) into the shape we expect
         # which is ['word', [start_ms, end_ms]]. Yes, this would
         # involve multiplying by 1000 to s => ms
-        words = [[i["value"], [round(i["ts"]*1000),
-                                round(i["end_ts"]*1000)]] # the shape
+        words = [[i["value"], [round(i["ts"]*1000) if i["ts"] != None else None,
+                                round(i["end_ts"]*1000) if i["end_ts"] != None else None]] # the shape
                 for i in words # for each word
                     if i["type"] == "text" and
                     not re.match(r'<.*>', i["value"])] # if its text (i.e. not "pause")
@@ -148,7 +148,10 @@ def process_generation(output, lang="eng", utterance_engine=None):
         words = []
         for word, (start,end) in utterance:
             if word not in ENDING_PUNCT:
-                words.append(Form(text=word, time=(int(start), int(end))))
+                if start == None or end == None:
+                    words.append(Form(text=word, time=None))
+                else:
+                    words.append(Form(text=word, time=(int(start), int(end))))
             else:
                 words.append(Form(text=word, time=None))
 
