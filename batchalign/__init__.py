@@ -1,3 +1,6 @@
+import os
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = str(1)
+
 from .document import *
 from .formats import *
 from .pipelines import *

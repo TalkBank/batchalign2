@@ -11,20 +11,28 @@ from collections import defaultdict
 from pathlib import Path
 
 import torch
-from transformers import WhisperProcessor, WhisperTokenizer, GenerationConfig
+from transformers import WhisperProcessor, WhisperTokenizer, GenerationConfig, WhisperForConditionalGeneration
+
 
 
 from batchalign.document import *
 from batchalign.pipelines.base import *
 from batchalign.pipelines.asr.utils import *
 
+from batchalign.pipelines.asr.utils import *
+
+from batchalign.models.utils import _extract_token_timestamps as ett
+
+
+WhisperForConditionalGeneration._extract_token_timestamps = ett
+
 import pycountry 
 
 import logging
 L = logging.getLogger("batchalign")
 
-DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-# DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
+# DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
 # PYTORCH_ENABLE_MPS_FALLBACK=1
 # pretrained model path
 # # PRETRAINED = "openai/whisper-small"

@@ -272,6 +272,8 @@ class Utterance(BaseModel):
 class MediaType(str, Enum):
     UNLINKED_AUDIO = "audio, unlinked"
     UNLINKED_VIDEO = "video, unlinked"
+    MISSING_VIDEO = "video, missing"
+    MISSING_AUDIO = "audio, missing"
     AUDIO = "audio"
     VIDEO = "video"
 

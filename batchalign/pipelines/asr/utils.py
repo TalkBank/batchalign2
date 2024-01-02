@@ -125,6 +125,12 @@ def process_generation(output, lang="eng", utterance_engine=None):
         final_words = []
         # go through the words, if there is a space, split time in n parts
         for word, (i,o) in words:
+            # if there is a dash in the beginning, we join it with the last one
+            if word.strip()[0] == "-" and len(final_words) > 0:
+                last = final_words.pop(-1)
+                word = last[0].strip()+word.strip()
+                i = last[1][0]
+                o = o
             # split the word
             word_parts = word.split(" ")
             # if we only have one part, we don't interpolate

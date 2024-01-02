@@ -224,6 +224,10 @@ def chat_parse_doc(lines):
                     type = MediaType.UNLINKED_AUDIO
                 elif "unlinked" in line and "video" in line:
                     type = MediaType.UNLINKED_VIDEO
+                elif "missing" in line and "audio" in line:
+                    type = MediaType.MISSING_AUDIO
+                elif "missing" in line and "video" in line:
+                    type = MediaType.MISSING_VIDEO
                 elif "audio" in line:
                     type = MediaType.AUDIO
                 elif "video" in line:

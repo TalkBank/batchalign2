@@ -36,6 +36,7 @@ baL = L.getLogger('batchalign')
 
 C = Console()
 
+
 with open(Path(__file__).parent.parent / "version", 'r') as df:
     VERSION_NUMBER, RELEASE_DATE, RELEASE_NOTES = df.readlines()[:3]
 
