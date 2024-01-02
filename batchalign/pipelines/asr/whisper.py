@@ -1,9 +1,16 @@
 from batchalign.document import *
 from batchalign.pipelines.base import *
 from batchalign.pipelines.asr.utils import *
-from batchalign.models import WhisperASRModel
+from batchalign.models import WhisperASRModel, BertUtteranceModel
 
 import pycountry
+
+import logging
+L = logging.getLogger("batchalign")
+
+
+
+POSTPROCESSOR_LANGS = {'eng': "talkbank/CHATUtterance-en"}
 
 class WhisperEngine(BatchalignEngine):
     tasks = [ Task.ASR, Task.UTTERANCE_SEGMENTATION ]
@@ -20,9 +27,16 @@ class WhisperEngine(BatchalignEngine):
         self.__whisper = WhisperASRModel(model, language=language)
         self.__lang = lang
 
+        if POSTPROCESSOR_LANGS.get(self.__lang) != None:
+            L.debug("Initializing utterance model...")
+            self.__engine = BertUtteranceModel(POSTPROCESSOR_LANGS.get(self.__lang))
+            L.debug("Done.")
+        else:
+            self.__engine = None
+
     def generate(self, source_path):
         res = self.__whisper(self.__whisper.load(source_path).all())
-        doc = process_generation(res, self.__lang)
+        doc = process_generation(res, self.__lang, utterance_engine=self.__engine)
 
         # define media tier
         media = Media(type=MediaType.AUDIO, name=Path(source_path).stem, url=source_path)

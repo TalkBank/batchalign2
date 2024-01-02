@@ -26,7 +26,14 @@ def retokenize(intermediate_output):
         for word, bullet in utterance:
             tmp.append((word, bullet))
             if word in ENDING_PUNCT or word[-1] in ENDING_PUNCT:
-                final_outputs.append((speaker, tmp))
+                if word in ENDING_PUNCT:
+                    final_outputs.append((speaker, tmp))
+                elif word[-1] in ENDING_PUNCT:
+                    # we want to seperate the ending punct out
+                    final, time = tmp.pop(-1)
+                    tmp.append((final[:-1], time))
+                    tmp.append((final[-1], [None, None]))
+                    final_outputs.append((speaker, tmp))
                 tmp = []
 
     return final_outputs
@@ -51,18 +58,29 @@ def retokenize_with_engine(intermediate_output, engine):
     final_outputs = []
 
     for speaker, utterance in intermediate_output:
+        # becasue we are using an utterance engine, we need
+        # to get rid of all the preexisting punctuation
+        for i in utterance:
+            for j in MOR_PUNCT+ENDING_PUNCT:
+                i[0] = i[0].strip(j).lower()
+
+        # remove everything that's now blank
+        utterance = [i for i in utterance if i[0].strip() != ""]
+
         joined = " ".join([i[0] for i in utterance])
         split = engine(joined)
 
-        # chop out the final delimiter and split
-        split = [(i[:-1].split(" "), i[-1]) for i in split]
-
         # align the utterance against original splits and generate final outputs
-        for new_ut, delim in split:
+        for i in split:
+            if i[-1] in ENDING_PUNCT:
+                new_ut, delim = (i[:-1].split(" "), i[-1])
+            else:
+                new_ut, delim = (i.split(" "), ".")
+
             tmp = []
 
-            for _ in new_ut:
-                tmp.append(utterance.pop(0))
+            for s in new_ut:
+                tmp.append((s, utterance.pop(0)[1]))
 
             final_outputs.append((speaker, tmp+[[delim, [None, None]]]))
 

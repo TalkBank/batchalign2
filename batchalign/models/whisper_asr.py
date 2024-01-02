@@ -1,6 +1,7 @@
 from torchaudio import transforms as T
 from torchaudio import load
 import numpy as np 
+import os
 
 from transformers import pipeline
 
@@ -17,7 +18,7 @@ from batchalign.document import *
 from batchalign.pipelines.base import *
 from batchalign.pipelines.asr.utils import *
 
-import pycountry
+import pycountry 
 
 import logging
 L = logging.getLogger("batchalign")
@@ -94,9 +95,10 @@ class WhisperASRModel(object):
             "automatic-speech-recognition",
             model=model,
             tokenizer=WhisperTokenizer.from_pretrained(base),
-            chunk_length_s=30,
-            stride_length_s=5,
+            chunk_length_s=25,
+            stride_length_s=3,
             device=DEVICE,
+            torch_dtype=torch.float32,
             return_timestamps="word",
         )
         L.debug("Done, initalizing processor and config...")
@@ -107,7 +109,6 @@ class WhisperASRModel(object):
 
         # force decoder IDs to create language
         self.lang = language
-        self.__prompt_ids = processor.get_prompt_ids("I um am going to uh pause a uh lot.")
 
         # save the target sample rate
         self.sample_rate = target_sample_rate
@@ -178,7 +179,6 @@ class WhisperASRModel(object):
                           generate_kwargs = {
                               "repetition_penalty": 1.01,
                               "generation_config": self.__config,
-                              "prompt_ids": self.__prompt_ids,
                               "task": "transcribe",
                               "language": self.lang
                           })
@@ -188,8 +188,8 @@ class WhisperASRModel(object):
                                              # "temperature": 0,
   #"temperature": 0.75,
                                              # })
-        # to filter out the two word prompt
-        words = words["chunks"][10:]
+        # to filter out the one word prompt
+        words = words["chunks"]
 
         # filter out the elements in the prompt, which has timestamp (0,0)
         # words = list(filter(lambda x:x["timestamp"] != (0.0, 0.0), words))
@@ -217,12 +217,16 @@ class WhisperASRModel(object):
             element = groups.pop(0)
 
             if element["type"] == "text":
-                current_turn.append({
+                text = {
                     "type": "text",
                     "ts": element["start"],
                     "end_ts": element["end"] if element["end"] else element["start"]+1,
                     "value": element["payload"].strip(),
-                })
+                }
+
+                if text["ts"] != text["end_ts"]:
+                    # text with no DTW time is likely a spurious retrace
+                    current_turn.append(text)
             elif element["type"] == "segment" and current_speaker != element["payload"]:
                 turns.append({
                     "elements": current_turn,
