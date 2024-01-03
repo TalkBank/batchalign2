@@ -52,6 +52,7 @@ class RevEngine(BatchalignEngine):
         lang = self.__lang
         client = self.__client
 
+
         L.info(f"Uploading '{pathlib.Path(f).stem}'...")
         # we will send the file for processing
         job = client.submit_job_local_file(f,

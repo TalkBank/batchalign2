@@ -41,6 +41,27 @@ from batchalign import *
 
 # print(str(CHATFile(doc=doc)))
 
+########### The Batchalign String Test Harness ###########
+# from batchalign.formats.chat.parser import chat_parse_utterance
+ 
+# file = "/Users/houjun/Documents/Projects/talkbank-alignment/test_harness/input/Untitled.wav"
+
+# function = "asr"
+# lang = "spa"
+# num_speakers = 1
+
+# ut = Document.new(media_path=file, lang=lang)
+
+# pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers)
+# doc = pipeline(ut)
+# doc.content
+# # doc[0][-1]
+# # doc[0][-2].model_dump()
+
+# # doc[0].content[-2]
+
+# print(str(CHATFile(doc=doc)))
+
 ########### The Batchalign Parser Harness ###########
 # from batchalign.formats.chat import CHATFile
 
