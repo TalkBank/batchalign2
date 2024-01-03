@@ -4,7 +4,8 @@ Tabulate default packages and options.
 """
 
 from batchalign import (WhisperEngine, WhisperFAEngine, StanzaEngine, RevEngine,
-                        NgramRetraceEngine, DisfluencyReplacementEngine)
+                        NgramRetraceEngine, DisfluencyReplacementEngine, WhisperUTREngine,
+                        RevUTREngine)
 from batchalign import BatchalignPipeline
 
 from batchalign.utils.config import config_read
@@ -13,11 +14,10 @@ from batchalign.errors import *
 import logging
 L = logging.getLogger("batchalign")
 
-
-
 # default for all languages
 DEFAULT_PACKAGES = {
     "asr": "whisper",
+    "utr": "whisper_utr",
     "fa": "whisper_fa",
     "morphosyntax": "stanza",
     "disfluency": "replacement",
@@ -68,7 +68,9 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
             packages.append("disfluency")
         if "retracing" not in packages:
             packages.append("retracing")
-        
+    if "fa" in packages:
+        if "utr" not in packages:
+            packages.append("utr")
 
     L.info(f"Initializing engines...")
     L.info(f"-------------------------------")
@@ -102,6 +104,10 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
             engines.append(NgramRetraceEngine())
         elif engine == "whisper_fa":
             engines.append(WhisperFAEngine())
+        elif engine == "whisper_utr":
+            engines.append(WhisperUTREngine(lang=lang))
+        elif engine == "rev_utr":
+            engines.append(RevUTREngine(lang=lang))
 
     L.debug(f"Done initalizing packages.")
     return BatchalignPipeline(*engines)

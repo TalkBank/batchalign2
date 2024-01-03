@@ -1,5 +1,5 @@
 # CHAT punctuation specifications
-ENDING_PUNCT = [".", "?", "!", "+//.", "+/.", "+...", "+\"/.", "+..?", "+\"."]
+ENDING_PUNCT = [".", "?", "!", "+//.", "+/.", "+...", "+\"/.", "+..?", "+\".", "+//?"]
 MOR_PUNCT = ["‡", "„", ","]
 CHAT_IGNORE = ["xxx", "yyy", "www"]
 

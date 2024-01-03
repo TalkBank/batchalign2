@@ -9,12 +9,16 @@ from transformers.models.whisper.modeling_whisper import _median_filter as media
 
 from batchalign.models import ASRAudioFile
 
+from batchalign.models.utils import _extract_token_timestamps as ett
+
+WhisperForConditionalGeneration._extract_token_timestamps = ett
 import numpy as np
 
 import logging
 L = logging.getLogger("batchalign")
 
-DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+# DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
 TIME_PRECISION = 0.02
 
 # inference engine
@@ -37,7 +41,7 @@ class WhisperFAModel(object):
 
     def __init__(self, model="openai/whisper-large-v2", target_sample_rate=16000):
         L.debug("Initializing whisper FA model...")
-        self.__model = WhisperForConditionalGeneration.from_pretrained(model, attn_implementation="eager")
+        self.__model = WhisperForConditionalGeneration.from_pretrained(model, attn_implementation="eager").to(DEVICE)
         L.debug("Done, initalizing processor and config...")
         self.__processor = WhisperProcessor.from_pretrained(model)
         L.debug("Whisper FA initialization done.")
@@ -85,12 +89,12 @@ class WhisperFAModel(object):
         L.debug("Running inference...")
         # perform inference to get cached qs
         with torch.inference_mode():
-            output = self.__model(**features, output_attentions=True)
+            output = self.__model(**features.to(DEVICE), output_attentions=True)
 
         L.debug("Collecting and normalizing activations...")
         # get decoder layer across attentions
         # which has shape layers x heads x output_tokens x input_frames
-        cross_attentions = torch.cat(output.cross_attentions)
+        cross_attentions = torch.cat(output.cross_attentions).cpu()
 
         # get the attention of alignment heads we care about only
         weights = torch.stack([cross_attentions[l][h]

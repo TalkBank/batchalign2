@@ -45,6 +45,7 @@ class WhisperFAEngine(BatchalignEngine):
                 continue
             if i.alignment == None:
                 warnings.warn("Cannot force-align an utterance without utterance-level segmentation; please run a pipeline that includes `Task.UTTERANCE_TIMING_RECOVERY` (\"bulletize\") before running forced-alignment.")
+                continue
 
             # pop the previous group onto the stack
             if (i.alignment[-1] - seg_start) > 28*1000:
@@ -111,7 +112,7 @@ class WhisperFAEngine(BatchalignEngine):
                 elif indx != len(ut.content)-1:
                     # search forward for the next compatible time
                     tmp = indx+1
-                    while ut.content[tmp].time == None and tmp < len(ut.content):
+                    while tmp < len(ut.content) and ut.content[tmp].time == None:
                         tmp += 1
                     if ut.content[tmp].time == None:
                         w.time = (w.time[0], w.time[0]+1000) # give a second because we don't know

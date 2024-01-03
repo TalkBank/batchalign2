@@ -110,6 +110,7 @@ class Tier(BaseModel):
     corpus: str = Field(default="corpus_name") # corpus_name
     id: str = Field(default="PAR") # PAR0
     name: str = Field(default="Participant") # Participant
+    birthday: str = Field(default="") # Participant
 
 def get_token_type(str):
     if str in ENDING_PUNCT or str in MOR_PUNCT:

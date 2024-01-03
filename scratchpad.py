@@ -65,8 +65,7 @@ from batchalign import *
 ########### The Batchalign Parser Harness ###########
 # from batchalign.formats.chat import CHATFile
 
-# in_dir = "../talkbank-alignment/test_harness/input/"
-# out_dir = "../talkbank-alignment/test_harness/output/"
+# in_dir = "../talkbank-alignment/test_harness/input"
 
 # in_files = glob(str(Path(in_dir)/"*.cha"))
 # parent, _, files = zip(*list(os.walk(in_dir)))
@@ -83,8 +82,16 @@ from batchalign import *
 #         print(file)
 #         raise e
 
-# # f.doc[1][1]
+
+# pipeline = BatchalignPipeline.new("fa", lang="eng", num_speakers=len(doc.tiers))
+# doc = pipeline(doc)
+
+
+# f.doc[1][1]
 # f.doc.media
+
+# doc = f.doc
+# doc[-382][1]
 
 ########### The Batchalign CLI Harness ###########
 # from batchalign.cli.dispatch import _dispatch

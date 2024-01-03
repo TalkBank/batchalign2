@@ -106,7 +106,7 @@ def __dp(payload, reference, t):
     # against the first element of PAYLOAD
     #
     # **AND YES. THIS MEANS THAT WE ARE 1 INDEXING!**
-    # centry nodes are excellent.
+    # sentry nodes are excellent.
     #
     # each element contains a tuple of 2 elements:
     # (dist, List[]), where the first element is the

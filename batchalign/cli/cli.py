@@ -104,8 +104,10 @@ def batchalign(ctx, verbose):
 
 @batchalign.command()
 @common_options
+@click.option("--whisper/--rev",
+              default=False, help="For utterance timing recovery, OpenAI Whisper (ASR) instead of Rev.AI (default).")
 @click.pass_context
-def align(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
+def align(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
     """Align transcripts against corresponding media files."""
     def loader(file):
         return CHATFile(path=os.path.abspath(file)).doc
@@ -116,7 +118,9 @@ def align(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     _dispatch("align", lang, num_speakers,
               ["cha"], ctx,
               in_dir, out_dir,
-              loader, writer, C, **kwargs)
+              loader, writer, C,
+              utr="whisper_utr" if whisper else "rev_utr",
+              **kwargs)
 
 #################### TRANSCRIBE ################################
 
@@ -139,7 +143,7 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
     _dispatch("transcribe", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
               in_dir, out_dir,
               loader, writer, C,
-              asr="whisper" if whisper else "rev")
+              asr="whisper" if whisper else "rev", **kwargs)
 
 #################### MORPHOTAG ################################
 

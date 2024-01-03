@@ -214,7 +214,8 @@ def chat_parse_doc(lines):
                 participant = line.strip("@ID:").strip().split("|")
 
                 tier = Tier(lang=participant[0], corpus=participant[1], 
-                            id=participant[2], name=participant[7])
+                            id=participant[2], name=participant[7],
+                            birthday=participant[3])
                 tiers[participant[2]] = tier
             # parse media type
             elif "@Media" in line.strip():

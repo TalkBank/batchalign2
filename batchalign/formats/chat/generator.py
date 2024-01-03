@@ -103,7 +103,7 @@ def generate_chat_preamble(doc, birthdays=[]):
     header.append("@Languages:\t"+", ".join(doc.langs))
     header.append("@Participants:\t"+", ".join([f"{i.id} {i.name}" for i in doc.tiers]))
     header.append("@Options:\tmulti")
-    header.append("\n".join([f"@ID:\t{i.lang}|{i.corpus}|{i.id}|||||{i.name}|||" for i in doc.tiers]))
+    header.append("\n".join([f"@ID:\t{i.lang}|{i.corpus}|{i.id}|{i.birthday}||||{i.name}|||" for i in doc.tiers]))
     for i in birthdays:
         header.append(f"@{i.id}:\t{i.content}")
     if doc.media:

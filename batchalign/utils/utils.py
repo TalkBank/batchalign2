@@ -68,3 +68,39 @@ def detokenize(tokens):
         nltk.download("punkt")
         return TreebankWordDetokenizer().detokenize(tokens)
 
+def correct_timing(doc):
+    """Correct the timings of ASR.
+
+    Parameters
+    ----------
+    doc : Document
+        The Document to correct ASR output timings of.
+
+    Returns
+    -------
+    Document
+        The document that has the utterance timings corrected.
+    """
+    
+    # correct the utterance-level timings
+    last_end = 0
+    for i in doc.content:
+        # bump time forward
+        if i.alignment:
+            time = list(i.alignment)
+            if i.alignment[0] < last_end:
+                time[0] = last_end
+            last_end = time[1]
+            i.time = tuple(time)
+            # if the time has been squished to nothing, we clear time
+            if i.alignment[1] <= i.alignment[0]:
+                i.time = None
+                for j in i.content:
+                    j.time = None
+            # otherwise, we remove impossible timestamps
+            else:
+                for j in i.content:
+                    if j.time and j.time[1] <= j.time[0]:
+                        j.time = None
+    return doc
+
