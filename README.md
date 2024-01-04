@@ -57,14 +57,30 @@ Where `verb` includes:
 
 1. `transcribe` - placing only an audio of video file (`.mp3/.mp4/.wav`) in the input directory, perform ASR on the audio, diarizes utterances, identifies some basic conversational features like retracing and filled pauses, and generate word-level alignments. You must supply a language code flag: `--lang=[three letter ISO language code]` for the ASR system to know what language the transcript is in. You can choose the flags `--rev` to use Rev.AI, a commercial ASR service, or `--whisper`, to use a local copy of OpenAI Whisper.
 2. `align` - placing both an audio of video file (`.mp3/.mp4/.wav`) and an *utterance-aligned* CHAT file in the input directory, generate word-level alignments
-3. `morphotag` - placing a CHAT file in the input directory, uses Stanford NLP Stanza to generate morphological and dependency analyses
+3. `morphotag` - placing a CHAT file in the input directory, uses Stanford NLP Stanza to generate morphological and dependency analyses. You must supply a language code flag: `--lang=[three letter ISO language code]` for the alignment system to know what language the transcript is in. 
 <!-- 4. `bulletize` - placing both an audio of video file (`.mp3/.mp4/.wav`) and an *unlinked* CHAT file in the input directory, generate utterance-level alignments through ASR -->
 
-For instance, one sample command for running morphosyntactic analysis on CHAT files located in `~/mfa_data/input` and dumped to `~/mfa_data/output`, one could write:
+### Sample Commands
+For input files (CHAT and audio for `align`, CHAT only for `morphotag`, and audio only for `transcribe`), located in `~/mfa_data/input` dumping the output to `~/mfa_data/output`, one could write:
+
+#### ASR + Segmentation
+
+```
+batchalign transcribe --lang=eng ~/mfa_data/input ~/mfa_data/output
+```
+
+#### morphosyntactic analysis
 
 ```
 batchalign morphotag ~/mfa_data/input ~/mfa_data/output
 ```
+
+#### forced alignment
+
+```
+batchalign align --lang=eng ~/mfa_data/input ~/mfa_data/output
+```
+
 
 -----
 
