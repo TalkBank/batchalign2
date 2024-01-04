@@ -12,7 +12,9 @@ Welcome! **Batchalign2** is a Python suite of language sample analysis (LSA) sof
 - We support Python versions 3.9, 3.10, and 3.11.  
 - **We do not support Python 3.12** (no PyTorch support)
 - To install Python, follow the instructions...
-    -  [for macOS](https://docs.python-guide.org/starting/install3/osx/)
+    -  for macOS
+        1. Install Brew: [visit this link](https://brew.sh/)
+        2. Install Python: execute `brew install python@3.11`
     -  for Windows: [part 1](https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe) and [part 2](https://stackoverflow.com/a/15626784)
     -  your distribution's instructions for Linux
 
