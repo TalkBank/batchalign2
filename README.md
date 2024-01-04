@@ -60,6 +60,14 @@ Where `verb` includes:
 3. `morphotag` - placing a CHAT file in the input directory, uses Stanford NLP Stanza to generate morphological and dependency analyses
 <!-- 4. `bulletize` - placing both an audio of video file (`.mp3/.mp4/.wav`) and an *unlinked* CHAT file in the input directory, generate utterance-level alignments through ASR -->
 
+For instance, one sample command for running morphosyntactic analysis on CHAT files located in `~/mfa_data/input` and dumped to `~/mfa_data/output`, one could write:
+
+```
+batchalign morphotag ~/mfa_data/input ~/mfa_data/output
+```
+
+-----
+
 Follow instructions from
 
 ```
