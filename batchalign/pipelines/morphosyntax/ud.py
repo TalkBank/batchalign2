@@ -620,13 +620,19 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
                              # "mwt": "gum" if ("en" in lang) else "default",
                              "lemma": "default",
                              "depparse": "default"},
-              "tokenize_no_ssplit": True,
-              "tokenize_postprocessor": lambda x:[tokenizer_processor(i, lang, inputs[-1])
-                                                            for i in x]}
+              "tokenize_no_ssplit": True}
+
+    # config["tokenize_postprocessor"] = lambda x:[tokenizer_processor(i, lang, inputs[-1]) for i in x]
+
+    if "zh" in lang:
+        lang.pop(lang.index("zh"))
+        lang.append("zh-hans")
+              
     if "en" in lang:
         config["processors"]["mwt"] = "gum"
-    elif "zh-hans" not in lang and "ja" not in lang:
+    elif "zh" not in lang and "zh-hans" not in lang and "ja" not in lang:
         config["processors"]["mwt"] = "default"
+        config["tokenize_postprocessor"] = lambda x:[tokenizer_processor(i, lang, inputs[-1]) for i in x]
 
     configs = {}
     for l in lang:
