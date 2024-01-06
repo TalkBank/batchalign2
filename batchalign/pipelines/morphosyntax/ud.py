@@ -118,6 +118,7 @@ def handler(word, lang=None):
 
     # clean out alternate spellings
     target = target.replace("_", "")
+    target = target.replace("+", "")
 
     # door zogen fix
     if target == "door zogen":
@@ -635,7 +636,7 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
               
     if "en" in lang:
         config["processors"]["mwt"] = "gum"
-    elif "zh" not in lang and "zh-hans" not in lang and "ja" not in lang:
+    elif "zh" not in lang and "zh-hans" not in lang and "ja" not in lang and "ko" not in lang:
         config["processors"]["mwt"] = "default"
 
     configs = {}

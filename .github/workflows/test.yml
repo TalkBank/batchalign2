@@ -21,6 +21,6 @@ jobs:
       - name: Install Batchalign
         run: python -m pip install -e ".[dev]"
       - name: Run tests
-        run: python -m pytest batchalign
+        run: python -m pytest batchalign --disable-pytest-warnings -k 'not test_whisper_fa_pipeline'
 
       

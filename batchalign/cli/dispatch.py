@@ -63,6 +63,15 @@ def _dispatch(command, lang, num_speakers,
             parent = repathed.parent.absolute()
             os.makedirs(parent, exist_ok=True)
 
+            # HACK check for @Options:\tdummy in the file
+            # and simply copy it
+            if ext == "cha":
+                with open(str(path), 'r') as df:
+                    data = df.read()
+                if "@Options:\tdummy" in data:
+                    shutil.copy2(str(path), str(repathed))
+                    continue
+                
             # if the file needs to get processed, append it to the list
             # to be processed and compute the output 
             if ext in extensions:
