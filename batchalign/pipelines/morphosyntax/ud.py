@@ -521,6 +521,9 @@ def conform(i):
     return i[0] if type(i) == tuple else i
 
 def tokenizer_processor(tokenized, lang, sent):
+    # split tokenized. in case stuff got combined
+    tokenized = [j for i in tokenized for j in i.split(" ")]
+    # tabulate results
     res = []
     # align the input sentence and the tokenization results
     payloads = []
@@ -531,10 +534,12 @@ def tokenizer_processor(tokenized, lang, sent):
     refs = []
     for indx, i in enumerate(tokenized):
         for char in conform(i):
-                targets.append(PayloadTarget(char, indx))
+            if char.strip() != "":
+                targets.append(PayloadTarget(char.strip(), indx))
     for indx, i in enumerate(split_passage):
         for char in i:
-            refs.append(ReferenceTarget(char, indx))
+            if char.strip() != "":
+                refs.append(ReferenceTarget(char.strip(), indx))
 
     # create groups such that if multiple of the tokenized result
     # belongs to the same group (i.e. orthographically
@@ -622,7 +627,7 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
                              "depparse": "default"},
               "tokenize_no_ssplit": True}
 
-    # config["tokenize_postprocessor"] = lambda x:[tokenizer_processor(i, lang, inputs[-1]) for i in x]
+    config["tokenize_postprocessor"] = lambda x:[tokenizer_processor(i, lang, inputs[-1]) for i in x]
 
     if "zh" in lang:
         lang.pop(lang.index("zh"))
@@ -632,7 +637,6 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
         config["processors"]["mwt"] = "gum"
     elif "zh" not in lang and "zh-hans" not in lang and "ja" not in lang:
         config["processors"]["mwt"] = "default"
-        config["tokenize_postprocessor"] = lambda x:[tokenizer_processor(i, lang, inputs[-1]) for i in x]
 
     configs = {}
     for l in lang:
@@ -735,6 +739,7 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
 
             # parse the stanza output
             mor, gra = parse_sentence(sents[0], ending, special_forms_cleaned, lang[0])
+            # breakpoint()
 
             if mor.strip() == "":
                 L.debug(f"Encountered an utterance that's likely devoid of morphological information; skipping... utterance='{doc.content[indx]}'")
@@ -753,6 +758,7 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
                 content.dependency = form.dependency
 
         except Exception as e:
+            breakpoint()
             warnings.warn(f"Utterance failed parsing, skipping ud tagging... line='{line}', error='{e}'.\n")
 
     L.debug("Stanza done.")
