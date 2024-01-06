@@ -187,7 +187,7 @@ def handler__NOUN(word, lang=None):
 
 
     # clear defaults
-    if gender_str == "&Com,Neut" or gender_str == "&Com": gender_str=""
+    if gender_str == "&Com,Neut" or gender_str == "&Com" or gender_str == "&ComNeut": gender_str=""
     if number_str == "&Sing": number_str=""
 
     return handler(word, lang)+gender_str+number_str+stringify_feats(case, type)
