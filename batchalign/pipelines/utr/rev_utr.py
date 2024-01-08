@@ -11,6 +11,7 @@ from batchalign.utils.config import config_read
 from batchalign.pipelines.utr.utils import bulletize_doc
 
 from batchalign.errors import *
+import warnings 
 
 import time
 import pathlib
