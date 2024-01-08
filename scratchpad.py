@@ -19,10 +19,10 @@ from batchalign import *
 ########### The Batchalign Core Test Harness ###########
 # from batchalign.formats.chat.parser import chat_parse_utterance
  
-# text = "だめ たろう „ ひっぱったら ."
+# text = "I'm going to read some random crap as I see on the screen . 2530_4940"
 
 # function = "morphosyntax"
-# lang = "jpn"
+# lang = "eng"
 # num_speakers = 1
 
 # forms, delim = chat_parse_utterance(text, None, None, None, None)
@@ -130,9 +130,7 @@ from batchalign import *
 
 # from batchalign.formats.chat.utils import annotation_clean
 
-# # # annotation_clean("<&~yuuuu>")
-
-# main = "⌈&=mira:Mamá⌉ . •232030_234008•"
+# main = "+< <太 高 了> [/] 太 高 了 . •125000_126823•"
 # mor = None
 # gra = None
 

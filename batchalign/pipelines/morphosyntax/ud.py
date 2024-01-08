@@ -260,6 +260,12 @@ HANDLERS = {
     "SYM": handler__PUNCT # symbols are handled like punctuation
 }
 
+def handle(word, lang):
+    if word.lemma in ['.', '!', '?', ',', '$,']:
+        return handler__actual_PUNCT(word, lang)
+
+    return HANDLERS.get(word.upos, handler)(word, lang)
+
 # the follow
 def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"):
     """Parses Stanza sentence into %mor and %gra strings
@@ -360,7 +366,7 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
         # append the appropriate mor line
         # by trying all handlers, and defaulting
         # to the default handler
-        mor_word = HANDLERS.get(word.upos, handler)(word, lang)
+        mor_word = handle(word, lang)
         # exception: if the word is 0, it is probably 0word
         # occationally Stanza screws up and makes forms like 0thing as 2 tokens:
         # 0 and thing 
@@ -523,7 +529,7 @@ def conform(i):
 
 def tokenizer_processor(tokenized, lang, sent):
     # split tokenized. in case stuff got combined
-    tokenized = [j for i in tokenized for j in i.split(" ")]
+    tokenized = [j for i in tokenized for j in conform(i).split(" ")]
     # tabulate results
     res = []
     # align the input sentence and the tokenization results
@@ -618,8 +624,16 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
     L.debug("Starting Stanza...")
     inputs = []
 
-    lang = doc.langs
-    lang = [pycountry.languages.get(alpha_3=i).alpha_2 for i in lang]
+    lang = []
+    for i in doc.langs:
+        try:
+            lang.append(pycountry.languages.get(alpha_3=i).alpha_2)
+        except:
+            # some languages don't have alpha 2
+            pass
+
+        
+# pycountry.languages.get(alpha_3=i).alpha_2 for i in lang
 
     config = {"processors": {"tokenize": "default",
                              "pos": "default",

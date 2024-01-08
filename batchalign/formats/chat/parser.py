@@ -40,13 +40,6 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
     # scan the timing
     # lex the utterance
     to_lex = re.compile("\x15\d+_\d+\x15").sub("", text).strip()
-    # fix all spacing issues
-    to_lex = to_lex.replace("< ", "<")
-    to_lex = to_lex.replace(" ]", "]")
-    to_lex = to_lex.replace("[ ", "[")
-    to_lex = to_lex.replace(" >", ">")
-    to_lex = to_lex.replace("  ", " ") # we do this twice
-    to_lex = to_lex.replace("  ", " ")
 
     # if the first form has a < in it and has no words,
     # its probably a beginning delimiter which we do not lex
@@ -55,6 +48,15 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
         and not re.findall("\w", to_lex.split(" ")[0])):
         beg = to_lex.split(" ")[0]
         to_lex = to_lex.replace(beg, "")
+
+    # fix all spacing issues
+    to_lex = to_lex.replace("< ", "<")
+    to_lex = to_lex.replace(" ]", "]")
+    to_lex = to_lex.replace("[ ", "[")
+    to_lex = to_lex.replace(" >", ">")
+    to_lex = to_lex.replace("  ", " ") # we do this twice
+    to_lex = to_lex.replace("  ", " ")
+
 
     # get rid of CA delimiters
     to_lex = re.compile("⌊&=[ A-Za-zÀ-ÖØ-öø-ÿ'-]+⌋").sub("", to_lex).strip()
