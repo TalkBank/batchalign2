@@ -43,6 +43,15 @@ def chat_parse_mor(mor_str):
     if mor_str in ENDING_PUNCT:
         return [Morphology(lemma=mor_str, pos="PUNCT", feats="")]
 
+    # JANK handle + forms
+    if "+" in mor_str:
+        pos, rest = mor_str.split("+", maxsplit=1)
+        return [Morphology.model_validate({
+            "lemma": "+"+rest,
+            "pos": pos.strip("|"),
+            "feats": "",
+        })]
+
     try:
         mors = [i.split("|") for i in re.split("[~$]", mor_str)]
         # TODO epic jank: backwards compatibility check: if a form
