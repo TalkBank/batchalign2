@@ -16,7 +16,12 @@ import warnings
 class WhisperFAEngine(BatchalignEngine):
     tasks = [ Task.FORCED_ALIGNMENT ]
 
+    def _hook_status(self, status_hook):
+        self.status_hook = status_hook
+
     def __init__(self, model=None):
+
+        self.status_hook = None
 
         if model == None:
             model = "openai/whisper-large-v2"
@@ -63,11 +68,17 @@ class WhisperFAEngine(BatchalignEngine):
 
         for indx, grp in enumerate(groups):
             L.info(f"Whisper FA processing segment {indx+1}/{len(groups)}...")
+            if self.status_hook != None:
+                self.status_hook(indx+1, len(groups))
 
             # perform alignment
             # we take a 2 second buffer in each direction
-            res = self.__whisper(audio=f.chunk(grp[0][1][0], grp[-1][1][1]),
-                                 text=detokenize(word[0].text for word in grp))
+            try:
+                res = self.__whisper(audio=f.chunk(grp[0][1][0], grp[-1][1][1]),
+                                    text=detokenize(word[0].text for word in grp))
+            except IndexError:
+                # utterance contains nothing
+                continue
 
             # create reference backplates, which are the word ids to set the timing for
             ref_targets = []
@@ -118,6 +129,9 @@ class WhisperFAEngine(BatchalignEngine):
                         w.time = (w.time[0], w.time[0]+1000) # give a second because we don't know
                     else:
                         w.time = (w.time[0], ut.content[tmp].time[0])
+                    # if we ended up with timings that don't make sense, drop it
+                    if w.time and w.time[0] == w.time[1]:
+                        w.time = None
             # clear any built-in timing (i.e. we should use utterance-derived timing)
             ut.time = None
             # correct the text 
