@@ -50,6 +50,7 @@ setup(
         "soundfile~=0.12.0",
         "rich-click>=1.7.0",
         "typing-extensions",
+        "pydub~=0.25.0",
     ],
     extras_require={
         'dev': [

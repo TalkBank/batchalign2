@@ -11,10 +11,12 @@ import warnings
 import shutil
 import os
 import glob
+import shutil
 
 from rich.console import Console
 from batchalign.pipelines import BatchalignPipeline
 from batchalign.document import *
+from batchalign.constants import *
 from batchalign.formats.chat import CHATFile
 from batchalign.utils import config
 from rich.markup import escape
@@ -56,8 +58,20 @@ def _dispatch(command, lang, num_speakers,
             path = Path(os.path.join(basedir, f))
             ext = path.suffix.strip(".").strip()
 
+            # calculate input path, convert if needed
+            inp_path = str(path)
+            if ext in FORCED_CONVERSION:
+                # check for ffmpeg
+                if not shutil.which("ffmpeg"):
+                    raise ValueError(f"ffmpeg not found in Path! Cannot load input media at {inp_path}.\nHint: Please convert your input audio sample to .wav before proceeding witch Batchalign, or install ffmpeg (https://ffmpeg.org/download.html)")
+                # convert
+                from pydub import AudioSegment
+                seg = AudioSegment.from_file(inp_path, ext)
+                seg.export(inp_path.replace(f".{ext}", ".wav"), format="wav")
+                inp_path = inp_path.replace(f".{ext}", ".wav")
+
             # repath the file to the output
-            rel = os.path.relpath(str(path), in_dir)
+            rel = os.path.relpath(inp_path, in_dir)
             repathed = Path(os.path.join(out_dir, rel))
             # make the repathed dir, if it doesn't exist
             parent = repathed.parent.absolute()
@@ -66,20 +80,20 @@ def _dispatch(command, lang, num_speakers,
             # HACK check for @Options:\tdummy in the file
             # and simply copy it
             if ext == "cha":
-                with open(str(path), 'r') as df:
+                with open(inp_path, 'r') as df:
                     data = df.read()
                 if "@Options:\tdummy" in data:
-                    shutil.copy2(str(path), str(repathed))
+                    shutil.copy2(inp_path, str(repathed))
                     continue
                 
             # if the file needs to get processed, append it to the list
             # to be processed and compute the output 
             if ext in extensions:
-                files.append(str(path))
+                files.append(inp_path)
                 outputs.append(str(repathed))
             # otherwise just copy the file
             else:
-                shutil.copy2(str(path), str(repathed))
+                shutil.copy2(inp_path, str(repathed))
 
     __tf = None
     # output file
