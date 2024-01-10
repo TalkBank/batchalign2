@@ -217,7 +217,8 @@ def chat_parse_doc(lines):
 
                 tier = Tier(lang=participant[0], corpus=participant[1], 
                             id=participant[2], name=participant[7],
-                            birthday=participant[3])
+                            birthday=participant[3], additional=[participant[i]
+                                                                 for i in [4,5,6,8,9]])
                 tiers[participant[2]] = tier
             # parse media type
             elif "@Media" in line.strip():

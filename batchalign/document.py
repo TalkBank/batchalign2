@@ -111,6 +111,7 @@ class Tier(BaseModel):
     id: str = Field(default="PAR") # PAR0
     name: str = Field(default="Participant") # Participant
     birthday: str = Field(default="") # Participant
+    additional: List[str] = Field(default=["","","","",""]) # additional fields 
 
 def get_token_type(str):
     if str in ENDING_PUNCT or str in MOR_PUNCT:

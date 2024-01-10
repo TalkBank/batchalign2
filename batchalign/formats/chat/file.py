@@ -70,7 +70,7 @@ class CHATFile(BaseFormat):
             if self.__doc.media != None:
                 name = self.__doc.media.name
                 dir = os.path.dirname(path)
-                globs = [os.path.join(dir, i) for i in MEDIA_EXTENSIONS]
+                globs = [os.path.join(dir, i) for i in PARSABLE_MEDIA]
 
                 # try to find the media file
                 media_files = sum([glob(i) for i in globs], [])

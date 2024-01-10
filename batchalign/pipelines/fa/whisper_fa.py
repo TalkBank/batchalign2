@@ -123,8 +123,10 @@ class WhisperFAEngine(BatchalignEngine):
                 elif indx != len(ut.content)-1:
                     # search forward for the next compatible time
                     tmp = indx+1
-                    while tmp < len(ut.content) and ut.content[tmp].time == None:
+                    while tmp < len(ut.content)-1 and ut.content[tmp].time == None:
                         tmp += 1
+                    if w.time == None:
+                        continue
                     if ut.content[tmp].time == None:
                         w.time = (w.time[0], w.time[0]+1000) # give a second because we don't know
                     else:

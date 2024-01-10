@@ -47,6 +47,14 @@ def bulletize_doc(asr, doc):
             doc[a][b].time = (int(round(i.payload[0]*1000)),
                               int(round(i.payload[1]*1000)))
 
+    # set media
+    if doc.media:
+        if doc.media.type == MediaType.UNLINKED_AUDIO:
+            doc.media.type = MediaType.AUDIO
+        elif doc.media.type == MediaType.UNLINKED_VIDEO:
+            doc.media.type = MediaType.VIDEO
+            
+
     return doc 
 
         
