@@ -73,7 +73,13 @@ class CHATFile(BaseFormat):
                 globs = [os.path.join(dir, i) for i in PARSABLE_MEDIA]
 
                 # try to find the media file
-                media_files = sum([glob(i) for i in globs], [])
+                media_files_glob = sum([glob(i) for i in globs], [])
+                # filter for those whose basename matches
+                media_files = [i for i in media_files_glob if os.path.splitext(os.path.basename(i))[0] == name]
+                # if we have no match, go by file names instead
+                if len(media_files) == 0:
+                    media_files = [i for i in media_files_glob
+                                   if os.path.splitext(os.path.basename(i))[0] == os.path.splitext(os.path.basename(path))[0]]
 
                 # associate
                 if len(media_files) > 0:
