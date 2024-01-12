@@ -41,7 +41,13 @@ class RevUTREngine(BatchalignEngine):
 
     def process(self, doc):
         # bring language code into the stack to access
-        lang =  doc.langs[0] if len(doc.langs) > 0 else self.__lang
+        lang = self.__lang
+        try:
+            lang = pycountry.languages.get(alpha_3=doc.langs[0]).alpha_2
+        except:
+            # some languages don't have alpha 2
+            pass
+
         client = self.__client
 
         assert doc.media != None and doc.media.url != None, f"We cannot add utterance timings to something that doesn't have a media path! Provided media tier='{doc.media}'"
