@@ -2,6 +2,10 @@ from batchalign.document import *
 from batchalign.utils.dp import align, ReferenceTarget, PayloadTarget, Match
 from batchalign.formats.chat.utils import annotation_clean
 
+import logging
+L = logging.getLogger("batchalign")
+
+
 def bulletize_doc(asr, doc):
     """Use ASR output to add estimated word-level timings to a doc.
 
@@ -18,11 +22,13 @@ def bulletize_doc(asr, doc):
         The corrected document.
     """
 
+    L.debug(f"bulletize: parsing")
     # collect and sort the raw words together with their timings
     raw_words = []
     for i in asr["monologues"]:
         raw_words += [j for j in i["elements"]
                     if j.get("ts") and j.get("end_ts")]
+    L.debug(f"bulletize: generating targets")
     # sort and serialize
     payloads = []
     for i in sorted(raw_words, key=lambda x:x["ts"]):
@@ -37,8 +43,10 @@ def bulletize_doc(asr, doc):
                 if annotation_clean(j.text).strip() != "":
                     backplates.append(ReferenceTarget(annotation_clean(j.text).lower(), 
                                                     (indx_i, indx_j)))
+    L.debug(f"bulletize: dping...")
     # aligment time!
-    alignments = align(payloads, backplates, False)
+    alignments = align(payloads, backplates, True)
+    L.debug(f"bulletize: finished aligning...")
 
     # for each aligned element, set timing
     for i in alignments:
@@ -46,6 +54,7 @@ def bulletize_doc(asr, doc):
             a,b = i.reference_payload
             doc[a][b].time = (int(round(i.payload[0]*1000)),
                               int(round(i.payload[1]*1000)))
+    L.debug(f"bulletize: returning")
 
     # set media
     if doc.media:

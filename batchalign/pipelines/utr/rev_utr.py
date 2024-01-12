@@ -74,7 +74,7 @@ class RevUTREngine(BatchalignEngine):
 
         # check status, sleeping every so often and check again
         while status == JobStatus.IN_PROGRESS:
-            time.sleep(30)
+            time.sleep(15)
             status = client.get_job_details(job.id).status
 
         # if we failed, report failure and give up
@@ -84,5 +84,11 @@ class RevUTREngine(BatchalignEngine):
 
         # and now, we extract result and postprocess it
         transcript_json = client.get_transcript_json(job.id)
+        L.debug(f"bulletizing...")
 
-        return bulletize_doc(transcript_json, doc)
+        res =  bulletize_doc(transcript_json, doc)
+        L.debug(f"done...")
+
+        return res
+
+

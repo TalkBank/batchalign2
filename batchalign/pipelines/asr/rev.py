@@ -70,7 +70,7 @@ class RevEngine(BatchalignEngine):
 
         # check status, sleeping every so often and check again
         while status == JobStatus.IN_PROGRESS:
-            time.sleep(30)
+            time.sleep(15)
             status = client.get_job_details(job.id).status
 
         # if we failed, report failure and give up
