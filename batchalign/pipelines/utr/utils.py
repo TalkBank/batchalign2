@@ -45,7 +45,7 @@ def bulletize_doc(asr, doc):
                                                     (indx_i, indx_j)))
     L.debug(f"bulletize: dping...")
     # aligment time!
-    alignments = align(payloads, backplates, True)
+    alignments = align(payloads, backplates, (L.level < logging.WARNING))
     L.debug(f"bulletize: finished aligning...")
 
     # for each aligned element, set timing
