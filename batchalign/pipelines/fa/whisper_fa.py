@@ -131,8 +131,11 @@ class WhisperFAEngine(BatchalignEngine):
                         w.time = (w.time[0], w.time[0]+1000) # give a second because we don't know
                     else:
                         w.time = (w.time[0], ut.content[tmp].time[0])
+                    # just in case, bound the time by the utterance derived timings
+                    if ut.alignment and ut.alignment[0] != None:
+                        w.time = (max(w.time[0], ut.alignment[0]), min(w.time[1], ut.alignment[1]))
                     # if we ended up with timings that don't make sense, drop it
-                    if w.time and w.time[0] == w.time[1]:
+                    if w.time and w.time[0] >= w.time[1]:
                         w.time = None
             # clear any built-in timing (i.e. we should use utterance-derived timing)
             ut.time = None

@@ -131,7 +131,6 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
     if (len(phonated_words) > 0 and
         phonated_words[-1][1][1] == TokenType.PUNCT and # because we don't track last ending PUNCT
         (len(phonated_words)-1 != len(wor))) and (len(phonated_words) != len(wor)):
-        breakpoint()
         raise CHATValidationException(f"Lengths of main and wor tiers are unaligned: lens main (filtered for phonation)={len(phonated_words)} wor={len(wor)}; line: '{text}'")
 
     # insert morphology into the parsed forms

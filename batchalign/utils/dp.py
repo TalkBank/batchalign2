@@ -96,8 +96,8 @@ def __dp(payload, reference, t):
     """
 
     from tqdm import tqdm
-    tqdm = tqdm if t else (lambda x,total="":x)
-
+    tqdm = tqdm if t else (lambda total="":None)
+    
     # bottom-up DP table:
     # every ROW represents a new element in REFERENCE
     # every COLUMN represents a new element in PAYLOAD
@@ -129,7 +129,8 @@ def __dp(payload, reference, t):
         dp[0][j] = (prev_dist+1, OutputType.EXTRA_PAYLOAD, (0, j-1))
 
     # now, its dp time.
-    for i in tqdm(range(1, len(reference)+1), total=len(reference)+1):
+    bar = tqdm(total=(len(reference)+1)*(len(payload)+1))
+    for i in range(1, len(reference)+1):
         for j in range(1, len(payload)+1):
             # get the three possible base solutions
             dist1, _, _ = dp[i-1][j-1]
@@ -167,6 +168,9 @@ def __dp(payload, reference, t):
                 dp[i][j] = (new_dist2, OutputType.EXTRA_REFERENCE, (i-1, j))
             elif new_dist3 <= new_dist1 and new_dist3 <= new_dist2:
                 dp[i][j] = (new_dist3, OutputType.EXTRA_PAYLOAD, (i, j-1))
+
+            if bar:
+                bar.update(1)
 
     # get the final solution by backtracking through the solutions
     dist, action, prev = dp[len(reference)][len(payload)]
