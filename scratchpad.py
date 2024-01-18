@@ -83,6 +83,7 @@ from batchalign import *
 #         raise e
 
 
+
 # pipeline = BatchalignPipeline.new("fa", lang="eng", num_speakers=len(doc.tiers))
 # doc = pipeline(doc)
 
@@ -125,16 +126,16 @@ from batchalign import *
 
 ########## The Batchalign CHAT Test Tarness ##########
 
-# from batchalign.formats.chat.parser import chat_parse_utterance
-# from batchalign.formats.chat.lexer import lex
+from batchalign.formats.chat.parser import chat_parse_utterance
+from batchalign.formats.chat.lexer import lex
 
-# from batchalign.formats.chat.utils import annotation_clean
+from batchalign.formats.chat.utils import annotation_clean
 
-# main = "+< <太 高 了> [/] 太 高 了 . •125000_126823•"
-# mor = None
-# gra = None
+main = "<and &+f> [//] <and the boy was &+kr> [//] and the boy heard a crying sound so he look back and said ."
+mor = None
+gra = None
 
-# chat_parse_utterance(main, mor, gra, None, None)
+chat_parse_utterance(main, mor, gra, None, None)
 
 
 
