@@ -6,7 +6,7 @@ Welcome! **Batchalign2** is a Python suite of language sample analysis (LSA) sof
 
 ----
 
-## 🏃 Quick Start
+## Quick Start
 
 ### Get Python
 - We support Python versions 3.9, 3.10, and 3.11.  
@@ -41,7 +41,7 @@ There are two main ways of interacting with Batchalign. Batchalign can be used a
 - to get started with the Batchalign program, [tap here](#-quick-start-command-line)
 - to get started on the Batchalign Python Library, [tap here](#-quick-start-python)
 
-## 💻 Quick Start: Command Line
+## Quick Start: Command Line
 
 ### Basic Usage 
 
@@ -120,7 +120,7 @@ and with two `-vv`, we will ditch the loading bar user interface and instead swi
 batchalign -vv align input output
 ```
 
-## 🐍 Quick Start: Python
+## Quick Start: Python
 
 Let's begin!
 
@@ -234,6 +234,6 @@ tg_word = ba.TextGridFile("word", doc=doc2)
 tg_utterance.write("tg_ut.TextGrid")
 tg_word.write("tg_w.TextGrid")
 ```
-## 🙌 Questions?
+## Questions?
 If you have any questions or concerns, please reach out! If something isn't working right, [open an issue on GitHub](https://github.com/TalkBank/batchalign2/issues); if you need support, please feel free to email `houjun@cmu.edu` and `macw@cmu.edu`.
 
