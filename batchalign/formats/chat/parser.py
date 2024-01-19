@@ -184,17 +184,25 @@ def chat_parse_doc(lines):
         exception describing the issue.
     """
 
+    pid = None
 
     raw = lines
     # pop off anything that's before @Begin
     while raw[0].strip() != "@Begin":
-        raw.pop(0)
+        ut = raw.pop(0)
+        if "@PID" in ut:
+            try:
+                head, end = ut.split("\t")
+            except ValueError:
+                raise CHATValidationException(f"Encountered unexpected PID line: {ut}")
+            pid = end.strip()
     raw.pop(0)
 
     results = {
         "content": [], 
         "langs": [], 
-        "media": None 
+        "media": None,
+        "pid": pid
     }
 
     tiers = {}

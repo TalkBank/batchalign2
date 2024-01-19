@@ -110,7 +110,8 @@ class CHATFile(BaseFormat):
         def __get_birthdays(line):
             return isinstance(line, CustomLine) and "birth" in line.id.lower()
 
-        main = ["@UTF8\n@Begin", generate_chat_preamble(doc, filter(__get_birthdays,
+        pid = "" if doc.pid in [None, ""] else f"@PID:\t{doc.pid}\n"
+        main = [f"@UTF8\n{pid}@Begin", generate_chat_preamble(doc, filter(__get_birthdays,
                                                                     utterances))]
         for i in utterances:
             if isinstance(i, CustomLine):

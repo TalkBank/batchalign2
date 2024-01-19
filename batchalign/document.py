@@ -299,6 +299,8 @@ class Document(BaseModel):
     content: Paragraph = Field(default=[])
     media: Optional[Media] = Field(default=None)
     langs: List[str] = Field(default=["eng"])
+    # persistent digital identifier
+    pid: Optional[str] = Field(default=None)
 
     def __repr__(self):
         return "\n".join(self.transcript())
