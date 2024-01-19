@@ -20,7 +20,7 @@ setup(
     version = VERSION_NUMBER.strip(),
     description = ("Python Speech Language Sample Analysis"),
     packages=find_packages(),
-    long_description=read('README.md'),
+    # long_description=read('README.md'),
     entry_points = {
         'console_scripts': ['batchalign=batchalign.cli.cli:batchalign'],
     },
