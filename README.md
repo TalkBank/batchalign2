@@ -4,6 +4,8 @@ Hello! This is the working codebase for the next-generation Batchalign project. 
 
 Welcome! **Batchalign2** is a Python suite of language sample analysis (LSA) software from the TalkBank project. It is used to interact with conversation audio files and their transcripts, and provides a whole host of analyses within this space.
 
+The TalkBank Project, of which Batchalign is a part, is supported by NIH grant HD082736.
+
 ----
 
 ## Quick Start
