@@ -38,8 +38,8 @@ py -m pip install -U batchalign
 ### Rock and Roll
 There are two main ways of interacting with Batchalign. Batchalign can be used as a program to batch-process CHAT (hence the name), or a Python LSA library.
 
-- to get started with the Batchalign program, [tap here](#-quick-start-command-line)
-- to get started on the Batchalign Python Library (advanced, not recommended for most users), [tap here](#-quick-start-python)
+- to get started with the Batchalign program, [tap here](#quick-start-command-line)
+- to get started on the Batchalign Python Library (advanced, not recommended for most users), [tap here](#quick-start-python)
 
 ## Quick Start: Command Line
 
