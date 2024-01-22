@@ -1,7 +1,5 @@
 # TalkBank | Batchalign2
 
-Hello! This is the working codebase for the next-generation Batchalign project. If you are a user seeking to use Batchalign, please refer to our [original repository](https://github.com/talkbank/batchalign).
-
 Welcome! **Batchalign2** is a Python suite of language sample analysis (LSA) software from the TalkBank project. It is used to interact with conversation audio files and their transcripts, and provides a whole host of analyses within this space.
 
 The TalkBank Project, of which Batchalign is a part, is supported by NIH grant HD082736.
@@ -9,6 +7,8 @@ The TalkBank Project, of which Batchalign is a part, is supported by NIH grant H
 ----
 
 ## Quick Start
+
+The following instructions is a quick start to install Batchalign. **For most users, we recommend you [visit this detailed guide](https://talkbank.org/info/batchalign.pdf) for more detailed instructions.** The remaining instructions on this page provides a very rough overview of the primary functionality of `batchalign`, and assumes familiarity with Python and the terminal.
 
 ### Get Python
 - We support Python versions 3.9, 3.10, and 3.11.  
@@ -20,10 +20,8 @@ The TalkBank Project, of which Batchalign is a part, is supported by NIH grant H
     -  for Windows: [part 1](https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe) and [part 2](https://stackoverflow.com/a/15626784)
     -  your distribution's instructions for Linux
 
-### Install the Package
-TESTING TESTING TESTING TESTING
-
-You can get Batchalign from PyPi:
+### Install and Update the Package
+You can get Batchalign from PyPi, and you can update the package in the same way:
 
 macOS/Linux:
 
@@ -41,7 +39,7 @@ py -m pip install -U batchalign
 There are two main ways of interacting with Batchalign. Batchalign can be used as a program to batch-process CHAT (hence the name), or a Python LSA library.
 
 - to get started with the Batchalign program, [tap here](#-quick-start-command-line)
-- to get started on the Batchalign Python Library, [tap here](#-quick-start-python)
+- to get started on the Batchalign Python Library (advanced, not recommended for most users), [tap here](#-quick-start-python)
 
 ## Quick Start: Command Line
 
