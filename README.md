@@ -28,13 +28,13 @@ You can get Batchalign from PyPi:
 macOS/Linux:
 
 ```
-pip install -U  --extra-index-url https://test.pypi.org/simple/ batchalign
+pip install -U batchalign
 ```
 
 Windows:
 
 ```
-py -m pip install -U  --extra-index-url https://test.pypi.org/simple/ batchalign
+py -m pip install -U batchalign
 ```
 
 ### Rock and Roll
