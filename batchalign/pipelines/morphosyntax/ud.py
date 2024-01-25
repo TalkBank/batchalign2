@@ -37,7 +37,7 @@ repath_file = lambda file_path, new_dir: os.path.join(new_dir, pathlib.Path(file
 from batchalign.document import *
 from batchalign.pipelines.base import *
 from batchalign.formats.chat.parser import chat_parse_utterance
-        
+
 from batchalign.utils.dp import *
 
 import logging
@@ -60,7 +60,7 @@ def stringify_feats(*feats):
 
 # the following is a list of feature-extracting handlers
 # it is used to extract features from specific parts of
-# speech. 
+# speech.
 
 def handler(word, lang=None):
     """The generic handler"""
@@ -76,7 +76,7 @@ def handler(word, lang=None):
 
     # unknown flag
     unknown = False
-    
+
     # if there is a 0 in front, the word is unkown
     # so we mark it as such
     if target[0] == '0':
@@ -173,7 +173,7 @@ def handler__ADJ(word, lang=None):
     person = str(feats.get("Person", 1))
     if person == "0":
         person = '4'
-        
+
     return handler(word, lang)+stringify_feats(deg, case, number[:1]+person)
 
 def handler__NOUN(word, lang=None):
@@ -213,7 +213,7 @@ def handler__VERB(word, lang=None):
     if person == "0":
         person = '4'
     number = feats.get("Number", "Sing")
-        
+
     tense = feats.get("Tense", "")
     polarity = feats.get("Polarity", "")
     polite = feats.get("Polite", "")
@@ -369,7 +369,7 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
         mor_word = handle(word, lang)
         # exception: if the word is 0, it is probably 0word
         # occationally Stanza screws up and makes forms like 0thing as 2 tokens:
-        # 0 and thing 
+        # 0 and thing
         if word.text.strip() == "0":
             mor.append("$ZERO$")
             num_skipped+=1 # mark skipped if skipped
@@ -381,7 +381,7 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
                 mor_word = "cm|begin"
             elif word.text.strip() == '„':
                 mor_word = "cm|end"
-            
+
 
             # specivl forms: recall the special form marker is xbxxx
             if "xbxxx" in word.text.strip():
@@ -499,10 +499,10 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
     return (mor_str, gra_str)
 
 def clean_sentence(sent):
-    """clean a sentence 
+    """clean a sentence
 
     Arguments:
-        sent (string): 
+        sent (string):
     """
 
     remove = ["+,", "++", "+\""]
@@ -632,7 +632,7 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
             # some languages don't have alpha 2
             pass
 
-        
+
 # pycountry.languages.get(alpha_3=i).alpha_2 for i in lang
 
     config = {"processors": {"tokenize": "default",
@@ -647,7 +647,7 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
     if "zh" in lang:
         lang.pop(lang.index("zh"))
         lang.append("zh-hans")
-              
+
     elif "hr" not in lang and "zh" not in lang and "zh-hans" not in lang and "ja" not in lang and "ko" not in lang:
         if "en" in lang:
             config["processors"]["mwt"] = "gum"
@@ -757,7 +757,7 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
             mor, gra = parse_sentence(sents[0], ending, special_forms_cleaned, lang[0])
             # breakpoint()
 
-            if mor.strip() == "":
+            if mor.strip() == "" or mor.strip() in ENDING_PUNCT:
                 L.debug(f"Encountered an utterance that's likely devoid of morphological information; skipping... utterance='{doc.content[indx]}'")
                 continue
 
