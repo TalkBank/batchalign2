@@ -19,7 +19,7 @@ class WhisperEngine(BatchalignEngine):
 
     def __init__(self, model=None, lang="eng"):
 
-        if model == None and lang == "eng":
+        if model == None and lang == "eng" or lang == "jpn":
             model = "talkbank/CHATWhisper-en-large-v1"
         elif model == None:
             model = "openai/whisper-large-v2"
