@@ -648,7 +648,8 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
         lang.pop(lang.index("zh"))
         lang.append("zh-hans")
 
-    elif not any([i in ["hr", "zh", "zh-hans", "ja", "ko", "sl", "sr"] for i in lang]):
+    elif not any([i in ["hr", "zh", "zh-hans", "ja", "ko",
+                        "sl", "sr", "bg", "ru"] for i in lang]):
         if "en" in lang:
             config["processors"]["mwt"] = "gum"
         else:
