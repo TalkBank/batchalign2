@@ -11,7 +11,12 @@ from collections import defaultdict
 from pathlib import Path
 
 import torch
-from transformers import WhisperProcessor, WhisperTokenizer, GenerationConfig, WhisperForConditionalGeneration
+from transformers import WhisperProcessor, WhisperTokenizer, GenerationConfig, WhisperForConditionalGeneration, AutoProcessor
+
+from batchalign.models.utils import _extract_token_timestamps as ett
+
+WhisperForConditionalGeneration._extract_token_timestamps = ett
+
 
 
 
@@ -99,20 +104,22 @@ class WhisperASRModel(object):
 
     def __init__(self, model, base="openai/whisper-large-v2", language="english", target_sample_rate=16000):
         L.debug("Initializing whisper model...")
-        self.pipe = pipeline(
-            "automatic-speech-recognition",
-            model=model,
-            tokenizer=WhisperTokenizer.from_pretrained(base),
-            chunk_length_s=25,
-            stride_length_s=3,
-            device=DEVICE,
-            torch_dtype=torch.float32,
-            return_timestamps="word",
-        )
-        L.debug("Done, initalizing processor and config...")
-        self.__config = GenerationConfig.from_pretrained(base)
-        self.__config.no_repeat_ngram_size = 5
-        processor = WhisperProcessor.from_pretrained(base)
+        # self.pipe = pipeline(
+        #     "automatic-speech-recognition",
+        #     model=model,
+        #     tokenizer=WhisperTokenizer.from_pretrained(base),
+        #     chunk_length_s=25,
+        #     stride_length_s=3,
+        #     device=DEVICE,
+        #     torch_dtype=torch.float32,
+        #     return_timestamps="word",
+        # )
+        self.__processor = AutoProcessor.from_pretrained(base)
+        self.__model = WhisperForConditionalGeneration.from_pretrained(model,
+                                                                torch_dtype=torch.float16)
+        self.__model.to(DEVICE)
+        L.debug("Done, initalizing processor...")
+        self.__processor = WhisperProcessor.from_pretrained(base)
         L.debug("Whisper initialization done.")
 
         # force decoder IDs to create language
@@ -156,7 +163,7 @@ class WhisperASRModel(object):
         groups = []
 
         L.info(f"Whisper transcribing file...")
-        L.debug("Whisper Preprocessing...")
+        L.debug("Whisper loading data...")
         if segments is not None:
             secs = np.array(range(len(segments))) * 0.5 + 0.1 / 2.0
             cur_start = 0
@@ -181,21 +188,48 @@ class WhisperASRModel(object):
                 "payload": 0
             })
 
-        L.debug("Whisper Transcribing...")
-        words = self.pipe(data.cpu().numpy(),
-                          batch_size=1, 
-                          generate_kwargs = {
-                              "repetition_penalty": 1.01,
-                              "generation_config": self.__config,
-                              "task": "transcribe",
-                              "language": self.lang
-                          })
-                                             # "do_sample": True,
-                                             # "temperature": 0.1
-                                             # })
-                                             # "temperature": 0,
-  #"temperature": 0.75,
-                                             # })
+        if data.shape[0] <= 480000:
+            L.debug(f"Found data of shape {data.shape}, invoking short-form preprocessing...")
+            inputs = self.__processor(data, return_tensors="pt", sampling_rate=16_000)
+            inputs = inputs.to(DEVICE, torch.float16)
+            L.debug(f"Beginning Whisper short-form inference...")
+            output = self.__model.generate(input_features=inputs.input_features,
+                                           return_timestamps=True,
+                                           return_token_timestamps=True,
+                                           no_repeat_ngram_size=5)
+        else:
+            L.debug(f"Found data of shape {data.shape}, invoking long-form preprocessing...")
+            inputs = self.__processor(data, return_tensors="pt", truncation=False,
+                                      padding="longest",
+                                      sampling_rate=16_000)
+            inputs = inputs.to(DEVICE, torch.float16)
+            L.debug(f"Beginning Whisper long-form inference...")
+            output = self.__model.generate(**inputs, condition_on_prev_tokens=False,
+                                           logprob_threshold=-1.0,
+                                           compression_ratio_threshold=1.35,
+                                           return_timestamps=True,
+                                           return_token_timestamps=True,
+                                           output_attentions=True,
+                                           no_repeat_ngram_size=5)
+
+        L.debug(f"Whisper inference done. Decoding...")
+        time_precision = (self.__processor.feature_extractor.chunk_length /
+                          self.__model.config.max_source_positions)
+
+        
+        L.debug(f"Whisper Decoding done.")
+        raw_decoding = []
+        seqs = output["sequences"].cpu()
+        times = output["token_timestamps"].cpu()
+        tok = self.__processor.tokenizer
+        # decode pairwise tokens and times
+        for i,t in zip(seqs, times):
+            for j,tt in zip(tok.convert_ids_to_tokens(i),t):
+                # this is a metadata token
+                if j[:2] != "<|":
+                    raw_decoding.append((j, tt.item()))
+        # decoded = self.__processor.tobatch_decode(output["sequences"], skip_special_tokens=True)
+        breakpoint()
         # to filter out the one word prompt
         words = words["chunks"]
 
@@ -250,4 +284,11 @@ class WhisperASRModel(object):
 
         L.debug("Whisper Done.")
         return ({"monologues": turns})
+
+tmp = "../talkbank-alignment/cassette/input/155-0.wav"
+asr = WhisperASRModel("openai/whisper-large-v2")
+# (
+df = asr.load(tmp)
+asr(df.all())
+
 

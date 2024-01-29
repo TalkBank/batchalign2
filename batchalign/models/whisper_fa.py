@@ -10,6 +10,7 @@ from transformers.models.whisper.generation_whisper import _median_filter as med
 from batchalign.models import ASRAudioFile
 
 from batchalign.models.utils import _extract_token_timestamps as ett
+from batchalign.models.utils import attn_dynamic_timewarp
 
 WhisperForConditionalGeneration._extract_token_timestamps = ett
 import numpy as np
@@ -92,36 +93,11 @@ class WhisperFAModel(object):
         with torch.inference_mode():
             output = self.__model(**features.to(DEVICE), output_attentions=True)
 
-        L.debug("Collecting and normalizing activations...")
-        # get decoder layer across attentions
-        # which has shape layers x heads x output_tokens x input_frames
-        cross_attentions = torch.cat(output.cross_attentions).cpu()
+        # dtw time!
+        jump_times = attn_dynamic_timewarp(output,
+                                           self.__model.generation_config.alignment_heads,
+                                           self.__model.config.median_filter_width)
 
-        # get the attention of alignment heads we care about only
-        weights = torch.stack([cross_attentions[l][h]
-                            for l, h in self.__model.generation_config.alignment_heads])
-
-        # normalize the attentino activations
-        std, mean = torch.std_mean(weights, dim=-2, keepdim=True, unbiased=False)
-        weights = (weights - mean) / std
-
-        L.debug("Applying median filter...")
-
-        # perform smoothing on attention activations + scale them
-        weights = median_filter(weights, self.__model.config.median_filter_width)
-        # average weights across heads
-        matrix = weights.mean(axis=0)
-        matrix[0] = matrix.mean() # jank way of fixing weird 0th token output
-        # see: https://media.discordapp.net/attachments/870073176380563460/1185486042753679390/image.png?ex=658fc8e9&is=657d53e9&hm=28ba60b6035fd8976e44f3e53628558d59d5f578917d36ad22c3d63b5563582e&=&format=webp&quality=lossless&width=1050&height=1164
-        # essentially, the 0th token (<sos>) gets attention jammed across the entire rest of the sequence
-        # because its padding; which screws everything else up
-
-        L.debug("Applying dynamic time warping...")
-
-        # its dynamic time warping time
-        text_idx, time_idx = dtw(-matrix)
-        jumps = np.pad(np.diff(text_idx), (1, 0), constant_values=1).astype(bool)
-        jump_times = time_idx[jumps] * 0.02
         # align jumps against transcript and decode
         timestamped_tokens = [(self.__processor.decode(i),j) for i,j in zip(tokens, jump_times)]
         # TODO: 50200 is the locations of special tokens
