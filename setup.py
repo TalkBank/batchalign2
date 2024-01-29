@@ -37,7 +37,7 @@ setup(
         "pydub>=0.25.1,<0.26.0",
         "imblearn",
         "plotly>=5.18.0",
-        "transformers>=4.36",
+        "transformers>=4.37",
         "tokenizers>=0.14.1",
         "pycountry>=22.3",
         "stanza>=1.7",

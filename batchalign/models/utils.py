@@ -1,6 +1,6 @@
 import torch
-from transformers.models.whisper.modeling_whisper import _dynamic_time_warping as _dynamic_time_warping
-from transformers.models.whisper.modeling_whisper import _median_filter as _median_filter
+from transformers.models.whisper.generation_whisper import _dynamic_time_warping as _dynamic_time_warping
+from transformers.models.whisper.generation_whisper import _median_filter as _median_filter
 
 import numpy as np
 
