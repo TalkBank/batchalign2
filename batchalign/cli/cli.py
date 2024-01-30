@@ -165,6 +165,38 @@ def morphotag(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
               loader, writer, C)
 
 
+#################### BENCHMARK ################################
+
+@batchalign.command()
+@common_options
+@click.option("--whisper/--rev",
+              default=False, help="Use OpenAI Whisper (ASR) instead of Rev.AI (default).")
+@click.pass_context
+def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
+    """Benchmark ASR utilities for their word accuracy"""
+    def loader(file):
+        # try to find a .cha in the same directory
+        p = Path(file)
+        cha = p.with_suffix(".cha")
+        # if there are not cha file found, we complain
+        if not cha.exists():
+            raise FileNotFoundError(f"No gold .cha transcript found, we cannot do benchmarking. audio: {p.name}, desired cha: {cha.name}, looked in: {str(cha)}.")
+        # otherwise, load the goald along with the input file
+        return file, {"gold": CHATFile(path=str(cha)).doc}
+
+    def writer(doc, output):
+        # delete the copied cha file
+        os.remove(Path(output).with_suffix(".cha"))
+        # write the wer
+        with open(Path(output).with_suffix(".wer.txt"), 'w') as df:
+            df.write(str(doc["wer"]))
+
+    _dispatch("benchmark", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
+              in_dir, out_dir,
+              loader, writer, C,
+              asr="whisper" if whisper else "rev", **kwargs)
+
+
 #################### SETUP ################################
 
 @batchalign.command()

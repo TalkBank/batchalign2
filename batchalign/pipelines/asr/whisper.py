@@ -36,7 +36,7 @@ class WhisperEngine(BatchalignEngine):
         else:
             self.__engine = None
 
-    def generate(self, source_path):
+    def generate(self, source_path, **kwargs):
         res = self.__whisper(self.__whisper.load(source_path).all())
         doc = process_generation(res, self.__lang, utterance_engine=self.__engine)
 

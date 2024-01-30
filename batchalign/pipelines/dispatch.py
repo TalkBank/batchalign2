@@ -5,7 +5,7 @@ Tabulate default packages and options.
 
 from batchalign import (WhisperEngine, WhisperFAEngine, StanzaEngine, RevEngine,
                         NgramRetraceEngine, DisfluencyReplacementEngine, WhisperUTREngine,
-                        RevUTREngine)
+                        RevUTREngine, EvaluationEngine)
 from batchalign import BatchalignPipeline
 
 from batchalign.utils.config import config_read
@@ -21,7 +21,8 @@ DEFAULT_PACKAGES = {
     "fa": "whisper_fa",
     "morphosyntax": "stanza",
     "disfluency": "replacement",
-    "retracing": "ngram"
+    "retracing": "ngram",
+    "eval": "evaluation",
 }
 
 LANGUAGE_OVERRIDE_PACKAGES = {
@@ -108,6 +109,8 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
             engines.append(WhisperUTREngine(lang=lang))
         elif engine == "rev_utr":
             engines.append(RevUTREngine(lang=lang))
+        elif engine == "evaluation":
+            engines.append(EvaluationEngine())
 
     L.debug(f"Done initalizing packages.")
     return BatchalignPipeline(*engines)

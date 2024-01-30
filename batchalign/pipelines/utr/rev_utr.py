@@ -39,7 +39,7 @@ class RevUTREngine(BatchalignEngine):
         self.__client = apiclient.RevAiAPIClient(key)
 
 
-    def process(self, doc):
+    def process(self, doc, **kwargs):
         # bring language code into the stack to access
         lang = self.__lang
         try:

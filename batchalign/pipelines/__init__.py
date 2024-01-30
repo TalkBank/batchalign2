@@ -7,3 +7,6 @@ from .cleanup import NgramRetraceEngine, DisfluencyReplacementEngine
 
 from .fa import WhisperFAEngine
 from .utr import WhisperUTREngine, RevUTREngine
+
+from .analysis import EvaluationEngine
+

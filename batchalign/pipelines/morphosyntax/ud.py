@@ -788,5 +788,5 @@ class StanzaEngine(BatchalignEngine):
     def _hook_status(self, status_hook):
         self.status_hook = status_hook
 
-    def process(self, doc):
+    def process(self, doc, **kwargs):
         return morphoanalyze(doc, self.status_hook)

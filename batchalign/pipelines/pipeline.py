@@ -59,7 +59,7 @@ class BatchalignPipeline:
         from batchalign.pipelines.dispatch import dispatch_pipeline
         return dispatch_pipeline(tasks, lang=lang, num_speakers=num_speakers, **arg_overrides)
 
-    def __call__(self, input, callback=None):
+    def __call__(self, input, callback=None, **kwargs):
         """Call the pipeline.
 
         Parameters
@@ -109,7 +109,7 @@ class BatchalignPipeline:
             L.debug(f"Calling generator: {self.__generator}")
             if callback:
                 callback(0,total_tasks, self.__generator.tasks)
-            doc = self.__generator.generate(doc.media.url)
+            doc = self.__generator.generate(doc.media.url, **kwargs)
             if callback:
                 callback(1,total_tasks, self.__generator.tasks)
 
@@ -125,7 +125,7 @@ class BatchalignPipeline:
 
             if callback:
                 p._hook_status(lambda x,y:callback(base+indx+x,total_tasks+y, p.tasks))
-            doc = p.process(doc)
+            doc = p.process(doc, **kwargs)
             p._hook_status(None)
 
             if callback:
@@ -139,7 +139,7 @@ class BatchalignPipeline:
             if callback:
                 callback(base, total_tasks, self.__analyzer.tasks)
 
-            doc = self.__analyzer.analyze(doc)
+            doc = self.__analyzer.analyze(doc, **kwargs)
             if callback:
                 callback(base+1, total_tasks, self.__analyzer.tasks)
             return doc
