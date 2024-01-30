@@ -26,7 +26,7 @@ You can get Batchalign from PyPi, and you can update the package in the same way
 macOS/Linux:
 
 ```
-pip install -U batchalign
+pip3 install -U batchalign
 ```
 
 Windows:
