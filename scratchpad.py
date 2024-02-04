@@ -18,25 +18,25 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 from batchalign import *
 
 ########### The Batchalign Core Test Harness ###########
-from batchalign.formats.chat.parser import chat_parse_utterance
+# from batchalign.formats.chat.parser import chat_parse_utterance
  
-text = "Hey yo kids, whacha gonna do?"
+# text = "on va jouer aux arbres ?"
 
-function = "morphosyntax,eval"
-lang = "eng"
-num_speakers = 1
+# function = "morphosyntax"
+# lang = "fra"
+# num_speakers = 1
 
-forms, delim = chat_parse_utterance(text, None, None, None, None)
-utterance = Utterance(content=forms, delim=delim)
+# forms, delim = chat_parse_utterance(text, None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim)
 
-# utterance = utterance(content=text)
+# # utterance = utterance(content=text)
 
-ut = Document(content=[utterance], langs=[lang])
+# ut = Document(content=[utterance], langs=[lang])
 
-pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers)
-res = pipeline(ut, gold=ut)
+# pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers)
+# res = pipeline(ut)
 
-# print(str(CHATFile(doc=doc)))
+# print(str(CHATFile(doc=res)))
 
 ########### The Batchalign String Test Harness ###########
 # from batchalign.formats.chat.parser import chat_parse_utterance
@@ -117,6 +117,7 @@ res = pipeline(ut, gold=ut)
 #     #                         .replace(".mp3", ".cha"))
 
 # _dispatch(function, lang, num_speakers, [in_format], Context(),
+          
 #             in_dir, out_dir,
 #             loader, writer, Console())
 

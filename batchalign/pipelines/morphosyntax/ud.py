@@ -349,8 +349,8 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
             auxiliaries.append(token.id[0]+1)
         elif lang=="fr" and token.text.strip() == "aujourd'":
             auxiliaries.append(token.id[-1])
-        elif lang=="fr" and token.text.strip() == "aux":
-            auxiliaries.append(token.id[0])
+        # elif lang=="fr" and token.text.strip() == "aux":
+            # auxiliaries.append(token.id[0])
         elif (lang=="fr" and token.text.strip() == "au" and
               type(token.id) == tuple and indx != 0
               and sentence.tokens[indx-1].text != "jusqu'"):
