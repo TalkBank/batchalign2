@@ -28,7 +28,7 @@ class WhisperFAEngine(BatchalignEngine):
 
         self.__whisper = WhisperFAModel(model)
 
-    def process(self, doc:Document):
+    def process(self, doc:Document, **kwargs):
         # check that the document has a media path to align to
         assert doc.media != None and doc.media.url != None, f"We cannot forced-align something that doesn't have a media path! Provided media tier='{doc.media}'"
 

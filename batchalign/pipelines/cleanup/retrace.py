@@ -12,7 +12,7 @@ class NgramRetraceEngine(BatchalignEngine):
 
     tasks = [ Task.RETRACE_ANALYSIS ]
 
-    def process(self, doc):
+    def process(self, doc, **kwargs):
         has_text = False
 
         for ut in doc.content:

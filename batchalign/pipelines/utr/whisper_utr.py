@@ -27,7 +27,7 @@ class WhisperUTREngine(BatchalignEngine):
         self.__whisper = WhisperASRModel(model, language=language)
         self.__lang = lang
 
-    def process(self, doc):
+    def process(self, doc, **kwargs):
         # check that the document has a media path to align to
         assert doc.media != None and doc.media.url != None, f"We cannot add utterance timings to something that doesn't have a media path! Provided media tier='{doc.media}'"
 

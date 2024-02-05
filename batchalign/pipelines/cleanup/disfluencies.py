@@ -8,7 +8,7 @@ class DisfluencyReplacementEngine(BatchalignEngine):
 
     tasks = [ Task.DISFLUENCY_ANALYSIS ]
 
-    def process(self, doc):
+    def process(self, doc, **kwargs):
         primary_language = doc.langs[0]
         for ut in doc.content:
             _mark_utterance(ut, "filled_pauses", TokenType.FP, primary_language)

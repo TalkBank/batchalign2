@@ -33,12 +33,16 @@ import traceback
 import logging as L 
 baL = L.getLogger('batchalign')
 
+import warnings
+warnings.filterwarnings('ignore', category=UserWarning, message='TypedStorage is deprecated')
+
 # this dictionary maps what commands are executed
 # against what BatchalignPipeline tasks are actually ran 
 Cmd2Task = {
     "align": "fa",
     "transcribe": "asr",
     "morphotag": "morphosyntax",
+    "benchmark": "asr,eval",
 }
 
 # this is the main runner used by all functions
@@ -140,9 +144,15 @@ def _dispatch(command, lang, num_speakers,
                 with warnings.catch_warnings(record=True) as w:
                     # parse the input format, as needed
                     doc = loader(os.path.abspath(file))
+                    # if we ended up with a tuple of length two,
+                    # that means that the loader requested kwargs
+                    kw = {}
+                    if isinstance(doc, tuple) and len(doc) > 1:
+                        doc, kw = doc
                     # RUN THE PUPPY!
                     doc = pipeline(doc,
-                                callback=lambda *args:progress_callback(file, *args))
+                                   callback=lambda *args:progress_callback(file, *args),
+                                   **kw)
                 msgs = [escape(str(i.message)).strip() for i in w]
                 # write the format, as needed
                 writer(doc, output)

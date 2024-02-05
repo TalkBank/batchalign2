@@ -47,7 +47,7 @@ class RevEngine(BatchalignEngine):
             self.__engine = None
 
 
-    def generate(self, f):
+    def generate(self, f, **kwargs):
         # bring language code into the stack to access
         lang = self.__lang
         client = self.__client

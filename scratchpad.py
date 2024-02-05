@@ -3,6 +3,7 @@ import json
 from glob import glob
 from pathlib import Path
 from rich.console import Console
+import copy
 import os
 
 import logging as L 
@@ -19,10 +20,10 @@ from batchalign import *
 ########### The Batchalign Core Test Harness ###########
 # from batchalign.formats.chat.parser import chat_parse_utterance
  
-# text = "電車 は 通ります よ ."
+# text = "on va jouer aux arbres ?"
 
 # function = "morphosyntax"
-# lang = "jpn"
+# lang = "fra"
 # num_speakers = 1
 
 # forms, delim = chat_parse_utterance(text, None, None, None, None)
@@ -33,13 +34,9 @@ from batchalign import *
 # ut = Document(content=[utterance], langs=[lang])
 
 # pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers)
-# doc = pipeline(ut)
-# doc[0][-1]
-# doc[0][-2].model_dump()
+# res = pipeline(ut)
 
-# doc[0].content[-2]
-
-# print(str(CHATFile(doc=doc)))
+# print(str(CHATFile(doc=res)))
 
 ########### The Batchalign String Test Harness ###########
 # from batchalign.formats.chat.parser import chat_parse_utterance
@@ -82,10 +79,11 @@ from batchalign import *
 #         print(file)
 #         raise e
 
-# pipeline = BatchalignPipeline.new("fa", lang="eng", num_speakers=len(doc.tiers))
-# doc = pipeline(doc)
+# d = f.doc
+# wer = EvaluationEngine()
+# wer(d_alt, gold=d)
 
-
+# dp time
 # f.doc[1][1]
 # f.doc.media
 
@@ -119,6 +117,7 @@ from batchalign import *
 #     #                         .replace(".mp3", ".cha"))
 
 # _dispatch(function, lang, num_speakers, [in_format], Context(),
+          
 #             in_dir, out_dir,
 #             loader, writer, Console())
 

@@ -27,6 +27,7 @@ class Task(IntEnum):
     FORCED_ALIGNMENT = 9
     FEATURE_EXTRACT = 10
     MORPHOSYNTAX = 11
+    WER = 12
 
 
     DEBUG__G = 0
@@ -48,6 +49,8 @@ TypeMap = {
     Task.FEATURE_EXTRACT: TaskType.ANALYSIS,
     Task.RETRACE_ANALYSIS: TaskType.PROCESSING,
     Task.DISFLUENCY_ANALYSIS: TaskType.PROCESSING,
+    Task.WER: TaskType.ANALYSIS,
+
     Task.DEBUG__G: TaskType.GENERATION,
     Task.DEBUG__P: TaskType.PROCESSING,
     Task.DEBUG__A: TaskType.ANALYSIS,
@@ -64,6 +67,7 @@ TaskFriendlyName = {
     Task.FEATURE_EXTRACT: "Feature Extraction",
     Task.RETRACE_ANALYSIS:  "Retrace Analysis",
     Task.DISFLUENCY_ANALYSIS:  "Disfluncy Analysis",
+    Task.WER:  "Word Error Rate",
     Task.DEBUG__G:  "TEST_GENERATION",
     Task.DEBUG__P:  "TEST_PROCESSING",
     Task.DEBUG__A:   "TEST_ANALYSIS",

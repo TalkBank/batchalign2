@@ -26,7 +26,7 @@ You can get Batchalign from PyPi, and you can update the package in the same way
 macOS/Linux:
 
 ```
-pip install -U batchalign
+pip3 install -U batchalign
 ```
 
 Windows:
@@ -61,24 +61,24 @@ Where `verb` includes:
 <!-- 4. `bulletize` - placing both an audio of video file (`.mp3/.mp4/.wav`) and an *unlinked* CHAT file in the input directory, generate utterance-level alignments through ASR -->
 
 ### Sample Commands
-For input files (CHAT and audio for `align`, CHAT only for `morphotag`, and audio only for `transcribe`), located in `~/mfa_data/input` dumping the output to `~/mfa_data/output`, one could write:
+For input files (CHAT and audio for `align`, CHAT only for `morphotag`, and audio only for `transcribe`), located in `~/ba_input` dumping the output to `~/ba_output`, one could write:
 
 #### ASR + Segmentation
 
 ```
-batchalign transcribe --lang=eng ~/mfa_data/input ~/mfa_data/output
+batchalign transcribe --lang=eng ~/ba_input ~/ba_output
 ```
 
 #### morphosyntactic analysis
 
 ```
-batchalign morphotag ~/mfa_data/input ~/mfa_data/output
+batchalign morphotag ~/ba_input ~/ba_output
 ```
 
 #### forced alignment
 
 ```
-batchalign align --lang=eng ~/mfa_data/input ~/mfa_data/output
+batchalign align --lang=eng ~/ba_input ~/ba_output
 ```
 
 
