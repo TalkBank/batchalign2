@@ -8,7 +8,7 @@ The TalkBank Project, of which Batchalign is a part, is supported by NIH grant H
 
 ## Quick Start
 
-The following instructions is a quick start to install Batchalign. **For most users, we recommend you [visit this detailed guide](https://talkbank.org/info/batchalign.pdf) for more detailed instructions.** The remaining instructions on this page provides a very rough overview of the primary functionality of `batchalign`, and assumes familiarity with Python and the terminal.
+The following instructions is a quick start to install Batchalign. **For most users, we recommend you [visit this detailed guide](https://talkbank.org/info/batchalign2.pdf) for more detailed instructions.** The remaining instructions on this page provides a very rough overview of the primary functionality of `batchalign`, and assumes familiarity with Python and the terminal.
 
 ### Get Python
 - We support Python versions 3.9, 3.10, and 3.11.  
@@ -17,7 +17,9 @@ The following instructions is a quick start to install Batchalign. **For most us
     -  for macOS
         1. Install Brew: [visit this link](https://brew.sh/)
         2. Install Python: execute `brew install python@3.11`
-    -  for Windows: [part 1](https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe) and [part 2](https://stackoverflow.com/a/15626784)
+    -  for Windows
+        1.  Install Python 3.11: [via this link](https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe) 
+        2.  If later commands report `pip module not found`, [this page may help](https://stackoverflow.com/a/15626784)
     -  your distribution's instructions for Linux
 
 ### Install and Update the Package
@@ -32,7 +34,7 @@ pip3 install -U batchalign
 Windows:
 
 ```
-py -m pip install -U batchalign
+py -m pip3 install -U batchalign
 ```
 
 ### Rock and Roll
