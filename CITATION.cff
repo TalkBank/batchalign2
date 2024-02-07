@@ -59,14 +59,14 @@ license: BSD-3-Clause
 preferred-citation:
   type: article
   authors:
-  - family-names: "Houjun"
-    given-names: "Liu"
-  - family-names: "Brian"
-    given-names: "MacWhinney"
-  - family-names: "Davida"
-    given-names: "Fromm"
-  - family-names: "Alyssa"
-    given-names: "Lanzi"
+  - family-names: "Liu"
+    given-names: "Houjun"
+  - family-names: "MacWhinney"
+    given-names: "Brian"
+  - family-names: "Fromm"
+    given-names: "Davida"
+  - family-names: "Lanzi"
+    given-names: "Alyssa"
   doi: "10.1044/2023_JSLHR-22-00642"
   journal: "Journal of Speech, Language, and Hearing Research"
   month: 7
