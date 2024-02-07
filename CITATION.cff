@@ -70,8 +70,8 @@ preferred-citation:
   doi: "10.1044/2023_JSLHR-22-00642"
   journal: "Journal of Speech, Language, and Hearing Research"
   month: 7
-  start: 1 # First page number
-  end: 10 # Last page number
+  start: 2421 # First page number
+  end: 2433 # Last page number
   title: "Automation of Language Sample Analysis"
   issue: 7
   volume: 66
