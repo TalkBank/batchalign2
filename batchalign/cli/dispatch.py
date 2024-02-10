@@ -89,6 +89,9 @@ def _dispatch(command, lang, num_speakers,
                 if "@Options:\tdummy" in data:
                     shutil.copy2(inp_path, str(repathed))
                     continue
+                elif "This is a dummy file to permit playback from the TalkBank browser" in data:
+                    shutil.copy2(inp_path, str(repathed))
+                    continue
                 
             # if the file needs to get processed, append it to the list
             # to be processed and compute the output 
