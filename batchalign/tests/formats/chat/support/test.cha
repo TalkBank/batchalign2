@@ -1,22 +1,59 @@
 @UTF8
 @Begin
 @Languages:	eng
-@Participants:	PAR0 Participant, INV1 Participant, STU Participant
+@Participants:	PAR0 Participant
 @Options:	multi
 @ID:	eng|corpus_name|PAR0|||||Participant|||
-@ID:	eng|corpus_name|INV1|||||Participant|||
-@ID:	eng|corpus_name|STU|||||Participant|||
 @Media:	test, audio
-*PAR0:	Um <I like I like> [/] I like beans . 20780_24300
-%mor:	intj|um pron|I&Prs&Nom&S1 verb|like&Fin&Ind&1&Pres&S1 noun|bean&ComNeut&Plur .
-%gra:	1|3|DISCOURSE 2|3|NSUBJ 3|4|ROOT 4|3|OBJ 5|3|PUNCT
-*INV1:	so ‡ she doesn't have a list of questions to ask you . 136820_139220
-%mor:	adv|so cm|begin pron|she&Prs&Nom&S3 aux|do&Fin&Ind&3&Pres&S3~part|not verb|have&Inf&S det|a&Ind&Art noun|list&ComNeut adp|of noun|question&ComNeut&Plur part|to verb|ask&Inf&S pron|you&Prs&Acc&S2 .
-%gra:	1|6|ADVMOD 2|6|PUNCT 3|6|NSUBJ 4|6|AUX 5|6|ADVMOD 6|13|ROOT 7|8|DET 8|6|OBJ 9|10|CASE 10|8|NMOD 11|12|MARK 12|6|ADVCL 13|12|IOBJ 14|6|PUNCT
-*STU:	+< so I was +//. 201235_201933
-%mor:	adv|so pron|I&Prs&Nom&S1 verb|be&Fin&Ind&1&Past&S1 +//.
-%gra:	1|3|ADVMOD 2|3|NSUBJ 3|3|ROOT 4|3|PUNCT
-*STU:	+< right , right . 332418_333654
-%mor:	adj|right&Pos&S1 cm|cm adj|right&Pos&S1 .
-%gra:	1|3|ROOT 2|1|PUNCT 3|1|DISCOURSE 4|1|PUNCT
+*PAR0:	Hello . 125_475
+%mor:	intj|hello .
+%gra:	1|1|ROOT 2|1|PUNCT
+%wor:	Hello 125_475 .
+*PAR0:	this is a test of wake-up . 985_2395
+%mor:	pron|this-Dem-S1 aux|be-Fin-Ind-Pres-S3 det|a-Ind-Art noun|test adp|of noun|wakeup .
+%gra:	1|4|NSUBJ 2|4|COP 3|4|DET 4|6|ROOT 5|6|CASE 6|4|NMOD 7|4|PUNCT
+*PAR0:	i'm going to read some random crap as i see on the screen . 2575_5195
+%mor:	pron|I-Prs-Nom-S1~aux|be-Fin-Ind-Pres-S1 verb|go-Part-Pres-S part|to verb|read-Inf-S det|some-Def adj|random-Pos-S1 noun|crap sconj|as pron|I-Prs-Nom-S1 verb|see-Fin-Ind-Pres-S1 adp|on det|the-Def-Art noun|screen .
+%gra:	1|3|NSUBJ 2|3|AUX 3|14|ROOT 4|5|MARK 5|3|XCOMP 6|8|DET 7|8|AMOD 8|5|OBJ 9|11|MARK 10|11|NSUBJ 11|5|ADVCL 12|14|CASE 13|14|DET 14|11|OBL 15|3|PUNCT
+%wor:	i'm 2575_2795 going 2795_2955 to 2955_3035 read 3035_3235 some 3235_3395 random 3395_3635 crap 3745_4035 as 4175_4395 i 4475_4595 see 4595_4715 on 4715_4915 the 4915_5035 screen 5035_5195 .
+*PAR0:	just to test batch line . 5305_6555
+%mor:	adv|just part|to verb|test-Inf-S noun|batch noun|line .
+%gra:	1|3|ADVMOD 2|3|MARK 3|5|ROOT 4|5|COMPOUND 5|3|OBJ 6|3|PUNCT
+%wor:	just 5305_5595 to 5595_5755 test 5755_5955 batch 5955_6235 line 6265_6555 .
+*PAR0:	the primary area for recording editing and arranging audio mid and drum regions divided into different track types . 7095_12755
+%mor:	det|the-Def-Art adj|primary-Pos-S1 noun|area sconj|for noun|recording noun|editing cconj|and verb|arrange-Ger-S adj|audio-Pos-S1 noun|midmorning cconj|and noun|drum noun|region-Plur verb|divide-Part-Past-S adp|into adj|different-Pos-S1 noun|track noun|type-Plur .
+%gra:	1|3|DET 2|3|AMOD 3|18|ROOT 4|5|MARK 5|3|ACL 6|5|OBJ 7|8|CC 8|5|CONJ 9|13|AMOD 10|13|COMPOUND 11|12|CC 12|10|CONJ 13|8|OBJ 14|13|ACL 15|18|CASE 16|18|AMOD 17|18|COMPOUND 18|14|OBL 19|3|PUNCT
+%wor:	the 7095_7315 primary 7315_7555 area 7705_7995 for 8135_8355 recording 8355_8835 editing 8835_9155 and 9155_9355 arranging 9355_9755 audio 9755_9955 mid 10135_10355 and 10355_10555 drum 10555_10755 regions 10785_11275 divided 11275_11675 into 11745_12035 different 12035_12275 track 12275_12515 types 12515_12755 .
+*PAR0:	press command slash for more info . 13085_14875
+%mor:	noun|press noun|command noun|slash adp|for adj|more-Cmp-S1 noun|info .
+%gra:	1|3|COMPOUND 2|3|COMPOUND 3|6|ROOT 4|6|CASE 5|6|AMOD 6|3|NMOD 7|3|PUNCT
+%wor:	press 13085_13435 command 13435_13835 slash 13835_14075 for 14135_14355 more 14355_14555 info 14585_14875 .
+*PAR0:	test [/] test . 15185_15755
+%mor:	noun|test .
+%gra:	1|1|ROOT 2|1|PUNCT
+%wor:	test 15185_15475 test 15475_15755 .
+*PAR0:	i don't know what to say . 16475_17235
+%mor:	pron|I-Prs-Nom-S1 aux|do-Fin-Ind-Pres-S1~part|not verb|know-Inf-S pron|what-Int-S1 part|to verb|say-Inf-S .
+%gra:	1|4|NSUBJ 2|4|AUX 3|4|ADVMOD 4|7|ROOT 5|4|OBJ 6|7|MARK 7|5|ACL 8|4|PUNCT
+%wor:	i 16475_16595 don't 16595_16755 know 16755_16835 what 16835_16955 to 16955_17115 say 17115_17235 .
+*PAR0:	but &-um here's some retracing . 17235_19195
+%mor:	cconj|but adv|here~aux|be-Fin-Ind-Pres-S3 det|some-Def noun|retracing .
+%gra:	1|2|CC 2|5|ROOT 3|2|COP 4|5|DET 5|2|NSUBJ 6|2|PUNCT
+%wor:	but 17235_17395 um 17455_17675 here's 18135_18555 some 18555_18675 retracing 18835_19195 .
+*PAR0:	so just for fun . 19295_20155
+%mor:	adv|so adv|just adp|for noun|fun .
+%gra:	1|4|ROOT 2|4|ADVMOD 3|4|CASE 4|1|OBL 5|1|PUNCT
+%wor:	so 19295_19515 just 19555_19795 for 19795_19955 fun 19955_20155 .
+*PAR0:	&-um <i like i like> [/] i like beans . 20735_23955
+%mor:	pron|I-Prs-Nom-S1 verb|like-Fin-Ind-Pres-S1 noun|bean-Plur .
+%gra:	1|2|NSUBJ 2|3|ROOT 3|2|OBJ 4|2|PUNCT
+%wor:	um 20735_20955 i 21395_21515 like 21545_21835 i 22235_22355 like 22355_22595 i 22715_22835 like 22835_23075 beans 23605_23955 .
+*PAR0:	beans are fun . 24205_25075
+%mor:	noun|bean-Plur aux|be-Fin-Ind-Pres-P3 adj|fun-Pos-S1 .
+%gra:	1|3|NSUBJ 2|3|COP 3|3|ROOT 4|3|PUNCT
+%wor:	beans 24205_24555 are 24615_24835 fun 24855_25075 .
+*PAR0:	thank you very much . 25085_25835
+%mor:	verb|thank-Fin-Ind-Pres-S1 pron|you-Prs-Acc-S2 adv|very adv|much .
+%gra:	1|4|ROOT 2|1|OBJ 3|4|ADVMOD 4|1|ADVMOD 5|1|PUNCT
+%wor:	thank 25085_25435 you 25435_25515 very 25515_25675 much 25675_25835 .
 @End

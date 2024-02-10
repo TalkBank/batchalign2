@@ -53,9 +53,9 @@ def parse_feats(word):
         return {}
 # one liner to join feature string
 def stringify_feats(*feats):
-    template= ("&"+"&".join(filter(lambda x: x!= "", feats))).strip()
+    template= ("-"+"-".join(filter(lambda x: x!= "", feats))).strip()
 
-    if template == "&": return ""
+    if template == "-": return ""
     else: return template.replace(",", "")
 
 # the following is a list of feature-extracting handlers
@@ -93,16 +93,16 @@ def handler(word, lang=None):
     target = target.replace(".", "")
 
     # if we have a clitic that's broken off, we remove the extra dash
-    if target != "" and target[0] == "&":
+    if target != "" and target[0] == "-":
         target = target[1:]
 
     # if we have a dash marker in the end, we remove the extra dash
-    if target != "" and target[-1] == "&":
+    if target != "" and target[-1] == "-":
         target = target[:-1]
 
     # replace double dashes
     target = target.replace("--", "-")
-    target = target.replace("&&", "&")
+    target = target.replace("--", "-")
     target = target.replace("<unk>", "")
     target = target.replace("<SOS>", "")
 
@@ -123,6 +123,9 @@ def handler(word, lang=None):
     # door zogen fix
     if target == "door zogen":
         target = word.text
+
+    # fix dash
+    target = target.replace("-", "–")
 
     return f"{'' if not unknown else '0'}{word.upos.lower()}|{target}"
 
@@ -154,13 +157,13 @@ def handler__DET(word, lang=None):
         return handler(word)
 
     # get gender and numer
-    gender_str = "&"+feats.get("Gender", "").replace(",", "")
+    gender_str = "-"+feats.get("Gender", "").replace(",", "")
 
     # clear defaults
-    if gender_str == "&Com,Neut" or gender_str == "&Com" or gender_str=="&": gender_str=""
+    if gender_str == "-Com,Neut" or gender_str == "-Com" or gender_str=="-": gender_str=""
 
     # parse
-    return (handler(word, lang)+gender_str+"&"+
+    return (handler(word, lang)+gender_str+"-"+
             feats.get("Definite", "Def") + stringify_feats(feats.get("PronType", "")))
 
 def handler__ADJ(word, lang=None):
@@ -181,15 +184,15 @@ def handler__NOUN(word, lang=None):
     feats = parse_feats(word)
 
     # get gender and numer
-    gender_str = "&"+feats.get("Gender", "ComNeut").replace(",", "")
-    number_str = "&"+feats.get("Number", "Sing")
+    gender_str = "-"+feats.get("Gender", "ComNeut").replace(",", "")
+    number_str = "-"+feats.get("Number", "Sing")
     case  = feats.get("Case", "").replace(",", "")
     type  = feats.get("PronType", "")
 
 
     # clear defaults
-    if gender_str == "&Com,Neut" or gender_str == "&Com" or gender_str == "&ComNeut": gender_str=""
-    if number_str == "&Sing": number_str=""
+    if gender_str == "-Com,Neut" or gender_str == "-Com" or gender_str == "-ComNeut": gender_str=""
+    if number_str == "-Sing": number_str=""
 
     return handler(word, lang)+gender_str+number_str+stringify_feats(case, type)
 
@@ -204,7 +207,7 @@ def handler__VERB(word, lang=None):
     # seed flag
     flag = ""
     # append number and form if needed
-    flag += "&"+feats.get("VerbForm", "Inf").replace(",", "")
+    flag += "-"+feats.get("VerbForm", "Inf").replace(",", "")
     # append tense
     aspect = feats.get("Aspect", "")
     mood = feats.get("Mood", "")
@@ -620,7 +623,7 @@ def tokenizer_processor(tokenized, lang, sent):
     return res
 
 ######
-def morphoanalyze(doc: Document, status_hook:callable = None):
+def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None):
     L.debug("Starting Stanza...")
     inputs = []
 
@@ -642,7 +645,8 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
                              "depparse": "default"},
               "tokenize_no_ssplit": True}
 
-    config["tokenize_postprocessor"] = lambda x:[tokenizer_processor(i, lang, inputs[-1]) for i in x]
+    if not retokenize:
+        config["tokenize_postprocessor"] = lambda x:[tokenizer_processor(i, lang, inputs[-1]) for i in x]
 
     if "zh" in lang:
         lang.pop(lang.index("zh"))
@@ -763,17 +767,28 @@ def morphoanalyze(doc: Document, status_hook:callable = None):
                 L.debug(f"Encountered an utterance that's likely devoid of morphological information; skipping... utterance='{doc.content[indx]}'")
                 continue
 
-            # insert morphology into the parsed forms
-            forms, _ = chat_parse_utterance(line, mor, gra, None, None)
+            if retokenize:
+                # rewrite the sentence with our desired tokenizations
+                ut, end = chat_parse_utterance(" ".join([i.text for i in sents[0].words])+" "+ending,
+                                          mor, gra,
+                                          None, None)
+                doc.content[indx] = Utterance(content=ut,
+                                              tier=doc.content[indx].tier,
+                                              time=doc.content[indx].time,
+                                              custom_dependencies=doc.content[indx].custom_dependencies)
+                                          
+            else:
+                # insert morphology into the parsed forms
+                forms, _ = chat_parse_utterance(line, mor, gra, None, None)
 
-            if len(doc.content[indx].content) != len(forms):
-                warnings.warn(f"Generated UD output has length mismatch with the main tier! line='{line}'. Skipping...")
-                continue
+                if len(doc.content[indx].content) != len(forms):
+                    warnings.warn(f"Generated UD output has length mismatch with the main tier! line='{line}'. Skipping...")
+                    continue
 
-            # stitch the morphology back
-            for content, form in zip(doc.content[indx].content, forms):
-                content.morphology = form.morphology
-                content.dependency = form.dependency
+                # stitch the morphology back
+                for content, form in zip(doc.content[indx].content, forms):
+                    content.morphology = form.morphology
+                    content.dependency = form.dependency
 
         except Exception as e:
             warnings.warn(f"Utterance failed parsing, skipping ud tagging... line='{line}', error='{e}'.\n")
@@ -789,4 +804,4 @@ class StanzaEngine(BatchalignEngine):
         self.status_hook = status_hook
 
     def process(self, doc, **kwargs):
-        return morphoanalyze(doc, self.status_hook)
+        return morphoanalyze(doc, retokenize=kwargs.get("retokenize", False), status_hook=self.status_hook)

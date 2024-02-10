@@ -5,15 +5,26 @@
                 "lang": "eng",
                 "corpus": "corpus_name",
                 "id": "PAR0",
-                "name": "Participant"
+                "name": "Participant",
+                "birthday": "",
+                "additional": [
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
             },
             "content": [
                 {
-                    "text": "Um",
-                    "time": null,
+                    "text": "Hello",
+                    "time": [
+                        125,
+                        475
+                    ],
                     "morphology": [
                         {
-                            "lemma": "um",
+                            "lemma": "hello",
                             "pos": "intj",
                             "feats": ""
                         }
@@ -21,93 +32,8 @@
                     "dependency": [
                         {
                             "id": 1,
-                            "dep_id": 3,
-                            "dep_type": "DISCOURSE"
-                        }
-                    ],
-                    "type": 0
-                },
-                {
-                    "text": "I",
-                    "time": null,
-                    "morphology": null,
-                    "dependency": null,
-                    "type": 1
-                },
-                {
-                    "text": "like",
-                    "time": null,
-                    "morphology": null,
-                    "dependency": null,
-                    "type": 1
-                },
-                {
-                    "text": "I",
-                    "time": null,
-                    "morphology": null,
-                    "dependency": null,
-                    "type": 1
-                },
-                {
-                    "text": "like",
-                    "time": null,
-                    "morphology": null,
-                    "dependency": null,
-                    "type": 1
-                },
-                {
-                    "text": "I",
-                    "time": null,
-                    "morphology": [
-                        {
-                            "lemma": "I",
-                            "pos": "pron",
-                            "feats": "Prs&Nom&S1"
-                        }
-                    ],
-                    "dependency": [
-                        {
-                            "id": 2,
-                            "dep_id": 3,
-                            "dep_type": "NSUBJ"
-                        }
-                    ],
-                    "type": 0
-                },
-                {
-                    "text": "like",
-                    "time": null,
-                    "morphology": [
-                        {
-                            "lemma": "like",
-                            "pos": "verb",
-                            "feats": "Fin&Ind&1&Pres&S1"
-                        }
-                    ],
-                    "dependency": [
-                        {
-                            "id": 3,
-                            "dep_id": 4,
+                            "dep_id": 1,
                             "dep_type": "ROOT"
-                        }
-                    ],
-                    "type": 0
-                },
-                {
-                    "text": "beans",
-                    "time": null,
-                    "morphology": [
-                        {
-                            "lemma": "bean",
-                            "pos": "noun",
-                            "feats": "ComNeut&Plur"
-                        }
-                    ],
-                    "dependency": [
-                        {
-                            "id": 4,
-                            "dep_id": 3,
-                            "dep_type": "OBJ"
                         }
                     ],
                     "type": 0
@@ -124,18 +50,18 @@
                     ],
                     "dependency": [
                         {
-                            "id": 5,
-                            "dep_id": 3,
+                            "id": 2,
+                            "dep_id": 1,
                             "dep_type": "PUNCT"
                         }
                     ],
                     "type": 5
                 }
             ],
-            "text": "Um <I like I like> [/] I like beans . \u001520780_24300\u0015",
+            "text": "Hello . \u0015125_475\u0015",
             "time": [
-                20780,
-                24300
+                125,
+                475
             ],
             "custom_dependencies": [],
             "delim": "."
@@ -144,111 +70,52 @@
             "tier": {
                 "lang": "eng",
                 "corpus": "corpus_name",
-                "id": "INV1",
-                "name": "Participant"
+                "id": "PAR0",
+                "name": "Participant",
+                "birthday": "",
+                "additional": [
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
             },
             "content": [
                 {
-                    "text": "so",
+                    "text": "this",
                     "time": null,
                     "morphology": [
                         {
-                            "lemma": "so",
-                            "pos": "adv",
-                            "feats": ""
+                            "lemma": "this",
+                            "pos": "pron",
+                            "feats": "Dem-S1"
                         }
                     ],
                     "dependency": [
                         {
                             "id": 1,
-                            "dep_id": 6,
-                            "dep_type": "ADVMOD"
-                        }
-                    ],
-                    "type": 0
-                },
-                {
-                    "text": "\u2021",
-                    "time": null,
-                    "morphology": [
-                        {
-                            "lemma": "begin",
-                            "pos": "cm",
-                            "feats": ""
-                        }
-                    ],
-                    "dependency": [
-                        {
-                            "id": 2,
-                            "dep_id": 6,
-                            "dep_type": "PUNCT"
-                        }
-                    ],
-                    "type": 5
-                },
-                {
-                    "text": "she",
-                    "time": null,
-                    "morphology": [
-                        {
-                            "lemma": "she",
-                            "pos": "pron",
-                            "feats": "Prs&Nom&S3"
-                        }
-                    ],
-                    "dependency": [
-                        {
-                            "id": 3,
-                            "dep_id": 6,
+                            "dep_id": 4,
                             "dep_type": "NSUBJ"
                         }
                     ],
                     "type": 0
                 },
                 {
-                    "text": "doesn't",
+                    "text": "is",
                     "time": null,
                     "morphology": [
                         {
-                            "lemma": "do",
+                            "lemma": "be",
                             "pos": "aux",
-                            "feats": "Fin&Ind&3&Pres&S3"
-                        },
-                        {
-                            "lemma": "not",
-                            "pos": "part",
-                            "feats": ""
+                            "feats": "Fin-Ind-Pres-S3"
                         }
                     ],
                     "dependency": [
                         {
-                            "id": 4,
-                            "dep_id": 6,
-                            "dep_type": "AUX"
-                        },
-                        {
-                            "id": 5,
-                            "dep_id": 6,
-                            "dep_type": "ADVMOD"
-                        }
-                    ],
-                    "type": 0
-                },
-                {
-                    "text": "have",
-                    "time": null,
-                    "morphology": [
-                        {
-                            "lemma": "have",
-                            "pos": "verb",
-                            "feats": "Inf&S"
-                        }
-                    ],
-                    "dependency": [
-                        {
-                            "id": 6,
-                            "dep_id": 13,
-                            "dep_type": "ROOT"
+                            "id": 2,
+                            "dep_id": 4,
+                            "dep_type": "COP"
                         }
                     ],
                     "type": 0
@@ -260,33 +127,33 @@
                         {
                             "lemma": "a",
                             "pos": "det",
-                            "feats": "Ind&Art"
+                            "feats": "Ind-Art"
                         }
                     ],
                     "dependency": [
                         {
-                            "id": 7,
-                            "dep_id": 8,
+                            "id": 3,
+                            "dep_id": 4,
                             "dep_type": "DET"
                         }
                     ],
                     "type": 0
                 },
                 {
-                    "text": "list",
+                    "text": "test",
                     "time": null,
                     "morphology": [
                         {
-                            "lemma": "list",
+                            "lemma": "test",
                             "pos": "noun",
-                            "feats": "ComNeut"
+                            "feats": ""
                         }
                     ],
                     "dependency": [
                         {
-                            "id": 8,
+                            "id": 4,
                             "dep_id": 6,
-                            "dep_type": "OBJ"
+                            "dep_type": "ROOT"
                         }
                     ],
                     "type": 0
@@ -303,85 +170,28 @@
                     ],
                     "dependency": [
                         {
-                            "id": 9,
-                            "dep_id": 10,
+                            "id": 5,
+                            "dep_id": 6,
                             "dep_type": "CASE"
                         }
                     ],
                     "type": 0
                 },
                 {
-                    "text": "questions",
+                    "text": "wakeup",
                     "time": null,
                     "morphology": [
                         {
-                            "lemma": "question",
+                            "lemma": "wakeup",
                             "pos": "noun",
-                            "feats": "ComNeut&Plur"
-                        }
-                    ],
-                    "dependency": [
-                        {
-                            "id": 10,
-                            "dep_id": 8,
-                            "dep_type": "NMOD"
-                        }
-                    ],
-                    "type": 0
-                },
-                {
-                    "text": "to",
-                    "time": null,
-                    "morphology": [
-                        {
-                            "lemma": "to",
-                            "pos": "part",
                             "feats": ""
                         }
                     ],
                     "dependency": [
                         {
-                            "id": 11,
-                            "dep_id": 12,
-                            "dep_type": "MARK"
-                        }
-                    ],
-                    "type": 0
-                },
-                {
-                    "text": "ask",
-                    "time": null,
-                    "morphology": [
-                        {
-                            "lemma": "ask",
-                            "pos": "verb",
-                            "feats": "Inf&S"
-                        }
-                    ],
-                    "dependency": [
-                        {
-                            "id": 12,
-                            "dep_id": 6,
-                            "dep_type": "ADVCL"
-                        }
-                    ],
-                    "type": 0
-                },
-                {
-                    "text": "you",
-                    "time": null,
-                    "morphology": [
-                        {
-                            "lemma": "you",
-                            "pos": "pron",
-                            "feats": "Prs&Acc&S2"
-                        }
-                    ],
-                    "dependency": [
-                        {
-                            "id": 13,
-                            "dep_id": 12,
-                            "dep_type": "IOBJ"
+                            "id": 6,
+                            "dep_id": 4,
+                            "dep_type": "NMOD"
                         }
                     ],
                     "type": 0
@@ -398,18 +208,18 @@
                     ],
                     "dependency": [
                         {
-                            "id": 14,
-                            "dep_id": 6,
+                            "id": 7,
+                            "dep_id": 4,
                             "dep_type": "PUNCT"
                         }
                     ],
                     "type": 5
                 }
             ],
-            "text": "so \u2021 she doesn't have a list of questions to ask you . \u0015136820_139220\u0015",
+            "text": "this is a test of wake-up . \u0015985_2395\u0015",
             "time": [
-                136820,
-                139220
+                985,
+                2395
             ],
             "custom_dependencies": [],
             "delim": "."
@@ -418,16 +228,367 @@
             "tier": {
                 "lang": "eng",
                 "corpus": "corpus_name",
-                "id": "STU",
-                "name": "Participant"
+                "id": "PAR0",
+                "name": "Participant",
+                "birthday": "",
+                "additional": [
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
             },
             "content": [
                 {
-                    "text": "so",
+                    "text": "i'm",
+                    "time": [
+                        2575,
+                        2795
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "I",
+                            "pos": "pron",
+                            "feats": "Prs-Nom-S1"
+                        },
+                        {
+                            "lemma": "be",
+                            "pos": "aux",
+                            "feats": "Fin-Ind-Pres-S1"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 1,
+                            "dep_id": 3,
+                            "dep_type": "NSUBJ"
+                        },
+                        {
+                            "id": 2,
+                            "dep_id": 3,
+                            "dep_type": "AUX"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "going",
+                    "time": [
+                        2795,
+                        2955
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "go",
+                            "pos": "verb",
+                            "feats": "Part-Pres-S"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 3,
+                            "dep_id": 14,
+                            "dep_type": "ROOT"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "to",
+                    "time": [
+                        2955,
+                        3035
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "to",
+                            "pos": "part",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 4,
+                            "dep_id": 5,
+                            "dep_type": "MARK"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "read",
+                    "time": [
+                        3035,
+                        3235
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "read",
+                            "pos": "verb",
+                            "feats": "Inf-S"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 5,
+                            "dep_id": 3,
+                            "dep_type": "XCOMP"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "some",
+                    "time": [
+                        3235,
+                        3395
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "some",
+                            "pos": "det",
+                            "feats": "Def"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 6,
+                            "dep_id": 8,
+                            "dep_type": "DET"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "random",
+                    "time": [
+                        3395,
+                        3635
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "random",
+                            "pos": "adj",
+                            "feats": "Pos-S1"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 7,
+                            "dep_id": 8,
+                            "dep_type": "AMOD"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "crap",
+                    "time": [
+                        3745,
+                        4035
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "crap",
+                            "pos": "noun",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 8,
+                            "dep_id": 5,
+                            "dep_type": "OBJ"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "as",
+                    "time": [
+                        4175,
+                        4395
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "as",
+                            "pos": "sconj",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 9,
+                            "dep_id": 11,
+                            "dep_type": "MARK"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "i",
+                    "time": [
+                        4475,
+                        4595
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "I",
+                            "pos": "pron",
+                            "feats": "Prs-Nom-S1"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 10,
+                            "dep_id": 11,
+                            "dep_type": "NSUBJ"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "see",
+                    "time": [
+                        4595,
+                        4715
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "see",
+                            "pos": "verb",
+                            "feats": "Fin-Ind-Pres-S1"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 11,
+                            "dep_id": 5,
+                            "dep_type": "ADVCL"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "on",
+                    "time": [
+                        4715,
+                        4915
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "on",
+                            "pos": "adp",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 12,
+                            "dep_id": 14,
+                            "dep_type": "CASE"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "the",
+                    "time": [
+                        4915,
+                        5035
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "the",
+                            "pos": "det",
+                            "feats": "Def-Art"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 13,
+                            "dep_id": 14,
+                            "dep_type": "DET"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "screen",
+                    "time": [
+                        5035,
+                        5195
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "screen",
+                            "pos": "noun",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 14,
+                            "dep_id": 11,
+                            "dep_type": "OBL"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": ".",
                     "time": null,
                     "morphology": [
                         {
-                            "lemma": "so",
+                            "lemma": ".",
+                            "pos": "PUNCT",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 15,
+                            "dep_id": 3,
+                            "dep_type": "PUNCT"
+                        }
+                    ],
+                    "type": 5
+                }
+            ],
+            "text": "i'm going to read some random crap as i see on the screen . \u00152575_5195\u0015",
+            "time": [
+                2575,
+                5195
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant",
+                "birthday": "",
+                "additional": [
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            },
+            "content": [
+                {
+                    "text": "just",
+                    "time": [
+                        5305,
+                        5595
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "just",
                             "pos": "adv",
                             "feats": ""
                         }
@@ -442,56 +603,106 @@
                     "type": 0
                 },
                 {
-                    "text": "I",
-                    "time": null,
+                    "text": "to",
+                    "time": [
+                        5595,
+                        5755
+                    ],
                     "morphology": [
                         {
-                            "lemma": "I",
-                            "pos": "pron",
-                            "feats": "Prs&Nom&S1"
+                            "lemma": "to",
+                            "pos": "part",
+                            "feats": ""
                         }
                     ],
                     "dependency": [
                         {
                             "id": 2,
                             "dep_id": 3,
-                            "dep_type": "NSUBJ"
+                            "dep_type": "MARK"
                         }
                     ],
                     "type": 0
                 },
                 {
-                    "text": "was",
-                    "time": null,
+                    "text": "test",
+                    "time": [
+                        5755,
+                        5955
+                    ],
                     "morphology": [
                         {
-                            "lemma": "be",
+                            "lemma": "test",
                             "pos": "verb",
-                            "feats": "Fin&Ind&1&Past&S1"
+                            "feats": "Inf-S"
                         }
                     ],
                     "dependency": [
                         {
                             "id": 3,
-                            "dep_id": 3,
+                            "dep_id": 5,
                             "dep_type": "ROOT"
                         }
                     ],
                     "type": 0
                 },
                 {
-                    "text": "+//.",
-                    "time": null,
+                    "text": "batch",
+                    "time": [
+                        5955,
+                        6235
+                    ],
                     "morphology": [
                         {
-                            "lemma": "+//.",
-                            "pos": "PUNCT",
+                            "lemma": "batch",
+                            "pos": "noun",
                             "feats": ""
                         }
                     ],
                     "dependency": [
                         {
                             "id": 4,
+                            "dep_id": 5,
+                            "dep_type": "COMPOUND"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "line",
+                    "time": [
+                        6265,
+                        6555
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "line",
+                            "pos": "noun",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 5,
+                            "dep_id": 3,
+                            "dep_type": "OBJ"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": [
+                        {
+                            "lemma": ".",
+                            "pos": "PUNCT",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 6,
                             "dep_id": 3,
                             "dep_type": "PUNCT"
                         }
@@ -499,48 +710,685 @@
                     "type": 5
                 }
             ],
-            "text": "+< so I was +//. \u0015201235_201933\u0015",
+            "text": "just to test batch line . \u00155305_6555\u0015",
             "time": [
-                201235,
-                201933
+                5305,
+                6555
             ],
             "custom_dependencies": [],
-            "delim": "+//."
+            "delim": "."
         },
         {
             "tier": {
                 "lang": "eng",
                 "corpus": "corpus_name",
-                "id": "STU",
-                "name": "Participant"
+                "id": "PAR0",
+                "name": "Participant",
+                "birthday": "",
+                "additional": [
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
             },
             "content": [
                 {
-                    "text": "right",
-                    "time": null,
+                    "text": "the",
+                    "time": [
+                        7095,
+                        7315
+                    ],
                     "morphology": [
                         {
-                            "lemma": "right",
-                            "pos": "adj",
-                            "feats": "Pos&S1"
+                            "lemma": "the",
+                            "pos": "det",
+                            "feats": "Def-Art"
                         }
                     ],
                     "dependency": [
                         {
                             "id": 1,
                             "dep_id": 3,
+                            "dep_type": "DET"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "primary",
+                    "time": [
+                        7315,
+                        7555
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "primary",
+                            "pos": "adj",
+                            "feats": "Pos-S1"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 2,
+                            "dep_id": 3,
+                            "dep_type": "AMOD"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "area",
+                    "time": [
+                        7705,
+                        7995
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "area",
+                            "pos": "noun",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 3,
+                            "dep_id": 18,
                             "dep_type": "ROOT"
                         }
                     ],
                     "type": 0
                 },
                 {
-                    "text": ",",
+                    "text": "for",
+                    "time": [
+                        8135,
+                        8355
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "for",
+                            "pos": "sconj",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 4,
+                            "dep_id": 5,
+                            "dep_type": "MARK"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "recording",
+                    "time": [
+                        8355,
+                        8835
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "recording",
+                            "pos": "noun",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 5,
+                            "dep_id": 3,
+                            "dep_type": "ACL"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "editing",
+                    "time": [
+                        8835,
+                        9155
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "editing",
+                            "pos": "noun",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 6,
+                            "dep_id": 5,
+                            "dep_type": "OBJ"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "and",
+                    "time": [
+                        9155,
+                        9355
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "and",
+                            "pos": "cconj",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 7,
+                            "dep_id": 8,
+                            "dep_type": "CC"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "arranging",
+                    "time": [
+                        9355,
+                        9755
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "arrange",
+                            "pos": "verb",
+                            "feats": "Ger-S"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 8,
+                            "dep_id": 5,
+                            "dep_type": "CONJ"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "audio",
+                    "time": [
+                        9755,
+                        9955
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "audio",
+                            "pos": "adj",
+                            "feats": "Pos-S1"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 9,
+                            "dep_id": 13,
+                            "dep_type": "AMOD"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "mid",
+                    "time": [
+                        10135,
+                        10355
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "midmorning",
+                            "pos": "noun",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 10,
+                            "dep_id": 13,
+                            "dep_type": "COMPOUND"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "and",
+                    "time": [
+                        10355,
+                        10555
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "and",
+                            "pos": "cconj",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 11,
+                            "dep_id": 12,
+                            "dep_type": "CC"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "drum",
+                    "time": [
+                        10555,
+                        10755
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "drum",
+                            "pos": "noun",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 12,
+                            "dep_id": 10,
+                            "dep_type": "CONJ"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "regions",
+                    "time": [
+                        10785,
+                        11275
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "region",
+                            "pos": "noun",
+                            "feats": "Plur"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 13,
+                            "dep_id": 8,
+                            "dep_type": "OBJ"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "divided",
+                    "time": [
+                        11275,
+                        11675
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "divide",
+                            "pos": "verb",
+                            "feats": "Part-Past-S"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 14,
+                            "dep_id": 13,
+                            "dep_type": "ACL"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "into",
+                    "time": [
+                        11745,
+                        12035
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "into",
+                            "pos": "adp",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 15,
+                            "dep_id": 18,
+                            "dep_type": "CASE"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "different",
+                    "time": [
+                        12035,
+                        12275
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "different",
+                            "pos": "adj",
+                            "feats": "Pos-S1"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 16,
+                            "dep_id": 18,
+                            "dep_type": "AMOD"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "track",
+                    "time": [
+                        12275,
+                        12515
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "track",
+                            "pos": "noun",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 17,
+                            "dep_id": 18,
+                            "dep_type": "COMPOUND"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "types",
+                    "time": [
+                        12515,
+                        12755
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "type",
+                            "pos": "noun",
+                            "feats": "Plur"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 18,
+                            "dep_id": 14,
+                            "dep_type": "OBL"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": ".",
                     "time": null,
                     "morphology": [
                         {
-                            "lemma": "cm",
-                            "pos": "cm",
+                            "lemma": ".",
+                            "pos": "PUNCT",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 19,
+                            "dep_id": 3,
+                            "dep_type": "PUNCT"
+                        }
+                    ],
+                    "type": 5
+                }
+            ],
+            "text": "the primary area for recording editing and arranging audio mid and drum regions divided into different track types . \u00157095_12755\u0015",
+            "time": [
+                7095,
+                12755
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant",
+                "birthday": "",
+                "additional": [
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            },
+            "content": [
+                {
+                    "text": "press",
+                    "time": [
+                        13085,
+                        13435
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "press",
+                            "pos": "noun",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 1,
+                            "dep_id": 3,
+                            "dep_type": "COMPOUND"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "command",
+                    "time": [
+                        13435,
+                        13835
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "command",
+                            "pos": "noun",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 2,
+                            "dep_id": 3,
+                            "dep_type": "COMPOUND"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "slash",
+                    "time": [
+                        13835,
+                        14075
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "slash",
+                            "pos": "noun",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 3,
+                            "dep_id": 6,
+                            "dep_type": "ROOT"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "for",
+                    "time": [
+                        14135,
+                        14355
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "for",
+                            "pos": "adp",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 4,
+                            "dep_id": 6,
+                            "dep_type": "CASE"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "more",
+                    "time": [
+                        14355,
+                        14555
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "more",
+                            "pos": "adj",
+                            "feats": "Cmp-S1"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 5,
+                            "dep_id": 6,
+                            "dep_type": "AMOD"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "info",
+                    "time": [
+                        14585,
+                        14875
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "info",
+                            "pos": "noun",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 6,
+                            "dep_id": 3,
+                            "dep_type": "NMOD"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": [
+                        {
+                            "lemma": ".",
+                            "pos": "PUNCT",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 7,
+                            "dep_id": 3,
+                            "dep_type": "PUNCT"
+                        }
+                    ],
+                    "type": 5
+                }
+            ],
+            "text": "press command slash for more info . \u001513085_14875\u0015",
+            "time": [
+                13085,
+                14875
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant",
+                "birthday": "",
+                "additional": [
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            },
+            "content": [
+                {
+                    "text": "test",
+                    "time": [
+                        15185,
+                        15475
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 1
+                },
+                {
+                    "text": "test",
+                    "time": [
+                        15475,
+                        15755
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "test",
+                            "pos": "noun",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 1,
+                            "dep_id": 1,
+                            "dep_type": "ROOT"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": [
+                        {
+                            "lemma": ".",
+                            "pos": "PUNCT",
                             "feats": ""
                         }
                     ],
@@ -552,22 +1400,614 @@
                         }
                     ],
                     "type": 5
+                }
+            ],
+            "text": "test [/] test . \u001515185_15755\u0015",
+            "time": [
+                15185,
+                15755
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant",
+                "birthday": "",
+                "additional": [
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            },
+            "content": [
+                {
+                    "text": "i",
+                    "time": [
+                        16475,
+                        16595
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "I",
+                            "pos": "pron",
+                            "feats": "Prs-Nom-S1"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 1,
+                            "dep_id": 4,
+                            "dep_type": "NSUBJ"
+                        }
+                    ],
+                    "type": 0
                 },
                 {
-                    "text": "right",
+                    "text": "don't",
+                    "time": [
+                        16595,
+                        16755
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "do",
+                            "pos": "aux",
+                            "feats": "Fin-Ind-Pres-S1"
+                        },
+                        {
+                            "lemma": "not",
+                            "pos": "part",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 2,
+                            "dep_id": 4,
+                            "dep_type": "AUX"
+                        },
+                        {
+                            "id": 3,
+                            "dep_id": 4,
+                            "dep_type": "ADVMOD"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "know",
+                    "time": [
+                        16755,
+                        16835
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "know",
+                            "pos": "verb",
+                            "feats": "Inf-S"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 4,
+                            "dep_id": 7,
+                            "dep_type": "ROOT"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "what",
+                    "time": [
+                        16835,
+                        16955
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "what",
+                            "pos": "pron",
+                            "feats": "Int-S1"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 5,
+                            "dep_id": 4,
+                            "dep_type": "OBJ"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "to",
+                    "time": [
+                        16955,
+                        17115
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "to",
+                            "pos": "part",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 6,
+                            "dep_id": 7,
+                            "dep_type": "MARK"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "say",
+                    "time": [
+                        17115,
+                        17235
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "say",
+                            "pos": "verb",
+                            "feats": "Inf-S"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 7,
+                            "dep_id": 5,
+                            "dep_type": "ACL"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": ".",
                     "time": null,
                     "morphology": [
                         {
-                            "lemma": "right",
-                            "pos": "adj",
-                            "feats": "Pos&S1"
+                            "lemma": ".",
+                            "pos": "PUNCT",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 8,
+                            "dep_id": 4,
+                            "dep_type": "PUNCT"
+                        }
+                    ],
+                    "type": 5
+                }
+            ],
+            "text": "i don't know what to say . \u001516475_17235\u0015",
+            "time": [
+                16475,
+                17235
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant",
+                "birthday": "",
+                "additional": [
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            },
+            "content": [
+                {
+                    "text": "but",
+                    "time": [
+                        17235,
+                        17395
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "but",
+                            "pos": "cconj",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 1,
+                            "dep_id": 2,
+                            "dep_type": "CC"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "um",
+                    "time": [
+                        17455,
+                        17675
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 3
+                },
+                {
+                    "text": "here's",
+                    "time": [
+                        18135,
+                        18555
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "here",
+                            "pos": "adv",
+                            "feats": ""
+                        },
+                        {
+                            "lemma": "be",
+                            "pos": "aux",
+                            "feats": "Fin-Ind-Pres-S3"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 2,
+                            "dep_id": 5,
+                            "dep_type": "ROOT"
+                        },
+                        {
+                            "id": 3,
+                            "dep_id": 2,
+                            "dep_type": "COP"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "some",
+                    "time": [
+                        18555,
+                        18675
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "some",
+                            "pos": "det",
+                            "feats": "Def"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 4,
+                            "dep_id": 5,
+                            "dep_type": "DET"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "retracing",
+                    "time": [
+                        18835,
+                        19195
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "retracing",
+                            "pos": "noun",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 5,
+                            "dep_id": 2,
+                            "dep_type": "NSUBJ"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": [
+                        {
+                            "lemma": ".",
+                            "pos": "PUNCT",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 6,
+                            "dep_id": 2,
+                            "dep_type": "PUNCT"
+                        }
+                    ],
+                    "type": 5
+                }
+            ],
+            "text": "but &-um here's some retracing . \u001517235_19195\u0015",
+            "time": [
+                17235,
+                19195
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant",
+                "birthday": "",
+                "additional": [
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            },
+            "content": [
+                {
+                    "text": "so",
+                    "time": [
+                        19295,
+                        19515
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "so",
+                            "pos": "adv",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 1,
+                            "dep_id": 4,
+                            "dep_type": "ROOT"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "just",
+                    "time": [
+                        19555,
+                        19795
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "just",
+                            "pos": "adv",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 2,
+                            "dep_id": 4,
+                            "dep_type": "ADVMOD"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "for",
+                    "time": [
+                        19795,
+                        19955
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "for",
+                            "pos": "adp",
+                            "feats": ""
                         }
                     ],
                     "dependency": [
                         {
                             "id": 3,
+                            "dep_id": 4,
+                            "dep_type": "CASE"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "fun",
+                    "time": [
+                        19955,
+                        20155
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "fun",
+                            "pos": "noun",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 4,
                             "dep_id": 1,
-                            "dep_type": "DISCOURSE"
+                            "dep_type": "OBL"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": [
+                        {
+                            "lemma": ".",
+                            "pos": "PUNCT",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 5,
+                            "dep_id": 1,
+                            "dep_type": "PUNCT"
+                        }
+                    ],
+                    "type": 5
+                }
+            ],
+            "text": "so just for fun . \u001519295_20155\u0015",
+            "time": [
+                19295,
+                20155
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant",
+                "birthday": "",
+                "additional": [
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            },
+            "content": [
+                {
+                    "text": "um",
+                    "time": [
+                        20735,
+                        20955
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 3
+                },
+                {
+                    "text": "i",
+                    "time": [
+                        21395,
+                        21515
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 1
+                },
+                {
+                    "text": "like",
+                    "time": [
+                        21545,
+                        21835
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 1
+                },
+                {
+                    "text": "i",
+                    "time": [
+                        22235,
+                        22355
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 1
+                },
+                {
+                    "text": "like",
+                    "time": [
+                        22355,
+                        22595
+                    ],
+                    "morphology": null,
+                    "dependency": null,
+                    "type": 1
+                },
+                {
+                    "text": "i",
+                    "time": [
+                        22715,
+                        22835
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "I",
+                            "pos": "pron",
+                            "feats": "Prs-Nom-S1"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 1,
+                            "dep_id": 2,
+                            "dep_type": "NSUBJ"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "like",
+                    "time": [
+                        22835,
+                        23075
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "like",
+                            "pos": "verb",
+                            "feats": "Fin-Ind-Pres-S1"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 2,
+                            "dep_id": 3,
+                            "dep_type": "ROOT"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "beans",
+                    "time": [
+                        23605,
+                        23955
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "bean",
+                            "pos": "noun",
+                            "feats": "Plur"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 3,
+                            "dep_id": 2,
+                            "dep_type": "OBJ"
                         }
                     ],
                     "type": 0
@@ -585,6 +2025,248 @@
                     "dependency": [
                         {
                             "id": 4,
+                            "dep_id": 2,
+                            "dep_type": "PUNCT"
+                        }
+                    ],
+                    "type": 5
+                }
+            ],
+            "text": "&-um <i like i like> [/] i like beans . \u001520735_23955\u0015",
+            "time": [
+                20735,
+                23955
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant",
+                "birthday": "",
+                "additional": [
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            },
+            "content": [
+                {
+                    "text": "beans",
+                    "time": [
+                        24205,
+                        24555
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "bean",
+                            "pos": "noun",
+                            "feats": "Plur"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 1,
+                            "dep_id": 3,
+                            "dep_type": "NSUBJ"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "are",
+                    "time": [
+                        24615,
+                        24835
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "be",
+                            "pos": "aux",
+                            "feats": "Fin-Ind-Pres-P3"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 2,
+                            "dep_id": 3,
+                            "dep_type": "COP"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "fun",
+                    "time": [
+                        24855,
+                        25075
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "fun",
+                            "pos": "adj",
+                            "feats": "Pos-S1"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 3,
+                            "dep_id": 3,
+                            "dep_type": "ROOT"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": [
+                        {
+                            "lemma": ".",
+                            "pos": "PUNCT",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 4,
+                            "dep_id": 3,
+                            "dep_type": "PUNCT"
+                        }
+                    ],
+                    "type": 5
+                }
+            ],
+            "text": "beans are fun . \u001524205_25075\u0015",
+            "time": [
+                24205,
+                25075
+            ],
+            "custom_dependencies": [],
+            "delim": "."
+        },
+        {
+            "tier": {
+                "lang": "eng",
+                "corpus": "corpus_name",
+                "id": "PAR0",
+                "name": "Participant",
+                "birthday": "",
+                "additional": [
+                    "",
+                    "",
+                    "",
+                    "",
+                    ""
+                ]
+            },
+            "content": [
+                {
+                    "text": "thank",
+                    "time": [
+                        25085,
+                        25435
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "thank",
+                            "pos": "verb",
+                            "feats": "Fin-Ind-Pres-S1"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 1,
+                            "dep_id": 4,
+                            "dep_type": "ROOT"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "you",
+                    "time": [
+                        25435,
+                        25515
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "you",
+                            "pos": "pron",
+                            "feats": "Prs-Acc-S2"
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 2,
+                            "dep_id": 1,
+                            "dep_type": "OBJ"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "very",
+                    "time": [
+                        25515,
+                        25675
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "very",
+                            "pos": "adv",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 3,
+                            "dep_id": 4,
+                            "dep_type": "ADVMOD"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": "much",
+                    "time": [
+                        25675,
+                        25835
+                    ],
+                    "morphology": [
+                        {
+                            "lemma": "much",
+                            "pos": "adv",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 4,
+                            "dep_id": 1,
+                            "dep_type": "ADVMOD"
+                        }
+                    ],
+                    "type": 0
+                },
+                {
+                    "text": ".",
+                    "time": null,
+                    "morphology": [
+                        {
+                            "lemma": ".",
+                            "pos": "PUNCT",
+                            "feats": ""
+                        }
+                    ],
+                    "dependency": [
+                        {
+                            "id": 5,
                             "dep_id": 1,
                             "dep_type": "PUNCT"
                         }
@@ -592,10 +2274,10 @@
                     "type": 5
                 }
             ],
-            "text": "+< right , right . \u0015332418_333654\u0015",
+            "text": "thank you very much . \u001525085_25835\u0015",
             "time": [
-                332418,
-                333654
+                25085,
+                25835
             ],
             "custom_dependencies": [],
             "delim": "."
@@ -609,24 +2291,21 @@
     "langs": [
         "eng"
     ],
+    "pid": null,
     "tiers": [
         {
             "lang": "eng",
             "corpus": "corpus_name",
             "id": "PAR0",
-            "name": "Participant"
-        },
-        {
-            "lang": "eng",
-            "corpus": "corpus_name",
-            "id": "INV1",
-            "name": "Participant"
-        },
-        {
-            "lang": "eng",
-            "corpus": "corpus_name",
-            "id": "STU",
-            "name": "Participant"
+            "name": "Participant",
+            "birthday": "",
+            "additional": [
+                "",
+                "",
+                "",
+                "",
+                ""
+            ]
         }
     ]
 }

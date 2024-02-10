@@ -54,7 +54,7 @@ def generate_chat_utterance(utterance: Utterance):
     for mor in mors:
         if mor != None:
             # I'm sorry. This is just mor line generation; there is actually not that much complexity here
-            mor_elems.append("~".join(f"{m.pos}|{m.lemma}{'&' if any([m.feats.startswith(i) for i in UD__GENDERS]) else ('&' if m.feats else '')}{m.feats}"
+            mor_elems.append("~".join(f"{m.pos}|{m.lemma}{'-' if any([m.feats.startswith(i) for i in UD__GENDERS]) else ('-' if m.feats else '')}{m.feats}"
                                     for m in mor))
     if len(mor_elems) > 0:
         # if the end is punct, drop the tag

@@ -149,13 +149,18 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
 
 @batchalign.command()
 @common_options
+@click.option("--retokenize/--keeptokens",
+              default=False, help="Retokenize the main line to fit the UD tokenizations.")
 @click.pass_context
 def morphotag(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     """Perform morphosyntactic analysis on transcripts."""
 
    
     def loader(file):
-        return CHATFile(path=os.path.abspath(file)).doc
+        return (
+            CHATFile(path=os.path.abspath(file)).doc,
+            {"retokenize": kwargs["retokenize"]}
+        )
 
     def writer(doc, output):
         CHATFile(doc=doc).write(output)

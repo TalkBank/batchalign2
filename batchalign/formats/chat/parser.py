@@ -59,7 +59,7 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
 
 
     # get rid of CA delimiters
-    to_lex = re.compile("⌊&=[ A-Za-zÀ-ÖØ-öø-ÿ'-]+⌋").sub("", to_lex).strip()
+    to_lex = re.compile("⌊[&-]=[ A-Za-zÀ-ÖØ-öø-ÿ'-]+⌋").sub("", to_lex).strip()
 
     # fix commas for people that don't annotate commas with a space
     to_lex = to_lex.replace(",", " ,")
