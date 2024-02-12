@@ -47,7 +47,7 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
         ("<" in to_lex.split(" ")[0]  or "+" in to_lex.split(" ")[0] )
         and not re.findall("\w", to_lex.split(" ")[0])):
         beg = to_lex.split(" ")[0]
-        to_lex = to_lex.replace(beg, "")
+        to_lex = to_lex.replace(beg, "", 1)
 
     # fix all spacing issues
     to_lex = to_lex.replace("< ", "<")

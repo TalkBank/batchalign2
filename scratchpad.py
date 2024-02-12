@@ -123,16 +123,16 @@ from batchalign import *
 
 ########## The Batchalign CHAT Test Tarness ##########
 
-# from batchalign.formats.chat.parser import chat_parse_utterance
-# from batchalign.formats.chat.lexer import lex
+from batchalign.formats.chat.parser import chat_parse_utterance
+from batchalign.formats.chat.lexer import lex
 
-# from batchalign.formats.chat.utils import annotation_clean
+from batchalign.formats.chat.utils import annotation_clean
 
-# main = "<and &+f> [//] <and the boy was &+kr> [//] and the boy heard a crying sound so he look back and said ."
-# mor = None
-# gra = None
+main = "+\" and then some Indians came and took something away from him and he said +\"/. [+ dia] •884995_892418•"
+mor = None
+gra = None
 
-# chat_parse_utterance(main, mor, gra, None, None)
+chat_parse_utterance(main, mor, gra, None, None)
 
 
 
