@@ -164,13 +164,15 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
 
     return forms, delim
 
-def chat_parse_doc(lines):
+def chat_parse_doc(lines, special_mor=False):
     """Encode a CHAT files' lines into a Batchalign Document.
 
     Parameters
     ----------
     lines : List[str]
         The contents of the CHAT file
+    special_mor : False
+        Use umor/ugra tiers 
 
     Returns
     -------
@@ -207,6 +209,8 @@ def chat_parse_doc(lines):
 
     tiers = {}
 
+    use_special_mor = False
+
     # read data
     while raw[0].strip() != "@End":
         try:
@@ -219,6 +223,8 @@ def chat_parse_doc(lines):
             # we split because there are multiple languages possible 
             elif "@Languages" in line.strip():
                 results["langs"] = [i.strip() for i in line.strip("@Languages:").strip().split(",")]
+                if len(results["langs"]) > 0 and results["langs"][0] == "eng" and special_mor:
+                    use_special_mor = True
             # parse participants; the number of | delinates the metedata field
             elif "@ID" in line.strip():
                 participant = line.strip("@ID:").strip().split("|")
@@ -275,9 +281,9 @@ def chat_parse_doc(lines):
                 while raw[0][0] == "%":
                     line = raw.pop(0)
                     beg,line = line.strip()[1:].split(":\t")
-                    if beg.strip() == "mor":
+                    if beg.strip() == f"{'u' if use_special_mor else ''}mor":
                         mor = line
-                    elif beg.strip() == "gra":
+                    elif beg.strip() == f"{'u' if use_special_mor else ''}gra":
                         gra = line
                     elif beg.strip() == "wor" or beg.strip() == "xwor":
                         wor = line

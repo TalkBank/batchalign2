@@ -110,10 +110,10 @@ def batchalign(ctx, verbose):
 def align(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
     """Align transcripts against corresponding media files."""
     def loader(file):
-        return CHATFile(path=os.path.abspath(file)).doc
+        return CHATFile(path=os.path.abspath(file), special_mor_=True).doc
 
     def writer(doc, output):
-        CHATFile(doc=doc).write(output)
+        CHATFile(doc=doc, special_mor_=True).write(output)
 
     _dispatch("align", lang, num_speakers,
               ["cha"], ctx,
@@ -135,10 +135,10 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
         return file
 
     def writer(doc, output):
-        CHATFile(doc=doc).write(output
-                                .replace(".wav", ".cha")
-                                .replace(".mp4", ".cha")
-                                .replace(".mp3", ".cha"))
+        CHATFile(doc=doc, special_mor_=True).write(output
+                                                   .replace(".wav", ".cha")
+                                                   .replace(".mp4", ".cha")
+                                                   .replace(".mp3", ".cha"))
 
     _dispatch("transcribe", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
               in_dir, out_dir,
@@ -158,12 +158,12 @@ def morphotag(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
    
     def loader(file):
         return (
-            CHATFile(path=os.path.abspath(file)).doc,
+            CHATFile(path=os.path.abspath(file), special_mor_=True).doc,
             {"retokenize": kwargs["retokenize"]}
         )
 
     def writer(doc, output):
-        CHATFile(doc=doc).write(output)
+        CHATFile(doc=doc, special_mor_=True).write(output)
 
     _dispatch("morphotag", lang, num_speakers, ["cha"], ctx,
               in_dir, out_dir,
@@ -187,7 +187,7 @@ def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
         if not cha.exists():
             raise FileNotFoundError(f"No gold .cha transcript found, we cannot do benchmarking. audio: {p.name}, desired cha: {cha.name}, looked in: {str(cha)}.")
         # otherwise, load the goald along with the input file
-        return file, {"gold": CHATFile(path=str(cha)).doc}
+        return file, {"gold": CHATFile(path=str(cha), special_mor_=True).doc}
 
     def writer(doc, output):
         # delete the copied cha file

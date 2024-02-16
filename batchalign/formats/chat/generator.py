@@ -10,13 +10,15 @@ import warnings
 # document[3].text = None
 # document[3].model_dump()
 
-def generate_chat_utterance(utterance: Utterance):
+def generate_chat_utterance(utterance: Utterance, special_mor=False):
     """Converts at Utterance to a CHAT string.
 
     Parameters
     ----------
     utterance : Utterance
         The utterance to be written to string.
+    special_mor : False
+        Use umor/ugra tiers
 
     Returns
     -------
@@ -60,7 +62,7 @@ def generate_chat_utterance(utterance: Utterance):
         # if the end is punct, drop the tag
         if mor_elems[-1].startswith("PUNCT"):
             mor_elems[-1] = mor_elems[-1].split("|")[1]
-        result.append("%mor:\t"+" ".join(mor_elems))
+        result.append(f"%{'u' if special_mor else ''}mor:\t"+" ".join(mor_elems))
 
     #### GRA LINE GENERATION ####
     # gra list is not different for MWT tokens so we flatten it
@@ -68,7 +70,7 @@ def generate_chat_utterance(utterance: Utterance):
     # assemble gra line
     gra_line = None
     if len(gras) > 0:
-        result.append("%gra:\t"+" ".join([f"{i.id}|{i.dep_id}|{i.dep_type}" for i in gras]))
+        result.append(f"%{'u' if special_mor else ''}gra:\t"+" ".join([f"{i.id}|{i.dep_id}|{i.dep_type}" for i in gras]))
 
     #### WOR LINE GENERATION ####
     if has_wor:

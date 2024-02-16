@@ -47,7 +47,10 @@ class CHATFile(BaseFormat):
     >>> transcript = c.doc.transcript()
     """
 
-    def __init__(self, path=None, doc=None, lines=None):
+    def __init__(self, path=None, doc=None, lines=None, special_mor_=False):
+
+        self.__special_mor = special_mor_
+
         if path:
             # read in the resulting file
             with open(path, "r") as df:
@@ -65,7 +68,7 @@ class CHATFile(BaseFormat):
                 else:
                     raw.append(value)
 
-            self.__doc = chat_parse_doc(raw)
+            self.__doc = chat_parse_doc(raw, special_mor=special_mor_)
             # media file auto-associate
             if self.__doc.media != None:
                 name = self.__doc.media.name
@@ -85,9 +88,10 @@ class CHATFile(BaseFormat):
                 if len(media_files) > 0:
                     self.__doc.media.url = media_files[0]
         elif lines:
-            self.__doc = chat_parse_doc(lines)
+            self.__doc = chat_parse_doc(lines, special_mor=special_mor_)
         else:
             self.__doc = doc
+
 
     def write(self, path):
         """Write the CHATFile to file.
@@ -98,13 +102,13 @@ class CHATFile(BaseFormat):
             Path of where the CHAT file should get str.
         """
         
-        str_doc = self.__generate(self.__doc)
+        str_doc = self.__generate(self.__doc, self.__special_mor)
 
         with open(path, 'w') as df:
             df.write(str_doc)
 
     @staticmethod
-    def __generate(doc:Document):
+    def __generate(doc:Document, special=False):
         utterances = doc.content
 
         def __get_birthdays(line):
@@ -121,7 +125,7 @@ class CHATFile(BaseFormat):
                         extra += ":\t"+i.content
                     main.append(extra.strip())
             else:
-                main.append(generate_chat_utterance(i))
+                main.append(generate_chat_utterance(i, special and doc.langs[0] == "eng"))
         main.append("@End\n")
 
         return "\n".join(main)
@@ -131,5 +135,5 @@ class CHATFile(BaseFormat):
         return self.__doc
 
     def __str__(self):
-        return self.__generate(self.__doc)
+        return self.__generate(self.__doc, self.__special_mor)
 
