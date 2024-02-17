@@ -16,12 +16,6 @@ from contextlib import redirect_stdout, redirect_stderr
 import io
 import os
 
-try:
-    import whisperx
-
-except ImportError:
-    raise ImportError("Cannot import WhisperX, please ensure it is installed.\nHint: run `pip install -U batchalign[whisperx]` or install WhisperX via instructions (https://github.com/m-bain/whisperX).")
-
 import gc 
 import torch
 
@@ -33,6 +27,14 @@ class WhisperXEngine(BatchalignEngine):
     tasks = [ Task.ASR, Task.UTTERANCE_SEGMENTATION ]
 
     def __init__(self, lang="eng"):
+
+        try:
+            import whisperx
+
+        except ImportError:
+            raise ImportError("Cannot import WhisperX, please ensure it is installed.\nHint: install WhisperX via instructions (https://github.com/m-bain/whisperX).")
+
+
 
         language = pycountry.languages.get(alpha_3=lang).alpha_2
 
@@ -56,6 +58,14 @@ class WhisperXEngine(BatchalignEngine):
             self.__engine = None
 
     def generate(self, source_path, **kwargs):
+
+        try:
+            import whisperx
+
+        except ImportError:
+            raise ImportError("Cannot import WhisperX, please ensure it is installed.\nHint: run `pip install -U batchalign[whisperx]` or install WhisperX via instructions (https://github.com/m-bain/whisperX).")
+
+
         # load audio
         audio = whisperx.load_audio(source_path)
 

@@ -55,9 +55,6 @@ setup(
     extras_require={
         'dev': [
             'pytest',
-        ],
-        "whisperx": [
-            "whisperx @ git+ssh://git@github.com:m-bain/whisperX.git"
         ]
     },
     include_package_data=True,
