@@ -52,7 +52,7 @@ setup(
         "typing-extensions",
         "pydub~=0.25.0",
     ],
-    extra_requires={
+    extras_require={
         'dev': [
             'pytest',
         ],
