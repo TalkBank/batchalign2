@@ -69,6 +69,7 @@ def handle_verbosity(verbosity):
     L.getLogger('transformers').handlers.clear()
     L.getLogger("stanza").setLevel(L.INFO)
     L.getLogger('batchalign').setLevel(L.WARN)
+    L.getLogger('lightning.pytorch.utilities.migration.utils').setLevel(L.ERROR)
 
     if verbosity >= 2:
         L.basicConfig(format="%(message)s", level=L.ERROR, handlers=[RichHandler(rich_tracebacks=True)])
@@ -128,8 +129,10 @@ def align(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
 @common_options
 @click.option("--whisper/--rev",
               default=False, help="Use OpenAI Whisper (ASR) instead of Rev.AI (default).")
+@click.option("--whisperx/--rev",
+              default=False, help="Use WhisperX instead of Rev.AI (default). Superceeds --whisper.")
 @click.pass_context
-def transcribe(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
+def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     """Create a transcript from audio files."""
     def loader(file):
         return file
@@ -140,10 +143,16 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
                                                    .replace(".mp4", ".cha")
                                                    .replace(".mp3", ".cha"))
 
+    asr = "rev"
+    if kwargs["whisper"]:
+        asr = "whisper"
+    if kwargs["whisperx"]:
+        asr = "whisperx"
+
     _dispatch("transcribe", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
               in_dir, out_dir,
               loader, writer, C,
-              asr="whisper" if whisper else "rev", **kwargs)
+              asr=asr, **kwargs)
 
 #################### MORPHOTAG ################################
 

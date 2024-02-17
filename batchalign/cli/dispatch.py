@@ -13,12 +13,14 @@ import os
 import glob
 import shutil
 
-from rich.console import Console
+
 from batchalign.pipelines import BatchalignPipeline
 from batchalign.document import *
 from batchalign.constants import *
 from batchalign.formats.chat import CHATFile
 from batchalign.utils import config
+
+from rich.console import Console
 from rich.markup import escape
 
 from pathlib import Path

@@ -62,6 +62,9 @@ setup(
         "Development Status :: 3 - Alpha",
         "Topic :: Utilities"
     ],
+    extras_require={
+        "whisperx": ["whisperx @ git+ssh://git@github.com:m-bain/whisperX.git"]
+    }
 )
 
 

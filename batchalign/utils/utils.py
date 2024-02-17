@@ -5,6 +5,9 @@ from nltk import sent_tokenize as ST
 from nltk.tokenize.treebank import TreebankWordDetokenizer
 from nltk.tokenize import TweetTokenizer
 from batchalign.constants import *
+from contextlib import contextmanager
+
+import os
 
 def word_tokenize(str):
     """Tokenize a string by word
@@ -104,3 +107,24 @@ def correct_timing(doc):
                         j.time = None
     return doc
 
+
+
+@contextmanager
+def silence():
+    # silence all outputs
+    fd0 = os.dup(0)
+    fd1 = os.dup(1)
+    fd2 = os.dup(2)
+
+    with open(os.devnull, 'w') as devnull:
+        os.dup2(devnull.fileno(), 0)
+        os.dup2(devnull.fileno(), 1)
+        os.dup2(devnull.fileno(), 2)
+
+    # yield to call
+    yield
+
+    # Restore the original sys.stdout file descriptor
+    os.dup2(fd0, 0)
+    os.dup2(fd1, 1)
+    os.dup2(fd2, 2)

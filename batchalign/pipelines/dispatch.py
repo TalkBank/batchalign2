@@ -5,7 +5,7 @@ Tabulate default packages and options.
 
 from batchalign import (WhisperEngine, WhisperFAEngine, StanzaEngine, RevEngine,
                         NgramRetraceEngine, DisfluencyReplacementEngine, WhisperUTREngine,
-                        RevUTREngine, EvaluationEngine)
+                        RevUTREngine, EvaluationEngine, WhisperXEngine)
 from batchalign import BatchalignPipeline
 
 from batchalign.utils.config import config_read
@@ -95,6 +95,8 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
         # decode and initialize
         if engine == "whisper":
             engines.append(WhisperEngine(lang=lang))
+        elif engine == "whisperx":
+            engines.append(WhisperXEngine(lang=lang))
         elif engine == "rev":
             engines.append(RevEngine(lang=lang, num_speakers=num_speakers))
         elif engine == "stanza":
