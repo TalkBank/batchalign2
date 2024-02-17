@@ -17,8 +17,7 @@ import io
 import os
 
 try:
-    with silence():
-        import whisperx
+    import whisperx
 
 except ImportError:
     raise ImportError("Cannot import WhisperX, please ensure it is installed.\nHint: run `pip install -U batchalign[whisperx]` or install WhisperX via instructions (https://github.com/m-bain/whisperX).")
@@ -41,13 +40,12 @@ class WhisperXEngine(BatchalignEngine):
         self.__lang_code = language
 
         L.info("Loading (and possibly downloading) WhisperX models...")
-        with silence():
-            self.__model = whisperx.load_model("large-v2", device=DEVICE,
-                                            compute_type=("float16"
-                                                            if DEVICE == "cuda" else "float32"),
-                                            language=language)
-            self.__fa, self.__meta = whisperx.load_align_model(device=DEVICE,
-                                                            language_code=language)
+        self.__model = whisperx.load_model("large-v2", device=DEVICE,
+                                        compute_type=("float16"
+                                                        if DEVICE == "cuda" else "float32"),
+                                        language=language)
+        self.__fa, self.__meta = whisperx.load_align_model(device=DEVICE,
+                                                        language_code=language)
         L.info("Done loading WhisperX models!")
 
         if POSTPROCESSOR_LANGS.get(self.__lang) != None:
