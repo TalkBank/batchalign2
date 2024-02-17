@@ -55,16 +55,16 @@ setup(
     extra_requires={
         'dev': [
             'pytest',
+        ],
+        "whisperx": [
+            "whisperx @ git+ssh://git@github.com:m-bain/whisperX.git"
         ]
     },
     include_package_data=True,
     classifiers=[
         "Development Status :: 3 - Alpha",
         "Topic :: Utilities"
-    ],
-    extras_require={
-        "whisperx": ["whisperx @ git+ssh://git@github.com:m-bain/whisperX.git"]
-    }
+    ]
 )
 
 
