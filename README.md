@@ -40,8 +40,8 @@ py -m pip3 install -U batchalign
 ### Rock and Roll
 There are two main ways of interacting with Batchalign. Batchalign can be used as a program to batch-process CHAT (hence the name), or a Python LSA library.
 
-- to get started with the Batchalign program (processes and produces CHAT transcripts from TalkBank), [tap here](#quick-start-command-line)
-- to get started on the Batchalign Python Library (advanced usage, assumes familiarity with Python), [tap here](#quick-start-python)
+- to get started with the Batchalign program, [tap here](#quick-start-command-line)
+- to get started on the Batchalign Library (assumes familiarity with Python), [tap here](#quick-start-python)
 
 ## Quick Start: Command Line
 
@@ -61,6 +61,8 @@ Where `verb` includes:
 2. `align` - placing both an audio of video file (`.mp3/.mp4/.wav`) and an *utterance-aligned* CHAT file in the input directory, generate word-level alignments
 3. `morphotag` - placing a CHAT file in the input directory, uses Stanford NLP Stanza to generate morphological and dependency analyses. You must supply a language code flag: `--lang=[three letter ISO language code]` for the alignment system to know what language the transcript is in. 
 <!-- 4. `bulletize` - placing both an audio of video file (`.mp3/.mp4/.wav`) and an *unlinked* CHAT file in the input directory, generate utterance-level alignments through ASR -->
+
+You can get a CHAT transcript to experiment with [at the TalkBank website](https://talkbank.org/), under any of the "Banks" that are available. You can also generate and parse a CHAT transcript via [the Python program](https://github.com/TalkBank/batchalign2?tab=readme-ov-file#chat).
 
 ### Sample Commands
 For input files (CHAT and audio for `align`, CHAT only for `morphotag`, and audio only for `transcribe`), located in `~/ba_input` dumping the output to `~/ba_output`, one could write:
