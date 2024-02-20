@@ -40,8 +40,8 @@ py -m pip3 install -U batchalign
 ### Rock and Roll
 There are two main ways of interacting with Batchalign. Batchalign can be used as a program to batch-process CHAT (hence the name), or a Python LSA library.
 
-- to get started with the Batchalign program, [tap here](#quick-start-command-line)
-- to get started on the Batchalign Python Library (advanced, not recommended for most users), [tap here](#quick-start-python)
+- to get started with the Batchalign program (processes and produces CHAT transcripts from TalkBank), [tap here](#quick-start-command-line)
+- to get started on the Batchalign Python Library (advanced usage, assumes familiarity with Python), [tap here](#quick-start-python)
 
 ## Quick Start: Command Line
 
@@ -197,6 +197,8 @@ nlp = ba.BatchalignPipeline(whisper, retrace, disfluency, morphosyntax)
 # and run it!                             
 doc = nlp("audio.mp3") 
 ```
+
+[Here's a list](https://github.com/TalkBank/batchalign2/blob/master/batchalign/pipelines/__init__.py) of available engines.
 
 ### Formats
 We currently support reading and writing two transcript formats: TalkBank CHAT, and Praat TextGrid.
