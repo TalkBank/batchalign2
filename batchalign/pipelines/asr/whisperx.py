@@ -32,7 +32,7 @@ class WhisperXEngine(BatchalignEngine):
             import whisperx
 
         except ImportError:
-            raise ImportError("Cannot import WhisperX, please ensure it is installed.\nHint: install WhisperX via instructions (https://github.com/m-bain/whisperX).")
+            raise ImportError("Cannot import WhisperX, please ensure it is installed.\nHint: install WhisperX by running `pip install git+https://github.com/m-bain/whisperx.git`.")
 
 
 
