@@ -30,7 +30,7 @@ class WhisperXEngine(BatchalignEngine):
 
         try:
             import whisperx
-
+            print("Batchalign: If you got a warning about pyannote versioning, bad things will not happen. Please disregard.")
         except ImportError:
             raise ImportError("Cannot import WhisperX, please ensure it is installed.\nHint: install WhisperX by running `pip install git+https://github.com/m-bain/whisperx.git`.")
 
@@ -83,12 +83,13 @@ class WhisperXEngine(BatchalignEngine):
             for word in segment["words"]:
                 stripped = word["word"].translate(str.maketrans('', '', string.punctuation)).strip()
                 if stripped != "":
-                    text = {
-                        "type": "text",
-                        "ts": word["start"],
-                        "end_ts": word["end"],
-                        "value": stripped,
-                    }
+                    if word.get("start") != None and word.get("end") != None:
+                        text = {
+                            "type": "text",
+                            "ts": word["start"],
+                            "end_ts": word["end"],
+                            "value": stripped,
+                        }
 
                     current_turn.append(text)
 
