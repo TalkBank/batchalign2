@@ -213,9 +213,17 @@ class Utterance(BaseModel):
                 if (self.content[indx+1].type == TokenType.RETRACE and
                     (indx > 0 and self.content[indx-1].type != TokenType.RETRACE) or
                     (indx == 0 and self.content[indx+1].type != TokenType.REGULAR)):
-                    result.append("<"+i.text)
+                    if (indx < len(self.content)-1) and self.content[indx+1].text == i.text:
+                        result.append(i.text)
+                        result.append("[/]")
+                    else:
+                        result.append("<"+i.text)
+                elif (self.content[indx+1].type == TokenType.RETRACE and indx > 0 and indx < len(self.content) and
+                      self.content[indx+1].text == i.text and self.content[indx-1].text == i.text):
+                        result.append(i.text)
+                        result.append("[/]")
                 elif self.content[indx+1].type == TokenType.REGULAR:
-                    if indx > 0 and self.content[indx-1].type == TokenType.RETRACE:
+                    if indx > 0 and self.content[indx-1].type == TokenType.RETRACE and self.content[indx-1].text != i.text:
                         result.append(i.text+">")
                         result.append("[/]")
                     else:

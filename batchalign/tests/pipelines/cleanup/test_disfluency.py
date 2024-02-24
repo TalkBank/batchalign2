@@ -6,7 +6,7 @@ import pytest
 
 BOTH = 'this &-um is all <so crazy so crazy so so crazy> [/] so crazy , everybody [/] everybody seem [/] seem so famous [/] famous I am a big scary dinosaur I am a big &-um &-um &-um &-um scary dinosaur I am a big scary dinosaur .'
 DISF = 'this &-um is all so crazy so crazy so so crazy so crazy , everybody everybody seem seem so famous famous I am a big scary dinosaur I am a big &-um &-um &-um &-um scary dinosaur I am a big scary dinosaur .'
-RET = 'this um is all <so crazy so crazy so so crazy> [/] so crazy , everybody [/] everybody seem [/] seem so famous [/] famous I am a big scary dinosaur I am a big <um um um> [/] um scary dinosaur I am a big scary dinosaur .'
+RET = 'this um is all <so crazy so crazy so so crazy> [/] so crazy , everybody [/] everybody seem [/] seem so famous [/] famous I am a big scary dinosaur I am a big um [/] um [/] um [/] um scary dinosaur I am a big scary dinosaur .'
 SRC = "this um is all so crazy so crazy so so crazy so crazy, everybody everybody seem seem so famous famous I am a big scary dinosaur I am a big um um um um scary dinosaur I am a big scary dinosaur."
 
 RET_WITH_DISFLUENCY = 'um this is this is a retrace'

@@ -18,25 +18,25 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 from batchalign import *
 
 ########### The Batchalign Core Test Harness ###########
-# from batchalign.formats.chat.parser import chat_parse_utterance
+from batchalign.formats.chat.parser import chat_parse_utterance
  
-# text = "on va jouer aux arbres ?"
+text = "This is a test test test test test yes ."
 
-# function = "morphosyntax"
-# lang = "fra"
-# num_speakers = 1
+function = "morphosyntax"
+lang = "fra"
+num_speakers = 1
 
-# forms, delim = chat_parse_utterance(text, None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim)
+forms, delim = chat_parse_utterance(text, None, None, None, None)
+utterance = Utterance(content=forms, delim=delim)
 
-# # utterance = utterance(content=text)
+# utterance = utterance(content=text)
 
-# ut = Document(content=[utterance], langs=[lang])
+ut = Document(content=[utterance], langs=[lang])
 
-# pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers)
-# res = pipeline(ut)
+pipeline = BatchalignPipeline(NgramRetraceEngine())
+res = pipeline(ut)
 
-# print(str(CHATFile(doc=res)))
+print(str(CHATFile(doc=res)))
 
 ########### The Batchalign String Test Harness ###########
 # from batchalign.formats.chat.parser import chat_parse_utterance
@@ -123,16 +123,16 @@ from batchalign import *
 
 ########## The Batchalign CHAT Test Tarness ##########
 
-from batchalign.formats.chat.parser import chat_parse_utterance
-from batchalign.formats.chat.lexer import lex
+# from batchalign.formats.chat.parser import chat_parse_utterance
+# from batchalign.formats.chat.lexer import lex
 
-from batchalign.formats.chat.utils import annotation_clean
+# from batchalign.formats.chat.utils import annotation_clean
 
-main = "+\" and then some Indians came and took something away from him and he said +\"/. [+ dia] •884995_892418•"
-mor = None
-gra = None
+# main = "+\" and then some Indians came and took something away from him and he said +\"/. [+ dia] •884995_892418•"
+# mor = None
+# gra = None
 
-chat_parse_utterance(main, mor, gra, None, None)
+# chat_parse_utterance(main, mor, gra, None, None)
 
 
 
