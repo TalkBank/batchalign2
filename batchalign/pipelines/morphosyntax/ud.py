@@ -629,11 +629,14 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None):
 
     lang = []
     for i in doc.langs:
-        try:
-            lang.append(pycountry.languages.get(alpha_3=i).alpha_2)
-        except:
-            # some languages don't have alpha 2
-            pass
+        if i == "yue":
+            lang.append("zh-hant")
+        else:
+            try:
+                lang.append(pycountry.languages.get(alpha_3=i).alpha_2)
+            except:
+                # some languages don't have alpha 2
+                pass
 
 
 # pycountry.languages.get(alpha_3=i).alpha_2 for i in lang
@@ -652,7 +655,7 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None):
         lang.pop(lang.index("zh"))
         lang.append("zh-hans")
 
-    elif not any([i in ["hr", "zh", "zh-hans", "ja", "ko",
+    elif not any([i in ["hr", "zh", "zh-hans", "zh-hant", "ja", "ko",
                         "sl", "sr", "bg", "ru", "et", "hu",
                         "eu", "el", "he", "af", "ga"] for i in lang]):
         if "en" in lang:
