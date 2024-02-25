@@ -81,7 +81,7 @@ class WhisperXEngine(BatchalignEngine):
 
         for segment in result["segments"]:
             for word in segment["words"]:
-                stripped = word["word"].translate(str.maketrans('', '', string.punctuation)).strip()
+                stripped = word["word"].translate(str.maketrans('', '', ",")).replace("...", ".").strip()
                 if stripped != "":
                     if word.get("start") != None and word.get("end") != None:
                         text = {
