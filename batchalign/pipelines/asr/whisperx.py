@@ -91,7 +91,7 @@ class WhisperXEngine(BatchalignEngine):
                             "value": stripped,
                         }
 
-                    current_turn.append(text)
+                        current_turn.append(text)
 
             turns.append({
                 "elements": current_turn,
