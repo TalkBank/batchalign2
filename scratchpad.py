@@ -20,23 +20,23 @@ from batchalign import *
 ########### The Batchalign Core Test Harness ###########
 from batchalign.formats.chat.parser import chat_parse_utterance
  
-text = "This is a test test test test test yes ."
+# text = "dad (1:15.) ."
 
-function = "morphosyntax"
-lang = "fra"
-num_speakers = 1
+# function = "morphosyntax"
+# lang = "eng"
+# num_speakers = 1
 
-forms, delim = chat_parse_utterance(text, None, None, None, None)
-utterance = Utterance(content=forms, delim=delim)
+# forms, delim = chat_parse_utterance(text, None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim)
 
-# utterance = utterance(content=text)
+# # utterance = utterance(content=text)
 
-ut = Document(content=[utterance], langs=[lang])
+# ut = Document(content=[utterance], langs=[lang])
 
-pipeline = BatchalignPipeline(NgramRetraceEngine())
-res = pipeline(ut)
+# pipeline = BatchalignPipeline.new(function, lang=lang)
+# res = pipeline(ut)
 
-print(str(CHATFile(doc=res)))
+# print(str(CHATFile(doc=res)))
 
 ########### The Batchalign String Test Harness ###########
 # from batchalign.formats.chat.parser import chat_parse_utterance

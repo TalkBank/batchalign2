@@ -64,7 +64,7 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
     # fix commas for people that don't annotate commas with a space
     to_lex = to_lex.replace(",", " ,")
 
-    to_lex = re.sub(r"\([\d.]+\)", "", to_lex)
+    to_lex = re.sub(r"\([\d.:]+\)", "", to_lex)
     to_lex = re.sub(r"↫.*?↫", "", to_lex)
 
     # if there is a punct, move it
