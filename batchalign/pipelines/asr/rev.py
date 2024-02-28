@@ -38,6 +38,8 @@ class RevEngine(BatchalignEngine):
         self.__lang_code = lang
         self.__num_speakers = num_speakers
         self.__lang = pycountry.languages.get(alpha_3=lang).alpha_2
+        if self.__lang == "zh":
+            self.__lang = "cmn"
         self.__client = apiclient.RevAiAPIClient(key)
         if POSTPROCESSOR_LANGS.get(self.__lang) != None:
             L.debug("Initializing utterance model...")

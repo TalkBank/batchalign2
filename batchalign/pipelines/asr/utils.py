@@ -24,6 +24,7 @@ def retokenize(intermediate_output):
         # as a sub-utterance
         tmp = []
         for word, bullet in utterance:
+            word = word.replace("。", ".")
             tmp.append((word, bullet))
             if word in ENDING_PUNCT or word[-1] in ENDING_PUNCT:
                 if word in ENDING_PUNCT:
@@ -35,6 +36,13 @@ def retokenize(intermediate_output):
                     tmp.append((final[-1], [None, None]))
                     final_outputs.append((speaker, tmp))
                 tmp = []
+
+        if len(tmp) > 0: 
+            if tmp[-1][0] in MOR_PUNCT:
+                tmp.pop(-1)
+            tmp.append((".", [None, None]))
+            final_outputs.append((speaker, tmp))
+            tmp = []
 
     return final_outputs
 
