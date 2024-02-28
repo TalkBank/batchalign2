@@ -35,8 +35,10 @@ class WhisperXEngine(BatchalignEngine):
             raise ImportError("Cannot import WhisperX, please ensure it is installed.\nHint: install WhisperX by running `pip install git+https://github.com/m-bain/whisperx.git`.")
 
 
-
-        language = pycountry.languages.get(alpha_3=lang).alpha_2
+        if lang == "yue":
+            language = "yue"
+        else:
+            language = pycountry.languages.get(alpha_3=lang).alpha_2
 
         self.__lang = lang
         self.__lang_code = language
