@@ -69,7 +69,7 @@ class RevUTREngine(BatchalignEngine):
                                            language=lang,
                                            # some languages don't have postprocessors, so this option
                                            # raises an exception
-                                           skip_postprocessing=True)
+                                           skip_postprocessing=(lang in "en"))
 
         # we will wait untitl job finishes
         status = client.get_job_details(job.id).status
