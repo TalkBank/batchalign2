@@ -48,6 +48,9 @@ class RevUTREngine(BatchalignEngine):
             # some languages don't have alpha 2
             pass
 
+        if lang == "zh":
+            lang = "cmn"
+
         client = self.__client
 
         assert doc.media != None and doc.media.url != None, f"We cannot add utterance timings to something that doesn't have a media path! Provided media tier='{doc.media}'"
