@@ -190,7 +190,7 @@ def chat_parse_doc(lines, special_mor=False):
 
     raw = lines
     # pop off anything that's before @Begin
-    while raw[0].strip() != "@Begin":
+    while raw[0].strip() != "@Begin" and raw[0].strip() != "\ufeff@Begin" :
         ut = raw.pop(0)
         if "@PID" in ut:
             try:

@@ -60,24 +60,26 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # print(str(CHATFile(doc=doc)))
 
 ########### The Batchalign Parser Harness ###########
-# from batchalign.formats.chat import CHATFile
+from batchalign.formats.chat import CHATFile
 
-# in_dir = "../talkbank-alignment/test_harness/input"
+in_dir = "../talkbank-alignment/test_harness/input"
 
-# in_files = glob(str(Path(in_dir)/"*.cha"))
-# parent, _, files = zip(*list(os.walk(in_dir)))
+in_files = glob(str(Path(in_dir)/"*.cha"))
+parent, _, files = zip(*list(os.walk(in_dir)))
 
-# in_files = [os.path.join(a,i)
-#             for a,b in zip(parent, files)
-#             for i in b
-#             if ".cha" in i]
+in_files = [os.path.join(a,i)
+            for a,b in zip(parent, files)
+            for i in b
+            if ".cha" in i]
 
-# for file in in_files:
-#     try:
-#         f = CHATFile(path=os.path.abspath(file))
-#     except Exception as e:
-#         print(file)
-#         raise e
+for file in in_files:
+    try:
+        f = CHATFile(path=os.path.abspath(file))
+    except Exception as e:
+        print(file)
+        raise e
+
+# f.doc[12]
 
 # d = f.doc
 # wer = EvaluationEngine()
