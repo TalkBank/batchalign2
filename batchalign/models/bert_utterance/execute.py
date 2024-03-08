@@ -24,7 +24,7 @@ def utterance():
 @click.option("--batch_size", type=int, default=5, help="Batch Size")
 @click.option("--epochs", type=int, default=2, help="Number of Epochs")
 @click.option("--window", type=int, default=20, help="Size of the Utterance Merge Window")
-@click.option("--bert_base", type=str, default="bert-base-uncased", help="Bert model to start with")
+@click.option("--bert", type=str, default="bert-base-uncased", help="Bert model to start with")
 def train(**kwargs):
     """Train utterance segmentation model."""
     config = create_config(P, T, None,
@@ -33,7 +33,7 @@ def train(**kwargs):
         "batch_size": kwargs["batch_size"],
         "epochs": kwargs["epochs"],
         "window": kwargs["window"],
-        "bert_base": kwargs["bert_base"],
+        "bert_base": kwargs["bert"],
     }, **kwargs)
 
     config.project.prep(config)

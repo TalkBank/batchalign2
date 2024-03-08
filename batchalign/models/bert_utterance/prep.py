@@ -53,17 +53,17 @@ def prep(t):
 
     if not os.path.exists(os.path.join(DIR, f"{run_name}.train.txt")):
         # check if .txt exists
-        if len(glob.glob(os.path.join(DIR, "*.train.txt"))) == 0 and len(glob.glob(os.path.join(DIR, "*.train.cha"))) != 0:
+        if len(glob.glob(os.path.join(DIR, "train", "*.txt"))) == 0 and len(glob.glob(os.path.join(DIR, "train", "*.cha"))) != 0:
             # convert the cha files
             clan = get_clan()
             # run flo command
-            subprocess.run([clan, "\"+t*\"", "+ca", os.path.join(DIR, "*.train.cha")])
+            subprocess.run([clan, "\"+t*\"", "+ca", os.path.join(DIR, "train", "*.cha")])
             # rename each file
-            for f in glob.glob(os.path.join(DIR, "*.flo.cex")):
+            for f in glob.glob(os.path.join(DIR, "train", "*.flo.cex")):
                 os.rename(f, f.replace(".flo.cex", ".txt"))
 
         # Search for all chat files
-        chat_files = glob.glob(os.path.join(DIR, "*.train.txt"))
+        chat_files = glob.glob(os.path.join(DIR, "train", "*.txt"))
 
         # prep all the files
         cleaned_files = sum([read_file(i) for i in chat_files], [])
@@ -75,17 +75,17 @@ def prep(t):
 
     if not os.path.isfile(os.path.join(DIR, f"{run_name}.val.txt")):
         # check if .txt exists
-        if len(glob.glob(os.path.join(DIR, "*.val.txt"))) == 0 and len(glob.glob(os.path.join(DIR, "*.val.cha"))) != 0:
+        if len(glob.glob(os.path.join(DIR, "val", "*.txt"))) == 0 and len(glob.glob(os.path.join(DIR, "val", "*.cha"))) != 0:
             # convert the cha files
             clan = get_clan()
             # run flo command
-            subprocess.run([clan, "\"+t*\"", "+ca", os.path.join(DIR, "*.val.cha")])
+            subprocess.run([clan, "\"+t*\"", "+ca", os.path.join(DIR, "val", "*.cha")])
             # rename each file
-            for f in glob.glob(os.path.join(DIR, "*.flo.cex")):
+            for f in glob.glob(os.path.join(DIR, "val", "*.flo.cex")):
                 os.rename(f, f.replace(".flo.cex", ".txt"))
 
         # Search for all chat files
-        chat_files = glob.glob(os.path.join(DIR, "*.val.txt"))
+        chat_files = glob.glob(os.path.join(DIR, "val", "*.txt"))
 
         # prep all the files
         cleaned_files = sum([read_file(i) for i in chat_files], [])
