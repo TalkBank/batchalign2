@@ -43,7 +43,7 @@ def train(c):
         import wandb
 
         # start wandb
-        run = wandb.init(project=c.tracker.run_name, entity=c.tracker.user, config=c.params)
+        run = wandb.init(project="batchalign", name=c.tracker.run_name, entity=c.tracker.user, config=c.params)
 
         # set configuration
         config = dict(run.config)

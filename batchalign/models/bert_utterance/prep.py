@@ -51,7 +51,7 @@ def prep(t):
     # get in and out dir
     _, DIR, run_name = t.resolve_data()
 
-    if not os.path.exists(os.path.join(DIR, f"{run_name}.train.txt")):
+    if not os.path.isfile(os.path.join(DIR, f"{run_name}.train.txt")):
         # check if .txt exists
         if len(glob.glob(os.path.join(DIR, "train", "*.txt"))) == 0 and len(glob.glob(os.path.join(DIR, "train", "*.cha"))) != 0:
             # convert the cha files
@@ -71,7 +71,7 @@ def prep(t):
         with open(os.path.join(DIR, f"{run_name}.train.txt"), 'w') as df:
             df.writelines([i+'\n' for i in cleaned_files])
     else:
-        L.info(f"Path {os.path.isfile(os.path.join(DIR, f'{run_name}.train.txt'))} exists, skipping prep...")
+        L.info(f"Path {os.path.join(DIR, f'{run_name}.train.txt')} exists, skipping prep...")
 
     if not os.path.isfile(os.path.join(DIR, f"{run_name}.val.txt")):
         # check if .txt exists
@@ -93,7 +93,7 @@ def prep(t):
         with open(os.path.join(DIR, f"{run_name}.val.txt"), 'w') as df:
             df.writelines([i+'\n' for i in cleaned_files])
     else:
-        L.info(f"Path {os.path.isfile(os.path.join(DIR, f'{run_name}.val.txt'))} exists, skipping prep...")
+        L.info(f"Path {os.path.join(DIR, f'{run_name}.val.txt')} exists, skipping prep...")
 
 
 

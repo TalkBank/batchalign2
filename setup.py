@@ -55,6 +55,10 @@ setup(
     extras_require={
         'dev': [
             'pytest',
+        ],
+        'train': [
+            'wandb~=0.16',
+            'accelerate~=0.27',
         ]
     },
     include_package_data=True,

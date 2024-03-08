@@ -38,4 +38,3 @@ def train(**kwargs):
 
     config.project.prep(config)
     config.project.train(config)
-

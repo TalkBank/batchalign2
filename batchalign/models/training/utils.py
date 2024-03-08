@@ -23,6 +23,7 @@ def train_func_hydrate(f):
                        type=click.Path(file_okay=False)),
         click.option("--wandb",
                      help="Use wandb tracking.",
+                     is_flag=True,
                      default=False,
                      type=bool),
         click.option("--wandb_name",
@@ -32,7 +33,8 @@ def train_func_hydrate(f):
                      required=False),
         click.option("--wandb_user",
                      help="Wandb user name.",
-                     default="jemoka",
+                     default=None,
+                     required=False,
                      type=str)
     ]
 
@@ -40,7 +42,7 @@ def train_func_hydrate(f):
     return functools.reduce(lambda x, opt: opt(x), options, f)
 
 def create_config(prep, train, eval, task_name, params, **kwargs):
-    wandb = WandbConfig(run_name=(kwargs.get("run_name", "")
+    wandb = WandbConfig(run_name=(task_name+"_"+kwargs.get("run_name", "")
                                   if not kwargs.get("wandb_name") else kwargs["wandb_name"]),
                         user=kwargs.get("wandb_user", ""))
     proj = Project(task=task_name,
