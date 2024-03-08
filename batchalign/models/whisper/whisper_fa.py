@@ -7,7 +7,7 @@ from scipy.ndimage import median_filter
 from transformers.models.whisper.generation_whisper import _dynamic_time_warping as dtw
 from transformers.models.whisper.generation_whisper import _median_filter as median_filter
 
-from batchalign.models import ASRAudioFile
+from batchalign.models.utils import ASRAudioFile
 
 from batchalign.models.utils import _extract_token_timestamps as ett
 

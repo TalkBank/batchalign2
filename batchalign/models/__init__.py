@@ -1,4 +1,4 @@
 from .bert_utterance import BertUtteranceModel
-from .whisper_asr import WhisperASRModel, ASRAudioFile
-from .whisper_fa import WhisperFAModel
-
+from .whisper import WhisperASRModel, WhisperFAModel
+from .bert_utterance import BertUtteranceModel
+from .utils import ASRAudioFile

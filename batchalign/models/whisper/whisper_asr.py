@@ -22,6 +22,7 @@ from batchalign.pipelines.asr.utils import *
 from batchalign.pipelines.asr.utils import *
 
 from batchalign.models.utils import _extract_token_timestamps as ett
+from batchalign.models.utils import ASRAudioFile
 
 
 WhisperForConditionalGeneration._extract_token_timestamps = ett
@@ -41,43 +42,6 @@ DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device("mp
 # # FILE = "./data/test.wav"
 # FILE = "../talkbank-alignment/testing_playground_2/input/test.wav"
 # # FILE = "../talkbank-alignment/broken2/input/53.wav"
-
-@dataclass
-class ASRAudioFile:
-    file : str
-    tensor : torch.Tensor
-    rate : int
-
-    def chunk(self,begin_ms, end_ms):
-        """Get a chunk of the audio.
-
-        Parameters
-        ----------
-        begin_ms : int
-            Milliseconds of the start of the slice.
-        end_ms : int
-            Milliseconds of the end of the slice.
-
-        Returns
-        -------
-        torch.Tensor
-            The returned chunk to supply to the ASR engine.
-        """
-
-        data = self.tensor[int(round((begin_ms/1000)*self.rate)):
-                           int(round((end_ms/1000)*self.rate))]
-
-        return data
-
-    def all(self):
-        """Get the audio in its entirety
-
-        Notes
-        -----
-        like `chunk()` but all of the audio
-        """
-
-        return self.tensor
 
 # inference engine
 class WhisperASRModel(object):

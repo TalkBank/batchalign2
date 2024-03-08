@@ -24,6 +24,7 @@ from batchalign.utils import config
 from rich.logging import RichHandler
 
 from batchalign.cli.dispatch import _dispatch
+from batchalign.models.training.run import cli as train
 
 from enum import Enum
 
@@ -101,6 +102,8 @@ def batchalign(ctx, verbose):
     pretty.install()
     install()
 
+batchalign.add_command(train, "models")
+
 #################### ALIGN ################################
 
 @batchalign.command()
@@ -177,7 +180,6 @@ def morphotag(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     _dispatch("morphotag", lang, num_speakers, ["cha"], ctx,
               in_dir, out_dir,
               loader, writer, C)
-
 
 #################### BENCHMARK ################################
 

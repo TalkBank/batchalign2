@@ -2,6 +2,7 @@ import torch
 from transformers.models.whisper.generation_whisper import _dynamic_time_warping as _dynamic_time_warping
 from transformers.models.whisper.generation_whisper import _median_filter as _median_filter
 
+from dataclasses import dataclass
 import numpy as np
 
 def _extract_token_timestamps(self, generate_outputs, alignment_heads, time_precision=0.02, num_frames=None):
@@ -44,4 +45,42 @@ def _extract_token_timestamps(self, generate_outputs, alignment_heads, time_prec
         timestamps[batch_idx, 1:] = torch.tensor(jump_times)
 
     return timestamps
+
+
+@dataclass
+class ASRAudioFile:
+    file : str
+    tensor : torch.Tensor
+    rate : int
+
+    def chunk(self,begin_ms, end_ms):
+        """Get a chunk of the audio.
+
+        Parameters
+        ----------
+        begin_ms : int
+            Milliseconds of the start of the slice.
+        end_ms : int
+            Milliseconds of the end of the slice.
+
+        Returns
+        -------
+        torch.Tensor
+            The returned chunk to supply to the ASR engine.
+        """
+
+        data = self.tensor[int(round((begin_ms/1000)*self.rate)):
+                           int(round((end_ms/1000)*self.rate))]
+
+        return data
+
+    def all(self):
+        """Get the audio in its entirety
+
+        Notes
+        -----
+        like `chunk()` but all of the audio
+        """
+
+        return self.tensor
 
