@@ -117,9 +117,11 @@ class UtteranceBoundaryDataset(dataset.Dataset):
         # get the raw data shifted by sentence
         sents = self.raw_data[index*self.window:index*self.window+random.randint(1, self.window)]
         # filter for min length
-        sentsp = [i for i in sents if len(i) >= self.min_length]
+        sents = [i for i in sents if len(i) >= self.min_length]
+        if len(sents) == 0:
+            return self[index + 1] if index < len(self)-1 else self[index-1]
         # prepare the sentence and return
-        return self(" ".join(sentsp))
+        return self(" ".join(sents))
 
     def __len__(self):
         return len(self.raw_data)//self.window
