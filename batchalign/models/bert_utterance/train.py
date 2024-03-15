@@ -55,9 +55,9 @@ def train(c):
 
     # load the data (train using MICASE, test on Pitt)
     train_data = UtteranceBoundaryDataset(os.path.join(data_dir,  f"{run_name}.train.txt"),
-                                          tokenizer, window=config["window"])
+                                          tokenizer, window=config["window"], min_length=config["min_length"])
     test_data = UtteranceBoundaryDataset(os.path.join(data_dir,  f"{run_name}.val.txt"),
-                                         tokenizer, window=config["window"])
+                                         tokenizer, window=config["window"], min_length=config["min_length"])
 
     # create data collator utility on the tokenizer
     data_collator = DataCollatorForTokenClassification(tokenizer, return_tensors='pt')

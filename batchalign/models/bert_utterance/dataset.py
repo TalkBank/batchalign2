@@ -30,7 +30,7 @@ class UtteranceBoundaryDataset(dataset.Dataset):
 
     # initalization function (to read data, etc.)
     # max length doesn't matter
-    def __init__(self, f, tokenizer, window=10, max_length=1000):
+    def __init__(self, f, tokenizer, window=10, max_length=1000, min_length=10):
         # read the file
         with open(f, 'r') as df:
             d =  df.readlines()
@@ -40,6 +40,7 @@ class UtteranceBoundaryDataset(dataset.Dataset):
         self.window = window
         # store max length
         self.max_length = max_length
+        self.min_length = min_length
         # store tokenizer
         self.tokenizer = tokenizer
 
@@ -115,8 +116,10 @@ class UtteranceBoundaryDataset(dataset.Dataset):
     def __getitem__(self, index):
         # get the raw data shifted by sentence
         sents = self.raw_data[index*self.window:index*self.window+random.randint(1, self.window)]
+        # filter for min length
+        sentsp = [i for i in sents if len(i) >= self.min_length]
         # prepare the sentence and return
-        return self(" ".join(sents))
+        return self(" ".join(sentsp))
 
     def __len__(self):
         return len(self.raw_data)//self.window
