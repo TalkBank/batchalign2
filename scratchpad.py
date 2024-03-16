@@ -20,6 +20,14 @@ from batchalign import *
 ########### The Batchalign Core Test Harness ###########
 from batchalign.formats.chat.parser import chat_parse_utterance
  
+
+from batchalign.models import BertUtteranceModel
+
+
+# ut = BertUtteranceModel("../talkbank-alignment/train/models/utterance/mandarin/utterance_mandarin")
+
+# ut("早上好 中国 我在吃一个 冰淇淋 这个 冰淇淋 很 好吃 但是 我不知道")
+
 # text = "dad (1:15.) ."
 
 # function = "morphosyntax"
@@ -60,24 +68,24 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # print(str(CHATFile(doc=doc)))
 
 ########### The Batchalign Parser Harness ###########
-from batchalign.formats.chat import CHATFile
+# from batchalign.formats.chat import CHATFile
 
-in_dir = "../talkbank-alignment/test_harness/input"
+# in_dir = "../talkbank-alignment/test_harness/input"
 
-in_files = glob(str(Path(in_dir)/"*.cha"))
-parent, _, files = zip(*list(os.walk(in_dir)))
+# in_files = glob(str(Path(in_dir)/"*.cha"))
+# parent, _, files = zip(*list(os.walk(in_dir)))
 
-in_files = [os.path.join(a,i)
-            for a,b in zip(parent, files)
-            for i in b
-            if ".cha" in i]
+# in_files = [os.path.join(a,i)
+#             for a,b in zip(parent, files)
+#             for i in b
+#             if ".cha" in i]
 
-for file in in_files:
-    try:
-        f = CHATFile(path=os.path.abspath(file))
-    except Exception as e:
-        print(file)
-        raise e
+# for file in in_files:
+#     try:
+#         f = CHATFile(path=os.path.abspath(file))
+#     except Exception as e:
+#         print(file)
+#         raise e
 
 # f.doc[12]
 

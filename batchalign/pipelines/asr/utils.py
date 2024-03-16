@@ -62,7 +62,6 @@ def retokenize_with_engine(intermediate_output, engine):
         The utterance Engine to use.
     """
     
-
     final_outputs = []
 
     for speaker, utterance in intermediate_output:

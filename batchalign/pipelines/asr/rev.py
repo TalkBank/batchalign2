@@ -10,7 +10,7 @@ from batchalign.utils.config import config_read
 
 from batchalign.errors import *
 
-from batchalign.models import BertUtteranceModel
+from batchalign.models import BertUtteranceModel, resolve
 
 import time
 import pathlib
@@ -20,8 +20,6 @@ from rev_ai import apiclient, JobStatus
 
 import logging
 L = logging.getLogger("batchalign")
-
-POSTPROCESSOR_LANGS = {'en': "talkbank/CHATUtterance-en"}
 
 class RevEngine(BatchalignEngine):
     tasks = [ Task.ASR, Task.SPEAKER_RECOGNITION, Task.UTTERANCE_SEGMENTATION ]
@@ -41,9 +39,9 @@ class RevEngine(BatchalignEngine):
         if self.__lang == "zh":
             self.__lang = "cmn"
         self.__client = apiclient.RevAiAPIClient(key)
-        if POSTPROCESSOR_LANGS.get(self.__lang) != None:
+        if resolve("utterance", lang) != None:
             L.debug("Initializing utterance model...")
-            self.__engine = BertUtteranceModel(POSTPROCESSOR_LANGS.get(self.__lang))
+            self.__engine = BertUtteranceModel(resolve("utterance", lang))
             L.debug("Done.")
         else:
             self.__engine = None
@@ -62,8 +60,7 @@ class RevEngine(BatchalignEngine):
                                            language=lang,
                                            # some languages don't have postprocessors, so this option
                                            # raises an exception
-                                           skip_postprocessing=(True if lang in POSTPROCESSOR_LANGS.keys()
-                                                                else False),
+                                           skip_postprocessing=(True if resolve("utterance", self.__lang_code) and lang in ["en", "fr"] else False),
                                            speakers_count=self.__num_speakers)
 
         # we will wait untitl job finishes

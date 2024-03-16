@@ -61,7 +61,7 @@ class WhisperASRModel(object):
     >>> engine(file.chunk(7000, 13000)) # transcribes 7000th ms to 13000th ms
     """
 
-    def __init__(self, model, base="openai/whisper-large-v2", language="english", target_sample_rate=16000):
+    def __init__(self, model, base="openai/whisper-large-v3", language="english", target_sample_rate=16000):
         L.debug("Initializing whisper model...")
         self.pipe = pipeline(
             "automatic-speech-recognition",

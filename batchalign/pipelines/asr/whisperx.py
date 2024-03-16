@@ -10,6 +10,7 @@ import logging
 L = logging.getLogger("batchalign")
 
 from batchalign.utils.utils import correct_timing, silence
+from batchalign.models import resolve
 import warnings
 
 from contextlib import redirect_stdout, redirect_stderr
@@ -20,8 +21,6 @@ import gc
 import torch
 
 DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
-
-POSTPROCESSOR_LANGS = {'eng': "talkbank/CHATUtterance-en"}
 
 class WhisperXEngine(BatchalignEngine):
     tasks = [ Task.ASR, Task.UTTERANCE_SEGMENTATION ]
@@ -52,9 +51,9 @@ class WhisperXEngine(BatchalignEngine):
                                                         language_code=language)
         L.info("Done loading WhisperX models!")
 
-        if POSTPROCESSOR_LANGS.get(self.__lang) != None:
+        if resolve("utterance", self.__lang) != None:
             L.debug("Initializing utterance model...")
-            self.__engine = BertUtteranceModel(POSTPROCESSOR_LANGS.get(self.__lang))
+            self.__engine = BertUtteranceModel(resolve("utterance", self.__lang))
             L.debug("Done.")
         else:
             self.__engine = None

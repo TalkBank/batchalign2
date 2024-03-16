@@ -9,29 +9,32 @@ import logging
 L = logging.getLogger("batchalign")
 
 from batchalign.utils.utils import correct_timing
+from batchalign.models import resolve
 
-
-
-POSTPROCESSOR_LANGS = {'eng': "talkbank/CHATUtterance-en"}
 
 class WhisperEngine(BatchalignEngine):
     tasks = [ Task.ASR, Task.UTTERANCE_SEGMENTATION ]
 
     def __init__(self, model=None, lang="eng"):
 
-        if model == None and lang == "eng" or lang == "jpn":
-            model = "talkbank/CHATWhisper-en-large-v1"
-        elif model == None:
-            model = "openai/whisper-large-v2"
+        # try to resolve our internal model
+        res = resolve("whisper", lang)
+        if res:
+            model, base = res
+        else:
+            model = "openai/whisper-large-v3"
+            base = "openai/whisper-large-v3"
 
         language = pycountry.languages.get(alpha_3=lang).name
+        if language == "Yue Chinese":
+            language = "Cantonese"
             
-        self.__whisper = WhisperASRModel(model, language=language)
+        self.__whisper = WhisperASRModel(model, base=base, language=language)
         self.__lang = lang
 
-        if POSTPROCESSOR_LANGS.get(self.__lang) != None:
+        if resolve("utterance", self.__lang) != None:
             L.debug("Initializing utterance model...")
-            self.__engine = BertUtteranceModel(POSTPROCESSOR_LANGS.get(self.__lang))
+            self.__engine = BertUtteranceModel(resolve("utterance", self.__lang))
             L.debug("Done.")
         else:
             self.__engine = None
