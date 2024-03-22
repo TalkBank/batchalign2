@@ -8,6 +8,8 @@ from pathlib import Path
 # UD tools
 import stanza
 
+import copy
+
 from stanza.utils.conll import CoNLL
 from stanza import Document, DownloadMethod
 from stanza.models.common.doc import Token
@@ -622,8 +624,18 @@ def tokenizer_processor(tokenized, lang, sent):
 
     return res
 
+def adlist_postprocessor(i, lang, adlist):
+    cpy = copy.deepcopy(i)
+    adlist = {i.lower() : j for i,j in adlist.items()}
+
+    for indx,i in enumerate(cpy):
+        if conform(i).lower() in adlist:
+            cpy[indx] = (conform(i), list(adlist[conform(i).lower()]))
+
+    return cpy
+
 ######
-def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None):
+def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, **kwargs):
     L.debug("Starting Stanza...")
     inputs = []
 
@@ -648,8 +660,20 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None):
                              "depparse": "default"},
               "tokenize_no_ssplit": True}
 
+    tokenizer_postprocessor = lambda x:[tokenizer_processor(i, lang, inputs[-1]) for i in x] 
+
+    if len(kwargs.get("mwt", {})) > 0 and len(lang) > 1:
+        raise ValueError("Batchalign cannot handle code-switching documents with custom MWT lists!\nHint: Please remove the MWT list OR remove the secondary language in the transcript ID.")
+        
+    if len(kwargs.get("mwt", {})) > 0:
+        adlist_processor = lambda x:[adlist_postprocessor(i, lang, kwargs.get("mwt", {})) for i in x]
+    else:
+        adlist_processor = lambda x:x
+
     if not retokenize:
-        config["tokenize_postprocessor"] = lambda x:[tokenizer_processor(i, lang, inputs[-1]) for i in x]
+        config["tokenize_postprocessor"] = lambda x:adlist_processor(tokenizer_postprocessor(x))
+    else:
+        config["tokenize_postprocessor"] = lambda x:adlist_processor(x)
 
     if "zh" in lang:
         lang.pop(lang.index("zh"))
@@ -667,11 +691,19 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None):
     for l in lang:
         configs[l] = config.copy()
 
-    nlp = stanza.MultilingualPipeline(
-        lang_configs = configs,
-        lang_id_config = {"langid_lang_subset": lang},
-        download_method=DownloadMethod.REUSE_RESOURCES
-    )
+
+    if len(lang) > 1:
+        nlp = stanza.MultilingualPipeline(
+            lang_configs = configs,
+            lang_id_config = {"langid_lang_subset": lang},
+            download_method=DownloadMethod.REUSE_RESOURCES
+        )
+    else:
+        nlp = stanza.Pipeline(
+            lang=lang[0],
+            **configs[lang[0]],
+            download_method=DownloadMethod.REUSE_RESOURCES
+        )
 
     for indx, i in enumerate(doc.content):
         L.info(f"Stanza processing utterance {indx+1}/{len(doc.content)}")
@@ -772,7 +804,7 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None):
 
             if retokenize:
                 # rewrite the sentence with our desired tokenizations
-                ut, end = chat_parse_utterance(" ".join([i.text for i in sents[0].words])+" "+ending,
+                ut, end = chat_parse_utterance(" ".join([i.text for i in sents[0].tokens])+" "+ending,
                                           mor, gra,
                                           None, None)
                 doc.content[indx] = Utterance(content=ut,
@@ -807,4 +839,4 @@ class StanzaEngine(BatchalignEngine):
         self.status_hook = status_hook
 
     def process(self, doc, **kwargs):
-        return morphoanalyze(doc, retokenize=kwargs.get("retokenize", False), status_hook=self.status_hook)
+        return morphoanalyze(doc, retokenize=kwargs.get("retokenize", False), status_hook=self.status_hook, mwt=kwargs.get("mwt", {}))

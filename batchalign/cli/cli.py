@@ -163,15 +163,27 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
 @common_options
 @click.option("--retokenize/--keeptokens",
               default=False, help="Retokenize the main line to fit the UD tokenizations.")
+@click.option("--lexicon",
+              type=click.Path(exists=True,
+                              file_okay=True, dir_okay=False),
+              help="Comma seperated manual lexicon override")
 @click.pass_context
 def morphotag(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     """Perform morphosyntactic analysis on transcripts."""
 
    
     def loader(file):
+        mwt = {}
+        if kwargs.get("lexicon") != None and kwargs.get("lexicon", "").strip() != "":
+            import csv
+            raw = []
+            with open(kwargs["lexicon"], 'r') as df:
+                raw = [i for i in csv.reader(df)]
+            for i in raw:
+                mwt[i[0]] = tuple(i[1:])
         return (
             CHATFile(path=os.path.abspath(file), special_mor_=True).doc,
-            {"retokenize": kwargs["retokenize"]}
+            {"retokenize": kwargs["retokenize"], "mwt": mwt}
         )
 
     def writer(doc, output):
