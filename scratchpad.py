@@ -28,21 +28,21 @@ from batchalign.models import BertUtteranceModel
 
 # ut("早上好 中国 我在吃一个 冰淇淋 这个 冰淇淋 很 好吃 但是 我不知道")
 
-# text = "早上好中国我是一个冰淇淋 ."
+text = "ma' fe 'n byta bwyd e nawr +..."
 
-# function = "morphosyntax"
-# lang = "zho"
-# num_speakers = 1
+function = "morphosyntax"
+lang = "cym"
+num_speakers = 1
 
-# forms, delim = chat_parse_utterance(text, None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim)
+forms, delim = chat_parse_utterance(text, None, None, None, None)
+utterance = Utterance(content=forms, delim=delim)
 
-# ut = Document(content=[utterance], langs=[lang])
+ut = Document(content=[utterance], langs=[lang])
 
-# pipeline = BatchalignPipeline.new(function, lang=lang)
-# res = pipeline(ut, retokenize=True, mwt={"早上": ("早", "上")})
+pipeline = BatchalignPipeline.new(function, lang=lang)
+res = pipeline(ut)
 
-# print(str(CHATFile(doc=res)))
+print(str(CHATFile(doc=res)))
 
 ########### The Batchalign String Test Harness ###########
 # from batchalign.formats.chat.parser import chat_parse_utterance

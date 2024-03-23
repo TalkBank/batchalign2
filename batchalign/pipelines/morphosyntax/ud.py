@@ -401,7 +401,7 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
             # and .head is also 1-indexed already
             deprel = word.deprel.upper()
             deprel = deprel.replace(":", "-")
-            gra_tmp.append(((indx+1)-num_skipped, word.head, deprel))
+            gra_tmp.append(((indx+1)-num_skipped, word.head, deprel.replace("<","").replace(">", "")))
             actual_indicies.append((indx+1)-num_skipped) # so we can check later
             # if depedence relation is root, mark the current
             # ID as root
