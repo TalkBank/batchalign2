@@ -113,6 +113,7 @@ def handler(word, lang=None):
     target = target.replace('~', '')
     target = target.replace('/100', '')
     target = target.replace('/r', '')
+    target = target.replace('(', '')
 
     # remove attachments
     if "|" in target:
