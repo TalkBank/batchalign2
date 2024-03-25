@@ -12,6 +12,8 @@ from pathlib import Path
 from batchalign.errors import *
 from batchalign.constants import *
 
+import re
+
 # THE ORDERING OF THESE NUMBERS MATTERS
 # this is the order in which the processors are applied
 # and even if the user requests a different ordering the
@@ -216,12 +218,25 @@ class Utterance(BaseModel):
                     if (indx < len(self.content)-1) and self.content[indx+1].text == i.text:
                         result.append(i.text)
                         result.append("[/]")
+                        # check if we are about to begin another, seperate retrace
+                        # and then mark for that
+                        if (indx + 2 < len(self.content) and
+                            self.content[indx+2].text != i.text and
+                            self.content[indx+2].type == TokenType.RETRACE):
+                            result.append("<")
+                            
                     else:
                         result.append("<"+i.text)
                 elif (self.content[indx+1].type == TokenType.RETRACE and indx > 0 and indx < len(self.content) and
                       self.content[indx+1].text == i.text and self.content[indx-1].text == i.text):
                         result.append(i.text)
                         result.append("[/]")
+                        # check if we are about to begin another, seperate retrace
+                        # and then mark for that
+                        if (indx + 2 < len(self.content) and
+                            self.content[indx+2].text != i.text and
+                            self.content[indx+2].type == TokenType.RETRACE):
+                            result.append("<")
                 elif self.content[indx+1].type == TokenType.REGULAR:
                     if indx > 0 and self.content[indx-1].type == TokenType.RETRACE and self.content[indx-1].text != i.text:
                         result.append(i.text+">")
@@ -236,6 +251,9 @@ class Utterance(BaseModel):
 
         # detokenize
         detokenized = " ".join(result)
+        # replace suprious spaces caused by edge fudging
+        detokenized = re.sub(r"< +", "<", detokenized)
+
         # check and seperate punct 
         last_tok = result[-1]
         if last_tok in ENDING_PUNCT + MOR_PUNCT:

@@ -30,6 +30,7 @@ def test_ngram_retrace(doc, nr):
     d = copy.deepcopy(doc)
     dp = nr(d)
 
+
     assert str(doc) == str(d)
     assert str(dp) == RET
 
@@ -59,21 +60,23 @@ def test_retrace_and_disf(doc, dr, nr):
 # regression #idk
 def test_retrace_with_disfluency(nr):
     doc = Document.new(RET_WITH_DISFLUENCY)
-    doc[0][0].type == TokenType.FP
-    doc[0][1].type == TokenType.RETRACE
-    doc[0][2].type == TokenType.RETRACE
-
     docp = nr(doc)
+
     assert str(docp) == "um <this is> [/] this is a retrace"
 
 # regression email 01/01/2024 10:01AM
 def test_beg_with_disfluency(nr):
     doc = Document.new(BEG_WITH_DISFLUENCY)
-    doc[0][0].type == TokenType.RETRACE
-    doc[0][1].type == TokenType.RETRACE
-    doc[0][2].type == TokenType.RETRACE
 
     docp = nr(doc)
     assert str(docp) == "<um this is> [/] um this is a retrace"
+
+# regression email 03/25/2024 2:21PM
+def test_nested_retrace(nr):
+    doc = Document.new("ice ice ice ice ice cream ice cream")
+
+    docp = nr(doc)
+
+    assert str(docp) == "ice [/] ice [/] ice [/] ice [/] <ice cream> [/] ice cream"
 
 

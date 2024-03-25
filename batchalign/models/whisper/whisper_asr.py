@@ -196,7 +196,7 @@ class WhisperASRModel(object):
                     "value": element["payload"].strip(),
                 }
 
-                if text["ts"] != text["end_ts"]:
+                if text["ts"] != text["end_ts"] and text["value"].strip() != "…":
                     # text with no DTW time is likely a spurious retrace
                     current_turn.append(text)
             elif element["type"] == "segment" and current_speaker != element["payload"]:
