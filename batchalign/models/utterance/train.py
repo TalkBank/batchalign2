@@ -16,7 +16,7 @@ from transformers import AutoTokenizer, BertForTokenClassification
 from transformers import DataCollatorForTokenClassification
 
 # import our dataset
-from batchalign.models.bert_utterance.dataset import TOKENS, UtteranceBoundaryDataset
+from batchalign.models.utterance.dataset import TOKENS, UtteranceBoundaryDataset
 
 # tqdm
 from tqdm import tqdm

@@ -59,6 +59,16 @@ setup(
         'train': [
             'wandb~=0.16',
             'accelerate~=0.27',
+        ],
+        'diarize': [
+            "nemo-toolkit[asr]==1.21.0",
+            "omegaconf~=2.3.0",
+            "pydub~=0.25.1"
+        #     "youtokentome~=1.0.6",
+        #     "hydra-core~=1.3.2",
+        #     "inflect>=7.0.0",
+        #     "webdataset~=0.2.86",
+        #     "editdistance~=0.2.86",
         ]
     },
     include_package_data=True,

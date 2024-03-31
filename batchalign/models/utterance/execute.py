@@ -1,6 +1,6 @@
 from batchalign.models.training.utils import *
-from batchalign.models.bert_utterance.prep import prep as P
-from batchalign.models.bert_utterance.train import train as T
+from batchalign.models.utterance.prep import prep as P
+from batchalign.models.utterance.train import train as T
 
 import rich_click as click
 

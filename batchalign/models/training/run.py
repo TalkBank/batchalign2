@@ -1,4 +1,4 @@
-from batchalign.models.bert_utterance.execute import utterance
+from batchalign.models.utterance.execute import utterance
 import logging as L
 
 import rich_click as click
