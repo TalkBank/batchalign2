@@ -1,5 +1,6 @@
-from .bert_utterance import BertUtteranceModel
+from .utterance import BertUtteranceModel
 from .whisper import WhisperASRModel, WhisperFAModel
-from .bert_utterance import BertUtteranceModel
+from .speaker import NemoSpeakerModel
 from .utils import ASRAudioFile
 from .resolve import resolve
+

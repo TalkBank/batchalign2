@@ -43,6 +43,7 @@ warnings.filterwarnings('ignore', category=UserWarning, message='TypedStorage is
 Cmd2Task = {
     "align": "fa",
     "transcribe": "asr",
+    "transcribe_s": "asr,speaker",
     "morphotag": "morphosyntax",
     "benchmark": "asr,eval",
 }

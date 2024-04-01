@@ -21,7 +21,13 @@ from batchalign import *
 from batchalign.formats.chat.parser import chat_parse_utterance
  
 
-from batchalign.models import BertUtteranceModel
+# from batchalign.models import BertUtteranceModel
+
+
+pipe = BatchalignPipeline.new("asr,speaker", num_speakers=2, asr="whisperx")
+tmp = pipe("./extern/Untitled.wav")
+
+# CHATFile(doc=tmp).write("./extern/Untitled.cha")
 
 
 # ut = BertUtteranceModel("../talkbank-alignment/train/models/utterance/mandarin/utterance_mandarin")

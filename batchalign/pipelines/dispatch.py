@@ -5,7 +5,7 @@ Tabulate default packages and options.
 
 from batchalign import (WhisperEngine, WhisperFAEngine, StanzaEngine, RevEngine,
                         NgramRetraceEngine, DisfluencyReplacementEngine, WhisperUTREngine,
-                        RevUTREngine, EvaluationEngine, WhisperXEngine)
+                        RevUTREngine, EvaluationEngine, WhisperXEngine, NemoSpeakerEngine)
 from batchalign import BatchalignPipeline
 
 from batchalign.utils.config import config_read
@@ -19,6 +19,7 @@ DEFAULT_PACKAGES = {
     "asr": "whisper",
     "utr": "whisper_utr",
     "fa": "whisper_fa",
+    "speaker": "nemo_speaker",
     "morphosyntax": "stanza",
     "disfluency": "replacement",
     "retracing": "ngram",
@@ -113,6 +114,8 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
             engines.append(RevUTREngine(lang=lang))
         elif engine == "evaluation":
             engines.append(EvaluationEngine())
+        elif engine == "nemo_speaker":
+            engines.append(NemoSpeakerEngine(num_speakers=num_speakers))
 
     L.debug(f"Done initalizing packages.")
     return BatchalignPipeline(*engines)

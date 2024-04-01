@@ -66,14 +66,18 @@ def common_options(f):
 ###################### UTILS ##############################
 
 def handle_verbosity(verbosity):
+    L.shutdown()
     L.getLogger('stanza').handlers.clear()
     L.getLogger('transformers').handlers.clear()
+    L.getLogger('nemo_logger').handlers.clear()
     L.getLogger("stanza").setLevel(L.INFO)
+    L.getLogger('nemo_logger').setLevel(L.CRITICAL)
     L.getLogger('batchalign').setLevel(L.WARN)
     L.getLogger('lightning.pytorch.utilities.migration.utils').setLevel(L.ERROR)
 
     if verbosity >= 2:
         L.basicConfig(format="%(message)s", level=L.ERROR, handlers=[RichHandler(rich_tracebacks=True)])
+        L.getLogger('nemo_logger').setLevel(L.INFO)
         L.getLogger('batchalign').setLevel(L.INFO)
     if verbosity >= 3:
         L.getLogger('batchalign').setLevel(L.DEBUG)
@@ -99,7 +103,8 @@ def batchalign(ctx, verbose):
     # setup config
     ctx.obj["config"] = config.config_read(True)
     # make everything look better
-    pretty.install()
+    # pretty.install()
+    # better tracebacks
     install()
 
 batchalign.add_command(train, "models")
@@ -134,6 +139,8 @@ def align(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
               default=False, help="Use OpenAI Whisper (ASR) instead of Rev.AI (default).")
 @click.option("--whisperx/--rev",
               default=False, help="Use WhisperX instead of Rev.AI (default). Superceeds --whisper.")
+@click.option("--diarize/--nodiarize",
+              default=False, help="Perform speaker diarization (this flag is ignored with Rev.AI)")
 @click.pass_context
 def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     """Create a transcript from audio files."""
@@ -152,10 +159,18 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     if kwargs["whisperx"]:
         asr = "whisperx"
 
-    _dispatch("transcribe", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
-              in_dir, out_dir,
-              loader, writer, C,
-              asr=asr, **kwargs)
+    if kwargs.get("diarize"):
+        _dispatch("transcribe_s",
+                  lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
+                  in_dir, out_dir,
+                  loader, writer, C,
+                  asr=asr, **kwargs)
+    else:
+        _dispatch("transcribe",
+                  lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
+                  in_dir, out_dir,
+                  loader, writer, C,
+                  asr=asr, **kwargs)
 
 #################### MORPHOTAG ################################
 

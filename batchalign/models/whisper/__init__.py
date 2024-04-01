@@ -1,2 +1,2 @@
-from .whisper_asr import WhisperASRModel
-from .whisper_fa import WhisperFAModel
+from .infer_asr import WhisperASRModel
+from .infer_fa import WhisperFAModel

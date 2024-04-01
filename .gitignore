@@ -8,3 +8,4 @@ specification.py
 /batchalign.egg-info/
 /build/
 /dist/
+/.eggs/
