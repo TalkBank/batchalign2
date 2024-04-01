@@ -27,6 +27,7 @@ setup(
     long_description_content_type='text/markdown',
     setup_requires=[
         "Cython",
+        "wheel",
     ],
     install_requires=[
         "pydantic>=2.4",
