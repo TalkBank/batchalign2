@@ -30,7 +30,7 @@ class NemoSpeakerModel(object):
             self.__raise()
 
     def __raise(self):
-        raise ImportError("Failed to import the NeMo framework or its dependencies!\nHint: run 'pip install \"batchalign[speaker]\"' to install speaker diarization tools.")
+        raise ImportError("Failed to import the NeMo framework or its dependencies!\nHint: run 'pip install -U \"batchalign[speaker]\"' to install speaker diarization tools.")
 
     def __call__(self, in_file, num_speakers=2):
         try:
