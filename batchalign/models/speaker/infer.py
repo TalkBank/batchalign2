@@ -6,11 +6,6 @@ import copy
 import glob
 import tempfile
 
-from pydub import AudioSegment
-from omegaconf import OmegaConf
-from nemo.collections.asr.models.msdd_models import NeuralDiarizer
-from nemo.collections.asr.modules.msdd_diarizer import MSDD_module
-
 from batchalign.models.speaker.utils import conv_scale_weights
 
 import torch
@@ -20,9 +15,6 @@ import logging
 # compute device
 DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 
-# override msdd implementation
-MSDD_module.conv_scale_weights = conv_scale_weights
-
 # INPUT = "/Users/houjun/Documents/Projects/batchalign2/extern/test.wav"
 # NUM_SPEAKERS = 2
 
@@ -31,9 +23,25 @@ def resolve_config():
 
 class NemoSpeakerModel(object):
     def __init__(self):
-        self.__base = OmegaConf.load(resolve_config())
+        try:
+            from omegaconf import OmegaConf
+            self.__base = OmegaConf.load(resolve_config())
+        except ImportError:
+            self.__raise()
+
+    def __raise(self):
+        raise ImportError("Failed to import the NeMo framework or its dependencies!\nHint: run 'pip install \"batchalign[speaker]\"' to install speaker diarization tools.")
 
     def __call__(self, in_file, num_speakers=2):
+        try:
+            from pydub import AudioSegment
+            from nemo.collections.asr.models.msdd_models import NeuralDiarizer
+            from nemo.collections.asr.modules.msdd_diarizer import MSDD_module
+            # override msdd implementation
+            MSDD_module.conv_scale_weights = conv_scale_weights
+        except ImportError:
+            self.__raise()
+
         # make a copy of the input config
         config = copy.deepcopy(self.__base)
         # create a working directory and configure settings
