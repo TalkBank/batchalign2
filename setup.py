@@ -25,6 +25,9 @@ setup(
         'console_scripts': ['batchalign=batchalign.cli.cli:batchalign'],
     },
     long_description_content_type='text/markdown',
+    setup_requires=[
+        "Cython",
+    ],
     install_requires=[
         "pydantic>=2.4",
         "nltk>=3.8",
