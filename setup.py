@@ -30,6 +30,8 @@ setup(
         "wheel",
     ],
     install_requires=[
+        "Cython",
+        "wheel",
         "pydantic>=2.4",
         "nltk>=3.8",
         "praatio>=6.0.0,<6.1.0",
