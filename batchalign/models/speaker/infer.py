@@ -5,16 +5,17 @@ import json
 import copy
 import glob
 import tempfile
+
 from pydub import AudioSegment
 from omegaconf import OmegaConf
 from nemo.collections.asr.models.msdd_models import NeuralDiarizer
 from nemo.collections.asr.modules.msdd_diarizer import MSDD_module
+
 from batchalign.models.speaker.utils import conv_scale_weights
 
 import torch
 
 import logging
-logging.getLogger('nemo_logger').setLevel(logging.CRITICAL)
 
 # compute device
 DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"

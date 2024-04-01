@@ -158,7 +158,7 @@ class BatchalignPipeline:
                       collections.Counter([i for j in capabilities for i in j]).items()
                       if count > 1]
         if len(duplicates) > 0:
-            raise ValueError(f"Pipeline called with engines with overlapping capabilities: duplicate abilities='{duplicates}'!\nIf an engine supports initialization with variadic abilities (i.e. turning off an task it usual performs), please do so.")
+            raise ValueError(f"Pipeline called with engines with overlapping capabilities: duplicate abilities='{duplicates}'!\nIf an engine supports initialization with variadic abilities (i.e. turning off an task it usually performs), please do so.")
 
         # we want to make sure we only have one generator and one analyzer
         # and we want to construct the rest based on the order they were provided

@@ -75,7 +75,7 @@ class WhisperASRModel(object):
         )
         L.debug("Done, initalizing processor and config...")
         self.__config = GenerationConfig.from_pretrained(base)
-        self.__config.no_repeat_ngram_size = 5
+        self.__config.no_repeat_ngram_size = 4
         processor = WhisperProcessor.from_pretrained(base)
         L.debug("Whisper initialization done.")
 
@@ -149,7 +149,7 @@ class WhisperASRModel(object):
         words = self.pipe(data.cpu().numpy(),
                           batch_size=1, 
                           generate_kwargs = {
-                              "repetition_penalty": 1.01,
+                              "repetition_penalty": 1.001,
                               "generation_config": self.__config,
                               "task": "transcribe",
                               "language": self.lang
