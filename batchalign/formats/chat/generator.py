@@ -10,7 +10,7 @@ import warnings
 # document[3].text = None
 # document[3].model_dump()
 
-def generate_chat_utterance(utterance: Utterance, special_mor=False):
+def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=True):
     """Converts at Utterance to a CHAT string.
 
     Parameters
@@ -73,7 +73,7 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False):
         result.append(f"%{'u' if special_mor else ''}gra:\t"+" ".join([f"{i.id}|{i.dep_id}|{i.dep_type}" for i in gras]))
 
     #### WOR LINE GENERATION ####
-    if has_wor:
+    if has_wor and write_wor:
         result.append("%wor:\t"+" ".join(wor_elems))
 
 

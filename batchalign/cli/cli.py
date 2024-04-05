@@ -141,6 +141,8 @@ def align(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
               default=False, help="Use WhisperX instead of Rev.AI (default). Superceeds --whisper.")
 @click.option("--diarize/--nodiarize",
               default=False, help="Perform speaker diarization (this flag is ignored with Rev.AI)")
+@click.option("--wor/--nowor",
+              default=False, help="Should we write word level alignment line? Default to no.")
 @click.pass_context
 def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     """Create a transcript from audio files."""
@@ -151,7 +153,8 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
         CHATFile(doc=doc, special_mor_=True).write(output
                                                    .replace(".wav", ".cha")
                                                    .replace(".mp4", ".cha")
-                                                   .replace(".mp3", ".cha"))
+                                                   .replace(".mp3", ".cha"),
+                                                   write_wor=kwargs.get("wor", False))
 
     asr = "rev"
     if kwargs["whisper"]:
