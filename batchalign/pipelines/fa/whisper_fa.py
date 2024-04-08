@@ -74,8 +74,12 @@ class WhisperFAEngine(BatchalignEngine):
             # perform alignment
             # we take a 2 second buffer in each direction
             try:
+                detokenized = detokenize(word[0].text for word in grp)
+                # replace ANY punctuation
+                for i in MOR_PUNCT + ENDING_PUNCT:
+                    detokenized = detokenized.replace(i, "").strip()
                 res = self.__whisper(audio=f.chunk(grp[0][1][0], grp[-1][1][1]),
-                                    text=detokenize(word[0].text for word in grp))
+                                     text=detokenized)
             except IndexError:
                 # utterance contains nothing
                 continue
@@ -137,6 +141,7 @@ class WhisperFAEngine(BatchalignEngine):
                     # if we ended up with timings that don't make sense, drop it
                     if w.time and w.time[0] >= w.time[1]:
                         w.time = None
+
             # clear any built-in timing (i.e. we should use utterance-derived timing)
             ut.time = None
             # correct the text 
