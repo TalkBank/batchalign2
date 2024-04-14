@@ -211,6 +211,25 @@ def morphotag(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
               in_dir, out_dir,
               loader, writer, C)
 
+
+#################### UTSEG ################################
+
+@batchalign.command()
+@common_options
+@click.pass_context
+def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
+    """Perform morphosyntactic analysis on transcripts."""
+
+    def loader(file):
+        return CHATFile(path=os.path.abspath(file), special_mor_=True).doc
+
+    def writer(doc, output):
+        CHATFile(doc=doc, special_mor_=True).write(output)
+
+    _dispatch("utseg", lang, num_speakers, ["cha"], ctx,
+              in_dir, out_dir,
+              loader, writer, C)
+
 #################### BENCHMARK ################################
 
 @batchalign.command()

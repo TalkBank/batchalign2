@@ -46,6 +46,7 @@ Cmd2Task = {
     "transcribe_s": "asr,speaker",
     "morphotag": "morphosyntax",
     "benchmark": "asr,eval",
+    "utseg": "utterance",
 }
 
 # this is the main runner used by all functions
