@@ -18,14 +18,51 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 from batchalign import *
 
 ########### The Batchalign Core Test Harness ###########
-from batchalign.formats.chat.parser import chat_parse_utterance
- 
+# from batchalign.formats.chat.parser import chat_parse_utterance
+
+# sue = StanzaUtteranceEngine()
+# doc = Document.new("Los días que puedo ver a mi hija, pues, estoy con mi hija que es poco, porque ahora hasta que pase esto", lang="spa")
+
+# tmp = sue(doc)
+# tmp
+
+
+# import stanza
+# nlp = stanza.Pipeline("en", packages="tokenize,pos,constituency")
+# tree = nlp("I am dead, and he is also dead, but Josh isn't dead because \"only the brave die young and he knows the best is yet to come\".").sentences[0].constituency
+# i am dead and he is also dead but Josh isn't dead because only the brave die young and he knows the best is yet to come.
+
+# parse_tree(tree)
+
+
+# def rollout_to_leaf(tree):
+#     """Extract the leaf nodes from a subtree via dfs"""
+
+#     try:
+#         children = tree.children
+#     except AttributeError:
+#         breakpoint()
+#     leafs = []
+
+#     for c in children:
+#         if c.is_leaf():
+#             leafs.append(c.label)
+#         else:
+#             leafs += rollout_to_leaf(c)
+
+#     return leafs
 
 # from batchalign.models import BertUtteranceModel
+# tmp = CHATFile(path="./extern/Untitled.cha").doc
+# tmp
+# tmp1 = sue(tmp)
+# tmp1
+# tmp
 
 
-# pipe = BatchalignPipeline.new("asr,speaker", num_speakers=2, asr="whisperx")
-# tmp = pipe("./extern/Untitled.wav")
+# pipe = BatchalignPipeline.new("asr", num_speakers=2, asr="whisper", lang="spa")
+# tmp = pipe("../talkbank-alignment/test_harness/input/Untitled.wav")
+# tmp
 
 # CHATFile(doc=tmp).write("./extern/Untitled.cha")
 

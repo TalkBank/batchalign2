@@ -8,6 +8,7 @@ from batchalign import (WhisperEngine, WhisperFAEngine, StanzaEngine, RevEngine,
                         RevUTREngine, EvaluationEngine, WhisperXEngine, NemoSpeakerEngine,
                         StanzaUtteranceEngine)
 from batchalign import BatchalignPipeline
+from batchalign.models import resolve
 
 from batchalign.utils.config import config_read
 from batchalign.errors import *
@@ -25,6 +26,7 @@ DEFAULT_PACKAGES = {
     "disfluency": "replacement",
     "retracing": "ngram",
     "eval": "evaluation",
+    "utterance": "stanza_utt",
 }
 
 LANGUAGE_OVERRIDE_PACKAGES = {
@@ -71,6 +73,8 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
             packages.append("disfluency")
         if "retracing" not in packages:
             packages.append("retracing")
+        if "utterance" not in packages and resolve("utterance", lang) == None:
+            packages.append("utterance")
     if "fa" in packages:
         if "utr" not in packages:
             packages.append("utr")
@@ -117,6 +121,8 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
             engines.append(EvaluationEngine())
         elif engine == "nemo_speaker":
             engines.append(NemoSpeakerEngine(num_speakers=num_speakers))
+        elif engine == "stanza_utt":
+            engines.append(StanzaUtteranceEngine())
 
     L.debug(f"Done initalizing packages.")
     return BatchalignPipeline(*engines)

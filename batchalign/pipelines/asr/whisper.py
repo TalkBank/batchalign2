@@ -13,7 +13,15 @@ from batchalign.models import resolve
 
 
 class WhisperEngine(BatchalignEngine):
-    tasks = [ Task.ASR, Task.UTTERANCE_SEGMENTATION ]
+
+    @property
+    def tasks(self):
+        # if there is no utterance segmentation scheme, we only
+        # run ASR
+        if self.__engine:
+            return [ Task.ASR, Task.UTTERANCE_SEGMENTATION ]
+        else:
+            return [ Task.ASR ]
 
     def __init__(self, model=None, lang="eng"):
 

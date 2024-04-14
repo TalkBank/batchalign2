@@ -22,7 +22,15 @@ import logging
 L = logging.getLogger("batchalign")
 
 class RevEngine(BatchalignEngine):
-    tasks = [ Task.ASR, Task.SPEAKER_RECOGNITION, Task.UTTERANCE_SEGMENTATION ]
+
+    @property
+    def tasks(self):
+        # if there is no utterance segmentation scheme, we only
+        # run ASR
+        if self.__engine:
+            return [ Task.ASR, Task.SPEAKER_RECOGNITION, Task.UTTERANCE_SEGMENTATION ]
+        else:
+            return [ Task.ASR, Task.SPEAKER_RECOGNITION ]
 
     def __init__(self, key:str=None, lang="eng", num_speakers=2):
 

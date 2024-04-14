@@ -63,46 +63,51 @@ def rollout_to_leaf(tree):
             leafs += rollout_to_leaf(c)
 
     return leafs
-    
-def rollout_form(tree, last_np=None, form="S"):
-    """Get a list of NPs CLOSEST to the leaf nodes"""
 
-    leaf_nps = []
 
-    for c in tree.children:
-        if c.is_leaf():
-            leaf_nps.append(last_np)
-        else:
-            leaf_nps += rollout_form(c, (last_np if c.label != form else c), form=form)
+def parse_tree(subtree):
+    stack = []
 
-    return list(set([" ".join(rollout_to_leaf(i)).strip()
+    subtree_labels = [i.label for i in subtree.children]
+    # if we have a coordinating conjuction at this level
+    # we will consider all full sentence phrases in this
+    # lavel for parsing
+    if "CC" in subtree_labels:
+        stack += [i for i in subtree.children if i.label == "S"]
+    # also, parse all other subtrees
+    stack += [j for i in subtree.children for j in parse_tree(i)]
+
+    # return stringified represnetation
+    return [" ".join(rollout_to_leaf(i)).strip()
                      if type(i) != str else i
-                     for i in leaf_nps if i != None]))
+                     for i in stack]
 
 def process_ut(ut, nlp):
-    parse = nlp(ut.strip()).sentences
+    # remove punct
+    if (ut.content[-1].type == TokenType.PUNCT or
+        ut.content[-1].text in ENDING_PUNCT):
+        ut.content = ut.content[:-1]
+        
+    raw = ut.strip()
+    
+    parse = nlp(raw).sentences
 
     # rollout_to_leaf(
     # parse the text!
-    parse_tree = parse[0].constituency
-    parse_tree
+    pt = parse[0].constituency
     # parse_tree
     # get the rollouts
-    possible_forms_s = rollout_form(parse_tree, form="S")
-    possible_forms_s = sorted(possible_forms_s, key=lambda x:len(x))
-    possible_forms_sbar = rollout_form(parse_tree, form="SBAR")
-    possible_forms_sbar = sorted(possible_forms_sbar, key=lambda x:len(x))
-    # sort to smallest first
-    possible_forms = (sorted(possible_forms_sbar, key=lambda x:len(x)) +
-                    sorted(possible_forms_s, key=lambda x:len(x)))
+    possible_forms = parse_tree(pt)
+    possible_forms = (sorted(possible_forms, key=lambda x:len(x)))
 
     # get unique short forms
     unique_short_forms = []
-    for i in possible_forms:
+    for i in list(reversed(possible_forms))+[" ".join(rollout_to_leaf(pt))]:
         for j in filter(lambda x:x in i, unique_short_forms):
             i = i.replace(j, "")
         if i.strip() != "" and len(list(filter(lambda x:i in x, unique_short_forms))) == 0:
             unique_short_forms.append(i)
+    unique_short_forms = reversed(unique_short_forms)
     # retokenize (notice we combined forms with " ", so even if the language doesn't delinate
     # by space this should work fine
     unique_short_forms = [[j for j in i.split(" ") if j != ""] for i in unique_short_forms]
@@ -113,8 +118,9 @@ def process_ut(ut, nlp):
     refs = [ReferenceTarget(key=i.text, payload=indx) for indx, i in enumerate(ut.content) if isinstance(i, Form)]
     # our alignments will be the Phrase ID of each unique short form
     # the number doesn't matter, it simply matters how different they are
-    payloads = [[PayloadTarget(key=j, payload=indx) for j in i]
-                for indx, i in enumerate(unique_short_forms)]
+    payloads = [PayloadTarget(key=j, payload=indx)
+                for indx, i in enumerate(unique_short_forms)
+                for j in i]
 
     # import random
     # tmp1 = payloads[:]
@@ -125,21 +131,22 @@ def process_ut(ut, nlp):
     # and now, a good time: we have to align our targets a group at a time because they maybe
     # out of order, meaning weird edit distances
     matches = []
+    # breakpoint()
 
-    for group in payloads:
-        alignment = align(group, refs, False)
-        new_refs = []
-        # we want to collect the Matches, and resealize any
-        # reference extras (i.e. those we haven't aligned yet)
-        for i in alignment:
-            if isinstance(i, Match):
-                matches.append(i)
-            elif i.extra_type == ExtraType.REFERENCE:
-                new_refs.append(ReferenceTarget(key=i.key, payload=i.payload))
-        refs = new_refs
+    alignment = align(payloads, refs, False)
+    new_refs = []
+    # we want to collect the Matches, and resealize any
+    # reference extras (i.e. those we haven't aligned yet)
+    for i in alignment:
+        if isinstance(i, Match):
+            matches.append(i)
+        elif i.extra_type == ExtraType.REFERENCE:
+            new_refs.append(ReferenceTarget(key=i.key, payload=i.payload))
+
     # we now sort the references based on their orignial utterance order
-    matches = matches + refs
+    matches = matches + new_refs
     matches = sorted(matches, key=lambda x:x.reference_payload if isinstance(x, Match) else x.payload)
+
 
     # for each group, we combine into utterances based on the following heuristics
     utterances = []
@@ -181,6 +188,7 @@ def process_ut(ut, nlp):
     utterances.append(current_ut)
     utterances = utterances[1:]
 
+
     # for every single word drop, we combine it with the next utterance
     # as in---for every single word utterance we make, we just stick it onto the
     # next utterance
@@ -203,12 +211,22 @@ def process_ut(ut, nlp):
         new_ut = []
         for j in st:
             new_ut.append(ut.content[j])
-        new_uts.append(Utterance(content=new_ut, tier=tier))
+        new_ut = Utterance(content=new_ut, tier=tier)
+        # if we are missing an ending, fix that
+        if new_ut.content[-1].text not in ENDING_PUNCT:
+            new_ut.content.append(Form(text=".", type=TokenType.PUNCT))
+        new_uts.append(new_ut)
 
     return new_uts
  
 class StanzaUtteranceEngine(BatchalignEngine):
     tasks = [ Task.UTTERANCE_SEGMENTATION ]
+
+    def __init__(self):
+        self.status_hook = None
+
+    def _hook_status(self, status_hook):
+        self.status_hook = status_hook
 
     def process(self, doc, **kwargs):
         L.debug("Starting Stanza...")
@@ -263,8 +281,13 @@ class StanzaUtteranceEngine(BatchalignEngine):
                 download_method=DownloadMethod.REUSE_RESOURCES
             )
 
+        L.debug("Stanza Loaded.")
         contents = []
-        for i in doc.content:
+        for indx, i in enumerate(doc.content):
+            L.info(f"Stanza utseg processing turn {indx+1}/{len(doc.content)}")
+            if self.status_hook:
+                self.status_hook(indx+1, len(doc.content))
+
             if not isinstance(i, Utterance):
                 contents.append(i)
                 continue
@@ -277,12 +300,6 @@ class StanzaUtteranceEngine(BatchalignEngine):
         return doc
 
 
-# sue = StanzaUtteranceEngine()
-# doc = Document.new("I am a big idiot.", lang="eng")
-
-# # # si su envío aparecerá en la edición impresa y contiene figuras en color siga estas instrucciones esto no se aplica a los artículos que están en línea únicamente si desea que sus figuras aparezcan en color complete el formulario en color y devuélvalo dentro de los 7 días la devolución del formulario firmado incluso si decide rechazar el color evitará retrasos en la publicación si no tengo noticias suyas dentro de una semana asumiré que está contento de que sus figuras se impriman solo en blanco y negro
-# tmp = sue(doc)
-# tmp
 
 #         # # TODO sometimes tokenization causes problems at this stage, however, in all the cases
 #         # # I can think of sticking the form to the top of the next utterance will do just fine
