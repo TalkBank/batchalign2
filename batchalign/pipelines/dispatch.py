@@ -5,7 +5,8 @@ Tabulate default packages and options.
 
 from batchalign import (WhisperEngine, WhisperFAEngine, StanzaEngine, RevEngine,
                         NgramRetraceEngine, DisfluencyReplacementEngine, WhisperUTREngine,
-                        RevUTREngine, EvaluationEngine, WhisperXEngine, NemoSpeakerEngine)
+                        RevUTREngine, EvaluationEngine, WhisperXEngine, NemoSpeakerEngine,
+                        StanzaUtteranceEngine)
 from batchalign import BatchalignPipeline
 
 from batchalign.utils.config import config_read
