@@ -20,11 +20,11 @@ from batchalign import *
 ########### The Batchalign Core Test Harness ###########
 # from batchalign.formats.chat.parser import chat_parse_utterance
 
-# sue = StanzaUtteranceEngine()
-# doc = Document.new("Los días que puedo ver a mi hija, pues, estoy con mi hija que es poco, porque ahora hasta que pase esto", lang="spa")
+sue = StanzaUtteranceEngine()
+doc = Document.new("john is a chicken and robert is a chicken", lang="eng")
 
-# tmp = sue(doc)
-# tmp
+tmp = sue(doc)
+tmp
 
 
 # import stanza
