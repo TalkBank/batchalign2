@@ -49,7 +49,7 @@ class WhisperFAEngine(BatchalignEngine):
             if not isinstance(i, Utterance):
                 continue
             if i.alignment == None:
-                warnings.warn("Cannot force-align an utterance without utterance-level segmentation; please run a pipeline that includes `Task.UTTERANCE_TIMING_RECOVERY` (\"bulletize\") before running forced-alignment.")
+                warnings.warn("We found at least one utterance without utterance-level alignment; this is usually not an issue, but if the entire transcript is unaligned, please run a pipeline with `Task.UTTERANCE_TIMING_RECOVERY` (\"bulletize\") before running forced-alignment.")
                 continue
 
             # pop the previous group onto the stack
@@ -113,7 +113,7 @@ class WhisperFAEngine(BatchalignEngine):
         L.debug(f"Correcting text...")
 
         # we now set the end alignment of each word to the start of the next
-        for ut in doc.content:
+        for doc_ut, ut in enumerate(doc.content):
             if not isinstance(ut, Utterance):
                 continue
 
@@ -132,7 +132,14 @@ class WhisperFAEngine(BatchalignEngine):
                     if w.time == None:
                         continue
                     if ut.content[tmp].time == None:
-                        w.time = (w.time[0], w.time[0]+1000) # give a second because we don't know
+                        # seek forward one utterance to find their start time
+                        next_ut = doc_ut + 1 
+                        while next_ut < len(doc.content)-1 and doc.content[next_ut].alignment == None:
+                            next_ut += 1
+                        if next_ut < len(doc.content) and doc.content[next_ut].alignment:
+                            w.time = (w.time[0], doc.content[next_ut].alignment[0])
+                        else:
+                            w.time = (w.time[0], w.time[0]+500) # give half a second because we don't know
                     else:
                         w.time = (w.time[0], ut.content[tmp].time[0])
                     # just in case, bound the time by the utterance derived timings
