@@ -237,7 +237,7 @@ class Utterance(BaseModel):
                             self.content[indx+2].text != i.text and
                             self.content[indx+2].type == TokenType.RETRACE):
                             result.append("<")
-                elif self.content[indx+1].type == TokenType.REGULAR:
+                elif self.content[indx+1].type != TokenType.RETRACE:
                     if indx > 0 and self.content[indx-1].type == TokenType.RETRACE and self.content[indx-1].text != i.text:
                         result.append(i.text+">")
                         result.append("[/]")

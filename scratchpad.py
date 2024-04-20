@@ -20,11 +20,15 @@ from batchalign import *
 ########### The Batchalign Core Test Harness ###########
 # from batchalign.formats.chat.parser import chat_parse_utterance
 
-sue = StanzaUtteranceEngine()
-doc = Document.new("john is a chicken and robert is a chicken", lang="eng")
+# ng = NgramRetraceEngine()
+# disf = DisfluencyReplacementEngine()
+# doc = Document.new("um I'm seeing I'm seeing light and dark to create uh uh to create uh to create uh time", lang="eng")
+# pipe = BatchalignPipeline(ng, disf)
+# tmp = pipe(doc)
+# tmp
 
-tmp = sue(doc)
-tmp
+
+# tmp[0].content
 
 
 # import stanza
