@@ -53,7 +53,7 @@ class WhisperFAEngine(BatchalignEngine):
                 continue
 
             # pop the previous group onto the stack
-            if (i.alignment[-1] - seg_start) > 28*1000:
+            if (i.alignment[-1] - seg_start) > 20*1000:
                 groups.append(group)
                 group = []
                 seg_start = i.alignment[0]
@@ -78,6 +78,10 @@ class WhisperFAEngine(BatchalignEngine):
                 # replace ANY punctuation
                 for i in MOR_PUNCT + ENDING_PUNCT:
                     detokenized = detokenized.replace(i, "").strip()
+                # to ensure that combined words are pased correctly 
+                detokenized = detokenized.replace("_", " ")
+                # if "noone's" in detokenized:
+                    # breakpoint()
                 res = self.__whisper(audio=f.chunk(grp[0][1][0], grp[-1][1][1]),
                                      text=detokenized)
             except IndexError:
@@ -134,9 +138,9 @@ class WhisperFAEngine(BatchalignEngine):
                     if ut.content[tmp].time == None:
                         # seek forward one utterance to find their start time
                         next_ut = doc_ut + 1 
-                        while next_ut < len(doc.content)-1 and doc.content[next_ut].alignment == None:
+                        while next_ut < len(doc.content)-1 and (not isinstance(doc.content, Utterance) or doc.content[next_ut].alignment == None):
                             next_ut += 1
-                        if next_ut < len(doc.content) and doc.content[next_ut].alignment:
+                        if next_ut < len(doc.content) and isinstance(doc.content, Utterance) and doc.content[next_ut].alignment:
                             w.time = (w.time[0], doc.content[next_ut].alignment[0])
                         else:
                             w.time = (w.time[0], w.time[0]+500) # give half a second because we don't know
