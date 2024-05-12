@@ -8,7 +8,7 @@ The TalkBank Project, of which Batchalign is a part, is supported by NIH grant H
 
 ## Quick Start
 
-The following instructions is a quick start to install Batchalign. **For most users, we recommend you [visit this detailed guide](https://talkbank.org/info/batchalign2.pdf) for more detailed instructions.** The remaining instructions on this page provides a very rough overview of the primary functionality of `batchalign`, and assumes familiarity with Python and the terminal.
+The following instructions is a quick start to install Batchalign. 
 
 ### Get Python
 - We support Python versions 3.9, 3.10, and 3.11.  
