@@ -17,6 +17,9 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 from batchalign import *
 
+# with open("schema.json", 'w') as df:
+#     json.dump(Document.model_json_schema(), df, indent=4)
+
 ########### The Batchalign Core Test Harness ###########
 # from batchalign.formats.chat.parser import chat_parse_utterance
 
@@ -94,23 +97,27 @@ from batchalign import *
 
 ########### The Batchalign Individual Engine Harness ###########
 
-# text = "I love chicken pie I love chicken pie I love chicken pie "
+text = "We should be friends! Yes we should."
 # text = "ice ice cream ice ice cream ice ice cream"
 
 # ice ice cream ice cream
 # ice [/] <ice cream> [/] ice cream
 # ice cream ice cream ice cream ice ice cream cream
 
-# lang = "eng"
+lang = "eng"
 
 # forms, delim = chat_parse_utterance(text, None, None, None, None)
 # utterance = Utterance(content=forms, delim=delim)
 # ut = Document(content=[utterance], langs=[lang])
 
-# retrace = NgramRetraceEngine()
-# pipe = BatchalignPipeline(retrace)
+doc = Document.new(text, lang=lang)
 
-# doc = pipe(ut)
+retrace = StanzaEngine()
+pipe = BatchalignPipeline(retrace)
+
+doc = pipe(doc)
+doc
+
 # # doc[0].content
 
 # print(str(CHATFile(doc=doc)))
