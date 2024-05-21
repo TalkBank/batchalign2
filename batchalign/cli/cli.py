@@ -149,18 +149,21 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     def loader(file):
         return file
 
-    def writer(doc, output):
-        CHATFile(doc=doc, special_mor_=True).write(output
-                                                   .replace(".wav", ".cha")
-                                                   .replace(".mp4", ".cha")
-                                                   .replace(".mp3", ".cha"),
-                                                   write_wor=kwargs.get("wor", False))
-
     asr = "rev"
     if kwargs["whisper"]:
         asr = "whisper"
     if kwargs["whisperx"]:
         asr = "whisperx"
+
+
+    def writer(doc, output):
+        doc.content.insert(0, CustomLine(id="Comment", type=CustomLineType.INDEPENDENT,
+                                         content=f"Batchalign {VERSION_NUMBER.strip()}, ASR Engine {asr}"))
+        CHATFile(doc=doc, special_mor_=True).write(output
+                                                   .replace(".wav", ".cha")
+                                                   .replace(".mp4", ".cha")
+                                                   .replace(".mp3", ".cha"),
+                                                   write_wor=kwargs.get("wor", False))
 
     if kwargs.get("diarize"):
         _dispatch("transcribe_s",
