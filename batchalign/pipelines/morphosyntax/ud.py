@@ -37,6 +37,7 @@ repath_file = lambda file_path, new_dir: os.path.join(new_dir, pathlib.Path(file
 
 
 from batchalign.document import *
+from batchalign.constants import *
 from batchalign.pipelines.base import *
 from batchalign.formats.chat.parser import chat_parse_utterance
 
@@ -808,7 +809,52 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                 ut, end = chat_parse_utterance(" ".join([i.text for i in sents[0].tokens])+" "+ending,
                                           mor, gra,
                                           None, None)
+                # split the text up into previous chunks
+                chunks = list(enumerate(doc.content[indx].text.split(" ")))
+                # filter out everything that could not possibly align
+                chunks_align = [(i,j) for i,j in chunks
+                                if len(j) != 0 and (j[0] not in ["<", "[", "&", "\x15"])
+                                                   and (len(j) <= 2 or (j[-2] not in "@"))
+                                and j.strip() not in ENDING_PUNCT + MOR_PUNCT + CHAT_IGNORE + ["++"]]
+                # hollow out anything we are trying to align, and leave everything else
+                chunks_backplate = [[j] 
+                                    if not (len(j) != 0 and (j[0] not in ["<", "[", "&", "\x15"])
+                                    and (len(j) <= 2 or (j[-2] not in "@"))
+                                            and j.strip() not in ENDING_PUNCT + MOR_PUNCT + CHAT_IGNORE + ["++"])
+                                    else
+                                    []
+                                    for i,j in chunks]
+                # render each into a list
+                chunks_chars = []
+                for i,j in chunks_align:
+                    for k in j:
+                        chunks_chars.append(PayloadTarget(k, payload=i))
+                ud_chars = []
+                for i,j in enumerate(ut):
+                    for k in j.text:
+                        ud_chars.append(ReferenceTarget(k, payload=i))
+                # brrr
+                aligned = align(chunks_chars, ud_chars, tqdm=False)
+                for i in aligned:
+                    if isinstance(i, Match):
+                        if i.reference_payload not in chunks_backplate[i.payload]:
+                            chunks_backplate[i.payload].append(i.reference_payload)
+                    elif isinstance(i, Extra) and i.extra_type == ExtraType.PAYLOAD:
+                        # just put it back
+                        chunks_backplate[i.payload].append(i.key)
+                # resolve all the numbers and flatten
+                chunks_backplate = [j if isinstance(j, str) else ut[j].text
+                                    for i in chunks_backplate
+                                    for j in i]
+
+                retokenized_ut = " ".join(i for i in chunks_backplate if i.strip() not in ["(", ")"])
+                retokenized_ut = re.sub(r" +", " ", retokenized_ut)
+                # pray to everyone that it works---this will simply crash and ignore
+                # the utterance if it didn't work, so we are doing this as a sanity
+                # check rather than needing the parsed result
+                _1, _2 = chat_parse_utterance(retokenized_ut, mor, gra, None, None)
                 doc.content[indx] = Utterance(content=ut,
+                                              text=retokenized_ut,
                                               tier=doc.content[indx].tier,
                                               time=doc.content[indx].time,
                                               custom_dependencies=doc.content[indx].custom_dependencies)

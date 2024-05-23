@@ -222,7 +222,7 @@ def chat_parse_doc(lines, special_mor=False):
                 continue
             # we split because there are multiple languages possible 
             elif "@Languages" in line.strip():
-                results["langs"] = [i.strip() for i in line.strip("@Languages:").strip().split(",")]
+                results["langs"] = [i.strip() for i in line.strip("@Languages:").strip().replace(" ", ",").strip().split(",") if i.strip() != ""]
                 if len(results["langs"]) > 0 and results["langs"][0] == "eng" and special_mor:
                     use_special_mor = True
             # parse participants; the number of | delinates the metedata field

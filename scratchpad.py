@@ -60,7 +60,19 @@ from batchalign import *
 #     return leafs
 
 # from batchalign.models import BertUtteranceModel
-# tmp = CHATFile(path="./extern/Untitled.cha").doc
+# from batchalign.pipelines import BatchalignPipeline
+# tmp = CHATFile(path="../talkbank-alignment/test_harness/input/10502.cha").doc
+# pipe = BatchalignPipeline.new("morphosyntax", "jpn")
+# tmp.langs = ["jpn"]
+# # tmp[-1].content
+# res = pipe(tmp, retokenize=True)
+# print(str(CHATFile(doc=res)))
+
+
+# tmp[-1].content
+# tmp[-1]
+# tmp[6]
+
 # tmp
 # tmp1 = sue(tmp)
 # tmp1
@@ -97,28 +109,28 @@ from batchalign import *
 
 ########### The Batchalign Individual Engine Harness ###########
 
-text = "We should be friends! Yes we should."
-# text = "ice ice cream ice ice cream ice ice cream"
+# text = "We should be friends! Yes we should."
+# # text = "ice ice cream ice ice cream ice ice cream"
 
-# ice ice cream ice cream
-# ice [/] <ice cream> [/] ice cream
-# ice cream ice cream ice cream ice ice cream cream
+# # ice ice cream ice cream
+# # ice [/] <ice cream> [/] ice cream
+# # ice cream ice cream ice cream ice ice cream cream
 
-lang = "eng"
+# lang = "eng"
 
-# forms, delim = chat_parse_utterance(text, None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim)
-# ut = Document(content=[utterance], langs=[lang])
+# # forms, delim = chat_parse_utterance(text, None, None, None, None)
+# # utterance = Utterance(content=forms, delim=delim)
+# # ut = Document(content=[utterance], langs=[lang])
 
-doc = Document.new(text, lang=lang)
+# doc = Document.new(text, lang=lang)
 
-retrace = StanzaEngine()
-pipe = BatchalignPipeline(retrace)
+# retrace = StanzaEngine()
+# pipe = BatchalignPipeline(retrace)
 
-doc = pipe(doc)
-doc
+# doc = pipe(doc)
+# doc
 
-# # doc[0].content
+# # # doc[0].content
 
 # print(str(CHATFile(doc=doc)))
 
