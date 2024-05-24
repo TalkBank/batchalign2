@@ -119,10 +119,10 @@ batchalign.add_command(train, "models")
 def align(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
     """Align transcripts against corresponding media files."""
     def loader(file):
-        return CHATFile(path=os.path.abspath(file), special_mor_=True).doc
+        return CHATFile(path=os.path.abspath(file)).doc
 
     def writer(doc, output):
-        CHATFile(doc=doc, special_mor_=True).write(output)
+        CHATFile(doc=doc).write(output)
 
     _dispatch("align", lang, num_speakers,
               ["cha"], ctx,
@@ -159,11 +159,11 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     def writer(doc, output):
         doc.content.insert(0, CustomLine(id="Comment", type=CustomLineType.INDEPENDENT,
                                          content=f"Batchalign {VERSION_NUMBER.strip()}, ASR Engine {asr}"))
-        CHATFile(doc=doc, special_mor_=True).write(output
-                                                   .replace(".wav", ".cha")
-                                                   .replace(".mp4", ".cha")
-                                                   .replace(".mp3", ".cha"),
-                                                   write_wor=kwargs.get("wor", False))
+        CHATFile(doc=doc).write(output
+                                .replace(".wav", ".cha")
+                                .replace(".mp4", ".cha")
+                                .replace(".mp3", ".cha"),
+                                write_wor=kwargs.get("wor", False))
 
     if kwargs.get("diarize"):
         _dispatch("transcribe_s",
@@ -192,7 +192,6 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
 def morphotag(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     """Perform morphosyntactic analysis on transcripts."""
 
-   
     def loader(file):
         mwt = {}
         if kwargs.get("lexicon") != None and kwargs.get("lexicon", "").strip() != "":
@@ -202,13 +201,17 @@ def morphotag(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
                 raw = [i for i in csv.reader(df)]
             for i in raw:
                 mwt[i[0]] = tuple(i[1:])
+        cf = CHATFile(path=os.path.abspath(file), special_mor_=True)
+        doc = cf.doc
+        if str(cf).count("%mor") > 0:
+            doc.ba_special_["special_mor_notation"] = True
         return (
-            CHATFile(path=os.path.abspath(file), special_mor_=True).doc,
+            doc,
             {"retokenize": kwargs["retokenize"], "mwt": mwt}
         )
 
     def writer(doc, output):
-        CHATFile(doc=doc, special_mor_=True).write(output)
+        CHATFile(doc=doc, special_mor_=doc.ba_special_.get("special_mor_notation", False)).write(output)
 
     _dispatch("morphotag", lang, num_speakers, ["cha"], ctx,
               in_dir, out_dir,
@@ -224,10 +227,10 @@ def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     """Perform morphosyntactic analysis on transcripts."""
 
     def loader(file):
-        return CHATFile(path=os.path.abspath(file), special_mor_=True).doc
+        return CHATFile(path=os.path.abspath(file)).doc
 
     def writer(doc, output):
-        CHATFile(doc=doc, special_mor_=True).write(output)
+        CHATFile(doc=doc).write(output)
 
     _dispatch("utseg", lang, num_speakers, ["cha"], ctx,
               in_dir, out_dir,

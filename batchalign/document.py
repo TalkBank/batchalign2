@@ -1,5 +1,5 @@
 from enum import Enum, IntEnum
-from typing import Optional, List, Tuple, Union
+from typing import Optional, List, Tuple, Union, Any, Dict
 from typing_extensions import Annotated
 
 from pydantic import BaseModel, Field, computed_field
@@ -331,6 +331,7 @@ class Document(BaseModel):
     langs: List[str] = Field(default=["eng"])
     # persistent digital identifier
     pid: Optional[str] = Field(default=None)
+    ba_special_: Optional[Dict] = Field(default={})
 
     def __repr__(self):
         return "\n".join(self.transcript())
