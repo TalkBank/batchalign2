@@ -193,9 +193,12 @@ class Utterance(BaseModel):
 
     def __str__(self):
         if self.text != None:
-            return self.text
+            t = self.text
         else:
-            return self._detokenize()
+            t = self._detokenize()
+
+        t = t.replace(". . .", "+...")
+        return t
 
     def __repr__(self):
         return str(self)

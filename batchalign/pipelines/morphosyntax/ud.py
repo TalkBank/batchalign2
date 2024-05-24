@@ -848,7 +848,10 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                                     for j in i]
 
                 retokenized_ut = " ".join(i for i in chunks_backplate if i.strip() not in ["(", ")"])
+                retokenized_ut = retokenized_ut.replace("^", "")
                 retokenized_ut = re.sub(r" +", " ", retokenized_ut)
+                retokenized_ut = retokenized_ut.replace("+ \"", "+\"")
+                retokenized_ut = retokenized_ut.replace(" >", ">")
                 # pray to everyone that it works---this will simply crash and ignore
                 # the utterance if it didn't work, so we are doing this as a sanity
                 # check rather than needing the parsed result

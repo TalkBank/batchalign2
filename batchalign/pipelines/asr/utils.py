@@ -188,7 +188,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
 
         final_utterances.append(Utterance(
             tier=participant,
-            content = words
+            content=words
         ))
 
     doc.content = final_utterances
