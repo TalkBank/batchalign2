@@ -8,7 +8,7 @@ The TalkBank Project, of which Batchalign is a part, is supported by NIH grant H
 
 ## Quick Start
 
-The following instructions is a quick start to install Batchalign. 
+The following instructions is a quick start to install Batchalign. For most users aiming to process CHAT and audio with Batchalign, we recommend more detailed usage instructions: for [usage](https://talkbank.org/info/BA2-usage.pdf) and [human transcript cleanup](https://talkbank.org/info/BA2-cleanup.pdf). The following provides a quick start guide for the program.
 
 ### Get Python
 - We support Python versions 3.9, 3.10, and 3.11.  
