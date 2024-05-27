@@ -21,7 +21,7 @@ from batchalign import *
 #     json.dump(Document.model_json_schema(), df, indent=4)
 
 ########### The Batchalign Core Test Harness ###########
-# from batchalign.formats.chat.parser import chat_parse_utterance
+from batchalign.formats.chat.parser import chat_parse_utterance
 
 # ng = NgramRetraceEngine()
 # disf = DisfluencyReplacementEngine()
@@ -61,10 +61,10 @@ from batchalign import *
 
 # from batchalign.models import BertUtteranceModel
 # from batchalign.pipelines import BatchalignPipeline
-# tmp = CHATFile(path="../talkbank-alignment/test_harness/input/10502.cha").doc
+# tmp = CHATFile(path="../talkbank-alignment/test_harness/input/20024_hald.cha").doc
 # pipe = BatchalignPipeline.new("morphosyntax", "jpn")
-# tmp.langs = ["jpn"]
-# # tmp[-1].content
+# # tmp.langs = ["jpn"]
+# # # tmp[-1].content
 # res = pipe(tmp, retokenize=True)
 # print(str(CHATFile(doc=res)))
 
@@ -96,13 +96,13 @@ from batchalign import *
 # lang = "cym"
 # num_speakers = 1
 
-# forms, delim = chat_parse_utterance(text, None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim)
+# forms, delim = chat_parse_utterance("つ^み^きは?", None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim, text="つ^み^きは?")
 
-# ut = Document(content=[utterance], langs=[lang])
+# ut = Document(content=[utterance], langs=["jpn"])
 
-# pipeline = BatchalignPipeline.new(function, lang=lang)
-# res = pipeline(ut)
+# pipeline = BatchalignPipeline.new("morphosyntax", lang="jpn")
+# res = pipeline(ut, retokenize=True)
 
 # print(str(CHATFile(doc=res)))
 

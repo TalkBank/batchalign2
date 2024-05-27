@@ -813,13 +813,13 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                 chunks = list(enumerate(doc.content[indx].text.split(" ")))
                 # filter out everything that could not possibly align
                 chunks_align = [(i,j) for i,j in chunks
-                                if len(j) != 0 and (j[0] not in ["<", "[", "&", "\x15"])
-                                                   and (len(j) <= 2 or (j[-2] not in "@"))
+                                if len(j) != 0 and (j[0] not in ["<", "[", "&", "\x15"]) and (j[-1] not in ["]"])
+                                                   and ("@" not in j)
                                 and j.strip() not in ENDING_PUNCT + MOR_PUNCT + CHAT_IGNORE + ["++"]]
                 # hollow out anything we are trying to align, and leave everything else
                 chunks_backplate = [[j] 
-                                    if not (len(j) != 0 and (j[0] not in ["<", "[", "&", "\x15"])
-                                    and (len(j) <= 2 or (j[-2] not in "@"))
+                                    if not (len(j) != 0 and (j[0] not in ["<", "[", "&", "\x15"]) and (j[-1] not in ["]"])
+                                    and ("@" not in j)
                                             and j.strip() not in ENDING_PUNCT + MOR_PUNCT + CHAT_IGNORE + ["++"])
                                     else
                                     []
@@ -852,6 +852,11 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                 retokenized_ut = re.sub(r" +", " ", retokenized_ut)
                 retokenized_ut = retokenized_ut.replace("+ \"", "+\"")
                 retokenized_ut = retokenized_ut.replace(" >", ">")
+                retokenized_ut = retokenized_ut.replace("< ", "<")
+                retokenized_ut = retokenized_ut.replace(" :", ":")
+                retokenized_ut = retokenized_ut.replace(": <", ": <")
+                retokenized_ut = re.sub(r"@ ?w ?p", "@wp", retokenized_ut)
+                retokenized_ut = retokenized_ut.replace(" @", "@")
                 # pray to everyone that it works---this will simply crash and ignore
                 # the utterance if it didn't work, so we are doing this as a sanity
                 # check rather than needing the parsed result
