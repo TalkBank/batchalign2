@@ -73,7 +73,7 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
             packages.append("disfluency")
         if "retracing" not in packages:
             packages.append("retracing")
-        if "utterance" not in packages and resolve("utterance", lang) == None and lang not in ["heb"]:
+        if "utterance" not in packages and resolve("utterance", lang) == None and lang not in ["heb", "fra"]:
             packages.append("utterance")
     if "fa" in packages:
         if "utr" not in packages:
