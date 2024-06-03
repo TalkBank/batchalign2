@@ -131,6 +131,9 @@ def handler(word, lang=None):
     # fix dash
     target = target.replace("-", "–")
 
+    if "“" in target:
+        target = word.text
+
     return f"{'' if not unknown else '0'}{word.upos.lower()}|{target}"
 
 # POS specific handler
@@ -813,14 +816,14 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                 chunks = list(enumerate(doc.content[indx].text.split(" ")))
                 # filter out everything that could not possibly align
                 chunks_align = [(i,j) for i,j in chunks
-                                if len(j) != 0 and (j[0] not in ["<", "[", "&", "\x15"]) and (j[-1] not in ["]"])
+                                if len(j) != 0 and (j[0] not in ["<", "[", "&", "\x15", "(", ")"]) and (j[-1] not in ["]"])
                                                    and ("@" not in j)
-                                and j.strip() not in ENDING_PUNCT + MOR_PUNCT + CHAT_IGNORE + ["++"]]
+                                and j.strip() not in MOR_PUNCT + CHAT_IGNORE + ["++"]]
                 # hollow out anything we are trying to align, and leave everything else
                 chunks_backplate = [[j] 
-                                    if not (len(j) != 0 and (j[0] not in ["<", "[", "&", "\x15"]) and (j[-1] not in ["]"])
+                                    if not (len(j) != 0 and (j[0] not in ["<", "[", "&", "\x15", "(", ")"]) and (j[-1] not in ["]"])
                                     and ("@" not in j)
-                                            and j.strip() not in ENDING_PUNCT + MOR_PUNCT + CHAT_IGNORE + ["++"])
+                                            and j.strip() not in MOR_PUNCT + CHAT_IGNORE + ["++"])
                                     else
                                     []
                                     for i,j in chunks]
@@ -842,6 +845,14 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                     elif isinstance(i, Extra) and i.extra_type == ExtraType.PAYLOAD:
                         # just put it back
                         chunks_backplate[i.payload].append(i.key)
+                    # we want to replace the morphology of forms that are not actually
+                    # supposed to be analyzed
+                    elif isinstance(i, Extra) and i.extra_type == ExtraType.REFERENCE:
+                        ut[i.payload].morphology = [Morphology(
+                            lemma = sents[0].tokens[i.payload].text,
+                            pos = "x",
+                            feats = ""
+                        )]
                 # resolve all the numbers and flatten
                 chunks_backplate = [j if isinstance(j, str) else ut[j].text
                                     for i in chunks_backplate
@@ -855,6 +866,7 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                 retokenized_ut = retokenized_ut.replace("< ", "<")
                 retokenized_ut = retokenized_ut.replace(" :", ":")
                 retokenized_ut = retokenized_ut.replace(": <", ": <")
+                retokenized_ut = retokenized_ut.replace(" ↑", "↑")
                 retokenized_ut = re.sub(r"@ ?w ?p", "@wp", retokenized_ut)
                 retokenized_ut = retokenized_ut.replace(" @", "@")
                 # pray to everyone that it works---this will simply crash and ignore

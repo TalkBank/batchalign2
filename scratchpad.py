@@ -96,8 +96,8 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # lang = "cym"
 # num_speakers = 1
 
-# forms, delim = chat_parse_utterance("つ^み^きは?", None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim, text="つ^み^きは?")
+# forms, delim = chat_parse_utterance("あっ もうお魚↑ トラックがお腹が空いて <ヘロヘロです> [/] ヘロヘロ@o です .", None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim, text="あっ もうお魚↑ トラックがお腹が空いて <ヘロヘロです> [/] ヘロヘロ@o です .")
 
 # ut = Document(content=[utterance], langs=["jpn"])
 
