@@ -53,7 +53,7 @@ class CHATFile(BaseFormat):
 
         if path:
             # read in the resulting file
-            with open(path, "r") as df:
+            with open(path, "r", encoding="utf-8") as df:
                 # get alignment result
                 data = df.readlines()
             # conform result with tab-seperated beginnings
@@ -104,7 +104,7 @@ class CHATFile(BaseFormat):
         
         str_doc = self.__generate(self.__doc, self.__special_mor, write_wor=write_wor)
 
-        with open(path, 'w') as df:
+        with open(path, 'w', encoding="utf-8") as df:
             df.write(str_doc)
 
     @staticmethod
