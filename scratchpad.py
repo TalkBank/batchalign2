@@ -25,7 +25,9 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 # ng = NgramRetraceEngine()
 # disf = DisfluencyReplacementEngine()
-# doc = Document.new("um I'm seeing I'm seeing light and dark to create uh uh to create uh to create uh time", lang="eng")
+# doc = Document.new("tu dois la manger maman, maman, à fin", lang="eng")
+# # doc[0].content[4].text = "maman,"
+# # doc[0].content[5].text = "maman,"
 # pipe = BatchalignPipeline(ng, disf)
 # tmp = pipe(doc)
 # tmp

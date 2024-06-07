@@ -256,6 +256,7 @@ class Utterance(BaseModel):
         detokenized = " ".join(result)
         # replace suprious spaces caused by edge fudging
         detokenized = re.sub(r"< +", "<", detokenized)
+        detokenized = re.sub(r" >", ">", detokenized)
 
         # check and seperate punct 
         last_tok = result[-1]

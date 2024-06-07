@@ -43,6 +43,8 @@ class NgramRetraceEngine(BatchalignEngine):
                         for j in content[begin:begin+n]:
                             if j.type != TokenType.FP:
                                 j.type = TokenType.RETRACE
+                                for p in ENDING_PUNCT + MOR_PUNCT:
+                                    j.text = j.text.replace(p, "").strip()
                         root = root+n
                     # we scan grams forward one by one
                     begin += 1
