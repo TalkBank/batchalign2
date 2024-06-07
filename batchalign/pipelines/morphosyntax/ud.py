@@ -853,6 +853,13 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                             pos = "x",
                             feats = ""
                         )]
+
+                poses = [i.morphology[0].pos.upper() for i in ut
+                         if i.morphology
+                         and len(i.morphology) > 0]
+                if set(poses) == {"X", "PUNCT"}:
+                    # we don't tag those if there's no morphologyical content
+                    continue
                 # resolve all the numbers and flatten
                 chunks_backplate = [j if isinstance(j, str) else ut[j].text
                                     for i in chunks_backplate

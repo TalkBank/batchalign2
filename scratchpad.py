@@ -79,7 +79,12 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # tmp
 
 
-# pipe = BatchalignPipeline.new("asr", num_speakers=2, asr="whisper", lang="spa")
+# control x . oh yeah nine x . so we're on this side .
+# pipe = BatchalignPipeline.new("utterance", num_speakers=2)
+# uts = Document.new("he said a c a c . and he goes it c real fast .", lang="eng")
+
+# pipe(uts)
+
 # tmp = pipe("../talkbank-alignment/test_harness/input/Untitled.wav")
 # tmp
 
@@ -96,8 +101,8 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # lang = "cym"
 # num_speakers = 1
 
-# forms, delim = chat_parse_utterance("あっ もうお魚↑ トラックがお腹が空いて <ヘロヘロです> [/] ヘロヘロ@o です .", None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim, text="あっ もうお魚↑ トラックがお腹が空いて <ヘロヘロです> [/] ヘロヘロ@o です .")
+# forms, delim = chat_parse_utterance("<ポン@o ポン@o> [/] ポン@o .", None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim, text="<ポン@o ポン@o> [/] ポン@o .")
 
 # ut = Document(content=[utterance], langs=["jpn"])
 
