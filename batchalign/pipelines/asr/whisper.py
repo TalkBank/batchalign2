@@ -36,6 +36,8 @@ class WhisperEngine(BatchalignEngine):
         language = pycountry.languages.get(alpha_3=lang).name
         if language == "Yue Chinese":
             language = "Cantonese"
+        if "greek" in language.lower():
+            language = "Greek"
             
         self.__whisper = WhisperASRModel(model, base=base, language=language)
         self.__lang = lang
