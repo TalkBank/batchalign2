@@ -258,7 +258,7 @@ class StanzaUtteranceEngine(BatchalignEngine):
 
         elif not any([i in ["hr", "zh", "zh-hans", "zh-hant", "ja", "ko",
                             "sl", "sr", "bg", "ru", "et", "hu",
-                            "eu", "el", "he", "af", "ga"] for i in lang]):
+                            "eu", "el", "he", "af", "ga", "da"] for i in lang]):
             if "en" in lang:
                 config["processors"]["mwt"] = "gum"
             else:
