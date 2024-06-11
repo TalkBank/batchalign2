@@ -75,6 +75,7 @@ def retokenize_with_engine(intermediate_output, engine):
         utterance = [i for i in utterance if i[0].strip() != ""]
 
         joined = " ".join([i[0] for i in utterance])
+        joined = joined.replace("。", ".")
         split = engine(joined)
 
         # align the utterance against original splits and generate final outputs

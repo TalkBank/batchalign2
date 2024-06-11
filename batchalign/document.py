@@ -263,6 +263,11 @@ class Utterance(BaseModel):
         if last_tok in ENDING_PUNCT + MOR_PUNCT:
             detokenized = detokenized.replace(last_tok, f" {last_tok}")
         detokenized = detokenized.replace("  ", " ")
+        detokenized = re.sub(r",(\w)", r", \1", detokenized)
+        detokenized = re.sub(r",.", r",", detokenized)
+        detokenized = re.sub(r".,", r",", detokenized)
+        detokenized = re.sub(r"\? !", r"!", detokenized)
+        detokenized = re.sub(r"! \?", r"?", detokenized)
 
         ## TODO deal with angle brackets for retraces
         # NOTE: we don't use detokenize here to put spaces
