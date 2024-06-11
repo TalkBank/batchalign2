@@ -268,6 +268,8 @@ class Utterance(BaseModel):
         detokenized = re.sub(r".,", r",", detokenized)
         detokenized = re.sub(r"\? !", r"!", detokenized)
         detokenized = re.sub(r"! \?", r"?", detokenized)
+        detokenized = detokenized.encode().replace(b"\xef\xbf\xbd", b"").decode("utf-8")
+        detokenized = detokenized.encode().replace(b"\xe2\x80\xab", b"").decode("utf-8")
 
         ## TODO deal with angle brackets for retraces
         # NOTE: we don't use detokenize here to put spaces
