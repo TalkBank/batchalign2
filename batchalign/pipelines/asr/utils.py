@@ -25,6 +25,7 @@ def retokenize(intermediate_output):
         tmp = []
         for word, bullet in utterance:
             word = word.replace("。", ".")
+            word = word.replace("¿", " ").replace("¡", " ")
             tmp.append((word, bullet))
             if word in ENDING_PUNCT or word[-1] in ENDING_PUNCT:
                 if word in ENDING_PUNCT:
@@ -178,14 +179,20 @@ def process_generation(output, lang="eng", utterance_engine=None):
                            id=f"PAR{speaker}",
                            name=f"Participant")
         words = []
-        for word, (start,end) in utterance:
-            if word not in ENDING_PUNCT:
+        for indx, (word, (start,end)) in enumerate(utterance):
+            if indx == 0:
+                seen_word = False
+            if word.strip() == "":
+                continue
+            if word not in ENDING_PUNCT+MOR_PUNCT:
                 if start == None or end == None:
                     words.append(Form(text=word, time=None))
                 else:
+                    seen_word = True
                     words.append(Form(text=word, time=(int(start), int(end))))
             else:
-                words.append(Form(text=word, time=None))
+                if seen_word:
+                    words.append(Form(text=word, time=None))
 
         final_utterances.append(Utterance(
             tier=participant,

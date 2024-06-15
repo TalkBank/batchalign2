@@ -63,7 +63,8 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 # from batchalign.models import BertUtteranceModel
 # from batchalign.pipelines import BatchalignPipeline
-# tmp = CHATFile(path="../talkbank-alignment/test_harness/input/20024_hald.cha").doc
+# tmp = CHATFile(path="../talkbank-alignment/test_harness/input/1576.cha").doc
+# print(str(CHATFile(doc=tmp)))
 # pipe = BatchalignPipeline.new("morphosyntax", "jpn")
 # # tmp.langs = ["jpn"]
 # # # tmp[-1].content
@@ -77,20 +78,20 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 # tmp
 # tmp1 = sue(tmp)
-# tmp1
-# tmp
+# # tmp1
+# # tmp
 
 
-# control x . oh yeah nine x . so we're on this side .
-# pipe = BatchalignPipeline.new("utterance", num_speakers=2)
-# uts = Document.new("he said a c a c . and he goes it c real fast .", lang="eng")
+# # control x . oh yeah nine x . so we're on this side .
+# pipe = BatchalignPipeline.new("asr", num_speakers=2, asr="whisper", lang="spa")
+# uts = Document.new(media_path="../talkbank-alignment/test_harness/input/1576.mp3")
 
-# pipe(uts)
+# # pipe(uts)
 
-# tmp = pipe("../talkbank-alignment/test_harness/input/Untitled.wav")
-# tmp
+# # tmp = pipe("../talkbank-alignment/test_harness/input/crop.mp3")
+# # tmp[8]
 
-# CHATFile(doc=tmp).write("./extern/Untitled.cha")
+# # CHATFile(doc=tmp).write("../talkbank-alignment/test_harness/input/crop.cha")
 
 
 # ut = BertUtteranceModel("../talkbank-alignment/train/models/utterance/mandarin/utterance_mandarin")

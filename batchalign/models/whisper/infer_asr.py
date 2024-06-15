@@ -3,6 +3,7 @@ from torchaudio import load
 import numpy as np 
 import os
 
+import re
 from transformers import pipeline
 
 from dataclasses import dataclass
@@ -189,16 +190,38 @@ class WhisperASRModel(object):
             element = groups.pop(0)
 
             if element["type"] == "text":
-                text = {
+                pl = element["payload"].strip()
+                before = re.findall(r"^\W+", pl)
+                after = re.findall(r"\W+$", pl)
+                texts = []
+                if len(before) > 0:
+                    texts.append({
+                        "type": "punct",
+                        "ts": element["start"],
+                        "end_ts": element["end"] if element["end"] else element["start"]+1,
+                        "value": before[0],
+                    })
+                    pl = pl.strip(before[0])
+                if len(after) > 0:
+                    pl = pl.strip(after[0])
+                texts.append({
                     "type": "text",
                     "ts": element["start"],
                     "end_ts": element["end"] if element["end"] else element["start"]+1,
-                    "value": element["payload"].strip(),
-                }
+                    "value": pl.strip(),
+                })
+                if len(after) > 0:
+                    texts.append({
+                        "type": "punct",
+                        "ts": element["start"],
+                        "end_ts": element["end"] if element["end"] else element["start"]+1,
+                        "value": after[0],
+                    })
 
-                if text["ts"] != text["end_ts"] and text["value"].strip() != "…":
-                    # text with no DTW time is likely a spurious retrace
-                    current_turn.append(text)
+                for text in texts:
+                    if text["ts"] != text["end_ts"] and text["value"].strip() != "…" and text["value"].strip() != "":
+                        # text with no DTW time is likely a spurious retrace
+                        current_turn.append(text)
             elif element["type"] == "segment" and current_speaker != element["payload"]:
                 turns.append({
                     "elements": current_turn,

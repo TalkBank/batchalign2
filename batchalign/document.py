@@ -198,7 +198,11 @@ class Utterance(BaseModel):
             t = self._detokenize()
 
         t = t.replace(". . .", "+...")
-        t = re.sub(r"^\+\.\.\.", "", t).strip()
+        t = t.replace("¿", "").replace("¡", "")
+        t = re.sub(r"^\+\.\.\.", "", t.strip()).strip()
+        t = re.sub(r"^\W+", "", t.strip()).strip()
+        t = re.sub(r",", " , ", t.strip()).strip()
+        t = re.sub(r" +", " ", t.strip()).strip()
         return t
 
     def __repr__(self):
