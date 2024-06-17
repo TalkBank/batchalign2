@@ -198,9 +198,14 @@ class Utterance(BaseModel):
             t = self._detokenize()
 
         t = t.replace(". . .", "+...")
+        t = t.replace(" ' ", "'")
         t = t.replace("¿", "").replace("¡", "")
         t = re.sub(r"^\+\.\.\.", "", t.strip()).strip()
-        t = re.sub(r"^\W+", "", t.strip()).strip()
+        # this is here thrice to prevent stuff from not
+        # matching once because .sub seems to only match once
+        t = re.sub(r"^[^\w\d\s<]+", "", t.strip()).strip()
+        t = re.sub(r"^[^\w\d\s<]+", "", t.strip()).strip()
+        t = re.sub(r"^[^\w\d\s<]+", "", t.strip()).strip()
         t = re.sub(r",", " , ", t.strip()).strip()
         t = re.sub(r" +", " ", t.strip()).strip()
         return t

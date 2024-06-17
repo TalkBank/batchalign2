@@ -23,14 +23,14 @@ from batchalign import *
 ########### The Batchalign Core Test Harness ###########
 from batchalign.formats.chat.parser import chat_parse_utterance
 
-# ng = NgramRetraceEngine()
-# disf = DisfluencyReplacementEngine()
-# doc = Document.new("tu dois la manger maman, maman, à fin", lang="eng")
+ng = NgramRetraceEngine()
+disf = DisfluencyReplacementEngine()
+doc = Document.new("I ' m such an idiot", lang="eng")
 # # doc[0].content[4].text = "maman,"
 # # doc[0].content[5].text = "maman,"
-# pipe = BatchalignPipeline(ng, disf)
-# tmp = pipe(doc)
-# tmp
+pipe = BatchalignPipeline(ng, disf)
+tmp = pipe(doc)
+tmp
 
 
 # tmp[0].content
