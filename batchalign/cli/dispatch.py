@@ -88,7 +88,7 @@ def _dispatch(command, lang, num_speakers,
             # HACK check for @Options:\tdummy in the file
             # and simply copy it
             if ext == "cha":
-                with open(inp_path, 'r') as df:
+                with open(inp_path, 'r', encoding="utf-8") as df:
                     data = df.read()
                 if "@Options:\tdummy" in data:
                     shutil.copy2(inp_path, str(repathed))
