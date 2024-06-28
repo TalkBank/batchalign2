@@ -134,7 +134,13 @@ def handler(word, lang=None):
     if "“" in target:
         target = word.text
 
-    return f"{'' if not unknown else '0'}{word.upos.lower()}|{target}"
+    pos = word.upos.lower()
+
+    if lang == "ja":
+        from batchalign.pipelines.morphosyntax.ja.verbforms import verbform
+        pos,target = verbform(pos,target,word.text)
+
+    return f"{'' if not unknown else '0'}{pos}|{target}"
 
 # POS specific handler
 def handler__PRON(word, lang=None):
