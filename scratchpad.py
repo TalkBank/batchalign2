@@ -21,16 +21,16 @@ from batchalign import *
 #     json.dump(Document.model_json_schema(), df, indent=4)
 
 ########### The Batchalign Core Test Harness ###########
-from batchalign.formats.chat.parser import chat_parse_utterance
+# from batchalign.formats.chat.parser import chat_parse_utterance
 
-ng = NgramRetraceEngine()
-disf = DisfluencyReplacementEngine()
-doc = Document.new("I ' m such an idiot", lang="eng")
-# # doc[0].content[4].text = "maman,"
-# # doc[0].content[5].text = "maman,"
-pipe = BatchalignPipeline(ng, disf)
-tmp = pipe(doc)
-tmp
+# ng = NgramRetraceEngine()
+# disf = DisfluencyReplacementEngine()
+# doc = Document.new("I ' m such an idiot", lang="eng")
+# # # doc[0].content[4].text = "maman,"
+# # # doc[0].content[5].text = "maman,"
+# pipe = BatchalignPipeline(ng, disf)
+# tmp = pipe(doc)
+# tmp
 
 
 # tmp[0].content
