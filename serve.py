@@ -56,13 +56,12 @@ async def home():
     </pre>
     """
 
-def run(id:str, text:list[str], command:str, lang:str):
+def run(id:str, command:str, lang:str, name:str):
     workdir = (WORKDIR / id)
-    workdir.mkdir(exist_ok=True)
 
     try:
         pipe = BatchalignPipeline.new(command, lang)
-        doc = CHATFile(lines=text).doc
+        doc = CHATFile(path=workdir/"in.cha").doc
         res = pipe(doc)
         CHATFile(doc=res).write(workdir/"out.cha")
 
@@ -83,20 +82,18 @@ async def submit(
 
     for i in input:
         id = str(uuid.uuid4())
-        data = (await i.read()).decode("utf-8").split("\n")
-        raw = []
-        for value in data:
-            if value == "":
-                continue
-            if value[0] == "\t":
-                res = raw.pop()
-                res = res.strip("\n") + " " + value[1:]
-                raw.append(res)
-            else:
-                raw.append(value)
-        raw = [i.strip() for i in raw]
+        workdir = (WORKDIR / id)
+        workdir.mkdir(exist_ok=True)
 
-        background_tasks.add_task(run, id=id, text=raw, command=command, lang=lang)
+        with open(workdir/"in.cha", 'wb') as df:
+            df.write((await i.read()))
+
+        name = Path(i.filename).stem
+
+        with open(workdir/"name", 'w') as df:
+            df.write(name)
+
+        background_tasks.add_task(run, id=id, command=command, lang=lang, name=name)
         ids.append(id)
 
     return {"payload": ids, "status": "ok", "key": "submitted"}
@@ -106,16 +103,20 @@ async def status(id):
     """Get status of processed job."""
 
     id = id.strip()
+
     if not (WORKDIR / id).is_dir():
         return {"key": "not_found", "status": "error", "message": "The requested job is not found."}
+
+    with open(WORKDIR / id /"name", 'r') as df:
+        res = df.read().strip()
+
     if (WORKDIR / id / "error").is_file():
         with open(str(WORKDIR / id / "error"), 'r') as df:
-            return {"key": "job_error", "status": "error", "message": df.read().strip()}
+            return {"key": "job_error", "status": "error", "message": df.read().strip(), "name": res}
     if not (WORKDIR / id / "out.cha").is_file():
-        return {"key": "processing", "status": "pending", "message": "The requested job is still processing."}
+        return {"key": "processing", "status": "pending", "message": "The requested job is still processing.", "name": res}
 
-    # return FileResponse(WORKDIR / id / "out.cha")
-    return {"key": "done", "status": "done", "message": "The requested job is done."}
+    return {"key": "done", "status": "done", "message": "The requested job is done.", "name": res}
 
 @app.get("/api/get/{id}.cha")
 async def get(id):
