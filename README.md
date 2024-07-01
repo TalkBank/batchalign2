@@ -47,7 +47,7 @@ There are two main ways of interacting with Batchalign. Batchalign can be used a
 
 ### Basic Usage 
 
-  * [ ] Once installed, you can invoke the => Batchalign program by typing `batchalign` into the Terminal (MacOS) or Command Prompt (Windows).
+Once installed, you can invoke the Batchalign program by typing `batchalign` into the Terminal (MacOS) or Command Prompt (Windows).
 
 It is used in the following basic way:
 
