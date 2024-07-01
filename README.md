@@ -8,7 +8,7 @@ The TalkBank Project, of which Batchalign is a part, is supported by NIH grant H
 
 ## Quick Start
 
-The following instructions is a quick start to install Batchalign. For most users aiming to process CHAT and audio with Batchalign, we recommend more detailed usage instructions: for [usage](https://talkbank.org/info/BA2-usage.pdf) and [human transcript cleanup](https://talkbank.org/info/BA2-cleanup.pdf). The following provides a quick start guide for the program.
+The following instructions provide a quick start to installing Batchalign. For most users aiming to process CHAT and audio with Batchalign, we recommend more detailed usage instructions: for [usage](https://talkbank.org/info/BA2-usage.pdf) and [human transcript cleanup](https://talkbank.org/info/BA2-cleanup.pdf). The following provides a quick start guide for the program.
 
 ### Get Python
 - We support Python versions 3.9, 3.10, and 3.11.  
@@ -38,7 +38,7 @@ py -m pip3 install -U batchalign
 ```
 
 ### Rock and Roll
-There are two main ways of interacting with Batchalign. Batchalign can be used as a program to batch-process CHAT (hence the name), or a Python LSA library.
+There are two main ways of interacting with Batchalign. Batchalign can be used as a program to batch-process CHAT (hence the name), or as a Python LSA library.
 
 - to get started with the Batchalign program, [tap here](#quick-start-command-line)
 - to get started on the Batchalign Library (assumes familiarity with Python), [tap here](#quick-start-python)
@@ -47,7 +47,7 @@ There are two main ways of interacting with Batchalign. Batchalign can be used a
 
 ### Basic Usage 
 
-Once installed, you can invoke the Batchalign CLI program via the `batchalign` command.
+  * [ ] Once installed, you can invoke the => Batchalign program by typing `batchalign` into the Terminal (MacOS) or Command Prompt (Windows).
 
 It is used in the following basic way:
 
@@ -57,9 +57,9 @@ batchalign [verb] [input_dir] [output_dir]
 
 Where `verb` includes:
 
-1. `transcribe` - placing only an audio of video file (`.mp3/.mp4/.wav`) in the input directory, perform ASR on the audio, diarizes utterances, identifies some basic conversational features like retracing and filled pauses, and generate word-level alignments. You must supply a language code flag: `--lang=[three letter ISO language code]` for the ASR system to know what language the transcript is in. You can choose the flags `--rev` to use Rev.AI, a commercial ASR service, or `--whisper`, to use a local copy of OpenAI Whisper.
-2. `align` - placing both an audio of video file (`.mp3/.mp4/.wav`) and an *utterance-aligned* CHAT file in the input directory, generate word-level alignments
-3. `morphotag` - placing a CHAT file in the input directory, uses Stanford NLP Stanza to generate morphological and dependency analyses. You must supply a language code flag: `--lang=[three letter ISO language code]` for the alignment system to know what language the transcript is in. 
+1. `transcribe` - by placing only an audio of video file (`.mp3/.mp4/.wav`) in the input directory, this function performs ASR on the audio, diarizes utterances, identifies some basic conversational features like retracing and filled pauses, and generates word-level alignments. You must supply a language code flag: `--lang=[three letter ISO language code]` for the ASR system to know what language the transcript is in. You can choose the flags `--rev` to use Rev.AI, a commercial ASR service, or `--whisper`, to use a local copy of OpenAI Whisper.
+2. `align` - by placing both an audio of video file (`.mp3/.mp4/.wav`) and an *utterance-aligned* CHAT file in the input directory, this function recovers utterance-level time alignments (if they are not already annotated) and generates word-level alignments. The @Languages header in the CHAT file tells the program which language is in the transcript.
+3. `morphotag` - by placing a CHAT file in the input directory, this function uses Stanford NLP Stanza to generate morphological and dependency analyses. The @Languages header in the CHAT file tells the program which language is in the transcript. You must supply a language code flag: `--lang=[three letter ISO language code]` for the alignment system to know what language the transcript is in. 
 <!-- 4. `bulletize` - placing both an audio of video file (`.mp3/.mp4/.wav`) and an *unlinked* CHAT file in the input directory, generate utterance-level alignments through ASR -->
 
 You can get a CHAT transcript to experiment with [at the TalkBank website](https://talkbank.org/), under any of the "Banks" that are available. You can also generate and parse a CHAT transcript via [the Python program](https://github.com/TalkBank/batchalign2?tab=readme-ov-file#chat).
