@@ -233,9 +233,14 @@ def handler__VERB(word, lang=None):
     tense = feats.get("Tense", "")
     polarity = feats.get("Polarity", "")
     polite = feats.get("Polite", "")
-    return handler(word, lang)+flag+stringify_feats(aspect, mood,
-                                              tense, polarity, polite,
-                                              number[:1]+person)
+
+    res = handler(word, lang)
+    if "sconj" in res:
+        return res
+    else:
+        return res+flag+stringify_feats(aspect, mood,
+                                        tense, polarity, polite,
+                                        number[:1]+person)
 
 def handler__actual_PUNCT(word, lang=None):
     # actual punctuation handler
@@ -692,7 +697,7 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
 
     elif not any([i in ["hr", "zh", "zh-hans", "zh-hant", "ja", "ko",
                         "sl", "sr", "bg", "ru", "et", "hu",
-                        "eu", "el", "he", "af", "ga", "da"] for i in lang]):
+                        "eu", "el", "he", "af", "ga", "da", "ro"] for i in lang]):
         if "en" in lang:
             config["processors"]["mwt"] = "gum"
         else:
