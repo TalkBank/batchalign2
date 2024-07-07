@@ -208,6 +208,7 @@ class Utterance(BaseModel):
         # t = re.sub(r"^[^\w\d\s<]+", "", t.strip()).strip()
         t = re.sub(r",", " , ", t.strip()).strip()
         t = re.sub(r" +", " ", t.strip()).strip()
+        t = t.replace("+ ,", "+,").strip()
         return t
 
     def __repr__(self):

@@ -21,7 +21,7 @@ from batchalign import *
 #     json.dump(Document.model_json_schema(), df, indent=4)
 
 ########### The Batchalign Core Test Harness ###########
-# from batchalign.formats.chat.parser import chat_parse_utterance
+from batchalign.formats.chat.parser import chat_parse_utterance
 
 # ng = NgramRetraceEngine()
 # disf = DisfluencyReplacementEngine()
@@ -100,19 +100,20 @@ from batchalign import *
 
 # text = "ice ice cream ice cream"
 
-# function = "morphosyntax"
-# lang = "cym"
-# num_speakers = 1
+function = "morphosyntax"
+lang = "ron"
+num_speakers = 1
 
-# forms, delim = chat_parse_utterance("<ポン@o ポン@o> [/] ポン@o .", None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim, text="<ポン@o ポン@o> [/] ポン@o .")
+forms, delim = chat_parse_utterance("+, culoarea galbenă. ", None, None, None, None)
+utterance = Utterance(content=forms, delim=delim, text="+, culoarea galbenă .")
 
-# ut = Document(content=[utterance], langs=["jpn"])
 
-# pipeline = BatchalignPipeline.new("morphosyntax", lang="jpn")
-# res = pipeline(ut, retokenize=True)
+ut = Document(content=[utterance], langs=["ron"])
 
-# print(str(CHATFile(doc=res)))
+pipeline = BatchalignPipeline.new("morphosyntax", lang="ron")
+res = pipeline(ut, retokenize=True)
+
+print(str(CHATFile(doc=res)))
 
 
 ########### The Batchalign Individual Engine Harness ###########

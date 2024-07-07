@@ -883,6 +883,7 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                 retokenized_ut = retokenized_ut.replace(" >", ">")
                 retokenized_ut = retokenized_ut.replace("< ", "<")
                 retokenized_ut = retokenized_ut.replace(" :", ":")
+                retokenized_ut = retokenized_ut.replace("+ ,", "+,")
                 retokenized_ut = retokenized_ut.replace(": <", ": <")
                 retokenized_ut = retokenized_ut.replace(" ↑", "↑")
                 retokenized_ut = re.sub(r"@ ?w ?p", "@wp", retokenized_ut)
