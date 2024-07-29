@@ -34,7 +34,7 @@ pip install -U batchalign
 Windows:
 
 ```
-py -m pip3 install -U batchalign
+py -m pip install -U batchalign
 ```
 
 ### Rock and Roll
