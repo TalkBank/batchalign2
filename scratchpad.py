@@ -100,21 +100,23 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 # text = "ice ice cream ice cream"
 
-function = "morphosyntax"
-lang = "ron"
-num_speakers = 1
+# function = "morphosyntax"
+# lang = "eng"
+# num_speakers = 1
 
-forms, delim = chat_parse_utterance("+, culoarea galbenă. ", None, None, None, None)
-utterance = Utterance(content=forms, delim=delim, text="+, culoarea galbenă .")
+# forms, delim = chat_parse_utterance("why do I care ?", None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim, text="why do I care ?")
 
 
-ut = Document(content=[utterance], langs=["ron"])
+# ut = Document(content=[utterance], langs=["eng"])
 
-pipeline = BatchalignPipeline.new("morphosyntax", lang="ron")
-res = pipeline(ut, retokenize=True)
+# pipeline = BatchalignPipeline.new("morphosyntax", lang="eng")
+# res = pipeline(ut, retokenize=True)
 
-print(str(CHATFile(doc=res)))
+# print(str(CHATFile(doc=res)))
 
+# print(u"\u202bwhat up with that?")
+# print("אויתאויונסתהאויסו".encode().decode("").encode().decode("utf-8"))
 
 ########### The Batchalign Individual Engine Harness ###########
 

@@ -129,7 +129,13 @@ class CHATFile(BaseFormat):
                                                     write_wor=write_wor))
         main.append("@End\n")
 
-        return "\n".join(main)
+        raw = "\n".join(main)
+
+        # correct for unicode problems
+        corrected = raw
+        corrected = corrected.replace(u"\u202b", u"\u200f")
+
+        return corrected
 
     @property
     def doc(self):
