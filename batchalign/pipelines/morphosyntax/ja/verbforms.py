@@ -4,6 +4,68 @@ Fix Japanese verb forms.
 """
 
 def verbform(upos, target, text):
+    if "撮る" in text:
+        return "verb", "撮る"
+    if "貼る" in text:
+        return "verb", "貼る"
+    if "混ぜ" in text:
+        return "verb", "混ぜる"
+    if "釣る" in text:
+        return "verb", "釣る"
+    if "速い" in text and upos == "adj":
+        return "adj", "速い"
+    if "治ま" in text:
+        return "verb", "治まる"
+    if "刺す" in text:
+        return "verb", "刺す"
+    if "降り" in text:
+        return "verb", "降りる"
+    if "降" in text:
+        return "verb", "降る"
+    if "載せ" in text:
+        return "verb", "載せる"
+    if "帰" in text:
+        return "verb", "帰る"
+    if "はい" in text:
+        return "intj", "はい"
+    if "うん" in text:
+        return "intj", "うん"
+    if "おっ" in text:
+        return "intj", "おっ"
+    if "ほら" in text:
+        return "intj", "ほら"
+    if "ヤッホー" in text:
+        return "intj", "ヤッホー"
+    if "ただいま" in text:
+        return "intj", "ただいま"
+    if "あたし" in text:
+        return "pron", "あたし"
+    if "舐め" in text:
+        return "verb", "舐める"
+    if "バツ" in text:
+        return "noun", "バツ"
+    if "ブラシ" in text:
+        return "noun", "ブラシ"
+    if "引き出し" in text:
+        return "noun", "引き出し"
+    if "下さい" in text:
+        return "noun", "下さい"
+    if target in ["シャャミー", "物コャミ"]:
+        return "noun", "クシャミ"
+    if "マヨネーズ" in text:
+        return "noun", "マヨネーズ"
+    if "マヨ" in text:
+        return "noun", "マヨ"
+    if "チップス" in text:
+        return "noun", "チップス"
+    if "ゴロンっ" in text:
+        return "noun", "ゴロンっ"
+    if "モチーンっ" in text:
+        return "noun", "モチーンっ"
+    if "人っ" == text:
+        return "noun", "人"
+    if text == "掻く":
+        return "part", "かい"
     if "遣" in text and upos == "noun":
         return "verb", "遣る"
     if "死" in text:

@@ -100,20 +100,23 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 # text = "ice ice cream ice cream"
 
-# function = "morphosyntax"
-# lang = "eng"
-# num_speakers = 1
-
-# forms, delim = chat_parse_utterance("why do I care ?", None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim, text="why do I care ?")
+function = "morphosyntax"
+lang = "jpn"
+num_speakers = 1
 
 
-# ut = Document(content=[utterance], langs=["eng"])
+ut = "色が変わる飴舐めてる ."
 
-# pipeline = BatchalignPipeline.new("morphosyntax", lang="eng")
-# res = pipeline(ut, retokenize=True)
+forms, delim = chat_parse_utterance(ut, None, None, None, None)
+utterance = Utterance(content=forms, delim=delim, text=ut)
 
-# print(str(CHATFile(doc=res)))
+
+ut = Document(content=[utterance], langs=[lang])
+
+pipeline = BatchalignPipeline.new("morphosyntax", lang=lang)
+res = pipeline(ut, retokenize=True)
+
+print(str(CHATFile(doc=res)))
 
 # print(u"\u202bwhat up with that?")
 # print("אויתאויונסתהאויסו".encode().decode("").encode().decode("utf-8"))

@@ -237,6 +237,8 @@ def handler__VERB(word, lang=None):
     res = handler(word, lang)
     if "sconj" in res:
         return res
+    elif "verb" not in res:
+        return res
     else:
         return res+flag+stringify_feats(aspect, mood,
                                         tense, polarity, polite,
@@ -266,7 +268,10 @@ def handler__PUNCT(word, lang=None):
         return "noun|da"
     elif re.match(r"^['\w-]+$", word.text): # we match text here because .text is the ultumate content
                                         # instead of the lemma, which maybe entirely weird
-        return f"x|{word.text}"
+        if word.text == "もん":
+            return f"part|{word.text}"
+        else:
+            return f"x|{word.text}"
 
 # Register handlers
 HANDLERS = {
