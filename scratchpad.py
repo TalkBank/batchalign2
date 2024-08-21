@@ -15,13 +15,24 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 ########
 
-from batchalign import *
+# from batchalign import *
 
-# with open("schema.json", 'w') as df:
-#     json.dump(Document.model_json_schema(), df, indent=4)
+# # with open("schema.json", 'w') as df:
+# #     json.dump(Document.model_json_schema(), df, indent=4)
 
-########### The Batchalign Core Test Harness ###########
-from batchalign.formats.chat.parser import chat_parse_utterance
+# ########### The Batchalign Core Test Harness ###########
+# from batchalign.formats.chat.parser import chat_parse_utterance
+
+# forms, delim = chat_parse_utterance("my birthday's Date .", "det:poss|my n|+n|birth+n|day~cop|be&3S n:prop|Date .", "1|2|DET 2|3|SUBJ 3|0|ROOT 4|3|PRED 5|3|PUNCT", None, None)
+# forms
+
+# utterance = Utterance(content=forms, delim=delim)
+
+# ut = Document(content=[utterance], langs=["eng"])
+
+# print(str(CHATFile(doc=ut)))
+
+
 
 # ng = NgramRetraceEngine()
 # disf = DisfluencyReplacementEngine()
@@ -55,7 +66,7 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 #     for c in children:
 #         if c.is_leaf():
-#             leafs.append(c.label)
+#さっき[* s] 食べた事ある.             leafs.append(c.label)
 #         else:
 #             leafs += rollout_to_leaf(c)
 
@@ -100,23 +111,57 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 # text = "ice ice cream ice cream"
 
-function = "morphosyntax"
-lang = "jpn"
-num_speakers = 1
+# <<<<<<< ours
+# <<<<<<< Updated upstream
+# function = "morphosyntax"
+# lang = "jpn"
+# num_speakers = 1
+
+# =======
+# # function = "morphosyntax"
+# # lang = "jpn"
+# # num_speakers = 1
+
+# # forms, delim = chat_parse_utterance("さっき[* s] 食べた事ある.", None, None, None, None)
+# # utterance = Utterance(content=forms, delim=delim, text="さっき[* s] 食べた事ある.")
+# >>>>>>> theirs
+
+# ut = "色が変わる飴舐めてる ."
+
+# <<<<<<< ours
+# forms, delim = chat_parse_utterance(ut, None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim, text=ut)
 
 
-ut = "色が変わる飴舐めてる ."
+# ut = Document(content=[utterance], langs=[lang])
 
-forms, delim = chat_parse_utterance(ut, None, None, None, None)
-utterance = Utterance(content=forms, delim=delim, text=ut)
+# pipeline = BatchalignPipeline.new("morphosyntax", lang=lang)
+# res = pipeline(ut, retokenize=True)
+# =======
+# # function = "morphosyntax"
+# # lang = "jpn"
+# # num_speakers = 1
 
+# # forms, delim = chat_parse_utterance("さっき[* s] 食べた事ある.", None, None, None, None)
+# # utterance = Utterance(content=forms, delim=delim, text="さっき[* s] 食べた事ある.")
 
-ut = Document(content=[utterance], langs=[lang])
+# =======
+# # ut = Document(content=[utterance], langs=["jpn"])
 
-pipeline = BatchalignPipeline.new("morphosyntax", lang=lang)
-res = pipeline(ut, retokenize=True)
+# # pipeline = BatchalignPipeline.new("morphosyntax", lang="jpn")
+# # res = pipeline(ut, retokenize=True)
 
-print(str(CHATFile(doc=res)))
+# # print(str(CHATFile(doc=res)))
+# >>>>>>> theirs
+
+# # ut = Document(content=[utterance], langs=["jpn"])
+
+# # pipeline = BatchalignPipeline.new("morphosyntax", lang="jpn")
+# # res = pipeline(ut, retokenize=True)
+# >>>>>>> Stashed changes
+
+# # print(str(CHA
+# TFile(doc=res)))
 
 # print(u"\u202bwhat up with that?")
 # print("אויתאויונסתהאויסו".encode().decode("").encode().decode("utf-8"))

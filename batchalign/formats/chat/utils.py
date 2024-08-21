@@ -43,17 +43,8 @@ def chat_parse_mor(mor_str):
     if mor_str in ENDING_PUNCT:
         return [Morphology(lemma=mor_str, pos="PUNCT", feats="")]
 
-    # JANK handle + forms
-    if "+" in mor_str:
-        pos, rest = mor_str.split("+", maxsplit=1)
-        return [Morphology.model_validate({
-            "lemma": "+"+rest,
-            "pos": pos.strip("|"),
-            "feats": "",
-        })]
-
     try:
-        mors = [i.split("|") for i in re.split("[~$]", mor_str)]
+        mors = [i.split("|", maxsplit=1) for i in re.split("[~$]", mor_str)]
         # TODO epic jank: backwards compatibility check: if a form
         # uses a lot of dashes, its probably because its old-style
         # dash seperated; if it doesn't; it probably is new-style
@@ -67,11 +58,32 @@ def chat_parse_mor(mor_str):
     except:
         raise CHATValidationException(f"mor parser recieved invalid mor string: '{mor_str}'")
 
-    mors = [Morphology.model_validate({
-        "lemma": l,
-        "pos": p,
-        "feats": f,
-    }) for p,l,f in zip(pos, lemmas, feats)]
+
+    mors = []
+    for p,l,f in zip(pos, lemmas, feats):
+        # if "+" not in mor_str:
+        mors.append(Morphology.model_validate({
+            "lemma": l,
+            "pos": p,
+            "feats": f,
+        }))
+        # else:
+        #     breakpoint()
+        #     pos, rest = mor_str.split("+", maxsplit=1)
+
+
+
+    # # JANK handle + forms
+    # if "+" in mor_str:
+    #     pos, rest = mor_str.split("+", maxsplit=1)
+    #     return [Morphology.model_validate({
+    #         "lemma": "+"+rest,
+    #         "pos": pos.strip("|"),
+    #         "feats": "",
+    #     })]
+
+
+    # mors = [ ]
 
     return mors
     
