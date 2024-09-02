@@ -82,7 +82,7 @@ batchalign morphotag ~/ba_input ~/ba_output
 #### forced alignment
 
 ```
-batchalign align --lang=eng ~/ba_input ~/ba_output
+batchalign align ~/ba_input ~/ba_output
 ```
 
 
