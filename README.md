@@ -11,15 +11,15 @@ The TalkBank Project, of which Batchalign is a part, is supported by NIH grant H
 The following instructions provide a quick start to installing Batchalign. For most users aiming to process CHAT and audio with Batchalign, we recommend more detailed usage instructions: for [usage](https://talkbank.org/info/BA2-usage.pdf) and [human transcript cleanup](https://talkbank.org/info/BA2-cleanup.pdf). The following provides a quick start guide for the program.
 
 ### Get Python
-- We support Python versions 3.9, 3.10, and 3.11.  
-- **We do not support Python 3.12** (no PyTorch support)
+- We support Python versions 3.9, 3.10, 3.11 and 3.12.  
+- First, check to see if you have Python by running `python`. If it reports any of the versions above, skip the following step.
 - To install Python, follow the instructions...
     -  for macOS
         1. Install Brew: [visit this link](https://brew.sh/)
         2. Install Python: execute `brew install python@3.11`
     -  for Windows
         1.  Install Python 3.11: [via this link](https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe) 
-        2.  If later commands report `pip module not found`, [this page may help](https://stackoverflow.com/a/15626784)
+        2.  If later commands report `pip module not found`, [this page may help](https://github.com/TalkBank/batchalign2/wiki/Troubleshooting-Tips#get-pip-on-windows)
     -  your distribution's instructions for Linux
 
 ### Install and Update the Package
@@ -82,7 +82,7 @@ batchalign morphotag ~/ba_input ~/ba_output
 #### forced alignment
 
 ```
-batchalign align --lang=eng ~/ba_input ~/ba_output
+batchalign align ~/ba_input ~/ba_output
 ```
 
 
