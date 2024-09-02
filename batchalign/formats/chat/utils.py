@@ -146,7 +146,7 @@ def annotation_clean(content, special=False):
     cleaned_word = cleaned_word.replace("~","").replace("&~","")
     cleaned_word = cleaned_word.replace(">","").replace("<","")
     cleaned_word = cleaned_word.replace("〕","").replace("//","").replace(";","")
-    cleaned_word = re.sub(r"@.", '', cleaned_word)
+    cleaned_word = re.sub(r"@[^abcefpoqs]", '', cleaned_word)
     cleaned_word = re.sub(r"&.", '', cleaned_word)
 
     return cleaned_word

@@ -212,7 +212,7 @@ def handler__NOUN(word, lang=None):
 def handler__PROPN(word, lang=None):
     # code as noun
     parsed = handler__NOUN(word)
-    return parsed.replace("propn", "noun")
+    return parsed.replace("noun", "propn")
 
 def handler__VERB(word, lang=None):
     # get the features
@@ -635,7 +635,9 @@ def tokenizer_processor(tokenized, lang, sent):
             before,after = conform(i).split("'")
             res.append((f'{before}\'', False))
             res.append((after, False))
-        elif ("en" in lang) and matches_in(i, "'"):
+        elif (("en" in lang) and matches_in(i, "'") and
+              not (len(conform(i).split("'")) > 1 and
+                   conform(i).split("'")[0].strip() == "o")):
             res.append((conform(i), True))
         elif ("nl" in lang) and conform(i).endswith("'s"):
             res.append((conform(i), False))
