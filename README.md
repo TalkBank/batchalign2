@@ -19,7 +19,7 @@ The following instructions provide a quick start to installing Batchalign. For m
         2. Install Python: execute `brew install python@3.11`
     -  for Windows
         1.  Install Python 3.11: [via this link](https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe) 
-        2.  If later commands report `pip module not found`, [this page may help](https://stackoverflow.com/a/15626784)
+        2.  If later commands report `pip module not found`, [this page may help](https://github.com/TalkBank/batchalign2/wiki/Troubleshooting-Tips#get-pip-on-windows)
     -  your distribution's instructions for Linux
 
 ### Install and Update the Package
