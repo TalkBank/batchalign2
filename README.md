@@ -11,8 +11,7 @@ The TalkBank Project, of which Batchalign is a part, is supported by NIH grant H
 The following instructions provide a quick start to installing Batchalign. For most users aiming to process CHAT and audio with Batchalign, we recommend more detailed usage instructions: for [usage](https://talkbank.org/info/BA2-usage.pdf) and [human transcript cleanup](https://talkbank.org/info/BA2-cleanup.pdf). The following provides a quick start guide for the program.
 
 ### Get Python
-- We support Python versions 3.9, 3.10, and 3.11.  
-- **We do not support Python 3.12** (no PyTorch support)
+- We support Python versions 3.9, 3.10, 3.11 and 3.12.  
 - To install Python, follow the instructions...
     -  for macOS
         1. Install Brew: [visit this link](https://brew.sh/)
