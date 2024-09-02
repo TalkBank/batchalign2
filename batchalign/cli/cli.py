@@ -49,15 +49,7 @@ def common_options(f):
         click.argument("in_dir",
                        type=click.Path(exists=True, file_okay=False)),
         click.argument("out_dir",
-                       type=click.Path(exists=True, file_okay=False)),
-        click.option("--lang",
-                     help="sample language in three-letter ISO 3166-1 alpha-3 code",
-                     show_default=True,
-                     default="eng",
-                     type=str),
-        click.option("-n", "--num_speakers", type=int,
-                     help="number of speakers in the language sample", default=2),
-        
+                       type=click.Path(exists=True, file_okay=False))
     ]
 
     options.reverse()
@@ -115,8 +107,9 @@ batchalign.add_command(train, "models")
 @common_options
 @click.option("--whisper/--rev",
               default=False, help="For utterance timing recovery, OpenAI Whisper (ASR) instead of Rev.AI (default).")
+
 @click.pass_context
-def align(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
+def align(ctx, in_dir, out_dir, whisper, **kwargs):
     """Align transcripts against corresponding media files."""
     def loader(file):
         return CHATFile(path=os.path.abspath(file)).doc
@@ -124,7 +117,7 @@ def align(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
     def writer(doc, output):
         CHATFile(doc=doc).write(output)
 
-    _dispatch("align", lang, num_speakers,
+    _dispatch("align", "eng", 1,
               ["cha"], ctx,
               in_dir, out_dir,
               loader, writer, C,
@@ -143,6 +136,12 @@ def align(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
               default=False, help="Perform speaker diarization (this flag is ignored with Rev.AI)")
 @click.option("--wor/--nowor",
               default=False, help="Should we write word level alignment line? Default to no.")
+@click.option("--lang",
+              help="sample language in three-letter ISO 3166-1 alpha-3 code",
+              show_default=True,
+              default="eng",
+              type=str)
+@click.option("-n", "--num_speakers", type=int, help="number of speakers in the language sample", default=2)
 @click.pass_context
 def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     """Create a transcript from audio files."""
@@ -189,7 +188,7 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
                               file_okay=True, dir_okay=False),
               help="Comma seperated manual lexicon override")
 @click.pass_context
-def morphotag(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
+def morphotag(ctx, in_dir, out_dir, **kwargs):
     """Perform morphosyntactic analysis on transcripts."""
 
     def loader(file):
@@ -213,7 +212,7 @@ def morphotag(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     def writer(doc, output):
         CHATFile(doc=doc, special_mor_=doc.ba_special_.get("special_mor_notation", False)).write(output)
 
-    _dispatch("morphotag", lang, num_speakers, ["cha"], ctx,
+    _dispatch("morphotag", "eng", 1, ["cha"], ctx,
               in_dir, out_dir,
               loader, writer, C)
 
@@ -222,6 +221,12 @@ def morphotag(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
 
 @batchalign.command()
 @common_options
+@click.option("--lang",
+              help="sample language in three-letter ISO 3166-1 alpha-3 code",
+              show_default=True,
+              default="eng",
+              type=str)
+@click.option("-n", "--num_speakers", type=int, help="number of speakers in the language sample", default=2)
 @click.pass_context
 def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     """Perform morphosyntactic analysis on transcripts."""
