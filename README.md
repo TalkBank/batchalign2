@@ -12,6 +12,7 @@ The following instructions provide a quick start to installing Batchalign. For m
 
 ### Get Python
 - We support Python versions 3.9, 3.10, 3.11 and 3.12.  
+- First, check to see if you have Python by running `python`. If it reports any of the versions above, skip the following step.
 - To install Python, follow the instructions...
     -  for macOS
         1. Install Brew: [visit this link](https://brew.sh/)
