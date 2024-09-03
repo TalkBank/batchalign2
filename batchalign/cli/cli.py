@@ -247,6 +247,12 @@ def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
 @common_options
 @click.option("--whisper/--rev",
               default=False, help="Use OpenAI Whisper (ASR) instead of Rev.AI (default).")
+@click.option("--lang",
+              help="sample language in three-letter ISO 3166-1 alpha-3 code",
+              show_default=True,
+              default="eng",
+              type=str)
+@click.option("-n", "--num_speakers", type=int, help="number of speakers in the language sample", default=2)
 @click.pass_context
 def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
     """Benchmark ASR utilities for their word accuracy"""
