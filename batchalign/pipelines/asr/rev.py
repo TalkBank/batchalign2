@@ -63,13 +63,16 @@ class RevEngine(BatchalignEngine):
 
         L.info(f"Uploading '{pathlib.Path(f).stem}'...")
         # we will send the file for processing
-        job = client.submit_job_local_file(f,
-                                           metadata=f"batchalign2_{pathlib.Path(f).stem}",
-                                           language=lang,
-                                           # some languages don't have postprocessors, so this option
-                                           # raises an exception
-                                           skip_postprocessing=(True if resolve("utterance", self.__lang_code) and lang in ["en", "fr"] else False),
-                                           speakers_count=self.__num_speakers)
+        if "en" not in lang and "es" not in lang:
+            job = client.submit_job_local_file(f,
+                                               metadata=f"batchalign2_{pathlib.Path(f).stem}",
+                                               language=lang)
+        else:
+            job = client.submit_job_local_file(f,
+                                               metadata=f"batchalign2_{pathlib.Path(f).stem}",
+                                               language=lang,
+                                               skip_postprocessing=(True if resolve("utterance", self.__lang_code) and lang in ["en", "fr"] else False),
+                                               speakers_count=self.__num_speakers)
 
         # we will wait untitl job finishes
         status = client.get_job_details(job.id).status
