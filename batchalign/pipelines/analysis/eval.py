@@ -19,8 +19,8 @@ class EvaluationEngine(BatchalignEngine):
     @staticmethod
     def __compute_wer(doc, gold):
         # get the text of the document and get the text of the gold
-        forms = [ j.text.lower() for i in doc.content for j in i.content ]
-        gold_forms = [ j.text.lower() for i in gold.content for j in i.content ]
+        forms = [ j.text.lower() for i in doc.content for j in i.content if isinstance(i, Utterance)]
+        gold_forms = [ j.text.lower() for i in gold.content for j in i.content if isinstance(i, Utterance)]
 
         # dp!
         alignment = align(forms, gold_forms, False)
@@ -61,8 +61,15 @@ class EvaluationEngine(BatchalignEngine):
             else:
                 prev_error = None
 
+        diff = []
+        for i in alignment:
+            if isinstance(i, Extra):
+                diff.append(f"{'+' if i.extra_type == ExtraType.REFERENCE else '-'} {i.key}")
+            else:
+                diff.append(f"  {i.key}")
+                
         # wer = (S+D+I)/N
-        return (sub+dl+ins)/len(gold_forms)
+        return (sub+dl+ins)/len(gold_forms), "\n".join(diff)
 
     def analyze(self, doc, **kwargs):
         gold = kwargs.get("gold")
@@ -71,8 +78,11 @@ class EvaluationEngine(BatchalignEngine):
         if not gold or not isinstance(gold, Document):
             raise ValueError(f"Unexpected format for gold transcript. Expected batchalign.Document, got '{type(gold)}'")
 
+        wer, diff = self.__compute_wer(doc, gold)
+
         return {
-            "wer": self.__compute_wer(doc, gold)
+            "wer": wer,
+            "diff": diff
         }
 
 

@@ -272,6 +272,9 @@ def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
         # write the wer
         with open(Path(output).with_suffix(".wer.txt"), 'w') as df:
             df.write(str(doc["wer"]))
+        with open(Path(output).with_suffix(".diff"), 'w') as df:
+            df.write(str(doc["diff"]))
+
 
     _dispatch("benchmark", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
               in_dir, out_dir,
