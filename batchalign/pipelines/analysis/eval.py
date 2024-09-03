@@ -22,6 +22,9 @@ class EvaluationEngine(BatchalignEngine):
         forms = [ j.text.lower() for i in doc.content for j in i.content if isinstance(i, Utterance)]
         gold_forms = [ j.text.lower() for i in gold.content for j in i.content if isinstance(i, Utterance)]
 
+        forms = [i for i in forms if i.strip() not in MOR_PUNCT+ENDING_PUNCT]
+        gold_forms = [i for i in gold_forms if i.strip() not in MOR_PUNCT+ENDING_PUNCT]
+
         # dp!
         alignment = align(forms, gold_forms, False)
 
