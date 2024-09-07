@@ -35,6 +35,7 @@ class BertUtteranceModel(object):
         self.model.eval()
 
     def __call__(self, passage):
+        print(passage)
         # input passage words removed of all preexisting punctuation
         passage = passage.lower()
         passage = passage.replace('.','')
@@ -67,7 +68,8 @@ class BertUtteranceModel(object):
         prev_word_idx = None
 
         # for each word, perform the action
-        for indx, elem in enumerate(tokd.word_ids(0)):
+        wids = tokd.word_ids(0)
+        for indx, elem in enumerate(wids):
             # if its none, append nothing or if we have
             # seen it before, do nothing
             if elem is None or elem == prev_word_idx:
@@ -81,23 +83,31 @@ class BertUtteranceModel(object):
             # set the working variable
             w = input_tokenized[elem]
 
-            # perform the edit actions
-            if action == 1:
-                w = w[0].upper() + w[1:]
-            elif action == 2:
-                w = w+'.'
-            elif action == 3:
-                w = w+'?'
-            elif action == 4:
-                w = w+'!'
-            elif action == 5:
-                w = w+','
+            # fix one word hanging issue
+            will_action = False
+            if indx < len(wids)-2 and classified_targets[0][indx+1] > 0:
+                will_action = True
+
+            if not will_action:
+                # perform the edit actions
+                if action == 1:
+                    w = w[0].upper() + w[1:]
+                elif action == 2:
+                    w = w+'.'
+                elif action == 3:
+                    w = w+'?'
+                elif action == 4:
+                    w = w+'!'
+                elif action == 5:
+                    w = w+','
+
 
             # append
             res_toks.append(w)
 
         # compose final passage
         final_passage = self.tokenizer.convert_tokens_to_string(res_toks)
+        print(final_passage)
         try: 
             split_passage = sent_tokenize(final_passage)
         except LookupError:

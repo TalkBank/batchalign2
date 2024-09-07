@@ -8,7 +8,7 @@ from batchalign.pipelines.base import *
 from batchalign.pipelines.asr.utils import *
 from batchalign.utils.config import config_read
 
-from batchalign.utils.dp import align, ExtraType, Extra
+from batchalign.utils.dp import align, ExtraType, Extra, Match
 
 import logging
 L = logging.getLogger("batchalign")
@@ -38,8 +38,16 @@ class EvaluationEngine(BatchalignEngine):
         # ie: if we have <extra.payload> <extra.reference> +> substitution
         #     but if we have <extra.reference> <extra.reference> this is 2 insertions
 
+        cleaned_alignment = []
+
         for i in alignment:
+
             if isinstance(i, Extra):
+                if len(cleaned_alignment) > 0 and i.extra_type == ExtraType.REFERENCE and "name" in i.key and i.key[:4] != "name":
+                    cleaned_alignment.pop(-1)
+                    cleaned_alignment.append(Match(i.key, None, None))
+                    continue
+
                 if prev_error != None and prev_error != i.extra_type:
                     # this is a substitution: we have different "extra"s in
                     # reference vs. playload
@@ -63,6 +71,8 @@ class EvaluationEngine(BatchalignEngine):
                         dl += 1
             else:
                 prev_error = None
+
+            cleaned_alignment.append(i)
 
         diff = []
         for i in alignment:
