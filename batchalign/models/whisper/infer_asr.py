@@ -62,29 +62,36 @@ class WhisperASRModel(object):
     >>> engine(file.chunk(7000, 13000)) # transcribes 7000th ms to 13000th ms
     """
 
-    def __init__(self, model, base="openai/whisper-large-v3", language="english", target_sample_rate=16000):
+    def __init__(self, base="alvanlii/whisper-small-cantonese", language="english", device=0):
         L.debug("Initializing whisper model...")
-        self.pipe = pipeline(
-            "automatic-speech-recognition",
-            model=model,
-            tokenizer=WhisperTokenizer.from_pretrained(base),
-            chunk_length_s=25,
-            stride_length_s=3,
-            device=DEVICE,
-            torch_dtype=torch.float32,
-            return_timestamps="word",
-        )
-        L.debug("Done, initalizing processor and config...")
-        self.__config = GenerationConfig.from_pretrained(base)
-        self.__config.no_repeat_ngram_size = 4
-        processor = WhisperProcessor.from_pretrained(base)
+        if language == "yue":
+            self.model_name = "alvanlii/whisper-small-cantonese"
+            lang = "yue"
+            self.pipe = pipeline(
+                task="automatic-speech-recognition",
+                model=self.model_name,
+                chunk_length_s=30,
+                device=device,
+            )
+            self.pipe.model.config.forced_decoder_ids = self.pipe.tokenizer.get_decoder_prompt_ids(language=lang, task="transcribe")
+        else:
+            self.model_name = "openai/whisper-large-v3"
+            self.pipe = pipeline(
+                task="automatic-speech-recognition",
+                model=self.model_name,
+                tokenizer=WhisperTokenizer.from_pretrained(self.model_name),
+                chunk_length_s=25,
+                stride_length_s=3,
+                torch_dtype=torch.float32,
+                device=device,
+                return_timestamps="word",
+            )
+        
+        L.debug(f"Using model: {self.model_name}")
         L.debug("Whisper initialization done.")
 
-        # force decoder IDs to create language
-        self.lang = language
-
-        # save the target sample rate
-        self.sample_rate = target_sample_rate
+    def transcribe(self, file):
+        return self.pipe(file)["text"]
 
     def load(self, f):
         """Load an audio file for procesing.

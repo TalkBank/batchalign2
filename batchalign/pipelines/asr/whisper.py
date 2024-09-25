@@ -23,31 +23,36 @@ class WhisperEngine(BatchalignEngine):
         else:
             return [ Task.ASR ]
 
-    def __init__(self, model=None, lang="eng"):
-
+    def __init__(self, lang="eng"):
         # try to resolve our internal model
         res = resolve("whisper", lang)
         if res:
-            model, base = res
+            _, base = res
         else:
-            model = "openai/whisper-large-v3"
-            base = "openai/whisper-large-v3"
+            # Set default model and base based on language
+            if lang == "yue":
+                # model = "alvanlii/whisper-small-cantonese"
+                base = "alvanlii/whisper-small-cantonese"
+            else:
+                # model = "openai/whisper-large-v3"
+                base = "openai/whisper-large-v3"
 
         language = pycountry.languages.get(alpha_3=lang).name
         if language == "Yue Chinese":
             language = "Cantonese"
         if "greek" in language.lower():
-            language = "Greek"
-            
-        self.__whisper = WhisperASRModel(model, base=base, language=language)
+            language = "Greek"  
+        
+        self.__whisper = WhisperASRModel(base=base, language=language)
         self.__lang = lang
 
-        if resolve("utterance", self.__lang) != None:
+        if resolve("utterance", self.__lang) is not None:
             L.debug("Initializing utterance model...")
             self.__engine = BertUtteranceModel(resolve("utterance", self.__lang))
             L.debug("Done.")
         else:
             self.__engine = None
+
 
     def generate(self, source_path, **kwargs):
         res = self.__whisper(self.__whisper.load(source_path).all())
