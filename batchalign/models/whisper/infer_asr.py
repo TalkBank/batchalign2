@@ -64,16 +64,29 @@ class WhisperASRModel(object):
 
     def __init__(self, model, base="openai/whisper-large-v3", language="english", target_sample_rate=16000):
         L.debug("Initializing whisper model...")
-        self.pipe = pipeline(
-            "automatic-speech-recognition",
-            model=model,
-            tokenizer=WhisperTokenizer.from_pretrained(base),
-            chunk_length_s=25,
-            stride_length_s=3,
-            device=DEVICE,
-            torch_dtype=torch.float32,
-            return_timestamps="word",
-        )
+        if language == "Cantonese":
+            self.pipe = pipeline(
+                "automatic-speech-recognition",
+                model=model,
+                # tokenizer=WhisperTokenizer.from_pretrained(base),
+                chunk_length_s=30,
+                # stride_length_s=3,
+                device=DEVICE,
+                # torch_dtype=torch.float32,
+                # return_timestamps="word",
+            )
+            self.pipe.model.config.forced_decoder_ids = self.pipe.tokenizer.get_decoder_prompt_ids(language=language, task="transcribe")
+        else:
+            self.pipe = pipeline(
+                "automatic-speech-recognition",
+                model=model,
+                tokenizer=WhisperTokenizer.from_pretrained(base),
+                chunk_length_s=25,
+                stride_length_s=3,
+                device=DEVICE,
+                torch_dtype=torch.float32,
+                return_timestamps="word",
+            )
         L.debug("Done, initalizing processor and config...")
         self.__config = GenerationConfig.from_pretrained(base)
         self.__config.no_repeat_ngram_size = 4
@@ -147,14 +160,25 @@ class WhisperASRModel(object):
             })
 
         L.debug("Whisper Transcribing...")
+        config = {
+            "repetition_penalty": 1.001,
+            "generation_config": self.__config,
+            "task": "transcribe",
+            "language": self.lang
+        }
+
+        if self.lang == "Cantonese":
+            config = {
+                "repetition_penalty": 1.001,
+                # "generation_config": self.__config,
+                # "task": "transcribe",
+                # "language": self.lang
+            }
+
         words = self.pipe(data.cpu().numpy(),
                           batch_size=1, 
-                          generate_kwargs = {
-                              "repetition_penalty": 1.001,
-                              "generation_config": self.__config,
-                              "task": "transcribe",
-                              "language": self.lang
-                          })
+                          generate_kwargs=config)
+
                                              # "do_sample": True,
                                              # "temperature": 0.1
                                              # })
