@@ -2,7 +2,7 @@ from .pipeline import BatchalignPipeline
 from .base import BatchalignEngine
 from .asr import WhisperEngine, RevEngine, WhisperXEngine
 
-from .morphosyntax import StanzaEngine
+from .morphosyntax import StanzaEngine, CorefEngine
 from .cleanup import NgramRetraceEngine, DisfluencyReplacementEngine
 from .speaker import NemoSpeakerEngine
 

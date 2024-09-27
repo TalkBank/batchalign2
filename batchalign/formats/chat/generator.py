@@ -33,6 +33,8 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
     gras = []
     has_wor = False
     wor_elems = []
+    has_coref = False
+    coref_elems = []
 
     for i in utterance.content:
         mors.append(i.morphology)
@@ -42,6 +44,21 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
             wor_elems.append(f"{i.text} \x15{str(i.time[0])}_{str(i.time[1])}\x15")
         else:
             wor_elems.append(i.text)
+
+        if i.coreference:
+            has_coref = True
+            coref_str_form = ""
+            for j in i.coreference:
+                coref_str = ""
+                if j.start:
+                    coref_str += "("
+                coref_str += str(j.chain)
+                if j.end:
+                    coref_str += ")"
+                coref_str_form += coref_str
+            coref_elems.append(coref_str_form)
+        else:
+            coref_elems.append("-")
 
         if bool(mors[-1]) != bool(gras[-1]):
             warnings.warn(f"Batchalign has detected a mismatch between lengths of mor and gra tiers for utterance; output will not pass CHATTER; line='{main_line}'")
@@ -75,6 +92,9 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
     #### WOR LINE GENERATION ####
     if has_wor and write_wor:
         result.append("%wor:\t"+" ".join(wor_elems))
+    if has_coref:
+        result.append("%coref:\t"+" ".join(coref_elems))
+
 
 
     #### EXTRA LINE GENERATION ####

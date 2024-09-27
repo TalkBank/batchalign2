@@ -29,7 +29,8 @@ class Task(IntEnum):
     FORCED_ALIGNMENT = 9
     FEATURE_EXTRACT = 10
     MORPHOSYNTAX = 11
-    WER = 12
+    COREF = 12
+    WER = 13
 
 
     DEBUG__G = 0
@@ -51,6 +52,7 @@ TypeMap = {
     Task.FEATURE_EXTRACT: TaskType.ANALYSIS,
     Task.RETRACE_ANALYSIS: TaskType.PROCESSING,
     Task.DISFLUENCY_ANALYSIS: TaskType.PROCESSING,
+    Task.COREF: TaskType.PROCESSING,
     Task.WER: TaskType.ANALYSIS,
 
     Task.DEBUG__G: TaskType.GENERATION,
@@ -69,6 +71,7 @@ TaskFriendlyName = {
     Task.FEATURE_EXTRACT: "Feature Extraction",
     Task.RETRACE_ANALYSIS:  "Retrace Analysis",
     Task.DISFLUENCY_ANALYSIS:  "Disfluncy Analysis",
+    Task.COREF:  "Coreference Resolution",
     Task.WER:  "Word Error Rate",
     Task.DEBUG__G:  "TEST_GENERATION",
     Task.DEBUG__P:  "TEST_PROCESSING",
@@ -103,12 +106,18 @@ class Morphology(BaseModel):
     pos: str # pos like "pron"
     feats: str # string feats "Dem-Acc-S1"
 
+class Coref(BaseModel):
+    start: bool
+    end: bool
+    chain: int
+
 class Form(BaseModel):
     text: str # the text
     # MILISCEONDS
     time: Optional[Tuple[int, int]] = Field(default=None) # word bullet
     morphology: Optional[List[Morphology]] = Field(default=None) # mor
     dependency: Optional[List[Dependency]] = Field(default=None) # gra
+    coreference: Optional[List[Coref]] = Field(default=None) # gra
     type: TokenType = Field(default=TokenType.REGULAR) # whether the field is a regular word (i.e. not a filled pause, not a feature, not a retrace, etc.)
 
 class Tier(BaseModel):

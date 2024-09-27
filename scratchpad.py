@@ -38,6 +38,23 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # ut = Document(content=[utterance], langs=["eng"])
 
 # print(str(CHATFile(doc=ut)))
+# doc = CHATFile(path="../talkbank-alignment/input/barry.cha").doc
+# doc[3][0]
+
+# print(str(CHATFile(doc=res)))
+
+                
+# j.coref_chains) for j in i.words] for i in coref_chains]
+# dir(coref_chains[0][0][1][0])
+# coref_chains[0][0][1][0].chain.index
+# coref_chains[0][0][1][0].is_start
+# coref_chains[0][0][1][0].is_end
+
+# coref_chains[0].word
+
+
+
+
 
 
 

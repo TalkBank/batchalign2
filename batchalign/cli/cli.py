@@ -217,6 +217,27 @@ def morphotag(ctx, in_dir, out_dir, **kwargs):
               loader, writer, C)
 
 
+#################### MORPHOTAG ################################
+
+@batchalign.command(hidden=True)
+@common_options
+@click.pass_context
+def coref(ctx, in_dir, out_dir, **kwargs):
+    """Perform coreference analysis on transcripts."""
+
+    def loader(file):
+        cf = CHATFile(path=os.path.abspath(file))
+        doc = cf.doc
+        return doc, {}
+
+    def writer(doc, output):
+        CHATFile(doc=doc).write(output)
+
+    _dispatch("coref", "eng", 1, ["cha"], ctx,
+              in_dir, out_dir,
+              loader, writer, C)
+
+
 #################### UTSEG ################################
 
 @batchalign.command()

@@ -47,6 +47,7 @@ Cmd2Task = {
     "morphotag": "morphosyntax",
     "benchmark": "asr,eval",
     "utseg": "utterance",
+    "coref": "coref",
 }
 
 # this is the main runner used by all functions
