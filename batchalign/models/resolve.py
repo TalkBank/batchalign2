@@ -12,7 +12,7 @@ resolver = {
     },
     "whisper": {
         'eng': ("talkbank/CHATWhisper-en-large-v1", "openai/whisper-large-v2"),
-        'yue': ("alvanlii/whisper-small-cantonese", "alvanlii/whisper-small-cantonese"),
+        # 'yue': ("alvanlii/whisper-small-cantonese", "alvanlii/whisper-small-cantonese"),
     }
 }
 
