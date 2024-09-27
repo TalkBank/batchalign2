@@ -35,7 +35,7 @@ class BertUtteranceModel(object):
         self.model.eval()
 
     def __call__(self, passage):
-        print(passage)
+        # print(passage)
         # input passage words removed of all preexisting punctuation
         passage = passage.lower()
         passage = passage.replace('.','')
@@ -107,7 +107,7 @@ class BertUtteranceModel(object):
 
         # compose final passage
         final_passage = self.tokenizer.convert_tokens_to_string(res_toks)
-        print(final_passage)
+        # print(final_passage)
         try: 
             split_passage = sent_tokenize(final_passage)
         except LookupError:
