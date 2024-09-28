@@ -135,36 +135,15 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 # text = "ice ice cream ice cream"
 
-# <<<<<<< ours
-# <<<<<<< Updated upstream
 # function = "morphosyntax"
 # lang = "jpn"
 # num_speakers = 1
 
-# =======
-# # function = "morphosyntax"
-# # lang = "jpn"
-# # num_speakers = 1
-
-# # forms, delim = chat_parse_utterance("さっき[* s] 食べた事ある.", None, None, None, None)
-# # utterance = Utterance(content=forms, delim=delim, text="さっき[* s] 食べた事ある.")
-# >>>>>>> theirs
 
 # ut = "色が変わる飴舐めてる ."
 
-# <<<<<<< ours
 # forms, delim = chat_parse_utterance(ut, None, None, None, None)
 # utterance = Utterance(content=forms, delim=delim, text=ut)
-
-
-# ut = Document(content=[utterance], langs=[lang])
-
-# pipeline = BatchalignPipeline.new("morphosyntax", lang=lang)
-# res = pipeline(ut, retokenize=True)
-# =======
-# # function = "morphosyntax"
-# # lang = "jpn"
-# # num_speakers = 1
 
 # # forms, delim = chat_parse_utterance("さっき[* s] 食べた事ある.", None, None, None, None)
 # # utterance = Utterance(content=forms, delim=delim, text="さっき[* s] 食べた事ある.")
@@ -186,6 +165,12 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 # # print(str(CHA
 # TFile(doc=res)))
+# ut = Document(content=[utterance], langs=[lang])
+
+# pipeline = BatchalignPipeline.new("morphosyntax", lang=lang)
+# res = pipeline(ut, retokenize=True)
+
+# print(str(CHATFile(doc=res)))
 
 # print(u"\u202bwhat up with that?")
 # print("אויתאויונסתהאויסו".encode().decode("").encode().decode("utf-8"))

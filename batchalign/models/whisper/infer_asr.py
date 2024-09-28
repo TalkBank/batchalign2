@@ -191,6 +191,8 @@ class WhisperASRModel(object):
 
             if element["type"] == "text":
                 pl = element["payload"].strip()
+                pl = pl.replace("「", "")
+                pl = pl.replace("」", "")
                 before = re.findall(r"^\W+", pl)
                 after = re.findall(r"\W+$", pl)
                 texts = []
