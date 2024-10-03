@@ -237,7 +237,7 @@ def handler__VERB(word, lang=None):
     res = handler(word, lang)
     if "sconj" in res:
         return res
-    elif "verb" not in res:
+    elif "verb" not in res and "aux" not in res:
         return res
     else:
         return res+flag+stringify_feats(aspect, mood,
