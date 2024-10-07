@@ -202,6 +202,8 @@ def handler__NOUN(word, lang=None):
     case  = feats.get("Case", "").replace(",", "")
     type  = feats.get("PronType", "")
 
+    if word.get("deprel") == "obj" and case.strip() == "":
+        case = "Acc"
 
     # clear defaults
     if gender_str == "-Com,Neut" or gender_str == "-Com" or gender_str == "-ComNeut": gender_str=""
