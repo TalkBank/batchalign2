@@ -28,14 +28,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # #     json.dump(Document.model_json_schema(), df, indent=4)
 
 # ########### The Batchalign Core Test Harness ###########
-# from batchalign.formats.chat.parser import chat_parse_utterance
-
-# forms, delim = chat_parse_utterance("my birthday's Date .", "det:poss|my n|+n|birth+n|day~cop|be&3S n:prop|Date .", "1|2|DET 2|3|SUBJ 3|0|ROOT 4|3|PRED 5|3|PUNCT", None, None)
-# forms
-
-# utterance = Utterance(content=forms, delim=delim)
-
-# ut = Document(content=[utterance], langs=["eng"])
+from batchalign.formats.chat.parser import chat_parse_utterance
 
 # print(str(CHATFile(doc=ut)))
 # doc = CHATFile(path="../talkbank-alignment/input/barry.cha").doc
@@ -44,66 +37,65 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # print(str(CHATFile(doc=res)))
 
                 
-# j.coref_chains) for j in i.words] for i in coref_chains]
-# dir(coref_chains[0][0][1][0])
-# coref_chains[0][0][1][0].chain.index
-# coref_chains[0][0][1][0].is_start
-# coref_chains[0][0][1][0].is_end
+# # j.coref_chains) for j in i.words] for i in coref_chains]
+# # dir(coref_chains[0][0][1][0])
+# # coref_chains[0][0][1][0].chain.index
+# # coref_chains[0][0][1][0].is_start
+# # coref_chains[0][0][1][0].is_end
 
-# coref_chains[0].word
-
-
+# # coref_chains[0].word
 
 
 
 
 
-# ng = NgramRetraceEngine()
-# disf = DisfluencyReplacementEngine()
-# doc = Document.new("I ' m such an idiot", lang="eng")
-# # # doc[0].content[4].text = "maman,"
-# # # doc[0].content[5].text = "maman,"
-# pipe = BatchalignPipeline(ng, disf)
-# tmp = pipe(doc)
-# tmp
 
 
-# tmp[0].content
+# # ng = NgramRetraceEngine()
+# # disf = DisfluencyReplacementEngine()
+# # doc = Document.new("I ' m such an idiot", lang="eng")
+# # # # doc[0].content[4].text = "maman,"
+# # # # doc[0].content[5].text = "maman,"
+# # pipe = BatchalignPipeline(ng, disf)
+# # tmp = pipe(doc)
+# # tmp
 
 
-# import stanza
-# nlp = stanza.Pipeline("en", packages="tokenize,pos,constituency")
-# tree = nlp("I am dead, and he is also dead, but Josh isn't dead because \"only the brave die young and he knows the best is yet to come\".").sentences[0].constituency
-# i am dead and he is also dead but Josh isn't dead because only the brave die young and he knows the best is yet to come.
-
-# parse_tree(tree)
+# # tmp[0].content
 
 
-# def rollout_to_leaf(tree):
-#     """Extract the leaf nodes from a subtree via dfs"""
+# # import stanza
+# # nlp = stanza.Pipeline("en", packages="tokenize,pos,constituency")
+# # tree = nlp("I am dead, and he is also dead, but Josh isn't dead because \"only the brave die young and he knows the best is yet to come\".").sentences[0].constituency
+# # i am dead and he is also dead but Josh isn't dead because only the brave die young and he knows the best is yet to come.
 
-#     try:
-#         children = tree.children
-#     except AttributeError:
-#         breakpoint()
-#     leafs = []
+# # parse_tree(tree)
 
-#     for c in children:
-#         if c.is_leaf():
-#さっき[* s] 食べた事ある.             leafs.append(c.label)
-#         else:
-#             leafs += rollout_to_leaf(c)
 
-#     return leafs
+# # def rollout_to_leaf(tree):
+# #     """Extract the leaf nodes from a subtree via dfs"""
 
-# from batchalign.models import BertUtteranceModel
+# #     try:
+# #         children = tree.children
+# #     except AttributeError:
+# #         breakpoint()
+# #     leafs = []
+
+# #     for c in children:
+# #         if c.is_leaf():
+# #さっき[* s] 食べた事ある.             leafs.append(c.label)
+# #         else:
+# #             leafs += rollout_to_leaf(c)
+
+# #     return leafs
+
+# # from batchalign.models import BertUtteranceModel
 # from batchalign.pipelines import BatchalignPipeline
-# tmp = CHATFile(path="../talkbank-alignment/test_harness/input/1576.cha").doc
-# print(str(CHATFile(doc=tmp)))
-# pipe = BatchalignPipeline.new("morphosyntax", "jpn")
-# # tmp.langs = ["jpn"]
-# # # tmp[-1].content
-# res = pipe(tmp, retokenize=True)
+# forms, delim = chat_parse_utterance("who is that ?", None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim)
+# ut = Document(content=[utterance], langs=["eng"])
+# pipe = BatchalignPipeline.new("morphosyntax", "eng")
+# res = pipe(ut)
 # print(str(CHATFile(doc=res)))
 
 

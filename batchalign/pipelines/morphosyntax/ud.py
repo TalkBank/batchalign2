@@ -156,11 +156,15 @@ def handler__PRON(word, lang=None):
         from batchalign.pipelines.morphosyntax.fr.case import case as caser
         case = caser(word.text)
 
+    number_string = feats.get("Number", "S")[:1]+person
+    if word.text in ["that", "who"]:
+        number_string = ""
+
     # parse
     return (handler(word, lang)+
             stringify_feats(feats.get("PronType", "Int"),
                             case.replace(",", ""),
-                            feats.get("Number", "S")[:1]+person))
+                            number_string))
 
 def handler__DET(word, lang=None):
     # get the features
@@ -189,6 +193,9 @@ def handler__ADJ(word, lang=None):
     person = str(feats.get("Person", 1))
     if person == "0":
         person = '4'
+
+    if deg == "Pos":
+        deg = ""
 
     return handler(word, lang)+stringify_feats(deg, case, number[:1]+person)
 
