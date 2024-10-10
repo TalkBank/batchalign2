@@ -209,7 +209,7 @@ def handler__NOUN(word, lang=None):
     case  = feats.get("Case", "").replace(",", "")
     type  = feats.get("PronType", "")
 
-    if word.get("deprel") == "obj" and case.strip() == "":
+    if word.deprel == "obj" and case.strip() == "":
         case = "Acc"
 
     # clear defaults
