@@ -139,6 +139,7 @@ def handler(word, lang=None):
     if lang == "ja":
         from batchalign.pipelines.morphosyntax.ja.verbforms import verbform
         pos,target = verbform(pos,target,word.text)
+        target = target.replace(',', 'cm')
 
     return f"{'' if not unknown else '0'}{pos}|{target}"
 
@@ -421,7 +422,7 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
             # specivl forms: recall the special form marker is xbxxx
             if "xbxxx" in word.text.strip():
                 form = special_forms.pop(0)
-                mor.append(f"x|{form.strip()}")
+                mor.append(f"x|{form.strip().replace(',', 'cm')}")
                 special_form_ids.append(word.id)
             else:
                 mor.append(mor_word)
