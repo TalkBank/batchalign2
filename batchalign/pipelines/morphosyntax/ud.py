@@ -280,6 +280,8 @@ def handler__PUNCT(word, lang=None):
                                         # instead of the lemma, which maybe entirely weird
         if word.text == "もん":
             return f"part|{word.text}"
+        if word.text == ",":
+            return f"cm|cm"
         else:
             return f"x|{word.text}"
 
