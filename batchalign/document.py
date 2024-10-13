@@ -324,8 +324,7 @@ class Utterance(BaseModel):
             to_include.append(TokenType.RETRACE)
         if include_fp:
             to_include.append(TokenType.FP)
-        filtered = filter(lambda x:x.type in to_include,
-                          self.content)
+        filtered = filter(lambda x:x.type in to_include, self.content)
         # chain them together
         if join_with_spaces:
             return " ".join([i.text for i in filtered])

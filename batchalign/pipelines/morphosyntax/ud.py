@@ -837,11 +837,17 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                 L.debug(f"Encountered an utterance that's likely devoid of morphological information; skipping... utterance='{doc.content[indx]}'")
                 continue
 
+
             if retokenize:
                 # rewrite the sentence with our desired tokenizations
                 ut, end = chat_parse_utterance(" ".join([i.text for i in sents[0].tokens])+" "+ending,
                                           mor, gra,
                                           None, None)
+                # fix xbxxx
+                for i in ut:
+                    if i.text == "xbxxx" and len(i.morphology) > 0:
+                        i.text = i.morphology[0].lemma
+
                 # split the text up into previous chunks
                 chunks = list(enumerate(doc.content[indx].text.split(" ")))
                 # filter out everything that could not possibly align
@@ -878,11 +884,12 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                     # we want to replace the morphology of forms that are not actually
                     # supposed to be analyzed
                     elif isinstance(i, Extra) and i.extra_type == ExtraType.REFERENCE:
-                        ut[i.payload].morphology = [Morphology(
-                            lemma = sents[0].tokens[i.payload].text,
-                            pos = "x",
-                            feats = ""
-                        )]
+                        if ut[i.payload].text != ",":
+                            ut[i.payload].morphology = [Morphology(
+                                lemma = sents[0].tokens[i.payload].text if len(sents) > 0 and len(sents[0].tokens) > i.payload and sents[0].tokens[i.payload].text != "xbxxx" else ut[i.payload].text,
+                                pos = "x",
+                                feats = ""
+                            )]
 
                 poses = [i.morphology[0].pos.upper() for i in ut
                          if i.morphology
