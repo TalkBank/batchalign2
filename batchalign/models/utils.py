@@ -15,13 +15,13 @@ def _extract_token_timestamps(self, generate_outputs, alignment_heads, time_prec
         tensor containing the timestamps in seconds for each predicted token
     """
     # Create a list with `decoder_layers` elements, each a tensor of shape
-    # (batch size, attention_heads, output length, input length).
+    # (batch_size, attention_heads, output_length, input_length).
     cross_attentions = []
     for i in range(self.config.decoder_layers):
         cross_attentions.append(torch.cat([x[i] for x in generate_outputs.cross_attentions], dim=2))
 
-    # Select specific cross-attention layers and heads. This is a tensor
-    # of shape (batch size, num selected, output length, input length).
+    # Select specific cross-attention layers and heads. This results in a tensor
+    # of shape (batch_size, num_selected_heads, output_length, input_length).
     weights = torch.stack([cross_attentions[l][:, h] for l, h in alignment_heads])
     weights = weights.permute([1, 0, 2, 3])
     if num_frames is not None:
@@ -32,19 +32,37 @@ def _extract_token_timestamps(self, generate_outputs, alignment_heads, time_prec
     weights = (weights - mean) / std
     weights = _median_filter(weights, self.config.median_filter_width)
 
-    # Average the different cross-attention heads.
+    # Average the different cross-attention heads to get a matrix of shape
+    # (batch_size, output_length, input_length).
     matrix = weights.mean(dim=1)
 
-    timestamps = torch.zeros_like(generate_outputs.sequences, dtype=torch.float32)
+    # Initialize the timestamps tensor with the correct size.
+    # We'll find the maximum length of `jump_times` across the batch.
+    batch_size = generate_outputs.sequences.size(0)
+    max_jump_length = 0
+    batch_jump_times = []
 
-    # Perform dynamic time warping on each element of the batch.
-    for batch_idx in range(timestamps.shape[0]):
+    # First pass: Compute `jump_times` and find the maximum length.
+    for batch_idx in range(batch_size):
         text_indices, time_indices = _dynamic_time_warping(-matrix[batch_idx].float().cpu().numpy())
         jumps = np.pad(np.diff(text_indices), (1, 0), constant_values=1).astype(bool)
         jump_times = time_indices[jumps] * time_precision
-        timestamps[batch_idx, 1:] = torch.tensor(jump_times)
+        batch_jump_times.append(jump_times)
+        if len(jump_times) > max_jump_length:
+            max_jump_length = len(jump_times)
+
+    # Initialize timestamps tensor with appropriate size.
+    # Adding 1 to account for the initial zero (timestamps[:, 0]).
+    timestamps = torch.zeros((batch_size, max_jump_length + 1), dtype=torch.float32)
+
+    # Second pass: Assign `jump_times` to the timestamps tensor.
+    for batch_idx, jump_times in enumerate(batch_jump_times):
+        length = len(jump_times)
+        # Assign `jump_times` to the appropriate slice in `timestamps`.
+        timestamps[batch_idx, 1:1+length] = torch.tensor(jump_times, dtype=torch.float32)
 
     return timestamps
+
 
 
 @dataclass

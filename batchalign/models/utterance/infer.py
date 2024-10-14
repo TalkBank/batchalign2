@@ -31,6 +31,8 @@ class BertUtteranceModel(object):
         self.tokenizer = AutoTokenizer.from_pretrained(model)
         self.model = BertForTokenClassification.from_pretrained(model).to(DEVICE)
 
+        self.max_length = self.model.config.max_position_embeddings
+
         # eval mode
         self.model.eval()
 
@@ -43,15 +45,27 @@ class BertUtteranceModel(object):
         passage = passage.replace('.','')
 
         # "tokenize" the result by just splitting by space
-        input_tokenized = passage.split(' ')
+        input_tokenized = passage.split(' ') if passage.strip() else []
+        if not input_tokenized:
+            raise ValueError("Tokenized input is empty after preprocessing")
+
+        if len(input_tokenized) > self.max_length:
+            input_tokenized = input_tokenized[:self.max_length]
+
+        print(f"Input tokenized length: {len(input_tokenized)}, tokens: {input_tokenized}")
+
 
         # pass it through the tokenizer and model
         tokd = self.tokenizer([input_tokenized],
                               return_tensors='pt',
-                              is_split_into_words=True).to(DEVICE)
+                              is_split_into_words=True,
+                              truncation=True,
+                              max_length=self.max_length
+                              ).to(DEVICE)
 
         # pass it through the model
-        res = self.model(**tokd).logits
+        with torch.no_grad():
+            res = self.model(**tokd).logits
 
         # argmax
         classified_targets = torch.argmax(res, dim=2).cpu()
