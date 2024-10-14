@@ -132,23 +132,23 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # num_speakers = 1
 
 
-# ut = "どっ , どこ ."
+# ut = "どこ *チキンパイ*  [: どこ] ."
 
 # forms, delim = chat_parse_utterance(ut, None, None, None, None)
-# forms
+# # forms
 # utterance = Utterance(content=forms, delim=delim, text=ut)
 
-# # forms, delim = chat_parse_utterance("さっき[* s] 食べた事ある.", None, None, None, None)
-# # utterance = Utterance(content=forms, delim=delim, text="さっき[* s] 食べた事ある.")
+# # # forms, delim = chat_parse_utterance("さっき[* s] 食べた事ある.", None, None, None, None)
+# # # utterance = Utterance(content=forms, delim=delim, text="さっき[* s] 食べた事ある.")
 
-# # =======
+# # # =======
 # ut = Document(content=[utterance], langs=["jpn"])
 
 # pipeline = BatchalignPipeline.new("morphosyntax", lang="jpn")
 # res = pipeline(ut, retokenize=True)
 
 # print(str(CHATFile(doc=res)))
-# >>>>>>> theirs
+# # >>>>>>> theirs
 
 # # ut = Document(content=[utterance], langs=["jpn"])
 
