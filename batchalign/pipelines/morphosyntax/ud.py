@@ -213,11 +213,15 @@ def handler__NOUN(word, lang=None):
     if word.deprel == "obj" and case.strip() == "":
         case = "Acc"
 
+    ger = ""
+    if word.text.endswith("ing") and lang == "en":
+        ger += "-Ger"
+
     # clear defaults
     if gender_str == "-Com,Neut" or gender_str == "-Com" or gender_str == "-ComNeut": gender_str=""
     if number_str == "-Sing": number_str=""
 
-    return handler(word, lang)+gender_str+number_str+stringify_feats(case, type)
+    return handler(word, lang)+gender_str+number_str+stringify_feats(case, type)+ger
 
 def handler__PROPN(word, lang=None):
     # code as noun

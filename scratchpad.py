@@ -132,7 +132,7 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # num_speakers = 1
 
 
-# ut = "どこ *チキンパイ*  [: どこ] ."
+# ut = "Swimming is really fun."
 
 # forms, delim = chat_parse_utterance(ut, None, None, None, None)
 # # forms
@@ -142,13 +142,13 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # # # utterance = Utterance(content=forms, delim=delim, text="さっき[* s] 食べた事ある.")
 
 # # # =======
-# ut = Document(content=[utterance], langs=["jpn"])
+# ut = Document(content=[utterance], langs=["eng"])
 
-# pipeline = BatchalignPipeline.new("morphosyntax", lang="jpn")
-# res = pipeline(ut, retokenize=True)
+# pipeline = BatchalignPipeline.new("morphosyntax", lang="eng")
+# res = pipeline(ut, retokenize=False)
 
 # print(str(CHATFile(doc=res)))
-# # >>>>>>> theirs
+# >>>>>>> theirs
 
 # # ut = Document(content=[utterance], langs=["jpn"])
 
