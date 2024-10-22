@@ -65,7 +65,7 @@ def _dispatch(command, lang, num_speakers,
     for basedir, _, fs in os.walk(in_dir):
         for f in fs:
             path = Path(os.path.join(basedir, f))
-            ext = path.suffix.strip(".").strip()
+            ext = path.suffix.strip(".").strip().lower()
 
             # calculate input path, convert if needed
             inp_path = str(path)
