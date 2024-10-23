@@ -279,7 +279,7 @@ class Utterance(BaseModel):
         detokenized = re.sub(r" >", ">", detokenized)
 
         # check and seperate punct 
-        last_tok = result[-1]
+        last_tok = result[-1] if len(result) > 0 else ""
         if last_tok in ENDING_PUNCT + MOR_PUNCT:
             detokenized = detokenized.replace(last_tok, f" {last_tok}")
         detokenized = detokenized.replace("  ", " ")
