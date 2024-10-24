@@ -248,6 +248,13 @@ def handler__VERB(word, lang=None):
     polarity = feats.get("Polarity", "")
     polite = feats.get("Polite", "")
 
+    irr = False
+    if lang == "en" and tense == "Past":
+        from batchalign.pipelines.morphosyntax.en.irr import is_irregular
+        irr = is_irregular(word.lemma, word.text)
+    irr = "irr" if irr else "" 
+
+
     res = handler(word, lang)
     if "sconj" in res:
         return res
@@ -256,7 +263,7 @@ def handler__VERB(word, lang=None):
     else:
         return res+flag+stringify_feats(aspect, mood,
                                         tense, polarity, polite,
-                                        number[:1]+person)
+                                        number[:1]+person, irr)
 
 def handler__actual_PUNCT(word, lang=None):
     # actual punctuation handler
