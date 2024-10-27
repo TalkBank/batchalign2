@@ -259,7 +259,10 @@ def handler__VERB(word, lang=None):
     if "sconj" in res:
         return res
     elif "verb" not in res and "aux" not in res:
-        return res
+        if word.text == "たり":
+            return res+stringify_feats("Inf", "S"")
+        else:
+            return res
     else:
         return res+flag+stringify_feats(aspect, mood,
                                         tense, polarity, polite,
