@@ -4,6 +4,10 @@ Fix Japanese verb forms.
 """
 
 def verbform(upos, target, text):
+    if "無い" in target:
+        return "aux", "ない"
+    if "せる" in target:
+        return "aux", "させる"
     if "撮る" in text:
         return "verb", "撮る"
     if "貼る" in text:
