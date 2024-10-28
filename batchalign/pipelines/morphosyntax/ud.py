@@ -260,7 +260,7 @@ def handler__VERB(word, lang=None):
         return res
     elif "verb" not in res and "aux" not in res:
         if word.text == "たり":
-            return res+stringify_feats("Inf", "S"")
+            return res+stringify_feats("Inf", "S")
         else:
             return res
     else:
