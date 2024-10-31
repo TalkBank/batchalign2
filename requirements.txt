@@ -228,3 +228,4 @@ urllib3==2.2.3
     # via requests
 websocket-client==0.59.0
     # via rev-ai
+setuptools
