@@ -213,11 +213,15 @@ def handler__NOUN(word, lang=None):
     if word.deprel == "obj" and case.strip() == "":
         case = "Acc"
 
+    ger = ""
+    if word.text.endswith("ing") and lang == "en":
+        ger += "-Ger"
+
     # clear defaults
     if gender_str == "-Com,Neut" or gender_str == "-Com" or gender_str == "-ComNeut": gender_str=""
     if number_str == "-Sing": number_str=""
 
-    return handler(word, lang)+gender_str+number_str+stringify_feats(case, type)
+    return handler(word, lang)+gender_str+number_str+stringify_feats(case, type)+ger
 
 def handler__PROPN(word, lang=None):
     # code as noun
@@ -244,15 +248,25 @@ def handler__VERB(word, lang=None):
     polarity = feats.get("Polarity", "")
     polite = feats.get("Polite", "")
 
+    irr = False
+    if lang == "en" and tense == "Past":
+        from batchalign.pipelines.morphosyntax.en.irr import is_irregular
+        irr = is_irregular(word.lemma, word.text)
+    irr = "irr" if irr else "" 
+
+
     res = handler(word, lang)
     if "sconj" in res:
         return res
     elif "verb" not in res and "aux" not in res:
-        return res
+        if word.text == "たり":
+            return res+stringify_feats("Inf", "S")
+        else:
+            return res
     else:
         return res+flag+stringify_feats(aspect, mood,
                                         tense, polarity, polite,
-                                        number[:1]+person)
+                                        number[:1]+person, irr)
 
 def handler__actual_PUNCT(word, lang=None):
     # actual punctuation handler
@@ -872,6 +886,8 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                 for i,j in enumerate(ut):
                     for k in j.text:
                         ud_chars.append(ReferenceTarget(k, payload=i))
+                creaky = False
+                collected = ""
                 # brrr
                 aligned = align(chunks_chars, ud_chars, tqdm=False)
                 for i in aligned:
@@ -879,8 +895,14 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                         if i.reference_payload not in chunks_backplate[i.payload]:
                             chunks_backplate[i.payload].append(i.reference_payload)
                     elif isinstance(i, Extra) and i.extra_type == ExtraType.PAYLOAD:
-                        # just put it back
-                        chunks_backplate[i.payload].append(i.key)
+                        if i.key == "*":
+                            creaky = not creaky
+                            chunks_backplate[i.payload].append("*"+collected+"*")
+                            collected = ""
+                        elif creaky:
+                            collected += i.key
+                        elif not creaky:
+                            chunks_backplate[i.payload].append(i.key)
                     # we want to replace the morphology of forms that are not actually
                     # supposed to be analyzed
                     elif isinstance(i, Extra) and i.extra_type == ExtraType.REFERENCE:
@@ -915,6 +937,8 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                 retokenized_ut = retokenized_ut.replace(" ↑", "↑")
                 retokenized_ut = re.sub(r"@ ?w ?p", "@wp", retokenized_ut)
                 retokenized_ut = retokenized_ut.replace(" @", "@")
+                retokenized_ut = re.sub(r"\*[* ]*", "*", retokenized_ut)
+                retokenized_ut = re.sub(r"\*(.*?)\*", r"*\1* ", retokenized_ut)
                 # pray to everyone that it works---this will simply crash and ignore
                 # the utterance if it didn't work, so we are doing this as a sanity
                 # check rather than needing the parsed result

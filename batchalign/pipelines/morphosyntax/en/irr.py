@@ -1,0 +1,215 @@
+IRR = """
+abide: abode, abode
+arise: arose, arisen
+awake: awoke, awoken
+be: was, were, been
+bear: bore, borne
+beat: beat, beaten
+become: became, become
+befall: befell, befallen
+begin: began, begun
+beget: begot, begotten
+behold: beheld, beholden
+bend: bent, bent
+bereave: bereft, bereft
+beseek: besought, besought
+bet: bet, bet
+betake: betook, betaken
+bid: bid, bid
+bade: bidden, bidden
+bind: bound, bound
+bite: bit, bitten
+bleed: bled, bled
+blow: blew, blown
+break: broke, broken
+breed: bred, bred
+bring: brought, brought
+build: built, built
+burn: burnt
+burst: burst, burst
+buy: bought, bought
+cast: cast, cast
+catch: caught, caught
+choose: chose, chosen
+clad: clad, clad
+cleave: cleft, cloven
+cling: clung, clung
+come: came, come
+cost: cost, cost
+creep: crept, crept
+cut: cut, cut
+deal: dealt, dealt
+dig: dug, dug
+dive: dove, dived
+do: did, done
+draw: drew, drawn
+dream: dreamt, dreamt
+drink: drank, drunk
+drive: drove, driven
+dwell: dwelt, dwelt
+eat: ate, eaten
+fall: fell, fallen
+feed: fed, fed
+feel: felt, felt
+fight: fought, fought
+find: found, found
+fit: fit, fit
+flee: fled, fled
+fling: flung, flung
+fly: flew, flown
+forbid: forbade, forbidden
+forecast: forecast, forecast
+forget: forgot, forgotten
+forgo: forewent, foregone
+foresee: foresaw, foreseen
+foretell: foretold, foretold
+forgive: forgave, forgiven
+forsake: forsook, forsaken
+forswear: forswore, forsworn
+freeze: froze, frozen
+get: got, gotten
+gild: gilt
+give: gave, given
+go: went, gone
+grind: ground, ground
+grow: grew, grown
+hang: hung, hung
+have: had, had
+hear: heard, heard
+hew:  hewn
+hide: hid, hidden
+hit: hit, hit
+hold: held, held
+hurt: hurt, hurt
+inlay: inlaid, inlaid
+inset: inset, inset
+input: input, input
+interlay: interlaid, interlaid
+interweave: interwoven
+keep: kept, kept
+kneel: knelt, knelt
+knit: knit, knit
+know: knew, known
+lay: laid, laid
+lead: led, led
+leap: leapt, leapt
+led: led, led
+leave: left, left
+lend: lent, lent
+let: let, let
+lie: lay, lain
+lose: lost, lost
+make: made, made
+mean: meant, meant
+meet: met, met
+misspeak: misspoke, mispoken
+mistake: mistook, mistaken
+offset: offset, offset
+overdo: overdid, overdone
+outbid: outbid, outbid
+pay: paid, paid
+partake: partook, partaken
+plead: pled, pled
+prepay: prepaid, prepaid
+prove: proven
+put: put, put
+quit: quit, quit
+recast: recast, recast
+redo: redid, redone
+remake: remade, remade
+reset: reset, reset
+read: read, read
+rend: rent, rent
+rid: rid, ridden
+ride: rode, ridden
+ring: rang, rung
+rise: rose, risen
+run: ran, run
+say: said, said
+seek: sought, sought
+see: saw, seen
+sell: sold, sold
+send: sent, sent
+set: set, set 
+sew: sewn
+shake: shook, shaken
+shave: shaven
+shed: shed, shed
+shine: shone, shone
+shoot: shot, shot
+show: shown
+shrink: shrank, shrunk
+shut: shut, shut
+sing: sang, sung
+sink: sank, sunk
+sit: sat, sat
+slay: slew, slain
+sleep: slept, slept
+slide: slid, slid
+slink: slunk, slunk
+slit: slit, slit
+smite: smote, smitten
+sneak: snuck, snuck
+speak: spoke, spoken
+speed: sped, sped
+spend: spent, spent
+spin: spun, spun
+spit: spit, spit
+split: split, split
+spread:  spread, spread
+spring: sprang, sprung
+stand: stood, stood
+steal: stole, stolen
+stick: stuck, stuck
+sting: stung, stung
+stink: stank, stunk
+strew: strewn
+strike: struck, struck
+string: strung, strung
+strive: strove, striven
+swear: swore, sworn
+sweep: swept, swept
+swell: swollen
+swim: swam, swum
+swing: swung, swung
+take: took, taken
+teach: taught, taught
+tear: tore, torn
+tell: told, told
+think: thought, thought
+throw: threw, thrown
+thrust: thrust, thrust
+tread: trod, trod
+unbend: unbended, unbent
+underlie: underlay, underlain
+undergo: underwent, undergone
+understand: understood, understood
+upset: upset, upset
+wake: woke, woken
+waylay: waylaid, waylaid
+wear: wore, worn
+weave:  wove, woven
+wed: wed, wed
+weep: wept, wept
+wet: wet, wet
+win: won, won
+wind: wound, wound
+withdraw: withdrew, withdrawn
+withhold: withheld, withheld
+withstand: withstood, withstood
+wring: wrung, wrung
+write: wrote, written
+wreak: wrought, wrough
+"""
+
+def is_irregular(lemma, form):
+    proc = [[j.strip() for j in i.split(":")] for i in IRR.strip().split("\n")]
+    proc = {a.strip():
+            [k.strip() for k in b.strip().split(",")]
+            for (a,b) in proc}
+
+    res = proc.get(lemma.lower())
+    if not res:
+        return False
+    else:
+        return (form.lower() in res)

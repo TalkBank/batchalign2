@@ -91,7 +91,7 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 # # from batchalign.models import BertUtteranceModel
 # from batchalign.pipelines import BatchalignPipeline
-# forms, delim = chat_parse_utterance("who is that ?", None, None, None, None)
+# forms, delim = chat_parse_utterance("who farted that ?", None, None, None, None)
 # utterance = Utterance(content=forms, delim=delim)
 # ut = Document(content=[utterance], langs=["eng"])
 # pipe = BatchalignPipeline.new("morphosyntax", "eng")
@@ -132,20 +132,20 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # num_speakers = 1
 
 
-# ut = "どっ , どこ ."
+# ut = "Swimming is really fun."
 
 # forms, delim = chat_parse_utterance(ut, None, None, None, None)
-# forms
+# # forms
 # utterance = Utterance(content=forms, delim=delim, text=ut)
 
-# # forms, delim = chat_parse_utterance("さっき[* s] 食べた事ある.", None, None, None, None)
-# # utterance = Utterance(content=forms, delim=delim, text="さっき[* s] 食べた事ある.")
+# # # forms, delim = chat_parse_utterance("さっき[* s] 食べた事ある.", None, None, None, None)
+# # # utterance = Utterance(content=forms, delim=delim, text="さっき[* s] 食べた事ある.")
 
-# # =======
-# ut = Document(content=[utterance], langs=["jpn"])
+# # # =======
+# ut = Document(content=[utterance], langs=["eng"])
 
-# pipeline = BatchalignPipeline.new("morphosyntax", lang="jpn")
-# res = pipeline(ut, retokenize=True)
+# pipeline = BatchalignPipeline.new("morphosyntax", lang="eng")
+# res = pipeline(ut, retokenize=False)
 
 # print(str(CHATFile(doc=res)))
 # >>>>>>> theirs
