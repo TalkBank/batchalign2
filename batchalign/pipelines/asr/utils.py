@@ -4,6 +4,11 @@ from batchalign.utils import *
 
 from batchalign.constants import ENDING_PUNCT
 
+import logging
+L = logging.getLogger("batchalign")
+
+
+
 # Define a regular expression to match various punctuation marks
 def retokenize(intermediate_output):
     """
@@ -100,14 +105,14 @@ def retokenize_with_engine(intermediate_output, engine):
         joined = " ".join([i[0] for i in utterance])
         joined = joined.replace("。", ".")
         
-        # Print the joined string before passing it to engine.split()
-        print(f"Debug - Input to engine.split: {joined}")
+        # L.Debug the joined string before passing it to engine.split()
+        # L.debug(f"Debug - Input to engine.split: {joined}")
         
         # Use the engine to split the text
         split = engine(joined)
         
-        # Print the split results
-        print(f"Debug - Engine Split Result: {split}")
+        # L.Debug the split results
+        # L.debug(f"Debug - Engine Split Result: {split}")
 
         # Process the returned split
         for i in split:
@@ -123,7 +128,7 @@ def retokenize_with_engine(intermediate_output, engine):
 
             final_outputs.append((speaker, tmp + [[delim, [None, None]]]))
 
-    print(f"Debug - Final Outputs: {final_outputs}")
+    # L.debug(f"Debug - Final Outputs: {final_outputs}")
     return final_outputs
 
 
@@ -147,26 +152,26 @@ def process_generation(output, lang="eng", utterance_engine=None):
     doc = Document()
     utterance_col = []
 
-    print("Debug - Initial ASR Output:")
-    print(f"Number of Monologues: {len(output['monologues'])}")
+    # L.debug("Debug - Initial ASR Output:")
+    # L.debug(f"Number of Monologues: {len(output['monologues'])}")
     for idx, monologue in enumerate(output["monologues"]):
-        print(f"Monologue {idx}: {monologue}")
+        # L.debug(f"Monologue {idx}: {monologue}")
 
     # Process each monologue to build the utterance_col
     for utterance in output["monologues"]:
-        print(f"Debug - Initial Elements for Speaker {utterance['speaker']}: {utterance['elements']}")
+        # L.debug(f"Debug - Initial Elements for Speaker {utterance['speaker']}: {utterance['elements']}")
 
         # Get a list of words with their timestamps
         words = utterance["elements"]
         words = [[i["value"], [round(i["ts"] * 1000) if i.get("ts") is not None else None,
                                round(i["end_ts"] * 1000) if i.get("end_ts") is not None else None]]
                  for i in words if i["value"].strip() != "" and not re.match(r'<.*>', i["value"])]
-        print("Debug - Words after processing (without filtering '[None, None]'):")
-        print(words)
+        # L.debug("Debug - Words after processing (without filtering '[None, None]'):")
+        # L.debug(words)
 
         final_words = []
         for word, (i, o) in words:
-            print(f"Debug - Processing Word: '{word}', Start: {i}, End: {o}")
+            # L.debug(f"Debug - Processing Word: '{word}', Start: {i}, End: {o}")
             if word.strip()[0] == "-" and len(final_words) > 0:
                 last = final_words.pop(-1)
                 word = last[0].strip() + word.strip()
@@ -174,7 +179,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
                 o = o
             word_parts = word.split(" ")
             if len(word_parts) == 1:
-                print(f"Debug - Appending to Final Words: '{word}', Start: {i}, End: {o}")
+                # L.debug(f"Debug - Appending to Final Words: '{word}', Start: {i}, End: {o}")
                 final_words.append([word, [i, o]])
                 continue
             cur = i
@@ -183,7 +188,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
                 final_words.append([part.strip(), [cur, cur + div]])
                 cur += div
 
-        print(f"Debug - Final Words after splitting and joining (Speaker {utterance['speaker']}): {final_words}")
+        # L.debug(f"Debug - Final Words after splitting and joining (Speaker {utterance['speaker']}): {final_words}")
 
         # Check the length and append to utterance_col
         if len(final_words) > 300:
@@ -195,7 +200,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
                 utterance_col.append((utterance["speaker"], final_words))
 
     # If we have an utterance engine, we will use that to retokenize; otherwise retokenize via scanning for punctuation
-    print(f"Debug - Input to Retokenization: {utterance_col}")
+    # L.debug(f"Debug - Input to Retokenization: {utterance_col}")
     if lang == "yue":
         results = retokenize(utterance_col)
     else:
@@ -204,7 +209,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
         else:
             results = retokenize(utterance_col)
 
-    print(f"Debug - Results after retokenization: {results}")
+    # L.debug(f"Debug - Results after retokenization: {results}")
 
     final_utterances = []
     participant_map = {}  # Store the mapping between speaker and Tier
@@ -221,11 +226,11 @@ def process_generation(output, lang="eng", utterance_engine=None):
         words = []
         for indx, (word, (start, end)) in utterance:
             # Debug: Show each word and its timestamp before filtering
-            print(f"Debug - Word: '{word}', Start: {start}, End: {end}, Speaker: {speaker}")
+            # L.debug(f"Debug - Word: '{word}', Start: {start}, End: {end}, Speaker: {speaker}")
 
             # Skip words with [None, None] timestamps
             if [start, end] == [None, None]:
-                print(f"Debug - Skipping Word: '{word}' due to [None, None] timestamp.")
+                # L.debug(f"Debug - Skipping Word: '{word}' due to [None, None] timestamp.")
                 continue
 
             # Add the word to the utterance content
@@ -239,15 +244,15 @@ def process_generation(output, lang="eng", utterance_engine=None):
 
         # Only add utterances with content to the final list
         if len(words) > 0:
-            print(f"Debug - Final Utterance Content (Speaker {speaker}): {[form.text for form in words]}")
+            # L.debug(f"Debug - Final Utterance Content (Speaker {speaker}): {[form.text for form in words]}")
             final_utterances.append(Utterance(
                 tier=participant,
                 content=words
             ))
 
-    print(f"Debug - Final Utterances Before Document Creation: {final_utterances}")
+    # L.debug(f"Debug - Final Utterances Before Document Creation: {final_utterances}")
     doc.content = final_utterances
-    print(f"Debug - Document Content After Assignment: {doc.content}")
+    # L.debug(f"Debug - Document Content After Assignment: {doc.content}")
     doc.langs = [lang]
 
     return doc
