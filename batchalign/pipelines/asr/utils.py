@@ -154,7 +154,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
 
     # L.debug("Debug - Initial ASR Output:")
     # L.debug(f"Number of Monologues: {len(output['monologues'])}")
-    for idx, monologue in enumerate(output["monologues"]):
+    # for idx, monologue in enumerate(output["monologues"]):
         # L.debug(f"Monologue {idx}: {monologue}")
 
     # Process each monologue to build the utterance_col
@@ -201,13 +201,10 @@ def process_generation(output, lang="eng", utterance_engine=None):
 
     # If we have an utterance engine, we will use that to retokenize; otherwise retokenize via scanning for punctuation
     # L.debug(f"Debug - Input to Retokenization: {utterance_col}")
-    if lang == "yue":
-        results = retokenize(utterance_col)
+    if utterance_engine:
+        results = retokenize_with_engine(utterance_col, utterance_engine)
     else:
-        if utterance_engine:
-            results = retokenize_with_engine(utterance_col, utterance_engine)
-        else:
-            results = retokenize(utterance_col)
+        results = retokenize(utterance_col)
 
     # L.debug(f"Debug - Results after retokenization: {results}")
 
@@ -224,7 +221,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
         participant = participant_map[speaker]
         
         words = []
-        for indx, (word, (start, end)) in utterance:
+        for indx, (word, (start, end)) in enumerate(utterance):
             # Debug: Show each word and its timestamp before filtering
             # L.debug(f"Debug - Word: '{word}', Start: {start}, End: {end}, Speaker: {speaker}")
 

@@ -27,7 +27,8 @@ WhisperForConditionalGeneration._extract_token_timestamps = ett
 import pycountry
 
 # DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
+DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+# DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
 # PYTORCH_ENABLE_MPS_FALLBACK=1
 # pretrained model path
 # # PRETRAINED = "openai/whisper-small"
@@ -295,7 +296,6 @@ class WhisperASRModel(object):
                 groups.append(group_item)
 
         groups = list(sorted(groups, key=lambda x: x["start"]))
-        print(groups)
 
         turns = []
         current_speaker = 0

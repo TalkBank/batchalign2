@@ -234,7 +234,8 @@ class StanzaUtteranceEngine(BatchalignEngine):
         lang = []
         for i in doc.langs:
             if i == "yue":
-                lang.append("zh-hant")
+                # lang.append("zh-hant")
+                lang.append("zh-hans") # b/c otherwise we don't have a consitituency parser
             else:
                 try:
                     lang.append(pycountry.languages.get(alpha_3=i).alpha_2)

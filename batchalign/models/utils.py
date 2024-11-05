@@ -5,7 +5,7 @@ from transformers.models.whisper.generation_whisper import _median_filter as _me
 from dataclasses import dataclass
 import numpy as np
 
-def _extract_token_timestamps(self, generate_outputs, alignment_heads, time_precision=0.02, num_frames=None):
+def _extract_token_timestamps(self, generate_outputs, alignment_heads, time_precision=0.02, num_frames=None, num_input_ids=None):
     """
     Calculates token-level timestamps using the encoder-decoder cross-attentions and dynamic time-warping (DTW) to
     map each output token to a position in the input audio. If `num_frames` is specified, the encoder-decoder
