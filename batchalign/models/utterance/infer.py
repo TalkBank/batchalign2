@@ -113,6 +113,7 @@ class BertUtteranceModel(object):
         except LookupError:
             # we are missing punkt
             nltk.download('punkt')
+            nltk.download('punkt_tab')
             # perform tokenization
             split_passage = sent_tokenize(final_passage)
 
