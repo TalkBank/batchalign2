@@ -4,6 +4,8 @@ Fix Japanese verb forms.
 """
 
 def verbform(upos, target, text):
+    if "為る" in target and 'さ' == text:
+        return "part", "為る"
     if "無い" in target:
         return "aux", "ない"
     if "せる" in target:
@@ -101,7 +103,7 @@ def verbform(upos, target, text):
     if text == "たら":
         return "sconj", "たら"
     if text == "たっ":
-        return "sconj", "たって"
+        return "sconj", "たっ"
     # if text == "て" and upos == "sconj":
     #     return "aux", "て"
     if text == "なさい" and target == "為さる":
@@ -118,6 +120,9 @@ def verbform(upos, target, text):
         return "aux", "よう"
     if text == "ろ" and upos == "aux" and target == "為る":
         return "aux", "ろ"
+    if text == "で":
+        return "sconj", "で"
+
     # if upos == "verb" and "る" in target:
     #     return "verb", target.replace("る","").strip()
 
