@@ -896,9 +896,9 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                         if i.reference_payload not in chunks_backplate[i.payload]:
                             chunks_backplate[i.payload].append(i.reference_payload)
                     elif isinstance(i, Extra) and i.extra_type == ExtraType.PAYLOAD:
-                        if i.key == "*":
+                        if i.key == "⁎":
                             creaky = not creaky
-                            chunks_backplate[i.payload].append("*"+collected+"*")
+                            chunks_backplate[i.payload].append("⁎"+collected+"⁎")
                             collected = ""
                         elif creaky:
                             collected += i.key
@@ -939,7 +939,7 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                 retokenized_ut = re.sub(r"@ ?w ?p", "@wp", retokenized_ut)
                 retokenized_ut = retokenized_ut.replace(" @", "@")
                 retokenized_ut = re.sub(r"\*[* ]*", "*", retokenized_ut)
-                retokenized_ut = re.sub(r"\*(.*?)\*", r"*\1* ", retokenized_ut)
+                retokenized_ut = re.sub(r"⁎[⁎ ]*(.*?)[⁎ ]*⁎", r"⁎\1⁎ ", retokenized_ut)
                 retokenized_ut = re.sub(r"\[\*(.)\]", r"[* \1]", retokenized_ut)
                 # pray to everyone that it works---this will simply crash and ignore
                 # the utterance if it didn't work, so we are doing this as a sanity
