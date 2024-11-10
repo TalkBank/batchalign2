@@ -138,18 +138,18 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # # forms
 # utterance = Utterance(content=forms, delim=delim, text=ut)
 
-sec = "食べ さ せる ."
+# sec = "ミッキーさん *いい子* [: いい子いい子] なの . "
 
-forms, delim = chat_parse_utterance(sec, None, None, None, None)
-utterance = Utterance(content=forms, delim=delim, text=sec)
+# forms, delim = chat_parse_utterance(sec, None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim, text=sec)
 
-# # # =======
-ut = Document(content=[utterance], langs=["jpn"])
+# # # # =======
+# ut = Document(content=[utterance], langs=["jpn"])
 
-pipeline = BatchalignPipeline.new("morphosyntax", lang="jpn")
-res = pipeline(ut, retokenize=True)
+# pipeline = BatchalignPipeline.new("morphosyntax", lang="jpn")
+# res = pipeline(ut, retokenize=True)
 
-print(str(CHATFile(doc=res)))
+# print(str(CHATFile(doc=res)))
 # >>>>>>> theirs
 
 # # ut = Document(content=[utterance], langs=["jpn"])

@@ -890,6 +890,7 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                 collected = ""
                 # brrr
                 aligned = align(chunks_chars, ud_chars, tqdm=False)
+
                 for i in aligned:
                     if isinstance(i, Match):
                         if i.reference_payload not in chunks_backplate[i.payload]:
@@ -939,6 +940,7 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                 retokenized_ut = retokenized_ut.replace(" @", "@")
                 retokenized_ut = re.sub(r"\*[* ]*", "*", retokenized_ut)
                 retokenized_ut = re.sub(r"\*(.*?)\*", r"*\1* ", retokenized_ut)
+                retokenized_ut = re.sub(r"\[\*(.)\]", r"[* \1]", retokenized_ut)
                 # pray to everyone that it works---this will simply crash and ignore
                 # the utterance if it didn't work, so we are doing this as a sanity
                 # check rather than needing the parsed result
