@@ -28,12 +28,12 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # #     json.dump(Document.model_json_schema(), df, indent=4)
 
 # ########### The Batchalign Core Test Harness ###########
-from batchalign.formats.chat.parser import chat_parse_utterance
+# from batchalign.formats.chat.parser import chat_parse_utterance
 
 # print(str(CHATFile(doc=ut)))
 # doc = CHATFile(path="../talkbank-alignment/input/barry.cha").doc
 # doc[3][0]
-
+# て
 # print(str(CHATFile(doc=res)))
 
                 
@@ -138,12 +138,12 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # # forms
 # utterance = Utterance(content=forms, delim=delim, text=ut)
 
-# sec = "ミッキーさん ⁎いい子⁎ [: いい子いい子] なの . "
+# sec = "カッカに ⁎かって⁎ [: 貸て] くれる [* s] ."
 
 # forms, delim = chat_parse_utterance(sec, None, None, None, None)
 # utterance = Utterance(content=forms, delim=delim, text=sec)
 
-# # # =======
+# # # # =======
 # ut = Document(content=[utterance], langs=["jpn"])
 
 # pipeline = BatchalignPipeline.new("morphosyntax", lang="jpn")

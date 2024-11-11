@@ -893,8 +893,11 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
 
                 for i in aligned:
                     if isinstance(i, Match):
-                        if i.reference_payload not in chunks_backplate[i.payload]:
-                            chunks_backplate[i.payload].append(i.reference_payload)
+                        if not creaky:
+                            if i.reference_payload not in chunks_backplate[i.payload]:
+                                chunks_backplate[i.payload].append(i.reference_payload)
+                        else:
+                            collected += i.key
                     elif isinstance(i, Extra) and i.extra_type == ExtraType.PAYLOAD:
                         if i.key == "⁎":
                             creaky = not creaky
@@ -913,7 +916,6 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                                 pos = "x",
                                 feats = ""
                             )]
-
                 poses = [i.morphology[0].pos.upper() for i in ut
                          if i.morphology
                          and len(i.morphology) > 0]
@@ -938,9 +940,11 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                 retokenized_ut = retokenized_ut.replace(" ↑", "↑")
                 retokenized_ut = re.sub(r"@ ?w ?p", "@wp", retokenized_ut)
                 retokenized_ut = retokenized_ut.replace(" @", "@")
-                retokenized_ut = re.sub(r"\*[* ]*", "*", retokenized_ut)
+                # retokenized_ut = re.sub(r"\*[* ]*", "*", retokenized_ut)
                 retokenized_ut = re.sub(r"⁎[⁎ ]*(.*?)[⁎ ]*⁎", r"⁎\1⁎ ", retokenized_ut)
                 retokenized_ut = re.sub(r"\[\*(.)\]", r"[* \1]", retokenized_ut)
+                retokenized_ut = re.sub(r" +", r" ", retokenized_ut)
+
                 # pray to everyone that it works---this will simply crash and ignore
                 # the utterance if it didn't work, so we are doing this as a sanity
                 # check rather than needing the parsed result
