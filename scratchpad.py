@@ -138,18 +138,19 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # forms
 # utterance = Utterance(content=forms, delim=delim, text=ut)
 
-# sec = "カッカに ⁎かって⁎ [: 貸て] くれる [* s] ."
+# sec = "私 の 友達 は 食べ なく ちゃ 駄目 ."
 
 # forms, delim = chat_parse_utterance(sec, None, None, None, None)
 # utterance = Utterance(content=forms, delim=delim, text=sec)
 
-# # # # =======
+# # # # # =======
 # ut = Document(content=[utterance], langs=["jpn"])
 
 # pipeline = BatchalignPipeline.new("morphosyntax", lang="jpn")
 # res = pipeline(ut, retokenize=True)
 
 # print(str(CHATFile(doc=res)))
+
 # >>>>>>> theirs
 
 # # ut = Document(content=[utterance], langs=["jpn"])

@@ -258,6 +258,8 @@ def handler__VERB(word, lang=None):
     res = handler(word, lang)
     if "sconj" in res:
         return res
+    elif word.text == "ろ":
+        return res
     elif "verb" not in res and "aux" not in res:
         if word.text == "たり":
             return res+stringify_feats("Inf", "S")

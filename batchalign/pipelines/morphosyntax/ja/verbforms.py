@@ -4,6 +4,22 @@ Fix Japanese verb forms.
 """
 
 def verbform(upos, target, text):
+    if "ちゃ" in text:
+        return "sconj", "ば"
+    if "なきゃ" in text:
+        return "sconj", "なきゃ"
+    if "じゃ" in text:
+        return "sconj", "ちゃ"
+    if "れる" in text:
+        return "aux", "られる"
+    if "じゃう" in text:
+        return "aux", "ちゃう"
+    if "よう" in text:
+        return "aux", "おう"
+    if "だら" in text:
+        return "aux", "たら"
+    if "だ" in target:
+        return "aux", "た"
     if "為る" in target and 'さ' == text:
         return "part", "為る"
     if "無い" in target:
