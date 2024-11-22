@@ -175,14 +175,20 @@ def handler__DET(word, lang=None):
         return handler(word)
 
     # get gender and numer
-    gender_str = "-"+feats.get("Gender", "").replace(",", "")
+    number = feats.get("Number", "")
+    gender_str = "-"+feats.get("Gender", "" if lang != "fr" else ("" if number == "Plur" else "Masc")).replace(",", "")
+
+    number_psor = feats.get("Number[psor]", "")[:1]
+    person_psor = feats.get("Person[psor]", "")
+    psor = number_psor+person_psor
 
     # clear defaults
     if gender_str == "-Com,Neut" or gender_str == "-Com" or gender_str=="-": gender_str=""
 
     # parse
     return (handler(word, lang)+gender_str+"-"+
-            feats.get("Definite", "Def") + stringify_feats(feats.get("PronType", "")))
+            feats.get("Definite", "Def") + stringify_feats(
+                feats.get("PronType", ""), number, psor))
 
 def handler__ADJ(word, lang=None):
     # get the features

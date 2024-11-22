@@ -28,7 +28,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # #     json.dump(Document.model_json_schema(), df, indent=4)
 
 # ########### The Batchalign Core Test Harness ###########
-# from batchalign.formats.chat.parser import chat_parse_utterance
+from batchalign.formats.chat.parser import chat_parse_utterance
 
 # print(str(CHATFile(doc=ut)))
 # doc = CHATFile(path="../talkbank-alignment/input/barry.cha").doc
@@ -89,12 +89,12 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 # #     return leafs
 
-# # from batchalign.models import BertUtteranceModel
+# from batchalign.models import BertUtteranceModel
 # from batchalign.pipelines import BatchalignPipeline
-# forms, delim = chat_parse_utterance("who farted that ?", None, None, None, None)
+# forms, delim = chat_parse_utterance("le bateau , la jambe , les jambes.", None, None, None, None)
 # utterance = Utterance(content=forms, delim=delim)
-# ut = Document(content=[utterance], langs=["eng"])
-# pipe = BatchalignPipeline.new("morphosyntax", "eng")
+# ut = Document(content=[utterance], langs=["fra"])
+# pipe = BatchalignPipeline.new("morphosyntax", "fra")
 # res = pipe(ut)
 # print(str(CHATFile(doc=res)))
 
