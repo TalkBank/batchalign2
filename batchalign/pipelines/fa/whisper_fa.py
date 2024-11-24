@@ -49,7 +49,7 @@ class WhisperFAEngine(BatchalignEngine):
             if not isinstance(i, Utterance):
                 continue
             if i.alignment == None:
-                warnings.warn("We found at least one utterance without utterance-level alignment; this is usually not an issue, but if the entire transcript is unaligned, please run a pipeline with `Task.UTTERANCE_TIMING_RECOVERY` (\"bulletize\") before running forced-alignment.")
+                warnings.warn("We found at least one utterance without utterance-level alignment; this is usually not an issue, but if the entire transcript is unaligned, it means that utterance level timing recovery (which is fuzzy using ASR) failed due to the audio clarity. On this transcript, before running forced-alignment, please supply utterance-level links.")
                 continue
 
             # pop the previous group onto the stack
