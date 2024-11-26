@@ -92,7 +92,7 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 # from batchalign.models import BertUtteranceModel
 # from batchalign.pipelines import BatchalignPipeline
-# forms, delim = chat_parse_utterance("le bateau , la jambe , les jambes.", None, None, None, None)
+# forms, delim = chat_parse_utterance("les chevaux.", None, None, None, None)
 # utterance = Utterance(content=forms, delim=delim)
 # ut = Document(content=[utterance], langs=["fra"])
 # pipe = BatchalignPipeline.new("morphosyntax", "fra")
@@ -183,9 +183,9 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 # lang = "eng"
 
-# # forms, delim = chat_parse_utterance(text, None, None, None, None)
-# # utterance = Utterance(content=forms, delim=delim)
-# # ut = Document(content=[utterance], langs=[lang])
+# forms, delim = chat_parse_utterance(text, None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim)
+# ut = Document(content=[utterance], langs=[lang])
 
 # doc = Document.new(text, lang=lang)
 

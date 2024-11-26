@@ -216,6 +216,12 @@ def handler__NOUN(word, lang=None):
     case  = feats.get("Case", "").replace(",", "")
     type  = feats.get("PronType", "")
 
+    apm = ""
+    if lang == "fr":
+        from batchalign.pipelines.morphosyntax.fr.apm import is_apm_noun
+        apm = "apm" if is_apm_noun(word.text) else ""
+
+
     if word.deprel == "obj" and case.strip() == "":
         case = "Acc"
 
@@ -227,7 +233,7 @@ def handler__NOUN(word, lang=None):
     if gender_str == "-Com,Neut" or gender_str == "-Com" or gender_str == "-ComNeut": gender_str=""
     if number_str == "-Sing": number_str=""
 
-    return handler(word, lang)+gender_str+number_str+stringify_feats(case, type)+ger
+    return handler(word, lang)+gender_str+number_str+stringify_feats(case, type)+ger+stringify_feats(apm)
 
 def handler__PROPN(word, lang=None):
     # code as noun
