@@ -217,9 +217,9 @@ def handler__NOUN(word, lang=None):
     type  = feats.get("PronType", "")
 
     apm = ""
-    if lang == "fr":
+    if lang == "fr" and number_str == "-Plur":
         from batchalign.pipelines.morphosyntax.fr.apm import is_apm_noun
-        apm = "apm" if is_apm_noun(word.text) else ""
+        apm = "Apm" if is_apm_noun(word.text) else ""
 
 
     if word.deprel == "obj" and case.strip() == "":
