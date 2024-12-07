@@ -54,7 +54,25 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 # # ng = NgramRetraceEngine()
 # # disf = DisfluencyReplacementEngine()
-# # doc = Document.new("I ' m such an idiot", lang="eng")
+# doc = Document.new("in general, we have hair here.", lang="eng")
+
+# forms, delim = chat_parse_utterance("in general, we have hair(stuff) here.", None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim)
+# gold = Document(content=[utterance], langs=["eng"])
+
+# pipeline = BatchalignPipeline(EvaluationEngine())
+# result = pipeline(doc, gold=gold)
+
+# # pipeline = BatchalignPipeline.new("morphosyntax")
+# # result2 = pipeline(gold)
+
+# # print(str(CHATFile(doc=result2)))
+
+
+# result
+# print(result["diff"])
+
+
 # # # # doc[0].content[4].text = "maman,"
 # # # # doc[0].content[5].text = "maman,"
 # # pipe = BatchalignPipeline(ng, disf)
@@ -92,9 +110,6 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 # from batchalign.models import BertUtteranceModel
 # from batchalign.pipelines import BatchalignPipeline
-# forms, delim = chat_parse_utterance("les chevaux.", None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim)
-# ut = Document(content=[utterance], langs=["fra"])
 # pipe = BatchalignPipeline.new("morphosyntax", "fra")
 # res = pipe(ut)
 # print(str(CHATFile(doc=res)))

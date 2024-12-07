@@ -29,6 +29,7 @@ def word_tokenize(str):
         return tmp.tokenize(str)
     except LookupError:
         nltk.download("punkt")
+        nltk.download("punkt_tab")
         return tmp.tokenize(str)
 
 def sent_tokenize(str):
@@ -49,6 +50,7 @@ def sent_tokenize(str):
         return ST(str)
     except LookupError:
         nltk.download("punkt")
+        nltk.download("punkt_tab")
         return ST(str)
 
 def detokenize(tokens):
@@ -69,6 +71,7 @@ def detokenize(tokens):
         return TreebankWordDetokenizer().detokenize(tokens)
     except LookupError:
         nltk.download("punkt")
+        nltk.download("punkt_tab")
         return TreebankWordDetokenizer().detokenize(tokens)
 
 def correct_timing(doc):

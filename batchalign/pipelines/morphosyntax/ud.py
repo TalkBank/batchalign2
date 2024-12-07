@@ -115,6 +115,7 @@ def handler(word, lang=None):
     target = target.replace('/100', '')
     target = target.replace('/r', '')
     target = target.replace('(', '')
+    target = target.replace("(","").replace(")","")
 
     # remove attachments
     if "|" in target:
@@ -848,7 +849,7 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
         inputs.append(line_cut)
 
         try:
-            sents = nlp(line_cut.strip()).sentences
+            sents = nlp(line_cut.replace("(","").replace(")","").strip()).sentences
 
             if len(sents) == 0:
                 continue
