@@ -84,6 +84,7 @@ def parse_tree(subtree):
                      for i in stack]
 
 def process_ut(ut, nlp):
+
     # remove punct
     if (ut.content[-1].type == TokenType.PUNCT or
         ut.content[-1].text in ENDING_PUNCT):
@@ -142,7 +143,7 @@ def process_ut(ut, nlp):
         if isinstance(i, Match):
             matches.append(i)
         elif i.extra_type == ExtraType.REFERENCE:
-            new_refs.append(ReferenceTarget(key=i.key, payload=i.payload))
+            new_refs.append(ReferenceTarget(key=i.key, payload=i.payload if i.payload else -1))
 
     # we now sort the references based on their orignial utterance order
     matches = matches + new_refs
