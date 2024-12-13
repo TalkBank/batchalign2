@@ -154,10 +154,10 @@ print(result["diff"])
 # # forms
 # utterance = Utterance(content=forms, delim=delim, text=ut)
 
-# sec = "私 の 友達 は 食べ なく ちゃ 駄目 ."
+sec = "おっ <たっけ:た@u> [//] あっ ⁎たっけら⁎@u [: 助けて] [* p] !"
 
-# forms, delim = chat_parse_utterance(sec, None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim, text=sec)
+forms, delim = chat_parse_utterance(sec, None, None, None, None)
+utterance = Utterance(content=forms, delim=delim, text=sec)
 
 # # # # # =======
 # ut = Document(content=[utterance], langs=["jpn"])
@@ -169,14 +169,14 @@ print(result["diff"])
 
 # >>>>>>> theirs
 
-# # ut = Document(content=[utterance], langs=["jpn"])
+ut = Document(content=[utterance], langs=["jpn"])
 
-# # pipeline = BatchalignPipeline.new("morphosyntax", lang="jpn")
-# # res = pipeline(ut, retokenize=True)
+pipeline = BatchalignPipeline.new("morphosyntax", lang="jpn")
+res = pipeline(ut, retokenize=True)
 # >>>>>>> Stashed changes
 
 # # print(str(CHA
-# TFile(doc=res)))
+print(str(CHATFile(doc=res)))
 # ut = Document(content=[utterance], langs=[lang])
 
 # pipeline = BatchalignPipeline.new("morphosyntax", lang=lang)
