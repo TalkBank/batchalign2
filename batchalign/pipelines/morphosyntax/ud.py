@@ -959,12 +959,12 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                 retokenized_ut = re.sub(r"⁎[⁎ ]*(.*?)[⁎ ]*⁎", r"⁎\1⁎ ", retokenized_ut)
                 retokenized_ut = re.sub(r"\[\*(.)\]", r"[* \1]", retokenized_ut)
                 retokenized_ut = re.sub(r" +", r" ", retokenized_ut)
+                retokenized_ut = re.sub(r"⁎ @", r"⁎@", retokenized_ut)
 
                 # pray to everyone that it works---this will simply crash and ignore
                 # the utterance if it didn't work, so we are doing this as a sanity
                 # check rather than needing the parsed result
                 _1, _2 = chat_parse_utterance(retokenized_ut, mor, gra, None, None)
-                retokenized_ut = re.sub(r"⁎ @", r"⁎@", retokenized_ut)
                 doc.content[indx] = Utterance(content=ut,
                                               text=retokenized_ut,
                                               tier=doc.content[indx].tier,

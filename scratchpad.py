@@ -53,24 +53,24 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 
 # # ng = NgramRetraceEngine()
-# # disf = DisfluencyReplacementEngine()
-doc = Document.new("I am a very large chicken indeed.", lang="eng")
+# # # disf = DisfluencyReplacementEngine()
+# doc = Document.new("I am a very large chicken indeed.", lang="eng")
 
-forms, delim = chat_parse_utterance("I am a very large chicken indeed.", None, None, None, None)
-utterance = Utterance(content=forms, delim=delim)
-gold = Document(content=[utterance], langs=["eng"])
+# forms, delim = chat_parse_utterance("I am a very large chicken indeed.", None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim)
+# gold = Document(content=[utterance], langs=["eng"])
 
-pipeline = BatchalignPipeline(EvaluationEngine())
-result = pipeline(doc, gold=gold)
+# pipeline = BatchalignPipeline(EvaluationEngine())
+# result = pipeline(doc, gold=gold)
 
-# pipeline = BatchalignPipeline.new("morphosyntax")
-# result2 = pipeline(gold)
+# # pipeline = BatchalignPipeline.new("morphosyntax")
+# # result2 = pipeline(gold)
 
-# print(str(CHATFile(doc=result2)))
+# # print(str(CHATFile(doc=result2)))
 
 
-result
-print(result["diff"])
+# result
+# print(result["diff"])
 
 
 # # # # doc[0].content[4].text = "maman,"
@@ -154,7 +154,7 @@ print(result["diff"])
 # # forms
 # utterance = Utterance(content=forms, delim=delim, text=ut)
 
-sec = "おっ <たっけ:た@u> [//] あっ ⁎たっけら⁎@u [: 助けて] [* p] !"
+sec = "⁎あったったったった:⁎@wp [: あった] か ."
 
 forms, delim = chat_parse_utterance(sec, None, None, None, None)
 utterance = Utterance(content=forms, delim=delim, text=sec)
