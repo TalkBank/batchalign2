@@ -18,6 +18,7 @@ from stanza import DownloadMethod
 from torch import heaviside
 
 from stanza.pipeline.processor import ProcessorVariant, register_processor_variant
+from stanza.resources.common import download_resources_json, load_resources_json, get_language_resources
 
 # the loading bar
 from tqdm import tqdm
@@ -739,13 +740,17 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
     else:
         config["tokenize_postprocessor"] = lambda x:adlist_processor(x)
 
+    download_resources_json()
+    resources = load_resources_json()
+    mwt_exclusion = ["hr", "zh", "zh-hans", "zh-hant", "ja", "ko",
+                     "sl", "sr", "bg", "ru", "et", "hu",
+                     "eu", "el", "he", "af", "ga", "da", "ro"]
+    
     if "zh" in lang:
         lang.pop(lang.index("zh"))
         lang.append("zh-hans")
-
-    elif not any([i in ["hr", "zh", "zh-hans", "zh-hant", "ja", "ko",
-                        "sl", "sr", "bg", "ru", "et", "hu",
-                        "eu", "el", "he", "af", "ga", "da", "ro"] for i in lang]):
+        
+    elif not any(i in mwt_exclusion or "mwt" not in get_language_resources(resources, i) for i in lang):
         if "en" in lang:
             config["processors"]["mwt"] = "gum"
         else:
