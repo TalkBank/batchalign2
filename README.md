@@ -21,6 +21,8 @@ The following instructions provide a quick start to installing Batchalign. For m
         1.  Install Python 3.11: [via this link](https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe) 
         2.  If later commands report `pip module not found`, [this page may help](https://github.com/TalkBank/batchalign2/wiki/Troubleshooting-Tips#get-pip-on-windows)
     -  your distribution's instructions for Linux
+    
+For first-time users of Python, note that if you didn't install Python 3.11 (as we recommended above), it may be complex to change Python versions downstream and may cause additional problems. We recommend explicitly installing Python 3.11 by installing it explicitly via specifying a version number as we show above.
 
 ### Install and Update the Package
 You can get Batchalign from PyPi, and you can update the package in the same way:
@@ -36,6 +38,8 @@ Windows:
 ```
 py -m pip install -U batchalign
 ```
+
+Note that if your system reports `pip: command not found`, replace every use of `pip` in the instructions with `pip3` and try again.
 
 ### Rock and Roll
 There are two main ways of interacting with Batchalign. Batchalign can be used as a program to batch-process CHAT (hence the name), or as a Python LSA library.
