@@ -793,7 +793,7 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
         except AttributeError:
             breakpoint()
 
-        if re.findall("\w", ending):
+        if re.findall(r"\w", ending):
             ending = "."
             line_cut = i.strip(join_with_spaces=True)
         else:

@@ -197,7 +197,7 @@ class UtteranceLexer:
         while True:
             res = self.__pull()
             try:
-                if res == "" or res == False or res in ENDING_PUNCT or (res[-1] in ENDING_PUNCT and re.findall("\w", res)):
+                if res == "" or res == False or res in ENDING_PUNCT or (res[-1] in ENDING_PUNCT and re.findall(r"\w", res)):
                     break
             except IndexError:
                 raise CHATValidationException(f"Lexer failed! Utterance ended without ending punct. Utterance: {self.raw}")
