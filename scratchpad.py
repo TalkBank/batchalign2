@@ -154,10 +154,11 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # # forms
 # utterance = Utterance(content=forms, delim=delim, text=ut)
 
-sec = "⁎あったったったった:⁎@wp [: あった] か ."
+sec = "[- eng] oh no wrong one &-um (.)"
 
 forms, delim = chat_parse_utterance(sec, None, None, None, None)
 utterance = Utterance(content=forms, delim=delim, text=sec)
+utterance.punct
 
 # # # # # =======
 # ut = Document(content=[utterance], langs=["jpn"])
@@ -169,14 +170,15 @@ utterance = Utterance(content=forms, delim=delim, text=sec)
 
 # >>>>>>> theirs
 
-ut = Document(content=[utterance], langs=["jpn"])
+utterance[3].time=(1500,1600)
+ut = Document(content=[utterance], langs=["eng"])
 
-pipeline = BatchalignPipeline.new("morphosyntax", lang="jpn")
-res = pipeline(ut, retokenize=True)
+# pipeline = BatchalignPipeline.new("morphosyntax", lang="jpn")
+# res = pipeline(ut, retokenize=True)
 # >>>>>>> Stashed changes
 
 # # print(str(CHA
-print(str(CHATFile(doc=res)))
+print(str(CHATFile(doc=ut)))
 # ut = Document(content=[utterance], langs=[lang])
 
 # pipeline = BatchalignPipeline.new("morphosyntax", lang=lang)

@@ -64,8 +64,10 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
     # fix commas for people that don't annotate commas with a space
     to_lex = to_lex.replace(",", " ,")
 
-    to_lex = re.sub(r"\([\d.:]+\)", "", to_lex)
+    to_lex = re.sub(r"\([\d.:]+\)(?!$)", "", to_lex)
     to_lex = re.sub(r"↫.*?↫", "", to_lex)
+
+    to_lex = re.sub(r"\(.\)$", r"$END_SPC$", to_lex)
 
     # if there is a punct, move it
     for end in sorted(ENDING_PUNCT, key=len, reverse=True):
@@ -76,6 +78,8 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
     to_lex = to_lex.replace("  ", " ")
 
     tokens = lex(to_lex)
+    if tokens[-1][0] == "END_SPC":
+        tokens = tokens[:-1] + [("(.)", TokenType.PUNCT)]
 
     # correct 0 forms
     res = []
