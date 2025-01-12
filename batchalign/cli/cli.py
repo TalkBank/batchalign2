@@ -158,12 +158,12 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     def writer(doc, output):
         doc.content.insert(0, CustomLine(id="Comment", type=CustomLineType.INDEPENDENT,
                                          content=f"Batchalign {VERSION_NUMBER.strip()}, ASR Engine {asr}"))
-        CHATFile(doc=doc).write(output,
+        CHATFile(doc=doc).write(output
                                 .replace(".wav", ".cha")
                                 .replace(".WAV", ".cha")
                                 .replace(".mp4", ".cha")
                                 .replace(".MP4", ".cha")
-                                .replace(".mp3", ".cha"),
+                                .replace(".mp3", ".cha")
                                 .replace(".MP3", ".cha"),
                                 write_wor=kwargs.get("wor", False))
 
