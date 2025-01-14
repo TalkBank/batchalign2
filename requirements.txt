@@ -54,7 +54,7 @@ imbalanced-learn==0.12.4
     # via imblearn
 imblearn==0.0
     # via batchalign (setup.py)
-jinja2==3.1.4
+jinja2==3.1.5
     # via torch
 joblib==1.4.2
     # via
