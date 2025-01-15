@@ -154,11 +154,13 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # # forms
 # utterance = Utterance(content=forms, delim=delim, text=ut)
 
-sec = "[- eng] oh no wrong one &-um (.)"
+sec = "une famille die@s:deu vacances"
 
 forms, delim = chat_parse_utterance(sec, None, None, None, None)
 utterance = Utterance(content=forms, delim=delim, text=sec)
-utterance.punct
+# utterance.punct
+
+utterance[0]
 
 # # # # # =======
 # ut = Document(content=[utterance], langs=["jpn"])

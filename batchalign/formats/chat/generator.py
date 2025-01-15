@@ -41,9 +41,9 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
         gras.append(i.dependency)
         if i.time:
             has_wor = True
-            wor_elems.append(re.sub(r"@\w+", "", f"{i.text} \x15{str(i.time[0])}_{str(i.time[1])}\x15"))
+            wor_elems.append(re.sub(r"@(\w)(\w\w\w)", r"@\1:\2", f"{i.text} \x15{str(i.time[0])}_{str(i.time[1])}\x15"))
         else:
-            wor_elems.append(re.sub(r"@\w+", "", i.text))
+            wor_elems.append(re.sub(r"@(\w)(\w\w\w)", r"@\1:\2", i.text))
 
         if i.coreference:
             has_coref = True
