@@ -16,7 +16,8 @@ The following instructions provide a quick start to installing Batchalign. For m
 - To install Python, follow the instructions...
     -  for macOS
         1. Install Brew: [visit this link](https://brew.sh/)
-        2. Install Python: execute `brew install python@3.11`
+        2. Install Python and Pipx: execute `brew install python@3.11 pipx`
+        3. Copy the pipx path to yours: execute `pipx ensurepath` 
     -  for Windows
         1.  Install Python 3.11: [via this link](https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe) 
         2.  If later commands report `pip module not found`, [this page may help](https://github.com/TalkBank/batchalign2/wiki/Troubleshooting-Tips#get-pip-on-windows)
@@ -27,13 +28,21 @@ For first-time users of Python, note that if you didn't install Python 3.11 (as 
 ### Install and Update the Package
 You can get Batchalign from PyPi, and you can update the package in the same way:
 
-macOS/Linux:
+#### macOS
+
+Since Batchalign is a command line program, we recommend using `pipx`, the newly standard environment-based Python program installer, on macOS:
+
+```
+pipx install batchalign --python $(brew --prefix)/bin/python3.11
+```
+
+#### Linux
 
 ```
 pip install -U batchalign
 ```
 
-Windows:
+#### Windows
 
 ```
 py -m pip install -U batchalign
