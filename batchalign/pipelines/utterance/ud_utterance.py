@@ -294,6 +294,8 @@ class StanzaUtteranceEngine(BatchalignEngine):
                 contents.append(i)
                 continue
             
+            if len(i.content) == 0:
+                continue
             new_uts = process_ut(i, nlp)
             contents += new_uts
 
