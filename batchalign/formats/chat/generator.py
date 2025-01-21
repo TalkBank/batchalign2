@@ -1,5 +1,6 @@
 from batchalign.document import *
 from batchalign.constants import *
+import numbers
 
 import warnings
 
@@ -104,6 +105,32 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
 
     return "\n".join(result)
 
+def check_utterances_ordered(doc):
+    """check if the utterances are ordered such that one is aligned after another
+
+    Parameters
+    ----------
+        doc : Document
+                The CHAT document to check.
+
+    Returns
+    -------
+        bool
+                Whether the utterances timings are ordered or not.
+    """
+
+    n = -1
+    for i in doc.content:
+        if isinstance(i, Utterance) and i.alignment:
+            (start, end) = i.alignment
+            if isinstance(start, numbers.Number) != None and isinstance(end, numbers.Number) != None:
+                if end < start:
+                    return False
+                if start < n:
+                    return False
+                n = end
+    return True
+
 def generate_chat_preamble(doc, birthdays=[]):
     """Generate header for a Batchalign document.
 
@@ -124,7 +151,8 @@ def generate_chat_preamble(doc, birthdays=[]):
     header = []
     header.append("@Languages:\t"+", ".join(doc.langs))
     header.append("@Participants:\t"+", ".join([f"{i.id} {i.name}" for i in doc.tiers]))
-    # header.append("@Options:\tmulti")
+    if not check_utterances_ordered(doc):
+        header.append("@Options:\tbullets")
     header.append("\n".join([f"@ID:\t{i.lang}|{i.corpus}|{i.id}|{i.birthday}|{i.additional[0]}|{i.additional[1]}|{i.additional[2]}|{i.name}|{i.additional[3]}|{i.additional[4]}|" for i in doc.tiers]))
     for i in birthdays:
         header.append(f"@{i.id}:\t{i.content}")

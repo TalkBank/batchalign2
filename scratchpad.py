@@ -29,9 +29,25 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # #     json.dump(Document.model_json_schema(), df, indent=4)
 
 # ########### The Batchalign Core Test Harness ###########
-from batchalign.formats.chat.parser import chat_parse_utterance
+# from batchalign.formats.chat.parser import chat_parse_utterance
+# from batchalign.formats.chat.generator import check_utterances_ordered
 
-# print(str(CHATFile(doc=ut)))
+# doc = Document.new("This is an ice cone.\nMichelle Fiffer that white gould.")
+
+# doc[0].time = (0, 3232)
+# doc[1].time = (3232, 19223)
+# doc.content.append(CustomLine(id="he", type=CustomLineType.DEPENDENT, content="chicken"))
+# import copy
+# doc.content.append(copy.deepcopy(doc.content[0]))
+# # doc.content[0].time = (0,1)
+# doc.content[-1].time = (19223, 392039203)
+# # doc
+
+# # check_utterances_ordered(doc)
+# # 
+
+# print(str(CHATFile(doc=doc)))
+
 # doc = CHATFile(path="../talkbank-alignment/input/barry.cha").doc
 # doc[3][0]
 # て
