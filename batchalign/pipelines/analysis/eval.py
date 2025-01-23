@@ -37,7 +37,7 @@ class EvaluationEngine(BatchalignEngine):
         is_single = False
 
         for i in forms:
-            if len(i) == 1:
+            if len(i) == 1 and ("zho" not in doc.langs):
                 single_sticky += i
             else:
                 if single_sticky != "":
@@ -49,8 +49,23 @@ class EvaluationEngine(BatchalignEngine):
             forms_finished.append(single_sticky)
             single_sticky = ""
 
+        # special Chinese processing
+        gold_final = []
+        forms_final = []
+
+        if "zho" in doc.langs:
+            for i in gold_forms:
+                for j in i:
+                    gold_final.append(j)
+            for i in forms_finished:
+                for j in i:
+                    forms_final.append(j)
+        else:
+            gold_final = gold_forms
+            forms_final = forms_finished
+
         # dp!
-        alignment = align(forms_finished, gold_forms, False)
+        alignment = align(forms_final, gold_final, False)
 
         # calculate each type of error
         sub = 0

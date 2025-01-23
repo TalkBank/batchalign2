@@ -27,7 +27,7 @@ def retokenize(intermediate_output):
             word = word.replace("。", ".")
             word = word.replace("¿", " ").replace("¡", " ")
             tmp.append((word, bullet))
-            if word in ENDING_PUNCT or word[-1] in ENDING_PUNCT:
+            if len(word) > 0 and (word in ENDING_PUNCT or word[-1] in ENDING_PUNCT):
                 if word in ENDING_PUNCT:
                     final_outputs.append((speaker, tmp))
                 elif word[-1] in ENDING_PUNCT:
@@ -39,7 +39,7 @@ def retokenize(intermediate_output):
                 tmp = []
 
         if len(tmp) > 0: 
-            if tmp[-1][0] in MOR_PUNCT:
+            if len(tmp[-1]) > 0 and tmp[-1][0] in MOR_PUNCT:
                 tmp.pop(-1)
             tmp.append((".", [None, None]))
             final_outputs.append((speaker, tmp))
