@@ -120,7 +120,7 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
     if wor == None:
         wor = [None for i in range(len(phonated_words))]
     else:
-        words = re.findall(rf"[^{''.join(ENDING_PUNCT)} ]+ ?(\x15\d+_\d+\x15)?", wor)
+        words = re.findall(rf"[^{''.join([i for i in ENDING_PUNCT if len(i) == 1])} ]+ ?(\x15\d+_\d+\x15)?", wor)
         wor = []
         for i in words:
             if i.strip() == "":
