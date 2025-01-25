@@ -148,7 +148,8 @@ class EvaluationEngine(BatchalignEngine):
 
         return {
             "wer": wer,
-            "diff": diff
+            "diff": diff,
+            "doc": doc
         }
 
 
