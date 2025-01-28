@@ -160,6 +160,8 @@ def process_generation(output, lang="eng", utterance_engine=None):
 
         lang_2 = pycountry.languages.get(alpha_3=lang).alpha_2
         def catched_num2words(i):
+            if not i.isdigit():
+                return i
             try:
                 return num2words(i, lang=lang_2)
             except NotImplementedError:
