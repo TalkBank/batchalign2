@@ -253,17 +253,16 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 ########### The Batchalign String Test Harness ###########
 # from batchalign.formats.chat.parser import chat_parse_utterance
  
-# file = "/Users/houjun/Documents/Projects/talkbank-alignment/test_harness/input/Untitled.wav"
-
+# file = "/Users/houjun/Documents/Projects/talkbank-alignment/input/spanish.mp3"
 # function = "asr"
 # lang = "spa"
 # num_speakers = 1
 
 # ut = Document.new(media_path=file, lang=lang)
-
-# pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers)
+# pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers, asr="rev")
 # doc = pipeline(ut)
-# doc.content
+# doc
+# # doc.content
 # # doc[0][-1]
 # # doc[0][-2].model_dump()
 

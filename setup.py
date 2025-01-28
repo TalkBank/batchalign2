@@ -51,6 +51,7 @@ setup(
         "soundfile~=0.12.0",
         "rich-click>=1.7.0",
         "typing-extensions",
+        "num2words",
     ],
     extras_require={
         'dev': [
