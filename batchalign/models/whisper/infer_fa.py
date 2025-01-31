@@ -82,7 +82,7 @@ class WhisperFAModel(object):
     def __call__(self, audio, text):
         L.debug("Whisper Preprocessing...")
         # input features
-        features = self.__processor(audio=audio, text=text,
+        features = self.__processor(audio=audio, text=" ".join(list(text)),
                                     sampling_rate=self.sample_rate,
                                     return_tensors='pt')
         tokens = features["labels"][0]

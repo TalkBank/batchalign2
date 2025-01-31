@@ -107,11 +107,20 @@ class WhisperFAEngine(BatchalignEngine):
             # we do this BACKWARDS because we went to have the first timestamp
             # we get about a word first
             alignments.reverse()
-            for elem in alignments:
+            for indx,elem in enumerate(alignments):
                 if isinstance(elem, Match):
+                    next_elem = indx - 1 # remember this is backwards, see above
+                    while next_elem >= 0 and alignments[next_elem].payload == elem.payload:
+                        next_elem -= 1
+                    if next_elem < 0:
+                        next_elem = None
+                    else:
+                        next_elem = alignments[next_elem]
                     grp[elem.reference_payload][0].time = (int(round((timings[elem.payload]*1000 +
                                                                       grp[0][1][0]))),
                                                            int(round((timings[elem.payload]*1000 +
+                                                                      grp[0][1][0])))+500 if next_elem == None else
+                                                           int(round((timings[next_elem.payload]*1000 +
                                                                       grp[0][1][0]))))
 
         L.debug(f"Correcting text...")
@@ -144,8 +153,9 @@ class WhisperFAEngine(BatchalignEngine):
                             w.time = (w.time[0], doc.content[next_ut].alignment[0])
                         else:
                             w.time = (w.time[0], w.time[0]+500) # give half a second because we don't know
-                    else:
-                        w.time = (w.time[0], ut.content[tmp].time[0])
+                    # else:
+                    #     w.time = (w.time[0], ut.content[tmp].time[0])
+
                     # just in case, bound the time by the utterance derived timings
                     if ut.alignment and ut.alignment[0] != None:
                         w.time = (max(w.time[0], ut.alignment[0]), min(w.time[1], ut.alignment[1]))

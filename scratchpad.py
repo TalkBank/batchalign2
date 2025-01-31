@@ -29,7 +29,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # #     json.dump(Document.model_json_schema(), df, indent=4)
 
 # ########### The Batchalign Core Test Harness ###########
-from batchalign.formats.chat.parser import chat_parse_utterance
+# from batchalign.formats.chat.parser import chat_parse_utterance
 # from batchalign.formats.chat.generator import check_utterances_ordered
 
 # doc = Document.new("This is an ice cone.\nMichelle Fiffer that white gould.")
@@ -96,8 +96,18 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 
 
-# # pipeline = BatchalignPipeline.new("morphosyntax")
-# # result2 = pipeline(gold)
+# pipeline = BatchalignPipeline.new("fa")
+# ppe = pipeline
+# cha = CHATFile(path="../talkbank-alignment/testing_playground_2/input/test.cha")
+# doc = cha.doc
+
+# # print(str(CHATFile(doc=doc)))
+# result = ppe(doc)
+# result
+# CHATFile(doc=result).write("../talkbank-alignment/testing_playground_2/input/chicken.cha")
+# result
+# # del pipeline
+# # !i
 
 # # print(str(CHATFile(doc=result2)))
 
