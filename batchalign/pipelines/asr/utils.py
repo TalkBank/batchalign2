@@ -4,6 +4,10 @@ from batchalign.utils import *
 
 from batchalign.constants import ENDING_PUNCT
 
+from num2words import num2words
+import pycountry
+
+
 def retokenize(intermediate_output):
     """Retokenize the output of the ASR system from one giant blob to utterances
 
@@ -153,6 +157,17 @@ def process_generation(output, lang="eng", utterance_engine=None):
             for part in word_parts:
                 final_words.append([part.strip(), [cur, cur+div]])
                 cur += div
+
+        lang_2 = pycountry.languages.get(alpha_3=lang).alpha_2
+        def catched_num2words(i):
+            if not i.isdigit():
+                return i
+            try:
+                return num2words(i, lang=lang_2)
+            except NotImplementedError:
+                return i
+        final_words = [[catched_num2words(i), j] for i,j in final_words]
+
         # if the final words is > 300, split into n parts
         if len(final_words) > 300:
             # for each group, append

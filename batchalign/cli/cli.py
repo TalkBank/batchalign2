@@ -298,6 +298,7 @@ def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
             df.write(str(doc["wer"]))
         with open(Path(output).with_suffix(".diff"), 'w') as df:
             df.write(str(doc["diff"]))
+        CHATFile(doc=doc["doc"]).write(str(Path(output).with_suffix(".asr.cha")))
 
 
     _dispatch("benchmark", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
