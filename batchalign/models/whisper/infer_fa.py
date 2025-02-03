@@ -79,10 +79,10 @@ class WhisperFAModel(object):
         # and return the audio file
         return ASRAudioFile(f, resampled, self.sample_rate)
 
-    def __call__(self, audio, text):
+    def __call__(self, audio, text, pauses=False):
         L.debug("Whisper Preprocessing...")
         # input features
-        features = self.__processor(audio=audio, text=" ".join(list(text)),
+        features = self.__processor(audio=audio, text=(" ".join(list(text)) if pauses else text),
                                     sampling_rate=self.sample_rate,
                                     return_tensors='pt')
         tokens = features["labels"][0]

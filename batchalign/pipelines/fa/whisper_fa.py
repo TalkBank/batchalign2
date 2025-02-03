@@ -29,6 +29,9 @@ class WhisperFAEngine(BatchalignEngine):
         self.__whisper = WhisperFAModel(model)
 
     def process(self, doc:Document, **kwargs):
+        # check if pauses
+        pauses = kwargs.get("pauses", False)
+
         # check that the document has a media path to align to
         assert doc.media != None and doc.media.url != None, f"We cannot forced-align something that doesn't have a media path! Provided media tier='{doc.media}'"
 
@@ -83,7 +86,7 @@ class WhisperFAEngine(BatchalignEngine):
                 # if "noone's" in detokenized:
                     # breakpoint()
                 res = self.__whisper(audio=f.chunk(grp[0][1][0], grp[-1][1][1]),
-                                     text=detokenized)
+                                     text=detokenized, pauses=pauses)
             except IndexError:
                 # utterance contains nothing
                 continue
@@ -109,19 +112,25 @@ class WhisperFAEngine(BatchalignEngine):
             alignments.reverse()
             for indx,elem in enumerate(alignments):
                 if isinstance(elem, Match):
-                    next_elem = indx - 1 # remember this is backwards, see above
-                    while next_elem >= 0 and alignments[next_elem].payload == elem.payload:
-                        next_elem -= 1
-                    if next_elem < 0:
-                        next_elem = None
+                    if pauses:
+                        next_elem = indx - 1 # remember this is backwards, see above
+                        while next_elem >= 0 and alignments[next_elem].payload == elem.payload:
+                            next_elem -= 1
+                        if next_elem < 0:
+                            next_elem = None
+                        else:
+                            next_elem = alignments[next_elem]
+                        grp[elem.reference_payload][0].time = (int(round((timings[elem.payload]*1000 +
+                                                                        grp[0][1][0]))),
+                                                            int(round((timings[elem.payload]*1000 +
+                                                                        grp[0][1][0])))+500 if next_elem == None else
+                                                            int(round((timings[next_elem.payload]*1000 +
+                                                                        grp[0][1][0]))))
                     else:
-                        next_elem = alignments[next_elem]
-                    grp[elem.reference_payload][0].time = (int(round((timings[elem.payload]*1000 +
-                                                                      grp[0][1][0]))),
-                                                           int(round((timings[elem.payload]*1000 +
-                                                                      grp[0][1][0])))+500 if next_elem == None else
-                                                           int(round((timings[next_elem.payload]*1000 +
-                                                                      grp[0][1][0]))))
+                        grp[elem.reference_payload][0].time = (int(round((timings[elem.payload]*1000 +
+                                                                          grp[0][1][0]))),
+                                                               int(round((timings[elem.payload]*1000 +
+                                                                          grp[0][1][0]))))
 
         L.debug(f"Correcting text...")
 
@@ -153,8 +162,8 @@ class WhisperFAEngine(BatchalignEngine):
                             w.time = (w.time[0], doc.content[next_ut].alignment[0])
                         else:
                             w.time = (w.time[0], w.time[0]+500) # give half a second because we don't know
-                    # else:
-                    #     w.time = (w.time[0], ut.content[tmp].time[0])
+                    elif not pauses:
+                        w.time = (w.time[0], ut.content[tmp].time[0])
 
                     # just in case, bound the time by the utterance derived timings
                     if ut.alignment and ut.alignment[0] != None:

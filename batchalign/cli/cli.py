@@ -107,12 +107,16 @@ batchalign.add_command(train, "models")
 @common_options
 @click.option("--whisper/--rev",
               default=False, help="For utterance timing recovery, OpenAI Whisper (ASR) instead of Rev.AI (default).")
+@click.option("--pauses", type=bool, default=False, help="Should we try to bullet each word or should we try to add pauses in between words by grouping them? Default: no pauses.", is_flag=True)
 
 @click.pass_context
 def align(ctx, in_dir, out_dir, whisper, **kwargs):
     """Align transcripts against corresponding media files."""
     def loader(file):
-        return CHATFile(path=os.path.abspath(file)).doc
+        return (
+            CHATFile(path=os.path.abspath(file)).doc,
+            {"pauses", kwargs.get("pauses", False)}
+        )
 
     def writer(doc, output):
         CHATFile(doc=doc).write(output)
