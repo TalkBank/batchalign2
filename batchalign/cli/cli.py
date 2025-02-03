@@ -115,7 +115,7 @@ def align(ctx, in_dir, out_dir, whisper, **kwargs):
     def loader(file):
         return (
             CHATFile(path=os.path.abspath(file)).doc,
-            {"pauses", kwargs.get("pauses", False)}
+            {"pauses": kwargs.get("pauses", False)}
         )
 
     def writer(doc, output):
