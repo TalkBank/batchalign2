@@ -107,10 +107,12 @@ batchalign.add_command(train, "models")
 @common_options
 @click.option("--whisper/--rev",
               default=False, help="For utterance timing recovery, OpenAI Whisper (ASR) instead of Rev.AI (default).")
+@click.option("--wav2vec/--whisper_fa",
+              default=False, help="Use Whisper instead of Wav2Vec for English (defaults for Whisper for non-English)")
 @click.option("--pauses", type=bool, default=False, help="Should we try to bullet each word or should we try to add pauses in between words by grouping them? Default: no pauses.", is_flag=True)
 
 @click.pass_context
-def align(ctx, in_dir, out_dir, whisper, **kwargs):
+def align(ctx, in_dir, out_dir, whisper, wav2vec, **kwargs):
     """Align transcripts against corresponding media files."""
     def loader(file):
         return (
@@ -121,12 +123,22 @@ def align(ctx, in_dir, out_dir, whisper, **kwargs):
     def writer(doc, output):
         CHATFile(doc=doc).write(output)
 
-    _dispatch("align", "eng", 1,
-              ["cha"], ctx,
-              in_dir, out_dir,
-              loader, writer, C,
-              utr="whisper_utr" if whisper else "rev_utr",
-              **kwargs)
+    if not wav2vec:
+        _dispatch("align", "eng", 1,
+                  ["cha"], ctx,
+                  in_dir, out_dir,
+                  loader, writer, C,
+                  fa="whisper_fa",
+                  utr="whisper_utr" if whisper else "rev_utr",
+                  **kwargs)
+    else:
+        _dispatch("align", "eng", 1,
+                  ["cha"], ctx,
+                  in_dir, out_dir,
+                  loader, writer, C,
+                  fa="wav2vec_fa",
+                  utr="whisper_utr" if whisper else "rev_utr",
+                  **kwargs)
 
 #################### TRANSCRIBE ################################
 

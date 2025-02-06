@@ -27,10 +27,13 @@ class Wave2VecFAEngine(BatchalignEngine):
         # check that the document has a media path to align to
         assert doc.media != None and doc.media.url != None, f"We cannot forced-align something that doesn't have a media path! Provided media tier='{doc.media}'"
 
+        if doc.langs[0] != "eng":
+            warnings.warn("Looks like you are not aligning English with wav2vec; this works for a lot of Roman languages, but outside of that your milage may vary.")
+
         # load the audio file
         L.debug(f"Wave2Vec FA is loading url {doc.media.url}...")
         f = self.__wav2vec.load(doc.media.url)
-        L.debug(f"Wave2Vec FA finished loading media.")
+        L.debug(f"Wav2Vec FA finished loading media.")
 
         # collect utterances 30 secondish segments to be aligned for whisper
         # we have to do this because whisper does poorly with very short segments
@@ -38,7 +41,7 @@ class Wave2VecFAEngine(BatchalignEngine):
         group = []
         seg_start = 0
 
-        L.debug(f"Wave2Vec FA finished loading media.")
+        L.debug(f"Wav2Vec FA finished loading media.")
 
         for i in doc.content:
             if not isinstance(i, Utterance):
@@ -59,7 +62,7 @@ class Wave2VecFAEngine(BatchalignEngine):
 
         groups.append(group)
 
-        L.debug(f"Begin Whisper Inference...")
+        L.debug(f"Begin Wav2Vec Inference...")
 
         for indx, grp in enumerate(groups):
             L.info(f"Wave2Vec FA processing segment {indx+1}/{len(groups)}...")

@@ -48,7 +48,9 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 # print(str(CHATFile(doc=doc)))
 
-# doc = CHATFile(path="../talkbank-alignment/input/barry.cha").doc
+# doc = CHATFile(path="../talkbank-alignment/testing_playground_2/input/test.cha").doc
+# pipe = Wave2
+
 # doc[3][0]
 # て
 # print(str(CHATFile(doc=res)))
@@ -99,6 +101,8 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # ppe = pipeline
 # cha = CHATFile(path="../talkbank-alignment/testing_playground_2/input/test.cha")
 # doc = cha.doc
+# engine = Wave2VecFAEngine()
+# res = engine(doc)
 
 # # print(str(CHATFile(doc=doc)))
 # result = ppe(doc)
@@ -263,15 +267,15 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 ########### The Batchalign String Test Harness ###########
 # from batchalign.formats.chat.parser import chat_parse_utterance
  
-file = "/Users/houjun/Documents/Projects/talkbank-alignment/input/spanish.mp3"
-function = "asr"
-lang = "spa"
-num_speakers = 1
+# file = "/Users/houjun/Documents/Projects/talkbank-alignment/input/spanish.mp3"
+# function = "asr"
+# lang = "spa"
+# num_speakers = 1
 
-ut = Document.new(media_path=file, lang=lang)
-pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers, asr="rev")
-doc = pipeline(ut)
-doc
+# ut = Document.new(media_path=file, lang=lang)
+# pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers, asr="rev")
+# doc = pipeline(ut)
+# doc
 # doc.content
 # # doc[0][-1]
 # # doc[0][-2].model_dump()
