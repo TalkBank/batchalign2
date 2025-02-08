@@ -108,7 +108,7 @@ batchalign.add_command(train, "models")
 @click.option("--whisper/--rev",
               default=False, help="For utterance timing recovery, OpenAI Whisper (ASR) instead of Rev.AI (default).")
 @click.option("--wav2vec/--whisper_fa",
-              default=False, help="Use Whisper instead of Wav2Vec for English (defaults for Whisper for non-English)")
+              default=True, help="Use Whisper instead of Wav2Vec for English (defaults for Whisper for non-English)")
 @click.option("--pauses", type=bool, default=False, help="Should we try to bullet each word or should we try to add pauses in between words by grouping them? Default: no pauses.", is_flag=True)
 
 @click.pass_context
