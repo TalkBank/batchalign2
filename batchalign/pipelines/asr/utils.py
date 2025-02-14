@@ -3,6 +3,7 @@ from batchalign.document import *
 from batchalign.utils import *
 
 from batchalign.constants import ENDING_PUNCT
+from batchalign.pipelines.asr.num2chinese import num2chinese
 
 from num2words import num2words
 import pycountry
@@ -165,7 +166,17 @@ def process_generation(output, lang="eng", utterance_engine=None):
             try:
                 return num2words(i, lang=lang_2)
             except NotImplementedError:
-                return i
+                try:
+                    if lang == "zho":
+                        return num2chinese(i)
+                    elif lang == "jpn":
+                        return num2chinese(i, simp=False)
+                    elif lang == "yue":
+                        return num2chinese(i, simp=False)
+                    else:
+                        return i
+                except:
+                    return i
         final_words = [[catched_num2words(i), j] for i,j in final_words]
 
         # if the final words is > 300, split into n parts
