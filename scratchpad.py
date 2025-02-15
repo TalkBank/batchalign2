@@ -20,7 +20,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # engine = infer.BertUtteranceModel("talkbank/CHATUtterance-zh_CN")
 # engine("我 现在 想 听 你说 一些 你 自己 经 历 过 的 故 事 好不好 然后 呢 我们 会 一起 讨 论 有 六 种 不同 的 情 景 然后 在 每 一个 情 景 中 都 需要 你 去 讲 一个 关 于 你 自己 的 一个 故 事 小 故 事")
 
-# doc = Document.new(media_path="/Users/houjun/Downloads/trial.mp3", lang="zho")
+# doc = Document.new(media_path="/Users/houjun/Downloads/trial.mp3", lang="zhoj)
 # print(doc)
 # pipe = BatchalignPipeline.new("asr", lang="zho", num_speakers=2, engine="rev")
 # res = pipe(doc)
@@ -29,7 +29,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # #     json.dump(Document.model_json_schema(), df, indent=4)
 
 # ########### The Batchalign Core Test Harness ###########
-# from batchalign.formats.chat.parser import chat_parse_utterance
+from batchalign.formats.chat.parser import chat_parse_utterance
 # from batchalign.formats.chat.generator import check_utterances_ordered
 
 # doc = Document.new("This is an ice cone.\nMichelle Fiffer that white gould.")
@@ -74,11 +74,12 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 # doc = Document.new("You you chicken pie go .", lang="eng")
 
-# forms, delim = chat_parse_utterance("Go you chicken pie go .", None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim)
-# gold = Document(content=[utterance], langs=["zho"])
+forms, delim = chat_parse_utterance("סמדרי היום בת שנתיים ו#חודשיים ו#עשרה ימים .", None, None, None, None)
+utterance = Utterance(content=forms, delim=delim)
+doc = Document(content=[utterance], langs=["heb"])
 
-# pipeline = BatchalignPipeline(EvaluationEngine())
+pipeline = BatchalignPipeline(StanzaEngine())
+print(str(CHATFile(doc=pipeline(doc))))
 
 # # with open("/Users/houjun/Downloads/talkbank_ch11m-cha_2025-01-22_0939/output/tmp_gold.json") as df:
 # #     gold = Document.model_validate(json.load(df))
