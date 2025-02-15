@@ -826,6 +826,7 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
         line_cut = line_cut.replace("+//", "")
         line_cut = line_cut.replace("+...", "")
         line_cut = line_cut.replace("_", "")
+        line_cut = line_cut.replace("#", "")
 
         # xbxxx is a sepecial xxx-class token to mark
         # special form markers, used for processing later
