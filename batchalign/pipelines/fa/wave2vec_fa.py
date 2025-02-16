@@ -154,9 +154,9 @@ class Wave2VecFAEngine(BatchalignEngine):
                 if '\x15' not in ut.text:
                     ut.text = (ut.text+f" \x15{ut.alignment[0]}_{ut.alignment[1]}\x15").strip()
                 else:
-                    ut.text = re.sub("\x15\d+_\d+\x15",
+                    ut.text = re.sub(r"\x15\d+_\d+\x15",
                                      f"\x15{ut.alignment[0]}_{ut.alignment[1]}\x15", ut.text).strip()
             elif ut.text != None:
-                ut.text = re.sub("\x15\d+_\d+\x15", f"", ut.text).strip()
+                ut.text = re.sub(r"\x15\d+_\d+\x15", f"", ut.text).strip()
 
         return doc
