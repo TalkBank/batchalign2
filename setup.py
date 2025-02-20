@@ -52,6 +52,9 @@ setup(
         "rich-click>=1.7.0",
         "typing-extensions",
         "num2words",
+        "tiktoken",
+        "blobfile",
+        "sentencepiece"
     ],
     extras_require={
         'dev': [

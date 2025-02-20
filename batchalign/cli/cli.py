@@ -196,6 +196,28 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
                   loader, writer, C,
                   asr=asr, **kwargs)
 
+#################### TRANSLATE ################################
+
+@batchalign.command()
+@common_options
+@click.pass_context
+def translate(ctx, in_dir, out_dir, **kwargs):
+    """Translate the transcript to English."""
+
+    def loader(file):
+        cf = CHATFile(path=os.path.abspath(file), special_mor_=True)
+        doc = cf.doc
+        # if str(cf).count("%mor") > 0:
+        #     doc.ba_special_["special_mor_notation"] = True
+        return doc
+
+    def writer(doc, output):
+        CHATFile(doc=doc).write(output)
+
+    _dispatch("translate", "eng", 1, ["cha"], ctx,
+              in_dir, out_dir,
+              loader, writer, C)
+
 #################### MORPHOTAG ################################
 
 @batchalign.command()

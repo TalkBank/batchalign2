@@ -280,6 +280,7 @@ def chat_parse_doc(lines, special_mor=False):
                 mor = None
                 gra = None
                 wor = None
+                translation = None
                 additional = []
 
                 while raw[0][0] == "%":
@@ -291,6 +292,8 @@ def chat_parse_doc(lines, special_mor=False):
                         gra = line
                     elif beg.strip() == "wor" or beg.strip() == "xwor":
                         wor = line
+                    elif beg.strip() == "xtra":
+                        translation = line
                     else:
                         additional.append(CustomLine(id=beg.strip(),
                                                         type=CustomLineType.DEPENDENT,
@@ -309,7 +312,8 @@ def chat_parse_doc(lines, special_mor=False):
                     "content": parsed,
                     "text": text,
                     "delim": delim,
-                    "custom_dependencies": additional
+                    "custom_dependencies": additional,
+                    "translation": translation
                 })
 
                 timing = re.findall(rf"\x15(\d+)_(\d+)\x15", text)

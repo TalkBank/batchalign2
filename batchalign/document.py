@@ -31,6 +31,7 @@ class Task(IntEnum):
     MORPHOSYNTAX = 11
     COREF = 12
     WER = 13
+    TRANSLATE = 14
 
 
     DEBUG__G = 0
@@ -54,6 +55,7 @@ TypeMap = {
     Task.DISFLUENCY_ANALYSIS: TaskType.PROCESSING,
     Task.COREF: TaskType.PROCESSING,
     Task.WER: TaskType.ANALYSIS,
+    Task.TRANSLATE: TaskType.PROCESSING,
 
     Task.DEBUG__G: TaskType.GENERATION,
     Task.DEBUG__P: TaskType.PROCESSING,
@@ -73,6 +75,7 @@ TaskFriendlyName = {
     Task.DISFLUENCY_ANALYSIS:  "Disfluncy Analysis",
     Task.COREF:  "Coreference Resolution",
     Task.WER:  "Word Error Rate",
+    Task.TRANSLATE:  "Translation",
     Task.DEBUG__G:  "TEST_GENERATION",
     Task.DEBUG__P:  "TEST_PROCESSING",
     Task.DEBUG__A:   "TEST_ANALYSIS",
@@ -150,6 +153,7 @@ class Utterance(BaseModel):
     tier: Tier = Field(default=Tier())
     content: Sentence
     text: Optional[str] = Field(default=None)
+    translation: Optional[str] = Field(default=None)
     time: Optional[Tuple[int,int]] = Field(default=None)
     custom_dependencies: List[CustomLine]  = Field(default=[])
 

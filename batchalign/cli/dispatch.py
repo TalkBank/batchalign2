@@ -48,6 +48,7 @@ Cmd2Task = {
     "benchmark": "asr,eval",
     "utseg": "utterance",
     "coref": "coref",
+    "translate": "translate",
 }
 
 # this is the main runner used by all functions
