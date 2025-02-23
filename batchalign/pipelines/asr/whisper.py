@@ -1,7 +1,7 @@
 from batchalign.document import *
 from batchalign.pipelines.base import *
 from batchalign.pipelines.asr.utils import *
-from batchalign.models import WhisperASRModel, BertUtteranceModel
+from batchalign.models import WhisperASRModel, BertUtteranceModel, BertCantoneseUtteranceModel
 
 import pycountry
 
@@ -44,7 +44,11 @@ class WhisperEngine(BatchalignEngine):
 
         if resolve("utterance", self.__lang) != None:
             L.debug("Initializing utterance model...")
-            self.__engine = BertUtteranceModel(resolve("utterance", self.__lang))
+            if lang != "yue":
+                self.__engine = BertUtteranceModel(resolve("utterance", lang))
+            else:
+                # we have special inference procedure for cantonese
+                self.__engine = BertCantoneseUtteranceModel(resolve("utterance", lang))
             L.debug("Done.")
         else:
             self.__engine = None
