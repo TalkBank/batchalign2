@@ -94,7 +94,10 @@ def retokenize_with_engine(intermediate_output, engine):
             tmp = []
 
             for s in new_ut:
-                tmp.append((s, utterance.pop(0)[1]))
+                try:
+                    tmp.append((s, utterance.pop(0)[1]))
+                except IndexError:
+                    continue
 
             final_outputs.append((speaker, tmp+[[delim, [None, None]]]))
 
@@ -159,7 +162,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
                 final_words.append([part.strip(), [cur, cur+div]])
                 cur += div
 
-        lang_2 = pycountry.languages.get(alpha_3=lang).alpha_2
+        lang_2 = "yue" if lang == "yue" else pycountry.languages.get(alpha_3=lang).alpha_2
         def catched_num2words(i):
             if not i.isdigit():
                 return i

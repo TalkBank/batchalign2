@@ -10,7 +10,7 @@ from batchalign.utils.config import config_read
 
 from batchalign.errors import *
 
-from batchalign.models import BertUtteranceModel, resolve
+from batchalign.models import BertUtteranceModel, BertCantoneseUtteranceModel, resolve
 
 import time
 import pathlib
@@ -49,7 +49,11 @@ class RevEngine(BatchalignEngine):
         self.__client = apiclient.RevAiAPIClient(key)
         if resolve("utterance", lang) != None:
             L.debug("Initializing utterance model...")
-            self.__engine = BertUtteranceModel(resolve("utterance", lang))
+            if lang != "yue":
+                self.__engine = BertUtteranceModel(resolve("utterance", lang))
+            else:
+                # we have special inference procedure for cantonese
+                self.__engine = BertCantoneseUtteranceModel(resolve("utterance", lang))
             L.debug("Done.")
         else:
             self.__engine = None
