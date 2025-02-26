@@ -150,15 +150,45 @@ class BertCantoneseUtteranceModel(object):
             final_passage.append(self.tokenizer.convert_tokens_to_string(res_toks))
 
         # Step 4: Join processed chunks together into the final passage
-        final_text = ' '.join(final_passage)
+        final_passage = ' '.join(final_passage)
 
         print("Text processing completed. Generating final output...")
-
+        
         # Optionally, tokenize the final text into sentences based on punctuation
-        try:
-            split_passage = sent_tokenize(final_text)
-        except LookupError:
-            nltk.download('punkt')
-            split_passage = sent_tokenize(final_text)
+        def custom_sent_tokenize(text):
+            # Regular expression to match sentence-ending punctuation marks (. ! ?)
+            sentence_endings = re.compile(r'([.!?])')  
+            split_passage = []
+        
+            # Split the passage based on punctuation marks and keep them
+            parts = re.split(sentence_endings, text) 
+            
+            # Debug: Output the parts after splitting
+            print(f"Parts after splitting: {parts}")
+        
+            # Combine parts and punctuation together
+            for i in range(0, len(parts) - 1, 2):
+                sentence = parts[i] + parts[i + 1]  # Join sentence with punctuation
+                print(f"Sentence formed: {sentence}")  # Debug: Output the current sentence
+                
+                if sentence.strip():  # Only add non-empty sentences (check for non-whitespace content)
+                    split_passage.append(sentence)
+        
+            # If the last part doesn't have punctuation, we handle it here
+            if len(parts) % 2 != 0:  # If there's no punctuation at the end
+                last_part = parts[-1].strip()
+                print(f"Last part without punctuation: {last_part}")  # Debug: Output the last part
+                
+                if last_part:  # Only add non-empty sentences
+                    split_passage.append(last_part)
+        
+            # Final output
+            print(f"Final split passage: {split_passage}")
+            return split_passage
+            
+        split_passage = custom_sent_tokenize(final_passage)
+
+        # Debugging: Output the sentences after splitting
+        print(f"Final sentences: {split_passage}")
 
         return split_passage

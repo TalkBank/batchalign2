@@ -71,7 +71,7 @@ def retokenize_with_engine(intermediate_output, engine):
     final_outputs = []
 
     for speaker, utterance in intermediate_output:
-        # becasue we are using an utterance engine, we need
+        # because we are using an utterance engine, we need
         # to get rid of all the preexisting punctuation
         for i in utterance:
             for j in MOR_PUNCT+ENDING_PUNCT:
@@ -84,8 +84,12 @@ def retokenize_with_engine(intermediate_output, engine):
         joined = joined.replace("。", ".")
         split = engine(joined)
 
+        # Initialize current index to track position in original utterance
+        current_index = 0
+
         # align the utterance against original splits and generate final outputs
         for i in split:
+            # Check if the split has ending punctuation
             if i[-1] in ENDING_PUNCT:
                 new_ut, delim = (i[:-1].split(" "), i[-1])
             else:
@@ -94,12 +98,18 @@ def retokenize_with_engine(intermediate_output, engine):
             tmp = []
 
             for s in new_ut:
-                try:
-                    tmp.append((s, utterance.pop(0)[1]))
-                except IndexError:
-                    continue
+                if current_index < len(utterance):
+                    # Use current element and move index forward
+                    tmp.append((s, utterance[current_index][1]))
+                    current_index += 1
+                else:
+                    # Append with default timestamp if utterance is exhausted
+                    tmp.append((s, [None, None]))
+                    
+            if current_index >= len(utterance):
+                tmp.append((delim, [None, None]))  # Append the punctuation
 
-            final_outputs.append((speaker, tmp+[[delim, [None, None]]]))
+            final_outputs.append((speaker, tmp))
 
     return final_outputs
 
@@ -220,7 +230,6 @@ def process_generation(output, lang="eng", utterance_engine=None):
                     seen_word = True
                     words.append(Form(text=word, time=(int(start), int(end))))
             else:
-                if seen_word:
                     words.append(Form(text=word, time=None))
 
         final_utterances.append(Utterance(
