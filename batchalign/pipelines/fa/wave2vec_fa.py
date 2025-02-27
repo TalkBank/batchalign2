@@ -79,7 +79,7 @@ class Wave2VecFAEngine(BatchalignEngine):
                 # if "noone's" in detokenized:
                     # breakpoint()
                 res = self.__wav2vec(audio=f.chunk(grp[0][1][0], grp[-1][1][1]), text=transcript)
-            except IndexError:
+            except (IndexError, RuntimeError) as e:
                 # utterance contains nothing
                 continue
 
