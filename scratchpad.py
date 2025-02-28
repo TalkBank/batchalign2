@@ -30,7 +30,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # #     json.dump(Document.model_json_schema(), df, indent=4)
 # res
 # ########### The Batchalign Core Test Harness ###########
-# from batchalign.formats.chat.parser import chat_parse_utterance
+from batchalign.formats.chat.parser import chat_parse_utterance
 # from batchalign.formats.chat.generator import check_utterances_ordered
 
 # doc = Document.new("This is an ice cone.\nMichelle Fiffer that white gould.")
@@ -75,11 +75,13 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 # doc = Document.new("You you chicken pie go .", lang="eng")
 
-# forms, delim = chat_parse_utterance("Go you chicken pie go .", None, None, None, None)
+# forms, delim = chat_parse_utterance("לכי עצמי תראי מה יש ב חלון .", None, None, None, None)
 # utterance = Utterance(content=forms, delim=delim)
-# gold = Document(content=[utterance], langs=["zho"])
+# doc = Document(content=[utterance], langs=["heb"])
 
-# pipeline = BatchalignPipeline(EvaluationEngine())
+# pipeline = BatchalignPipeline(StanzaEngine())
+# result = pipeline(doc)
+# print(CHATFile(doc=result))
 
 # # with open("/Users/houjun/Downloads/talkbank_ch11m-cha_2025-01-22_0939/output/tmp_gold.json") as df:
 # #     gold = Document.model_validate(json.load(df))
@@ -91,7 +93,6 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # doc[0][3]
 
 # # gold.langs
-# result = pipeline(doc, gold=gold)
 
 # print(result["diff"])
 # result["wer"]

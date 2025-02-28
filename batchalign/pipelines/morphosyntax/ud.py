@@ -143,6 +143,7 @@ def handler(word, lang=None):
         pos,target = verbform(pos,target,word.text)
         target = target.replace(',', 'cm')
 
+
     return f"{'' if not unknown else '0'}{pos}|{target}"
 
 # POS specific handler
@@ -155,6 +156,9 @@ def handler__PRON(word, lang=None):
         person = '4'
 
     case = feats.get("Case","")
+    reflex = str(feats.get("Reflex","")).strip()
+    if reflex == "Yes":
+        reflex = "reflx"
     if lang == "fr":
         from batchalign.pipelines.morphosyntax.fr.case import case as caser
         case = caser(word.text)
@@ -167,6 +171,7 @@ def handler__PRON(word, lang=None):
     return (handler(word, lang)+
             stringify_feats(feats.get("PronType", "Int"),
                             case.replace(",", ""),
+                            reflex,
                             number_string))
 
 def handler__DET(word, lang=None):
@@ -254,6 +259,9 @@ def handler__VERB(word, lang=None):
     mood = feats.get("Mood", "")
     person = str(feats.get("Person", ""))
 
+    biyan = str(feats.get("HebBinyan", "")).lower()
+    existential = str(feats.get("HebExistential", "")).lower()
+
     if person == "0":
         person = '4'
     number = feats.get("Number", "Sing")
@@ -281,7 +289,7 @@ def handler__VERB(word, lang=None):
             return res
     else:
         return res+flag+stringify_feats(aspect, mood,
-                                        tense, polarity, polite,
+                                        tense, polarity, polite, biyan, existential,
                                         number[:1]+person, irr)
 
 def handler__actual_PUNCT(word, lang=None):
