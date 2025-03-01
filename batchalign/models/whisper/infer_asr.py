@@ -68,6 +68,22 @@ class WhisperASRModel(object):
         self.__config = GenerationConfig.from_pretrained(base)
         self.__config.no_repeat_ngram_size = 4
 
+        
+        if language == "Cantonese":
+            self.__config.no_repeat_ngram_size = 4
+            self.__config.no_timestamps_token_id = 50363
+            self.__config.alignment_heads = [
+                [5, 3],
+                [5, 9],
+                [8, 0],
+                [8, 4],
+                [8, 8],
+                [9, 0],
+                [9, 7],
+                [9, 9],
+                [10, 5]
+            ]
+
         self.pipe = pipeline(
             "automatic-speech-recognition",
             model=model,
@@ -159,7 +175,7 @@ class WhisperASRModel(object):
         if self.lang == "Cantonese":
             config = {
                 "repetition_penalty": 1.001,
-                # "generation_config": self.__config,
+                "generation_config": self.__config,
                 # "task": "transcribe",
                 # "language": self.lang
             }
