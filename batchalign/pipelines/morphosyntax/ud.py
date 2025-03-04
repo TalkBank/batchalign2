@@ -143,7 +143,7 @@ def handler(word, lang=None):
         pos,target = verbform(pos,target,word.text)
         target = target.replace(',', 'cm')
 
-
+    target = re.sub(r'@\w$', '', target)
     return f"{'' if not unknown else '0'}{pos}|{target}"
 
 # POS specific handler
