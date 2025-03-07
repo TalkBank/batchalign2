@@ -28,7 +28,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 # # with open("schema.json", 'w') as df:
 # #     json.dump(Document.model_json_schema(), df, indent=4)
-# res
+# rjs
 # ########### The Batchalign Core Test Harness ###########
 from batchalign.formats.chat.parser import chat_parse_utterance
 # from batchalign.formats.chat.generator import check_utterances_ordered
@@ -47,7 +47,14 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # # check_utterances_ordered(doc)
 # # 
 
-# print(str(CHATFile(doc=doc)))
+from batchalign.extern.hebpipe.heb_pipe import nlp, check_requirements, download_requirements
+models_OK = check_requirements()
+download_requirements(models_OK)
+
+nlp("what")
+# chat = CHATFile(path="../talkbank-alignment/periods/input/05home_2.cha")
+# str(chat)
+
 
 # doc = CHATFile(path="../talkbank-alignment/testing_playground_2/input/test.cha").doc
 # pipe = Wave2
@@ -73,9 +80,9 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # # ng = NgramRetraceEngine()
 # # # disf = DisfluencyReplacementEngine()
 
-# doc = Document.new("You you chicken pie go .", lang="eng")
+# # doc = Document.new("You you chicken pie go .", lang="eng")
 
-# forms, delim = chat_parse_utterance("לכי עצמי תראי מה יש ב חלון .", None, None, None, None)
+# forms, delim = chat_parse_utterance("קווצ'@o כזה .", None, None, None, None)
 # utterance = Utterance(content=forms, delim=delim)
 # doc = Document(content=[utterance], langs=["heb"])
 
