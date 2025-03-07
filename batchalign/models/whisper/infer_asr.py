@@ -84,16 +84,28 @@ class WhisperASRModel(object):
                 [10, 5]
             ]
 
-        self.pipe = pipeline(
-            "automatic-speech-recognition",
-            model=model,
-            tokenizer=WhisperTokenizer.from_pretrained(base),
-            chunk_length_s=25,
-            stride_length_s=3,
-            device=DEVICE,
-            torch_dtype=torch.float32,
-            return_timestamps="word",
-        )
+        try:
+            self.pipe = pipeline(
+                "automatic-speech-recognition",
+                model=model,
+                tokenizer=WhisperTokenizer.from_pretrained(base),
+                chunk_length_s=25,
+                stride_length_s=3,
+                device=DEVICE,
+                torch_dtype=torch.bfloat16,
+                return_timestamps="word",
+            )
+        except TypeError:
+            self.pipe = pipeline(
+                "automatic-speech-recognition",
+                model=model,
+                tokenizer=WhisperTokenizer.from_pretrained(base),
+                chunk_length_s=25,
+                stride_length_s=3,
+                device=DEVICE,
+                torch_dtype=torch.float16,
+                return_timestamps="word",
+            )
         L.debug("Done, initalizing processor and config...")
         processor = WhisperProcessor.from_pretrained(base)
         L.debug("Whisper initialization done.")
