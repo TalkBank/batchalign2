@@ -67,7 +67,7 @@ class WhisperASRModel(object):
         L.debug("Initializing whisper model...")
         self.__config = GenerationConfig.from_pretrained(base)
         self.__config.no_repeat_ngram_size = 4
-
+        self.__config.use_cache = True
         
         if language == "Cantonese":
             self.__config.no_repeat_ngram_size = 4
