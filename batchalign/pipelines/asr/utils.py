@@ -169,7 +169,12 @@ def process_generation(output, lang="eng", utterance_engine=None):
                 final_words.append([part.strip(), [cur, cur+div]])
                 cur += div
 
-        lang_2 = "yue" if lang == "yue" else pycountry.languages.get(alpha_3=lang).alpha_2
+        if lang == "yue":
+            lang_2 = "yue"
+        elif lang == "mys":
+            lang_2 = "mys"
+        else:
+            lang_2 = pycountry.languages.get(alpha_3=lang).alpha_2
         def catched_num2words(i):
             if not i.isdigit():
                 return i
