@@ -98,10 +98,13 @@ def retokenize_with_engine(intermediate_output, engine):
             tmp = []
 
             for s in new_ut:
-                try:
-                    tmp.append((s, utterance.pop(0)[1]))
-                except IndexError:
-                    continue
+                if current_index < len(utterance):
+                    # Use current element and move index forward
+                    tmp.append((s, utterance[current_index][1]))
+                    current_index += 1
+                else:
+                    # Append with default timestamp if utterance is exhausted
+                    tmp.append((s, [None, None]))
 
             final_outputs.append((speaker, tmp+[[delim, [None, None]]]))
 

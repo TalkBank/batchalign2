@@ -33,7 +33,10 @@ class WhisperEngine(BatchalignEngine):
             model = "openai/whisper-large-v3"
             base = "openai/whisper-large-v3"
 
-        language = pycountry.languages.get(alpha_3=lang).name
+        if lang == "mys":
+            language = "Malay"
+        else:
+            language = pycountry.languages.get(alpha_3=lang).name
         if language == "Yue Chinese":
             language = "Cantonese"
         if "greek" in language.lower():
