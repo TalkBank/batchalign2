@@ -51,7 +51,7 @@ class Wave2VecFAEngine(BatchalignEngine):
                 continue
 
             # pop the previous group onto the stack
-            if (i.alignment[-1] - seg_start) > 20*1000:
+            if (i.alignment[-1] - seg_start) > 15*1000:
                 groups.append(group)
                 group = []
                 seg_start = i.alignment[0]
@@ -78,7 +78,8 @@ class Wave2VecFAEngine(BatchalignEngine):
                     transcript = [i.replace("_", " ") for i in transcript if i.strip() != p]
                 # if "noone's" in detokenized:
                     # breakpoint()
-                res = self.__wav2vec(audio=f.chunk(grp[0][1][0], grp[-1][1][1]), text=transcript)
+                if (grp[-1][1][1] - grp[0][1][0]) < 20*1000:
+                    res = self.__wav2vec(audio=f.chunk(grp[0][1][0], grp[-1][1][1]), text=transcript)
             except (IndexError, RuntimeError) as e:
                 # utterance contains nothing
                 continue
