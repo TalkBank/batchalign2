@@ -15,6 +15,59 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 ########
 
+
+import base64
+import os
+from tencentcloud.common.credential import Credential
+from tencentcloud.asr.v20190614.asr_client import AsrClient, models
+
+with open("../talkbank-alignment/input/cantonese.mp3", "rb") as image_file:
+    encoded_string = base64.b64encode(image_file.read())
+
+
+client = AsrClient(cred, "ap-hongkong")
+
+req = models.CreateRecTaskRequest()
+req.EngineModelType = "16k_yue"
+req.ResTextFormat = 1
+req.SourceType = 1
+req.SpeakerDiarization = 1
+req.ChannelNum = 1
+req.Data = encoded_string.decode('ascii')
+
+resp = client.CreateRecTask(req)
+resp
+
+req = models.DescribeTaskStatusRequest()
+req.TaskId = resp.Data.TaskId
+
+res = client.DescribeTaskStatus(req)
+while res.Data.Status not in [2,3]:
+    time.sleep(15)
+    res = client.DescribeTaskStatus(req)
+
+# if failed, raise
+if res.Data.Status == "3":
+    raise RuntimeError(f"Tencent reports job failed! error='{res.Data.ErrorMsg}'")
+
+i.StartMs
+turns = []
+for i in res.Data.ResultDetail:
+    turn = []
+    for j in i.Words:
+        turn.append({
+            "type": "text",
+            "ts": j.OffsetStartMs+start,
+            "end_ts": j.OffsetEndMs+start,
+            "value": j.Word
+        })
+    turns.append({
+        "elements": turn,
+        "speaker": i.SpeakerId
+    })
+return ({"monologues": turns})
+
+
 # from batchalign.models.utterance import infer
 
 # engine = infer.BertUtteranceModel("talkbank/CHATUtterance-zh_CN")
@@ -30,7 +83,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # #     json.dump(Document.model_json_schema(), df, indent=4)
 # res
 # ########### The Batchalign Core Test Harness ###########
-from batchalign.formats.chat.parser import chat_parse_utterance
+# from batchalign.formats.chat.parser import chat_parse_utterance
 # from batchalign.formats.chat.generator import check_utterances_ordered
 
 # doc = Document.new("This is an ice cone.\nMichelle Fiffer that white gould.")

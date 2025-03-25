@@ -54,7 +54,9 @@ setup(
         "num2words",
         "tiktoken",
         "blobfile",
-        "sentencepiece"
+        "sentencepiece",
+        "tencentcloud-sdk-python-common",
+        "tencentcloud-sdk-python-asr"
     ],
     extras_require={
         'dev': [

@@ -6,7 +6,7 @@ Tabulate default packages and options.
 from batchalign import (WhisperEngine, WhisperFAEngine, StanzaEngine, RevEngine,
                         NgramRetraceEngine, DisfluencyReplacementEngine, WhisperUTREngine,
                         RevUTREngine, EvaluationEngine, WhisperXEngine, NemoSpeakerEngine,
-                        StanzaUtteranceEngine, CorefEngine, Wave2VecFAEngine, SeamlessTranslationModel)
+                        StanzaUtteranceEngine, CorefEngine, Wave2VecFAEngine, SeamlessTranslationModel, TencentEngine)
 from batchalign import BatchalignPipeline
 from batchalign.models import resolve
 
@@ -132,6 +132,9 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
             engines.append(Wave2VecFAEngine())
         elif engine == "seamless_translate":
             engines.append(SeamlessTranslationModel())
+        elif engine == "tencent":
+            engines.append(TencentEngine(lang=lang))
+
 
     L.debug(f"Done initalizing packages.")
     return BatchalignPipeline(*engines)
