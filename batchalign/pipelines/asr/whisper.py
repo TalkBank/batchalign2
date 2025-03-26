@@ -1,11 +1,16 @@
 from batchalign.document import *
 from batchalign.pipelines.base import *
 from batchalign.pipelines.asr.utils import *
-from batchalign.models import WhisperASRModel, BertUtteranceModel, BertCantoneseUtteranceModel
+from batchalign.models import (
+    WhisperASRModel,
+    BertUtteranceModel,
+    BertCantoneseUtteranceModel,
+)
 
 import pycountry
 
 import logging
+
 L = logging.getLogger("batchalign")
 
 from batchalign.utils.utils import correct_timing
@@ -19,14 +24,15 @@ class WhisperEngine(BatchalignEngine):
         # if there is no utterance segmentation scheme, we only
         # run ASR
         if self.__engine:
-            return [ Task.ASR, Task.UTTERANCE_SEGMENTATION ]
+            return [Task.ASR, Task.UTTERANCE_SEGMENTATION]
         else:
-            return [ Task.ASR ]
+            return [Task.ASR]
 
     def __init__(self, model=None, lang="eng"):
 
         # try to resolve our internal model
         res = resolve("whisper", lang)
+        L.debug(f"Whisper model resolution for lang '{lang}': {res}")
         if res:
             model, base = res
         else:
@@ -41,7 +47,7 @@ class WhisperEngine(BatchalignEngine):
             language = "Cantonese"
         if "greek" in language.lower():
             language = "Greek"
-            
+
         self.__whisper = WhisperASRModel(model, base=base, language=language)
         self.__lang = lang
 
@@ -61,17 +67,17 @@ class WhisperEngine(BatchalignEngine):
         doc = process_generation(res, self.__lang, utterance_engine=self.__engine)
 
         # define media tier
-        media = Media(type=MediaType.AUDIO, name=Path(source_path).stem, url=source_path)
+        media = Media(
+            type=MediaType.AUDIO, name=Path(source_path).stem, url=source_path
+        )
         doc.media = media
 
         return correct_timing(doc)
 
-
     # model="openai/whisper-large-v2", language="english"
+
 
 # e = WhisperEngine()
 # tmp = e.generate("./batchalign/tests/pipelines/asr/support/test.mp3", 1)
 # tmp.model_dump()
 # file = "./batchalign/tests/pipelines/asr/support/test.mp3"
-
-

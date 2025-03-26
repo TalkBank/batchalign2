@@ -1,6 +1,6 @@
 from torchaudio import transforms as T
 from torchaudio import load
-import numpy as np 
+import numpy as np
 import os
 
 import re
@@ -12,8 +12,12 @@ from collections import defaultdict
 from pathlib import Path
 
 import torch
-from transformers import WhisperProcessor, WhisperTokenizer, GenerationConfig, WhisperForConditionalGeneration
-
+from transformers import (
+    WhisperProcessor,
+    WhisperTokenizer,
+    GenerationConfig,
+    WhisperForConditionalGeneration,
+)
 
 
 from batchalign.document import *
@@ -28,14 +32,23 @@ from batchalign.models.utils import ASRAudioFile
 
 WhisperForConditionalGeneration._extract_token_timestamps = ett
 
-import pycountry 
+import pycountry
 
 import logging
+
 L = logging.getLogger("batchalign")
 
 # DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 # DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
+DEVICE = (
+    torch.device("cuda")
+    if torch.cuda.is_available()
+    else (
+        torch.device("mps")
+        if torch.backends.mps.is_available()
+        else torch.device("cpu")
+    )
+)
 # PYTORCH_ENABLE_MPS_FALLBACK=1
 # pretrained model path
 # # PRETRAINED = "openai/whisper-small"
@@ -44,6 +57,7 @@ DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device("mp
 # # FILE = "./data/test.wav"
 # FILE = "../talkbank-alignment/testing_playground_2/input/test.wav"
 # # FILE = "../talkbank-alignment/broken2/input/53.wav"
+
 
 # inference engine
 class WhisperASRModel(object):
@@ -63,12 +77,20 @@ class WhisperASRModel(object):
     >>> engine(file.chunk(7000, 13000)) # transcribes 7000th ms to 13000th ms
     """
 
-    def __init__(self, model, base="openai/whisper-large-v3", language="english", target_sample_rate=16000):
+    def __init__(
+        self,
+        model,
+        base="openai/whisper-large-v3",
+        language="english",
+        target_sample_rate=16000,
+    ):
         L.debug("Initializing whisper model...")
+        L.debug(f"Using model: {model}, base: {base}, language: {language}")
         self.__config = GenerationConfig.from_pretrained(base)
         self.__config.no_repeat_ngram_size = 4
         self.__config.use_cache = True
-        
+        self.__config.return_timestamps = True
+
         if language == "Cantonese":
             self.__config.no_repeat_ngram_size = 4
             self.__config.no_timestamps_token_id = 50363
@@ -81,10 +103,18 @@ class WhisperASRModel(object):
                 [9, 0],
                 [9, 7],
                 [9, 9],
-                [10, 5]
+                [10, 5],
             ]
 
         try:
+            L.debug("Loading ASR pipeline...")
+            from huggingface_hub import snapshot_download
+
+            model_path = snapshot_download(model, local_files_only=True)
+            base_path = snapshot_download(base, local_files_only=True)
+            L.debug(f"Using cached model at: {model_path}")
+            L.debug(f"Using cached base model at: {base_path}")
+
             self.pipe = pipeline(
                 "automatic-speech-recognition",
                 model=model,
@@ -93,7 +123,8 @@ class WhisperASRModel(object):
                 stride_length_s=3,
                 device=DEVICE,
                 torch_dtype=torch.bfloat16,
-                return_timestamps="word",
+                return_timestamps=True,
+                generate_kwargs={"return_timestamps": True},
             )
         except TypeError:
             self.pipe = pipeline(
@@ -140,7 +171,7 @@ class WhisperASRModel(object):
             audio_arr = T.Resample(rate, self.sample_rate)(audio_arr)
 
         # transpose and mean
-        resampled = torch.mean(audio_arr.transpose(0,1), dim=1)
+        resampled = torch.mean(audio_arr.transpose(0, 1), dim=1)
 
         # and return the audio file
         return ASRAudioFile(f, resampled, self.sample_rate)
@@ -160,66 +191,90 @@ class WhisperASRModel(object):
             for indx, i in zip(secs, segments):
                 if i != cur_spk:
                     # results is by 0.1 second steps
-                    groups.append({
-                        "type": "segment",
-                        "start": cur_start/10,
-                        "end": indx/10,
-                        "payload": int(cur_spk)
-                    })
+                    groups.append(
+                        {
+                            "type": "segment",
+                            "start": cur_start / 10,
+                            "end": indx / 10,
+                            "payload": int(cur_spk),
+                        }
+                    )
                     cur_start = indx
                     cur_spk = i
         else:
-            groups.append({
-                "type": "segment",
-                "start": 0,
-                "end": len(data)/self.sample_rate,
-                "payload": 0
-            })
+            groups.append(
+                {
+                    "type": "segment",
+                    "start": 0,
+                    "end": len(data) / self.sample_rate,
+                    "payload": 0,
+                }
+            )
 
         L.debug("Whisper Transcribing...")
         config = {
             "repetition_penalty": 1.001,
             "generation_config": self.__config,
             "task": "transcribe",
-            "language": self.lang
+            "language": self.lang,
+            "return_timestamps": True,
+            "use_cache": True,
         }
+        L.debug(f"Pipeline config: {config}")
 
         if self.lang == "Cantonese":
             config = {
                 "repetition_penalty": 1.001,
                 "generation_config": self.__config,
-                # "task": "transcribe",
-                # "language": self.lang
+                "return_timestamps": True,
+                "use_cache": True,
             }
 
-        words = self.pipe(data.cpu().numpy(),
-                          batch_size=1, 
-                          generate_kwargs=config)
+        try:
+            L.debug("Running Whisper pipeline...")
+            raw_output = self.pipe(
+                data.cpu().numpy(), batch_size=1, generate_kwargs=config
+            )
+            L.debug(f"Raw pipeline output type: {type(raw_output)}")
+            L.debug(
+                f"Raw pipeline output keys: {raw_output.keys() if isinstance(raw_output, dict) else 'not a dict'}"
+            )
 
-                                             # "do_sample": True,
-                                             # "temperature": 0.1
-                                             # })
-                                             # "temperature": 0,
-  #"temperature": 0.75,
-                                             # })
-        # to filter out the one word prompt
-        words = words["chunks"]
+            if "chunks" not in raw_output:
+                L.error(f"No chunks in output. Full output: {raw_output}")
+                return {"monologues": []}
 
-        # filter out the elements in the prompt, which has timestamp (0,0)
-        # words = list(filter(lambda x:x["timestamp"] != (0.0, 0.0), words))
-
+            words = raw_output["chunks"]
+            L.debug(f"Number of word chunks: {len(words)}")
+            L.debug(
+                f"First few words with timestamps: {words[:3] if words else 'no words'}"
+            )
+            L.debug(f"Extracted words: {words}")
+        except Exception as e:
+            L.error(f"Error in pipeline: {str(e)}")
+            L.error(f"Pipeline config was: {config}")
+            raise
 
         L.debug("Whisper Postprocessing...")
+        L.debug(f"Processing words with timestamps: {words}")
         for word in words:
-            groups.append({
-                "type": "text",
-                "start": word["timestamp"][0],
-                "end": word["timestamp"][1],
-                "payload": word["text"]
-            })
+            if (
+                not isinstance(word.get("timestamp"), tuple)
+                or None in word["timestamp"]
+            ):
+                L.warning(f"Invalid timestamp format for word: {word}")
+                continue
+            groups.append(
+                {
+                    "type": "text",
+                    "start": word["timestamp"][0],
+                    "end": word["timestamp"][1],
+                    "payload": word["text"],
+                }
+            )
 
         # sorting the output to perform sweep
-        groups = list(sorted(groups, key=lambda x:x["start"]))
+        groups = list(sorted(groups, key=lambda x: x["start"]))
 
         # tally turns together
         turns = []
@@ -238,46 +293,77 @@ class WhisperASRModel(object):
                 after = re.findall(r"\W+$", pl)
                 texts = []
                 if len(before) > 0:
-                    texts.append({
-                        "type": "punct",
-                        "ts": element["start"],
-                        "end_ts": element["end"] if element["end"] else element["start"]+1,
-                        "value": before[0],
-                    })
+                    texts.append(
+                        {
+                            "type": "punct",
+                            "ts": element["start"],
+                            "end_ts": (
+                                element["end"]
+                                if element["end"]
+                                else element["start"] + 1
+                            ),
+                            "value": before[0],
+                        }
+                    )
                     pl = pl.strip(before[0])
                 if len(after) > 0:
                     pl = pl.strip(after[0])
-                texts.append({
-                    "type": "text",
-                    "ts": element["start"],
-                    "end_ts": element["end"] if element["end"] else element["start"]+1,
-                    "value": pl.strip(),
-                })
-                if len(after) > 0:
-                    texts.append({
-                        "type": "punct",
+                texts.append(
+                    {
+                        "type": "text",
                         "ts": element["start"],
-                        "end_ts": element["end"] if element["end"] else element["start"]+1,
-                        "value": after[0],
-                    })
+                        "end_ts": (
+                            element["end"] if element["end"] else element["start"] + 1
+                        ),
+                        "value": pl.strip(),
+                    }
+                )
+                if len(after) > 0:
+                    texts.append(
+                        {
+                            "type": "punct",
+                            "ts": element["start"],
+                            "end_ts": (
+                                element["end"]
+                                if element["end"]
+                                else element["start"] + 1
+                            ),
+                            "value": after[0],
+                        }
+                    )
 
                 for text in texts:
-                    if text["ts"] != text["end_ts"] and text["value"].strip() != "…" and text["value"].strip() != "":
+                    if (
+                        text["ts"] != text["end_ts"]
+                        and text["value"].strip() != "…"
+                        and text["value"].strip() != ""
+                    ):
                         # text with no DTW time is likely a spurious retrace
                         current_turn.append(text)
             elif element["type"] == "segment" and current_speaker != element["payload"]:
-                turns.append({
-                    "elements": current_turn,
-                    "speaker": current_speaker[0] if type(current_speaker) == tuple else current_speaker
-                })
-                current_speaker = element["payload"],
+                turns.append(
+                    {
+                        "elements": current_turn,
+                        "speaker": (
+                            current_speaker[0]
+                            if type(current_speaker) == tuple
+                            else current_speaker
+                        ),
+                    }
+                )
+                current_speaker = (element["payload"],)
                 current_turn = []
 
-        turns.append({
-            "elements": current_turn,
-            "speaker": current_speaker[0] if type(current_speaker) == tuple else current_speaker
-        })
+        turns.append(
+            {
+                "elements": current_turn,
+                "speaker": (
+                    current_speaker[0]
+                    if type(current_speaker) == tuple
+                    else current_speaker
+                ),
+            }
+        )
 
         L.debug("Whisper Done.")
-        return ({"monologues": turns})
-
+        return {"monologues": turns}
