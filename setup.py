@@ -40,7 +40,7 @@ setup(
         "transformers>=4.37",
         "tokenizers>=0.14.1",
         "pycountry>=22.3",
-        "stanza[transformers]>=1.9.1",
+        "stanza[transformers]>=1.10.1",
         "scipy~=1.11",
         "rev_ai>=2.18.0",
         "rich~=13.6",
