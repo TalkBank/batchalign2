@@ -48,7 +48,7 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
 
         if i.coreference:
             has_coref = True
-            coref_str_form = ""
+            coref_str_form = []
             for j in i.coreference:
                 coref_str = ""
                 if j.start:
@@ -56,8 +56,8 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
                 coref_str += str(j.chain)
                 if j.end:
                     coref_str += ")"
-                coref_str_form += coref_str
-            coref_elems.append(coref_str_form)
+                coref_str_form.append(coref_str)
+            coref_elems.append(" ".join(coref_str_form))
         else:
             coref_elems.append("-")
 
@@ -94,7 +94,7 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
     if has_wor and write_wor:
         result.append("%wor:\t"+" ".join(wor_elems))
     if has_coref:
-        result.append("%coref:\t"+" ".join(coref_elems))
+        result.append("%coref:\t"+(", ".join(coref_elems)))
     if utterance.translation != None:
         result.append("%xtra:\t"+utterance.translation)
 
