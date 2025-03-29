@@ -154,6 +154,9 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, **kwargs):
               default=False, help="Perform speaker diarization (this flag is ignored with Rev.AI)")
 @click.option("--wor/--nowor",
               default=False, help="Should we write word level alignment line? Default to no.")
+@click.option("--data",
+              help="the URL of the data",
+              type=str)
 @click.option("--lang",
               help="sample language in three-letter ISO 3166-1 alpha-3 code",
               show_default=True,

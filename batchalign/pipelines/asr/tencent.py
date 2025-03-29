@@ -74,16 +74,21 @@ class TencentEngine(BatchalignEngine):
 
         L.info(f"Uploading '{pathlib.Path(f).stem}'...")
         # we will send the file for processing
-        with open(f, "rb") as image_file:
-            encoded_string = base64.b64encode(image_file.read())
+        if not str(f).startswith("http"):
+            with open(f, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read())
 
         req = models.CreateRecTaskRequest()
         req.EngineModelType = f"16k_{lang}"
         req.ResTextFormat = 1
-        req.SourceType = 1
         req.SpeakerDiarization = 1
         req.ChannelNum = 1
-        req.Data = encoded_string.decode('ascii')
+        if not str(f).startswith("http"):
+            req.Data = encoded_string.decode('ascii')
+            req.SourceType = 1
+        else:
+            req.Url = f
+            req.SourceType = 0
         resp = client.CreateRecTask(req)
 
         L.info(f"Tencent is transcribing '{pathlib.Path(f).stem}'...")
@@ -96,7 +101,7 @@ class TencentEngine(BatchalignEngine):
             res = client.DescribeTaskStatus(req)
 
         # if failed, raise
-        if res.Data.Status == "3":
+        if res.Data.Status == "3" or res.Data.Status == 3:
             raise RuntimeError(f"Tencent reports job failed! error='{res.Data.ErrorMsg}'")
 
         turns = []

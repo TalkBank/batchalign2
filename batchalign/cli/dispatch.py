@@ -5,6 +5,7 @@ and actual BatchalignPipeline.
 """
 
 from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, BarColumn
+from urllib.parse import urlparse
 
 import warnings
 
@@ -62,6 +63,15 @@ def _dispatch(command, lang, num_speakers,
     # get files by walking the directory
     files = []
     outputs = []
+
+    if kwargs.get("data"):
+        url = kwargs.get("data")
+        url = urlparse(url)
+        if url.scheme == "":
+            url = url._replace(scheme="http")
+        base = os.path.basename(url.path)
+        files.append(url)
+        outputs.append(os.path.join(out_dir, base))
 
     for basedir, _, fs in os.walk(in_dir):
         for f in fs:
@@ -128,7 +138,8 @@ def _dispatch(command, lang, num_speakers,
         errors = []
         # create the spinner bars
         for f in files:
-            tasks[f] = prog.add_task(Path(f).name, start=False, processor="")
+            tasks[f] = prog.add_task(Path(f).name if isinstance(f, str) else Path(f.geturl()).name,
+                                     start=False, processor="")
 
         # create pipeline and read files
         baL.debug("Attempting to create BatchalignPipeline for CLI...")
@@ -152,7 +163,7 @@ def _dispatch(command, lang, num_speakers,
                 prog.start_task(tasks[file])
                 with warnings.catch_warnings(record=True) as w:
                     # parse the input format, as needed
-                    doc = loader(os.path.abspath(file))
+                    doc = loader(os.path.abspath(file) if isinstance(file, str) else file.geturl())
                     # if we ended up with a tuple of length two,
                     # that means that the loader requested kwargs
                     kw = {}
@@ -179,7 +190,7 @@ def _dispatch(command, lang, num_speakers,
     if len(errors) > 0:
         C.print()
         for file, trcbk, e in errors:
-            C.print(f"[bold red]ERROR[/bold red] on file [italic]{os.path.relpath(str(Path(file).absolute()), in_dir)}[/italic]: {escape(str(e))}\n")
+            C.print(f"[bold red]ERROR[/bold red] on file [italic]{os.path.relpath(str(Path(file).absolute()), in_dir) if isinstance(file, str) else file.geturl()}[/italic]: {escape(str(e))}\n")
             if ctx.obj["verbose"] == 1:
                 C.print(escape(str(trcbk)))
             elif ctx.obj["verbose"] > 1:
