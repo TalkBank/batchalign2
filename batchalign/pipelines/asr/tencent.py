@@ -106,8 +106,8 @@ class TencentEngine(BatchalignEngine):
             for j in i.Words:
                 turn.append({
                     "type": "text",
-                    "ts": j.OffsetStartMs+start,
-                    "end_ts": j.OffsetEndMs+start,
+                    "ts": (j.OffsetStartMs+start)/1000,
+                    "end_ts": (j.OffsetEndMs+start)/1000,
                     "value": j.Word
                 })
             turns.append({
