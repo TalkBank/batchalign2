@@ -22,7 +22,7 @@ setup(
     packages=find_packages(),
     long_description=read('README.md'),
     entry_points = {
-        'console_scripts': ['batchalign=batchalign.cli.cli:batchalign'],
+        'console_scripts': ['batchalignhk=batchalign.cli.cli:batchalign'],
     },
     long_description_content_type='text/markdown',
     install_requires=[
