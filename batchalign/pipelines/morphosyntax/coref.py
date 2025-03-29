@@ -19,7 +19,7 @@ class CorefEngine(BatchalignEngine):
             return 
 
         detokenized = " ".join([i.strip(include_retrace=True, include_fp=True) for i in doc.content if isinstance(i, Utterance)])
-        pipeline = stanza.Pipeline(lang="en", processors="tokenize, coref")
+        pipeline = stanza.Pipeline(lang="en", processors="tokenize, coref", package={"coref": "ontonotes-singletons_roberta-large-lora"})
 
         coref_chains = pipeline(detokenized).sentences
         coref_chains = [(j.text,
