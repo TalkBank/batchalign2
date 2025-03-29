@@ -14,7 +14,7 @@ with open(Path("./batchalign") / "version", 'r') as df:
     VERSION_NUMBER, RELEASE_DATE, RELEASE_NOTES = df.readlines()[:3]
 
 setup(
-    name = "batchalign",
+    name = "BatchalignHK",
     author = "Brian MacWhinney, Houjun Liu",
     author_email = "macw@cmu.edu, houjun@cmu.edu",
     version = VERSION_NUMBER.strip(),
