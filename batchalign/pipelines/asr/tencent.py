@@ -12,6 +12,9 @@ from batchalign.errors import *
 
 from batchalign.models import BertUtteranceModel, BertCantoneseUtteranceModel, resolve
 
+from opencc import OpenCC
+cc = OpenCC('s2hk')
+
 import time
 import pathlib
 import pycountry
@@ -113,7 +116,7 @@ class TencentEngine(BatchalignEngine):
                     "type": "text",
                     "ts": (j.OffsetStartMs+start)/1000,
                     "end_ts": (j.OffsetEndMs+start)/1000,
-                    "value": j.Word
+                    "value": cc.convert(j.Word)
                 })
             turns.append({
                 "elements": turn,

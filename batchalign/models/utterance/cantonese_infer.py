@@ -19,6 +19,9 @@ from transformers import DataCollatorForTokenClassification
 # tqdm
 from tqdm import tqdm
 
+import logging
+L = logging.getLogger("batchalign")
+
 # seed device and tokens
 DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
 
@@ -34,8 +37,8 @@ class BertCantoneseUtteranceModel(object):
 
         # eval mode
         self.model.eval()
-        print(f"Model and tokenizer initialized on device: {DEVICE}")
-        print(f"Max length set to {self.max_length} with overlap of {self.overlap}")
+        L.debug(f"Model and tokenizer initialized on device: {DEVICE}")
+        L.debug(f"Max length set to {self.max_length} with overlap of {self.overlap}")
 
     def __call__(self, passage):
         # Step 1: Clean up passage
@@ -79,14 +82,14 @@ class BertCantoneseUtteranceModel(object):
                 break
         
         # Debugging: Print number of chunks and their content
-        print(f"Created {len(chunks)} chunks based on keywords.")
+        L.debug(f"Created {len(chunks)} chunks based on keywords.")
         for i, chunk in enumerate(chunks):
-            print(f"Chunk {i + 1}: {chunk[:100]}...")  # Print the first 100 characters of each chunk
+            L.debug(f"Chunk {i + 1}: {chunk[:100]}...")  # Print the first 100 characters of each chunk
         
         # Step 3: Process each chunk and restore punctuation
         final_passage = []
         for chunk_index, chunk in enumerate(chunks):
-            print(f"Processing chunk {chunk_index + 1}/{len(chunks)}...")
+            L.debug(f"Processing chunk {chunk_index + 1}/{len(chunks)}...")
 
             # Step 3.1: Split chunk by characters (Chinese tokenization)
             tokenized_chunk = list(chunk)  # Simply split by characters for Chinese text
@@ -103,7 +106,7 @@ class BertCantoneseUtteranceModel(object):
                 # Pass it through the model
                 res = self.model(**tokd).logits
             except Exception as e:
-                print(f"Error during model inference: {e}")
+                L.error(f"Error during model inference: {e}")
                 return []
 
             # Argmax for classification
@@ -152,7 +155,7 @@ class BertCantoneseUtteranceModel(object):
         # Step 4: Join processed chunks together into the final passage
         final_passage = ' '.join(final_passage)
 
-        print("Text processing completed. Generating final output...")
+        L.info("Text processing completed. Generating final output...")
         
         # Optionally, tokenize the final text into sentences based on punctuation
         def custom_sent_tokenize(text):
@@ -164,12 +167,12 @@ class BertCantoneseUtteranceModel(object):
             parts = re.split(sentence_endings, text) 
             
             # Debug: Output the parts after splitting
-            print(f"Parts after splitting: {parts}")
+            L.debug(f"Parts after splitting: {parts}")
         
             # Combine parts and punctuation together
             for i in range(0, len(parts) - 1, 2):
                 sentence = parts[i] + parts[i + 1]  # Join sentence with punctuation
-                print(f"Sentence formed: {sentence}")  # Debug: Output the current sentence
+                L.debug(f"Sentence formed: {sentence}")  # Debug: Output the current sentence
                 
                 if sentence.strip():  # Only add non-empty sentences (check for non-whitespace content)
                     split_passage.append(sentence)
@@ -177,18 +180,18 @@ class BertCantoneseUtteranceModel(object):
             # If the last part doesn't have punctuation, we handle it here
             if len(parts) % 2 != 0:  # If there's no punctuation at the end
                 last_part = parts[-1].strip()
-                print(f"Last part without punctuation: {last_part}")  # Debug: Output the last part
+                L.debug(f"Last part without punctuation: {last_part}")  # Debug: Output the last part
                 
                 if last_part:  # Only add non-empty sentences
                     split_passage.append(last_part)
         
             # Final output
-            print(f"Final split passage: {split_passage}")
+            L.debug(f"Final split passage: {split_passage}")
             return split_passage
             
         split_passage = custom_sent_tokenize(final_passage)
 
         # Debugging: Output the sentences after splitting
-        print(f"Final sentences: {split_passage}")
+        L.debug(f"Final sentences: {split_passage}")
 
         return split_passage

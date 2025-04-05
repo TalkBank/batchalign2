@@ -66,12 +66,16 @@ def _dispatch(command, lang, num_speakers,
 
     if kwargs.get("data"):
         url = kwargs.get("data")
-        url = urlparse(url)
-        if url.scheme == "":
-            url = url._replace(scheme="http")
-        base = os.path.basename(url.path)
-        files.append(url)
-        outputs.append(os.path.join(out_dir, base))
+        with open(url.strip()) as data:
+            data = data.readlines()
+        data = [i.strip() for i in data if i.strip() != ""]
+        for url in data:
+            url = urlparse(url)
+            if url.scheme == "":
+                url = url._replace(scheme="http")
+            base = os.path.basename(url.path)
+            files.append(url)
+            outputs.append(os.path.join(out_dir, base))
 
     for basedir, _, fs in os.walk(in_dir):
         for f in fs:
