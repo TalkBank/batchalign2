@@ -30,7 +30,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # #     json.dump(Document.model_json_schema(), df, indent=4)
 # res
 # ########### The Batchalign Core Test Harness ###########
-from batchalign.formats.chat.parser import chat_parse_utterance
+# from batchalign.formats.chat.parser import chat_parse_utterance
 # from batchalign.formats.chat.generator import check_utterances_ordered
 
 # doc = Document.new("This is an ice cone.\nMichelle Fiffer that white gould.")
@@ -195,12 +195,16 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # lang = "jpn"
 # num_speakers = 1
 
-
-# ut = "Swimming is really fun."
-
+# ut = "ピシー@o って , 新 幹線 ."
 # forms, delim = chat_parse_utterance(ut, None, None, None, None)
-# # forms
 # utterance = Utterance(content=forms, delim=delim, text=ut)
+# ut = Document(content=[utterance], langs=[lang])
+
+# pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers)
+# res = pipeline(ut, retokenize=True)
+
+# print(str(CHATFile(doc=res)))
+# # formu
 
 # from batchalign.formats.chat.parser import chat_parse_utterance
 # # sec = "早上好中国我有一个冰淇淋 ."
@@ -218,7 +222,7 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # ut = Document(content=[utterance], langs=["spa"])
 
 # pipeline = BatchalignPipeline.new("morphosyntax", lang="spa")
-# # res = pipeline(ut, retokenize=True)
+# res = pipeline(ut, retokenize=True)
 
 # from batchalign.pipelines.translate.seamless import SeamlessTranslationModel
 
