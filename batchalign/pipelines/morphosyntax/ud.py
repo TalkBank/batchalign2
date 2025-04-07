@@ -462,7 +462,7 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
             # specivl forms: recall the special form marker is xbxxx
             if "xbxxx" in word.text.strip():
                 form = special_forms.pop(0)
-                mor.append(f"x|{form.strip().replace(',', 'cm')}")
+                mor.append(f"{form[1].strip()}|{form[0].strip().replace(',', 'cm')}")
                 special_form_ids.append(word.id)
             else:
                 mor.append(mor_word)
@@ -554,7 +554,6 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
     if len(mor_str) != 1: # if we actually have content (not just . or ?)
                           # add a deliminator
         mor_str = mor_str + " " + delimiter
-
 
     mor_str = mor_str.replace("<UNK>", "")
     gra_str = gra_str.replace("<UNK>", "")
@@ -843,7 +842,7 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
         special_forms_cleaned = []
         for form in special_forms:
             line_cut = line_cut.replace(form, "xbxxx")
-            special_forms_cleaned.append(re.sub(r"@[\w\:]+", "", form).strip())
+            special_forms_cleaned.append(form.split("@"))
 
         # if line cut is still nothing, we get very angry
         if line_cut == "":
@@ -942,7 +941,7 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                         if ut[i.payload].text != ",":
                             ut[i.payload].morphology = [Morphology(
                                 lemma = sents[0].tokens[i.payload].text if len(sents) > 0 and len(sents[0].tokens) > i.payload and sents[0].tokens[i.payload].text != "xbxxx" else ut[i.payload].text,
-                                pos = "x",
+                                pos = ut[i.payload].morphology[0].pos if (ut[i.payload].morphology and len(ut[i.payload].morphology) > 0) else "x",
                                 feats = ""
                             )]
                 poses = [i.morphology[0].pos.upper() for i in ut
@@ -999,6 +998,7 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                     content.dependency = form.dependency
 
         except Exception as e:
+            raise e
             pass
             # warnings.warn(f"Utterance failed parsing, skipping ud tagging... line='{line}', error='{e}'.\n")
 

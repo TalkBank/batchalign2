@@ -248,12 +248,16 @@ return ({"monologues": turns})
 # lang = "jpn"
 # num_speakers = 1
 
-
-# ut = "Swimming is really fun."
-
+# ut = "ピシー@o って , 新 幹線 ."
 # forms, delim = chat_parse_utterance(ut, None, None, None, None)
-# # forms
 # utterance = Utterance(content=forms, delim=delim, text=ut)
+# ut = Document(content=[utterance], langs=[lang])
+
+# pipeline = BatchalignPipeline.new(function, lang=lang, num_speakers=num_speakers)
+# res = pipeline(ut, retokenize=True)
+
+# print(str(CHATFile(doc=res)))
+# # formu
 
 # from batchalign.formats.chat.parser import chat_parse_utterance
 # # sec = "早上好中国我有一个冰淇淋 ."
@@ -271,7 +275,7 @@ return ({"monologues": turns})
 # ut = Document(content=[utterance], langs=["spa"])
 
 # pipeline = BatchalignPipeline.new("morphosyntax", lang="spa")
-# # res = pipeline(ut, retokenize=True)
+# res = pipeline(ut, retokenize=True)
 
 # from batchalign.pipelines.translate.seamless import SeamlessTranslationModel
 
