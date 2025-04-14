@@ -124,6 +124,8 @@ class CHATFile(BaseFormat):
                     if i.content != None:
                         extra += ":\t"+i.content
                     main.append(extra.strip())
+            elif str(i).strip() in ENDING_PUNCT:
+                continue
             else:
                 main.append(generate_chat_utterance(i, special and doc.langs[0] == "eng",
                                                     write_wor=write_wor))
