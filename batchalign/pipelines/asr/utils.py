@@ -176,6 +176,17 @@ def process_generation(output, lang="eng", utterance_engine=None):
         else:
             lang_2 = pycountry.languages.get(alpha_3=lang).alpha_2
         def catched_num2words(i):
+            i = re.sub(r"—", "-", i)
+            i = re.sub(r"–", "-", i)
+            splitted = i.split("-")
+            if len(splitted) > 1:
+                res = []
+                for j in splitted:
+                    try:
+                        res.append(catched_num2words(j))
+                    except NotImplementedError:
+                        return i
+                return " ".join(res)
             if not i.isdigit():
                 return i
             try:

@@ -83,7 +83,7 @@ return ({"monologues": turns})
 # #     json.dump(Document.model_json_schema(), df, indent=4)
 # res
 # ########### The Batchalign Core Test Harness ###########
-# from batchalign.formats.chat.parser import chat_parse_utterance
+from batchalign.formats.chat.parser import chat_parse_utterance
 # from batchalign.formats.chat.generator import check_utterances_ordered
 
 # doc = Document.new("This is an ice cone.\nMichelle Fiffer that white gould.")
@@ -128,14 +128,13 @@ return ({"monologues": turns})
 
 # doc = Document.new("You you chicken pie go .", lang="eng")
 
-# forms, delim = chat_parse_utterance("לכי עצמי תראי מה יש ב חלון .", None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim)
-# doc = Document(content=[utterance], langs=["heb"])
+forms, delim = chat_parse_utterance("«Идроэлектрика»—–", None, None, None, None)
+utterance = Utterance(content=forms, delim=delim)
+doc = Document(content=[utterance], langs=["heb"])
 
 # pipeline = BatchalignPipeline(StanzaEngine())
 # result = pipeline(doc)
-# print(CHATFile(doc=result))
-
+print(CHATFile(doc=doc))
 # # with open("/Users/houjun/Downloads/talkbank_ch11m-cha_2025-01-22_0939/output/tmp_gold.json") as df:
 # #     gold = Document.model_validate(json.load(df))
 
