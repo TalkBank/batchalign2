@@ -58,6 +58,7 @@ setup(
         "sentencepiece",
         "tencentcloud-sdk-python-common",
         "tencentcloud-sdk-python-asr"
+        "googletrans"
     ],
     extras_require={
         'dev': [
