@@ -54,7 +54,8 @@ setup(
         "num2words",
         "tiktoken",
         "blobfile",
-        "sentencepiece"
+        "sentencepiece",
+        "googletrans"
     ],
     extras_require={
         'dev': [
