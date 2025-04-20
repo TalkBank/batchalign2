@@ -83,16 +83,17 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # # ng = NgramRetraceEngine()
 # # # # disf = DisfluencyReplacementEngine()
 
-doc = Document.new("早上好中国我有一个冰淇淋 . 晚上好中国我有一个冰淇淋 .", lang="zho")
-# doc
+# doc = Document.new("記 得 細 心 聆 聽 每 個 情 景 呢 留 翻 一 個 相 關 嘅 經 歷 當 你 準 備 好 嘅 時 候 呢 就 可 以 話 畀 我 聽 啦 .", lang="zho")
+# # doc
 
-# forms, delim = chat_parse_utterance("«Идроэлектрика»—–", None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim)
-# doc = Document(content=[utterance], langs=["heb"])
+# # forms, delim = chat_parse_utterance("«Идроэлектрика»—–", None, None, None, None)
+# # utterance = Utterance(content=forms, delim=delim)
+# # doc = Document(content=[utterance], langs=["zho"])
 
-pipeline = BatchalignPipeline(GoogleTranslateEngine())
-result = pipeline(doc)
-print(CHATFile(doc=result))
+# pipeline = BatchalignPipeline(GoogleTranslateEngine())
+# result = pipeline(doc)
+# print(CHATFile(doc=result))
+# # !uv pip install googletrans
 # # # with open("/Users/houjun/Downloads/talkbank_ch11m-cha_2025-01-22_0939/output/tmp_gold.json") as df:
 # # #     gold = Document.model_validate(json.load(df))
 
