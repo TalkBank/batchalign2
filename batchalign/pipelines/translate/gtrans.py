@@ -48,6 +48,8 @@ class GoogleTranslateEngine(BatchalignEngine):
                 text = text.replace(".","。")
 
             translated_text_from_text = run_coroutine_sync(self.translate(text)).text
+            translated_text_from_text = translated_text_from_text.replace("。", ".")
+            translated_text_from_text = translated_text_from_text.replace("’", "'")
 
             i.translation = translated_text_from_text
             for j in MOR_PUNCT + ENDING_PUNCT:
