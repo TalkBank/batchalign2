@@ -29,7 +29,7 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
     
     main_line = str(utterance)
     # last minut ecorrections
-    main_line = re.sub(r"<([\w ]+) \[\/", r"<\1> [/", main_line)
+    # main_line = re.sub(r"<([\w ]+) \[\/", r"<\1> [/", main_line)
     main_line = re.sub(r"«", "“", main_line)
     main_line = re.sub(r"»", "”", main_line)
     main_line = re.sub(r"—", "-", main_line)
