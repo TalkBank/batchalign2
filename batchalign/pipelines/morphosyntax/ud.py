@@ -998,9 +998,7 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
                     content.dependency = form.dependency
 
         except Exception as e:
-            raise e
-            pass
-            # warnings.warn(f"Utterance failed parsing, skipping ud tagging... line='{line}', error='{e}'.\n")
+            warnings.warn(f"Utterance failed parsing, skipping ud tagging... line='{line}', error='{e}'.\n")
 
     L.debug("Stanza done.")
     return doc
