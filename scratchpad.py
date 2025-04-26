@@ -32,7 +32,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 # # doc = Document.new(media_path="/Users/houjun/Documents/Projects/talkbank-alignment/cantonese/input/Untitled.mp3", lang="yue")
 # # # print(doc)
-# # pipe = BatchalignPipeline.new("asr", lang="yue", num_speakers=2, asr="whisper")
+# # pipe = BatchalignPipeline.new("asr", lang="yue", num_speakers=2, asr="whisperj)
 # # res = pipe(doc)
 # # res
 
@@ -40,7 +40,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # #     json.dump(Document.model_json_schema(), df, indent=4)
 # # res
 # # ########### The Batchalign Core Test Harness ###########
-# from batchalign.formats.chat.parser import chat_parse_utterance
+from batchalign.formats.chat.parser import chat_parse_utterance
 # # from batchalign.formats.chat.generator import check_utterances_ordered
 
 # # doc = Document.new("This is an ice cone.\nMichelle Fiffer that white gould.")
@@ -169,9 +169,14 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 # # from batchalign.models import BertUtteranceModel
 # # from batchalign.pipelines import BatchalignPipeline
-# # pipe = BatchalignPipeline.new("morphosyntax", "fra")
-# # res = pipe(ut)
-# # print(str(CHATFile(doc=res)))
+# forms, delim = chat_parse_utterance("chickens xxx@s:ita .", None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim)
+# ut = Document(content=[utterance], langs=["eng"])
+
+
+# pipe = BatchalignPipeline.new("morphosyntax", "eng")
+# res = pipe(ut)
+# print(str(CHATFile(doc=res)))
 
 
 # # tmp[-1].content
@@ -282,14 +287,10 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 # # lang = "eng"
 
-# # forms, delim = chat_parse_utterance(text, None, None, None, None)
-# # utterance = Utterance(content=forms, delim=delim)
-# # ut = Document(content=[utterance], langs=[lang])
-
 # # doc = Document.new(text, lang=lang)
 
-# # retrace = StanzaEngine()
-# # pipe = BatchalignPipeline(retrace)
+# retrace = StanzaEngine()
+# pipe = BatchalignPipeline(retrace)
 
 # # doc = pipe(doc)
 # # doc

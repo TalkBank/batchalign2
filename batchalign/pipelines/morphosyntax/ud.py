@@ -462,7 +462,10 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
             # specivl forms: recall the special form marker is xbxxx
             if "xbxxx" in word.text.strip():
                 form = special_forms.pop(0)
-                mor.append(f"{form[1].strip()}|{form[0].strip().replace(',', 'cm')}")
+                if form[1][0] == "s":
+                    mor.append("L2|xxx")
+                else:
+                    mor.append(f"{form[1].strip()}|{form[0].strip().replace(',', 'cm')}")
                 special_form_ids.append(word.id)
             else:
                 mor.append(mor_word)
