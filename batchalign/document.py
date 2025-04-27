@@ -153,6 +153,7 @@ class Utterance(BaseModel):
     tier: Tier = Field(default=Tier())
     content: Sentence
     text: Optional[str] = Field(default=None)
+    override_lang: Optional[str] = Field(default=None)
     translation: Optional[str] = Field(default=None)
     time: Optional[Tuple[int,int]] = Field(default=None)
     custom_dependencies: List[CustomLine]  = Field(default=[])
