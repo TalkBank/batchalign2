@@ -710,7 +710,7 @@ def adlist_postprocessor(i, lang, adlist):
     return cpy
 
 ######
-def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, **kwargs):
+def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, status_hook:callable = None, **kwargs):
     L.debug("Starting Stanza...")
     inputs = []
 
@@ -787,6 +787,8 @@ def morphoanalyze(doc: Document, retokenize:bool, status_hook:callable = None, *
     for indx, i in enumerate(doc.content):
         L.info(f"Stanza processing utterance {indx+1}/{len(doc.content)}")
         if not isinstance(i, Utterance):
+            continue
+        if i.override_lang and skipmultilang:
             continue
 
         # generate simplified version of the line
@@ -1014,4 +1016,4 @@ class StanzaEngine(BatchalignEngine):
         self.status_hook = status_hook
 
     def process(self, doc, **kwargs):
-        return morphoanalyze(doc, retokenize=kwargs.get("retokenize", False), status_hook=self.status_hook, mwt=kwargs.get("mwt", {}))
+        return morphoanalyze(doc, retokenize=kwargs.get("retokenize", False), skipmultilang=kwargs.get("skipmultilang", False), status_hook=self.status_hook, mwt=kwargs.get("mwt", {}))

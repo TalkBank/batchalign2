@@ -300,6 +300,7 @@ def chat_parse_doc(lines, special_mor=False):
                                                         content=line.strip()))
 
                 # parse the actual utterance
+                multilingual = re.findall(r"^\[- (\w+)\]", text)
                 parsed, delim = chat_parse_utterance(text, mor, gra, wor, additional)
 
                 # get the timing of the utterance
@@ -313,7 +314,8 @@ def chat_parse_doc(lines, special_mor=False):
                     "text": text,
                     "delim": delim,
                     "custom_dependencies": additional,
-                    "translation": translation
+                    "translation": translation,
+                    "override_lang": None if len(multilingual) == 0 else multilingual[0]
                 })
 
                 timing = re.findall(rf"\x15(\d+)_(\d+)\x15", text)

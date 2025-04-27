@@ -41,7 +41,12 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # res
 # # ########### The Batchalign Core Test Harness ###########
 from batchalign.formats.chat.parser import chat_parse_utterance
+chat_parse_utterance
 # # from batchalign.formats.chat.generator import check_utterances_ordered
+# *ANA:	[- spa] para que vengan . •141170_142119•
+# %eng:	for them to come .
+# *GLO:	eh ? •142796_143154•
+# %eng:	what ?
 
 # # doc = Document.new("This is an ice cone.\nMichelle Fiffer that white gould.")
 
@@ -169,13 +174,14 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 # # from batchalign.models import BertUtteranceModel
 # # from batchalign.pipelines import BatchalignPipeline
-# forms, delim = chat_parse_utterance("chickens xxx@s:ita .", None, None, None, None)
+# forms, delim = chat_parse_utterance("[- spa] eat a chicken .", None, None, None, None)
 # utterance = Utterance(content=forms, delim=delim)
 # ut = Document(content=[utterance], langs=["eng"])
+# ut[0].override_lang = "spa"
 
 
 # pipe = BatchalignPipeline.new("morphosyntax", "eng")
-# res = pipe(ut)
+# # res = pipe(ut, skipmultilang=True)
 # print(str(CHATFile(doc=res)))
 
 

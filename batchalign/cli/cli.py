@@ -230,6 +230,8 @@ def translate(ctx, in_dir, out_dir, **kwargs):
 @common_options
 @click.option("--retokenize/--keeptokens",
               default=False, help="Retokenize the main line to fit the UD tokenizations.")
+@click.option("--skipmultilang/--multilang",
+              default=False, help="skip code switching")
 @click.option("--lexicon",
               type=click.Path(exists=True,
                               file_okay=True, dir_okay=False),
@@ -253,7 +255,9 @@ def morphotag(ctx, in_dir, out_dir, **kwargs):
             doc.ba_special_["special_mor_notation"] = True
         return (
             doc,
-            {"retokenize": kwargs["retokenize"], "mwt": mwt}
+            {"retokenize": kwargs["retokenize"],
+             "skipmultilang": kwargs["skipmultilang"],
+             "mwt": mwt}
         )
 
     def writer(doc, output):
