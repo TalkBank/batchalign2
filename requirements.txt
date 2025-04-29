@@ -232,7 +232,7 @@ tqdm==4.67.1
     #   peft
     #   stanza
     #   transformers
-transformers==4.49.0
+transformers==4.50.0
     # via
     #   batchalign (./setup.py)
     #   peft
