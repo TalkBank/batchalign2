@@ -34,7 +34,7 @@ setup(
         # "pyAudioAnalysis",
         # "hmmlearn==0.3.0",
         # "eyed3",
-        # "pydub",
+        "pydub",
         # "imblearn",
         "plotly>=5.3.0",
         "transformers>=4.37",
