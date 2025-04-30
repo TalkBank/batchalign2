@@ -10,45 +10,22 @@ The TalkBank Project, of which Batchalign is a part, is supported by NIH grant H
 
 The following instructions provide a quick start to installing Batchalign. For most users aiming to process CHAT and audio with Batchalign, we recommend more detailed usage instructions: for [usage](https://talkbank.org/info/BA2-usage.pdf) and [human transcript cleanup](https://talkbank.org/info/BA2-cleanup.pdf). The following provides a quick start guide for the program.
 
-### Get Python
-- We support Python versions 3.9, 3.10, 3.11 and 3.12.  
-- First, check to see if you have Python by running `python`. If it reports any of the versions above, skip the following step.
-- To install Python, follow the instructions...
-    -  for macOS
-        1. Install Brew: [visit this link](https://brew.sh/)
-        2. Install Python and Pipx: execute `brew install python@3.11 pipx`
-        3. Copy the pipx path to yours: execute `pipx ensurepath` 
-    -  for Windows
-        1.  Install Python 3.11: [via this link](https://www.python.org/ftp/python/3.11.7/python-3.11.7-amd64.exe) 
-        2.  If later commands report `pip module not found`, [this page may help](https://github.com/TalkBank/batchalign2/wiki/Troubleshooting-Tips#get-pip-on-windows)
-    -  your distribution's instructions for Linux
-    
-For first-time users of Python, note that if you didn't install Python 3.11 (as we recommended above), it may be complex to change Python versions downstream and may cause additional problems. We recommend explicitly installing Python 3.11 by installing it explicitly via specifying a version number as we show above.
-
 ### Install and Update the Package
-You can get Batchalign from PyPi, and you can update the package in the same way:
+Batchalign is on PyPi (as `batchalign`). We recommend the use of UV to install Batchalign:
 
-#### macOS
-
-Since Batchalign is a command line program, we recommend using `pipx`, the newly standard environment-based Python program installer, on macOS:
+#### macOS / Linux
 
 ```
-pipx install batchalign --python $(brew --prefix)/bin/python3.11
-```
-
-#### Linux
-
-```
-pip install -U batchalign
+curl -LsSf https://astral.sh/uv/install.sh | sh
+UV_PYTHON=3.11 uv tool install batchalign
 ```
 
 #### Windows
 
 ```
-py -m pip install -U batchalign
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+uv tool install batchalign
 ```
-
-Note that if your system reports `pip: command not found`, replace every use of `pip` in the instructions with `pip3` and try again.
 
 ### Rock and Roll
 There are two main ways of interacting with Batchalign. Batchalign can be used as a program to batch-process CHAT (hence the name), or as a Python LSA library.
