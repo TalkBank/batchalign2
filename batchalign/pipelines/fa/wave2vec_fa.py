@@ -92,10 +92,13 @@ class Wave2VecFAEngine(BatchalignEngine):
             # create target backplates for the timings
             payload_targets = []
             timings = []
-            for indx, (word, time) in enumerate(res):
-                timings.append(time)
-                for char in word:
-                    payload_targets.append(PayloadTarget(char, payload=indx))
+            try:
+                for indx, (word, time) in enumerate(res):
+                    timings.append(time)
+                    for char in word:
+                        payload_targets.append(PayloadTarget(char, payload=indx))
+            except:
+                continue
             # alignment!
             alignments = align(payload_targets, ref_targets, tqdm=False)
 
