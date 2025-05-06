@@ -93,7 +93,7 @@ class WhisperASRModel(object):
                 stride_length_s=3,
                 device=DEVICE,
                 torch_dtype=torch.bfloat16,
-                return_timestamps="word",
+                return_timestamps=True,
             )
         except TypeError:
             self.pipe = pipeline(
@@ -104,7 +104,7 @@ class WhisperASRModel(object):
                 stride_length_s=3,
                 device=DEVICE,
                 torch_dtype=torch.float16,
-                return_timestamps="word",
+                return_timestamps=True,
             )
         L.debug("Done, initalizing processor and config...")
         processor = WhisperProcessor.from_pretrained(base)
