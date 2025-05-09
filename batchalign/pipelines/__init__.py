@@ -1,6 +1,6 @@
 from .pipeline import BatchalignPipeline
 from .base import BatchalignEngine
-from .asr import WhisperEngine, RevEngine, WhisperXEngine
+from .asr import WhisperEngine, RevEngine, WhisperXEngine, OAIWhisperEngine
 
 from .morphosyntax import StanzaEngine, CorefEngine
 from .cleanup import NgramRetraceEngine, DisfluencyReplacementEngine

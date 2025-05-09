@@ -144,8 +144,10 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, **kwargs):
 
 @batchalign.command()
 @common_options
+@click.option("--whisper_oai/--rev",
+              default=False, help="Use the OpenAI's Whisper implementation instead of Rev.AI (default).")
 @click.option("--whisper/--rev",
-              default=False, help="Use OpenAI Whisper (ASR) instead of Rev.AI (default).")
+              default=False, help="Use Huggingface's Whisper implementation instead of Rev.AI (default).")
 @click.option("--whisperx/--rev",
               default=False, help="Use WhisperX instead of Rev.AI (default). Superceeds --whisper.")
 @click.option("--diarize/--nodiarize",
@@ -169,6 +171,8 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
         asr = "whisper"
     if kwargs["whisperx"]:
         asr = "whisperx"
+    if kwargs["whisper_oai"]:
+        asr = "whisper_oai"
 
 
     def writer(doc, output):

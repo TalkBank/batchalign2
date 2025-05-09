@@ -55,7 +55,8 @@ setup(
         "tiktoken",
         "blobfile",
         "sentencepiece",
-        "googletrans"
+        "googletrans",
+        "openai-whisper>=20240930"
     ],
     extras_require={
         'dev': [

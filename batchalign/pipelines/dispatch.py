@@ -7,7 +7,7 @@ from batchalign import (WhisperEngine, WhisperFAEngine, StanzaEngine, RevEngine,
                         NgramRetraceEngine, DisfluencyReplacementEngine, WhisperUTREngine,
                         RevUTREngine, EvaluationEngine, WhisperXEngine, NemoSpeakerEngine,
                         StanzaUtteranceEngine, CorefEngine, Wave2VecFAEngine, SeamlessTranslationModel,
-                        GoogleTranslateEngine)
+                        GoogleTranslateEngine, OAIWhisperEngine)
 from batchalign import BatchalignPipeline
 from batchalign.models import resolve
 
@@ -19,7 +19,7 @@ L = logging.getLogger("batchalign")
 
 # default for all languages
 DEFAULT_PACKAGES = {
-    "asr": "whisper",
+    "asr": "whisper_oai",
     "utr": "whisper_utr",
     "fa": "whisper_fa",
     "speaker": "nemo_speaker",
@@ -135,7 +135,8 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
             engines.append(SeamlessTranslationModel())
         elif engine == "gtrans":
             engines.append(GoogleTranslateEngine())
-
+        elif engine == "whisper_oai":
+            engines.append(OAIWhisperEngine())
 
     L.debug(f"Done initalizing packages.")
     return BatchalignPipeline(*engines)
