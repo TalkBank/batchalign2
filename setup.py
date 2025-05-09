@@ -65,6 +65,10 @@ setup(
         'train': [
             'accelerate~=0.27',
         ],
+        'docs': [
+            'mkdocs-material',
+            'mkdocs-click'
+        ],
         # 'speaker': [
         #     "nemo-toolkit~=1.21.0",
         #     "omegaconf~=2.3.0",
