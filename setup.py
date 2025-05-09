@@ -58,7 +58,8 @@ setup(
         "sentencepiece",
         "tencentcloud-sdk-python-common",
         "tencentcloud-sdk-python-asr"
-        "googletrans"
+        "googletrans",
+        "openai-whisper>=20240930"
     ],
     extras_require={
         'dev': [

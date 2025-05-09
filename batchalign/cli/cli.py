@@ -144,8 +144,10 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, **kwargs):
 
 @batchalign.command()
 @common_options
+@click.option("--whisper_oai/--rev",
+              default=False, help="Use the OpenAI's Whisper implementation instead of Rev.AI (default).")
 @click.option("--whisper/--rev",
-              default=False, help="Use OpenAI Whisper (ASR) instead of Rev.AI (default).")
+              default=False, help="Use Huggingface's Whisper implementation instead of Rev.AI (default).")
 @click.option("--tencent/--rev",
               default=False, help="Use Tencent instead of Rev.AI (default).")
 @click.option("--whisperx/--rev",
@@ -176,6 +178,8 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
         asr = "whisperx"
     if kwargs["tencent"]:
         asr = "tencent"
+    if kwargs["whisper_oai"]:
+        asr = "whisper_oai"
 
     def writer(doc, output):
         doc.content.insert(0, CustomLine(id="Comment", type=CustomLineType.INDEPENDENT,
