@@ -9,3 +9,5 @@ specification.py
 /build/
 /dist/
 /.eggs/
+
+*.egg-info

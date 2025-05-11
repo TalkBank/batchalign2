@@ -14,6 +14,34 @@ from batchalign.utils.dp import align, ExtraType, Extra, Match
 import logging
 L = logging.getLogger("batchalign")
 
+def conform(x):
+    result = []
+    for i in x:
+        if "'s" in i.strip():
+            result.append(i.split("'")[0])
+            result.append("is")
+        elif "americanstyle" == i.strip():
+            result.append("american")
+            result.append("style")
+        elif "postwar" == i.strip():
+            result.append("post")
+            result.append("war")
+        elif "farmhouse" == i.strip():
+            result.append("farm")
+            result.append("house")
+        elif "aa" == i.strip():
+            result.append("a")
+            result.append("a")
+        elif "hmm" == i.strip():
+            result.append("hm")
+        elif "_" in i.strip():
+            for j in i.strip().split("_"):
+                result.append(j)
+        else:
+            result.append(i)
+
+    return result
+
 class EvaluationEngine(BatchalignEngine):
     tasks = [ Task.WER ]
 
@@ -63,6 +91,9 @@ class EvaluationEngine(BatchalignEngine):
         else:
             gold_final = gold_forms
             forms_final = forms_finished
+
+        gold_final = conform(gold_final)
+        forms_final = conform(forms_final)
 
         # dp!
         alignment = align(forms_final, gold_final, False)

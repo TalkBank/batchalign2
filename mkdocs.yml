@@ -1,0 +1,14 @@
+site_name: batchalign
+theme:
+  name: material
+  icon:
+    logo: material/bank
+  palette:
+    primary: black
+
+markdown_extensions:
+    - mkdocs-click
+extra:
+  generator: false
+
+copyright: Copyright &copy 2025, Brian MacWhinney and Houjun Liu; The TalkBank Project (NIH grant HD082736).

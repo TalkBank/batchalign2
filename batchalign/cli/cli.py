@@ -79,6 +79,7 @@ def handle_verbosity(verbosity):
 
 @click.group()
 @click.pass_context
+@click.version_option(VERSION_NUMBER)
 @click.option("-v", "--verbose", type=int, count=True, default=0, help="How loquacious Batchalign should be.")
 def batchalign(ctx, verbose):
     """process .cha and/or audio files in IN_DIR and dumps them to OUT_DIR using recipe COMMAND"""
