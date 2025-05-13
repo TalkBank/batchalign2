@@ -6681,4 +6681,4 @@ names_ = [
     "Zulema",
     "ZULMA"
 ]
-names = [i.lower() f or i in names_]
+names = [i.lower() for i in names_]
