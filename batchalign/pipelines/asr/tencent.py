@@ -116,7 +116,7 @@ class TencentEngine(BatchalignEngine):
                     "type": "text",
                     "ts": (j.OffsetStartMs+start)/1000,
                     "end_ts": (j.OffsetEndMs+start)/1000,
-                    "value": cc.convert(j.Word)
+                    "value": cc.convert(j.Word) if self.__lang == "yue" else j.Word
                 })
             turns.append({
                 "elements": turn,
