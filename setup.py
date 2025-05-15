@@ -57,7 +57,7 @@ setup(
         "blobfile",
         "sentencepiece",
         "tencentcloud-sdk-python-common",
-        "tencentcloud-sdk-python-asr"
+        "tencentcloud-sdk-python-asr",
         "googletrans",
         "openai-whisper>=20240930"
     ],

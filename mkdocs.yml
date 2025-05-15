@@ -1,5 +1,7 @@
 site_name: batchalign
 theme:
+  features:
+    - navigation.expand
   name: material
   icon:
     logo: material/bank

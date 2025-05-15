@@ -10,6 +10,7 @@ from batchalign.pipelines.asr.utils import *
 from batchalign.utils.config import config_read
 
 from batchalign.utils.dp import align, ExtraType, Extra, Match
+from batchalign.utils.names import names
 
 import logging
 L = logging.getLogger("batchalign")
@@ -26,6 +27,20 @@ def conform(x):
         elif "postwar" == i.strip():
             result.append("post")
             result.append("war")
+        elif "postwar" == i.strip():
+            result.append("post")
+            result.append("war")
+        elif i.strip() in names:
+            result.append("name")
+        elif "dunno" == i.strip():
+            result.append("don't")
+            result.append("know")
+        elif "wanna" == i.strip():
+            result.append("want")
+            result.append("to")
+        elif "gotta" == i.strip():
+            result.append("got")
+            result.append("to")
         elif "farmhouse" == i.strip():
             result.append("farm")
             result.append("house")
