@@ -59,7 +59,7 @@ class BertCantoneseUtteranceModel(object):
         
         
         # Step 2: Define keywords and split the passage based on them
-        keywords = ['呀', '啦', '喎', '嘞', '㗎喇', '囉', '㗎', '啊', '嗯']  # Replace with your desired keywords
+        keywords = ['呀', '喎', '嘞', '㗎喇', '囉', '啊', '嗯']  # Replace with your desired keywords
         
         chunks = []
         start = 0
