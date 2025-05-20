@@ -47,7 +47,7 @@ setup(
         "click~=8.1",
         "matplotlib>=3.8.0,<4.0.0",
         "pyfiglet==1.0.2",
-        "setuptools",
+        "setuptools>=78.1.1",
         "soundfile~=0.12.0",
         "rich-click>=1.7.0",
         "typing-extensions",
