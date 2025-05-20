@@ -189,7 +189,7 @@ scipy==1.15.2
     #   scikit-learn
 sentencepiece==0.2.0
     # via batchalign (./setup.py)
-setuptools==76.0.0
+setuptools==78.1.1
     # via batchalign (./setup.py)
 six==1.17.0
     # via
