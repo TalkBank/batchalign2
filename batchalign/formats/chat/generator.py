@@ -101,7 +101,7 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
         result.append("%wor:\t"+" ".join(wor_elems))
     if has_coref:
         result.append("%coref:\t"+(", ".join(coref_elems)))
-    if utterance.translation != None:
+    if utterance.translation != None and utterance.translation.strip() not in ["", ".", "!", "?"]:
         result.append("%xtra:\t"+utterance.translation)
 
 
