@@ -711,6 +711,7 @@ def adlist_postprocessor(i, lang, adlist):
 
 ######
 def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, status_hook:callable = None, **kwargs):
+
     L.debug("Starting Stanza...")
     inputs = []
 
