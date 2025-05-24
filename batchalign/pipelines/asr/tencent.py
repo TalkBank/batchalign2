@@ -21,8 +21,8 @@ import tempfile
 import pycountry
 import numpy as np
 import soundfile as sf
-from pydub import AudioSegment
-from pydub.effects import normalize
+# from pydub import AudioSegment
+# from pydub.effects import normalize
 import base64
 from tencentcloud.common.credential import Credential
 from tencentcloud.asr.v20190614.asr_client import AsrClient, models
@@ -30,9 +30,9 @@ from tencentcloud.asr.v20190614.asr_client import AsrClient, models
 import asyncio
 import tempfile
 import os
-from pydub import AudioSegment
-from pydub.effects import normalize
-from pydub.exceptions import CouldntDecodeError
+# from pydub import AudioSegment
+# from pydub.effects import normalize
+# from pydub.exceptions import CouldntDecodeError
 
 
 import logging
@@ -77,66 +77,6 @@ class TencentEngine(BatchalignEngine):
             L.debug("Done.")
         else:
             self.__engine = None
-
-    def __preprocess_audio(self, input_path):
-        """Enhanced audio preprocessing for low-volume speech"""
-        try:
-            L.info(f"Optimizing audio for ASR: {input_path}")
-            
-            # read the audio file
-            audio = AudioSegment.from_file(input_path)
-
-            audio = audio.set_channels(1)  
-            audio = audio.set_frame_rate(16000)  
-
-            
-            audio = audio.compress_dynamic_range(
-                threshold=-40, 
-                ratio=3,
-                attack=5, 
-                release=100
-            )
-            audio = audio.low_pass_filter(4000)  # filter out high frequencies
-            audio = audio.normalize(headroom=2)  # keep the headroom
-            audio = audio.compress_dynamic_range(
-                threshold=-55,
-                ratio=6,
-                attack=15,
-                release=200
-            )
-
-            # enhance low volume
-            audio = audio.high_pass_filter(80)
-            boosted = audio.high_pass_filter(1000).apply_gain(+4)
-            audio = audio.overlay(boosted)
-
-            if L.level <= logging.DEBUG:
-                self.__print_audio_stats(audio)
-
-            # output to a temporary file
-            temp_fd, temp_path = tempfile.mkstemp(suffix=".mp3")
-            os.close(temp_fd)
-            audio.export(
-                temp_path,
-                format="mp3",
-                codec="libmp3lame",
-                bitrate="96k",
-                tags={"title": "BA_Optimized"},
-                parameters=[
-                    "-compression_level", "2",
-                    "-reservoir", "0",
-                    "-joint_stereo", "0"
-                ]
-            )
-
-            return temp_path
-
-        except CouldntDecodeError:
-            L.error(f"Audio decoding failed: {input_path}")
-            return input_path
-        except Exception as e:
-            L.error(f"Audio processing error: {str(e)}")
-            return input_path
         
     def replace_cantonese_words(self, word):
         """Function to replace Cantonese words with custom replacements."""
@@ -176,13 +116,15 @@ class TencentEngine(BatchalignEngine):
         lang = self.__lang
         client = self.__client
 
-        processed_path = self.__preprocess_audio(f)
-        audio = AudioSegment.from_file(processed_path)
+        # processed_path = self.__preprocess_audio(f)
+        # audio = AudioSegment.from_file(processed_path)
         
         try:
             L.info(f"Uploading '{pathlib.Path(f).stem}'...")
-            with open(processed_path, "rb") as audio_file:
-                encoded_string = base64.b64encode(audio_file.read())
+            # we will send the file for processing
+            if not str(f).startswith("http"):
+                with open(f, "rb") as image_file:
+                    encoded_string = base64.b64encode(image_file.read())
 
             req = models.CreateRecTaskRequest()
             if lang in {'zho', 'yue', 'wuu', 'nan','hak'}:
@@ -192,9 +134,12 @@ class TencentEngine(BatchalignEngine):
             req.ResTextFormat = 1
             req.SpeakerDiarization = 1
             req.ChannelNum = 1
-            req.Data = encoded_string.decode('ascii')
-            req.SourceType = 1
-            
+            if not str(f).startswith("http"):
+                req.Data = encoded_string.decode('ascii')
+                req.SourceType = 1
+            else:
+                req.Url = f
+                req.SourceType = 0
             resp = client.CreateRecTask(req)
 
             L.info(f"Tencent is transcribing '{pathlib.Path(f).stem}'...")
