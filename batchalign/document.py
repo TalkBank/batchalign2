@@ -11,6 +11,7 @@ from pathlib import Path
 
 from batchalign.errors import *
 from batchalign.constants import *
+from batchalign.utils.abbrev import abbrev
 
 import re
 
@@ -223,6 +224,11 @@ class Utterance(BaseModel):
         t = re.sub(r",", " , ", t.strip()).strip()
         t = re.sub(r" +", " ", t.strip()).strip()
         t = t.replace("+ ,", "+,").strip()
+
+        abbrevs =  [" " .join(list(i)) for i in abbrev]
+        for i in abbrevs:
+            t = t.replace(i, i.replace(" ", ""))
+
         return t
 
     def __repr__(self):

@@ -46,7 +46,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # # # engine = infer.BertUtteranceModel("talkbank/CHATUtterance-zh_CN")
 # # # engine("我 现在 想 听 你说 一些 你 自己 经 历 过 的 故 事 好不好 然后 呢 我们 会 一起 讨 论 有 六 种 不同 的 情 景 然后 在 每 一个 情 景 中 都 需要 你 去 讲 一个 关 于 你 自己 的 一个 故 事 小 故 事")
 
-# # # # doc = Document.new(media_path="/Users/houjun/Documents/Projects/talkbank-alignment/cantonese/input/Untitled.mp3", lang="yue")
+# doc = Document.new(media_path="/Users/houjun/Documents/Projects/talkbank-alignment/cantonese/input/Untitled.mp3", lang="yue")
 # # # # # print(doc)
 # # # # pipe = BatchalignPipeline.new("asr", lang="yue", num_speakers=2, asr="whisperj)
 # # # # res = pipe(doc)
@@ -63,8 +63,6 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # # %eng:	for them to come .
 # # # *GLO:	eh ? •142796_143154•
 # # # %eng:	what ?
-
-# # # # doc = Document.new("This is an ice cone.\nMichelle Fiffer that white gould.")
 
 # # # # doc[0].time = (0, 3232)
 # # # # doc[1].time = (3232, 19223)
