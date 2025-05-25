@@ -22,7 +22,7 @@ class NgramRetraceEngine(BatchalignEngine):
                 if i.type in [TokenType.REGULAR, TokenType.PUNCT, TokenType.FP]:
                     content.append(i)
             # scan for n-gram retraces
-            for n in range(1, len(content)):
+            for n in range(1 if "yue" not in doc.langs and "zho" not in doc.langs else 2, len(content)):
                 begin = 0
                 while begin < len(content)-(n):
                     # get the n gram info; we convert it to
