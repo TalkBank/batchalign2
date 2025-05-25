@@ -119,73 +119,69 @@ class TencentEngine(BatchalignEngine):
         # processed_path = self.__preprocess_audio(f)
         # audio = AudioSegment.from_file(processed_path)
         
-        try:
-            L.info(f"Uploading '{pathlib.Path(f).stem}'...")
-            # we will send the file for processing
-            if not str(f).startswith("http"):
-                with open(f, "rb") as image_file:
-                    encoded_string = base64.b64encode(image_file.read())
+        L.info(f"Uploading '{pathlib.Path(f).stem}'...")
+        # we will send the file for processing
+        if not str(f).startswith("http"):
+            with open(f, "rb") as image_file:
+                encoded_string = base64.b64encode(image_file.read())
 
-            req = models.CreateRecTaskRequest()
-            if lang in {'zho', 'yue', 'wuu', 'nan','hak'}:
-                req.EngineModelType = "16k_zh_large"
-            else:
-                req.EngineModelType = f"16k_{lang}"
-            req.ResTextFormat = 1
-            req.SpeakerDiarization = 1
-            req.ChannelNum = 1
-            if not str(f).startswith("http"):
-                req.Data = encoded_string.decode('ascii')
-                req.SourceType = 1
-            else:
-                req.Url = f
-                req.SourceType = 0
-            resp = client.CreateRecTask(req)
+        req = models.CreateRecTaskRequest()
+        if lang in {'zho', 'yue', 'wuu', 'nan','hak'}:
+            req.EngineModelType = "16k_zh_large"
+        else:
+            req.EngineModelType = f"16k_{lang}"
+        req.ResTextFormat = 1
+        req.SpeakerDiarization = 1
+        req.ChannelNum = 1
+        if not str(f).startswith("http"):
+            req.Data = encoded_string.decode('ascii')
+            req.SourceType = 1
+        else:
+            req.Url = f
+            req.SourceType = 0
+        resp = client.CreateRecTask(req)
 
-            L.info(f"Tencent is transcribing '{pathlib.Path(f).stem}'...")
-            req = models.DescribeTaskStatusRequest()
-            req.TaskId = resp.Data.TaskId
+        L.info(f"Tencent is transcribing '{pathlib.Path(f).stem}'...")
+        req = models.DescribeTaskStatusRequest()
+        req.TaskId = resp.Data.TaskId
 
+        res = client.DescribeTaskStatus(req)
+        while res.Data.Status not in [2, 3]:
+            time.sleep(15)
             res = client.DescribeTaskStatus(req)
-            while res.Data.Status not in [2, 3]:
-                time.sleep(15)
-                res = client.DescribeTaskStatus(req)
 
-            if res.Data.Status in ["3", 3]:
-                raise RuntimeError(f"Tencent reports job failed! error='{res.Data.ErrorMsg}'")
+        if res.Data.Status in ["3", 3]:
+            raise RuntimeError(f"Tencent reports job failed! error='{res.Data.ErrorMsg}'")
 
-            turns = []
-            for i in res.Data.ResultDetail:
-                turn = []
-                start = i.StartMs
-                for j in i.Words:
-                    word = j.Word
-                    if self.__lang == "yue":
-                        word = cc.convert(word)
-                        
-                        word = self.replace_cantonese_words(word)
+        turns = []
+        for i in res.Data.ResultDetail:
+            turn = []
+            start = i.StartMs
+            for j in i.Words:
+                word = j.Word
+                if self.__lang == "yue":
+                    word = cc.convert(word)
 
-                    turn.append({
-                        "type": "text",
-                        "ts": (j.OffsetStartMs + start) / 1000,
-                        "end_ts": (j.OffsetEndMs + start) / 1000,
-                        "value": word
-                    })
-                turns.append({
-                    "elements": turn,
-                    "speaker": i.SpeakerId
+                    word = self.replace_cantonese_words(word)
+
+                turn.append({
+                    "type": "text",
+                    "ts": (j.OffsetStartMs + start) / 1000,
+                    "end_ts": (j.OffsetEndMs + start) / 1000,
+                    "value": word
                 })
-            L.debug(f"Tencent done.")
-            
-            # Extract the text from the small volume parts for translation
+            turns.append({
+                "elements": turn,
+                "speaker": i.SpeakerId
+            })
+        L.debug(f"Tencent done.")
 
-            doc = process_generation({"monologues": turns},
-                                    self.__lang_code, 
-                                    utterance_engine=self.__engine)
-            media = Media(type=MediaType.AUDIO, name=Path(f).stem, url=f)
-            doc.media = media
-            return doc
-            
-        finally:
-            if processed_path != f and pathlib.Path(processed_path).exists():
-                pathlib.Path(processed_path).unlink()
+        # Extract the text from the small volume parts for translation
+
+        doc = process_generation({"monologues": turns},
+                                self.__lang_code, 
+                                utterance_engine=self.__engine)
+        media = Media(type=MediaType.AUDIO, name=Path(f).stem, url=f)
+        doc.media = media
+        return doc
+
