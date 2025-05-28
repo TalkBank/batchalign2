@@ -331,6 +331,9 @@ def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
               show_default=True,
               default="eng",
               type=str)
+@click.option("--data",
+              help="the URL of the data",
+              type=str)
 @click.option("-n", "--num_speakers", type=int, help="number of speakers in the language sample", default=2)
 @click.pass_context
 def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, **kwargs):
