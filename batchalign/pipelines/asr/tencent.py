@@ -111,6 +111,11 @@ class TencentEngine(BatchalignEngine):
             "重復": "重複"
         }
         return word_replacements.get(word, word)
+
+    @staticmethod
+    def is_roman(x):
+        """check if x contains only roman characters"""
+        return all(c.isalpha() and ord(c) < 128 for c in x if not c.isspace())
     
     def generate(self, f, **kwargs):
         lang = self.__lang
@@ -157,6 +162,9 @@ class TencentEngine(BatchalignEngine):
         for i in res.Data.ResultDetail:
             turn = []
             start = i.StartMs
+            roman_cache = ""
+            roman_cache_start = i.StartMs
+            roman_cache_end = i.StartMs
             for j in i.Words:
                 word = j.Word
                 if self.__lang == "yue":
@@ -164,12 +172,35 @@ class TencentEngine(BatchalignEngine):
 
                     word = self.replace_cantonese_words(word)
 
+                if self.is_roman(word):
+                    if roman_cache == "":
+                        roman_cache_start = (j.OffsetStartMs + start)
+                    roman_cache = roman_cache + word
+                    roman_cache_end = (j.OffsetEndMs + start)
+                else:
+                    if roman_cache != "":
+                        turn.append({
+                            "type": "text",
+                            "ts": roman_cache_start / 1000,
+                            "end_ts": roman_cache_end / 1000,
+                            "value": roman_cache
+                        })
+                    roman_cache = ""
+                    turn.append({
+                        "type": "text",
+                        "ts": (j.OffsetStartMs + start) / 1000,
+                        "end_ts": (j.OffsetEndMs + start) / 1000,
+                        "value": word
+                    })
+
+            if roman_cache != "":
                 turn.append({
                     "type": "text",
-                    "ts": (j.OffsetStartMs + start) / 1000,
-                    "end_ts": (j.OffsetEndMs + start) / 1000,
-                    "value": word
+                    "ts": roman_cache_start / 1000,
+                    "end_ts": roman_cache_end / 1000,
+                    "value": roman_cache
                 })
+
             turns.append({
                 "elements": turn,
                 "speaker": i.SpeakerId
