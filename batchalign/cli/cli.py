@@ -111,7 +111,8 @@ batchalign.add_command(train, "models")
 @click.option("--wav2vec/--whisper_fa",
               default=True, help="Use Whisper instead of Wav2Vec for English (defaults for Whisper for non-English)")
 @click.option("--pauses", type=bool, default=False, help="Should we try to bullet each word or should we try to add pauses in between words by grouping them? Default: no pauses.", is_flag=True)
-
+@click.option("--wor/--nowor",
+              default=True, help="Should we write word level alignment line? Default to yes.")
 @click.pass_context
 def align(ctx, in_dir, out_dir, whisper, wav2vec, **kwargs):
     """Align transcripts against corresponding media files."""
@@ -122,7 +123,7 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, **kwargs):
         )
 
     def writer(doc, output):
-        CHATFile(doc=doc).write(output)
+        CHATFile(doc=doc).write(output, write_wor=kwargs.get("wor", True))
 
     if not wav2vec:
         _dispatch("align", "eng", 1,
