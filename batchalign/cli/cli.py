@@ -345,7 +345,9 @@ def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, **kwar
         cha = p.with_suffix(".cha")
         # if there are not cha file found, we complain
         if not cha.exists():
-            raise FileNotFoundError(f"No gold .cha transcript found, we cannot do benchmarking. audio: {p.name}, desired cha: {cha.name}, looked in: {str(cha)}.")
+            cha = (Path(in_dir)/p.name).with_suffix(".cha")
+            if not cha.exists():
+                raise FileNotFoundError(f"No gold .cha transcript found, we cannot do benchmarking. audio: {p.name}, desired cha: {cha.name}, looked in: {str(cha)}.")
         # otherwise, load the goald along with the input file
         return file, {"gold": CHATFile(path=str(cha), special_mor_=True).doc}
 
