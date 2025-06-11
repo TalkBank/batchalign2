@@ -77,6 +77,8 @@ def _dispatch(command, lang, num_speakers,
             files.append(url)
             outputs.append(os.path.join(out_dir, base))
 
+    extr_data_mapping = {}
+
     for basedir, _, fs in os.walk(in_dir):
         for f in fs:
             path = Path(os.path.join(basedir, f))
@@ -116,6 +118,16 @@ def _dispatch(command, lang, num_speakers,
             # if the file needs to get processed, append it to the list
             # to be processed and compute the output 
             if ext in extensions:
+                for indx, i in enumerate(files):
+                    # check if this is a duplicate file
+                    if (not isinstance(i, str) and
+                        Path(i.geturl()).stem == Path(inp_path).stem):
+                        extr_data_mapping[inp_path] = i.geturl()
+
+                        files.pop(indx)
+                        outputs.pop(indx)
+                        break
+                        
                 files.append(inp_path)
                 outputs.append(str(repathed))
             # otherwise just copy the file
@@ -176,6 +188,7 @@ def _dispatch(command, lang, num_speakers,
                     # RUN THE PUPPY!
                     doc = pipeline(doc,
                                    callback=lambda *args:progress_callback(file, *args),
+                                   extra_info={"extra_input": extr_data_mapping.get(file)},
                                    **kw)
                 msgs = [escape(str(i.message)).strip() for i in w]
                 # write the format, as needed

@@ -110,11 +110,16 @@ batchalign.add_command(train, "models")
               default=False, help="For utterance timing recovery, OpenAI Whisper (ASR) instead of Rev.AI (default).")
 @click.option("--wav2vec/--whisper_fa",
               default=True, help="Use Whisper instead of Wav2Vec for English (defaults for Whisper for non-English)")
+@click.option("--tencent/--rev",
+              default=False, help="Use Tencent instead of Rev.AI (default).")
 @click.option("--pauses", type=bool, default=False, help="Should we try to bullet each word or should we try to add pauses in between words by grouping them? Default: no pauses.", is_flag=True)
 @click.option("--wor/--nowor",
               default=True, help="Should we write word level alignment line? Default to yes.")
+@click.option("--data",
+              help="the URL of the data",
+              type=str)
 @click.pass_context
-def align(ctx, in_dir, out_dir, whisper, wav2vec, **kwargs):
+def align(ctx, in_dir, out_dir, whisper, wav2vec, tencent, **kwargs):
     """Align transcripts against corresponding media files."""
     def loader(file):
         return (
@@ -131,7 +136,8 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, **kwargs):
                   in_dir, out_dir,
                   loader, writer, C,
                   fa="whisper_fa",
-                  utr="whisper_utr" if whisper else "rev_utr",
+                  utr=("whisper_utr" if whisper else
+                       ("tencent_utr" if tencent else "rev_utr")),
                   **kwargs)
     else:
         _dispatch("align", "eng", 1,
@@ -139,7 +145,8 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, **kwargs):
                   in_dir, out_dir,
                   loader, writer, C,
                   fa="wav2vec_fa",
-                  utr="whisper_utr" if whisper else "rev_utr",
+                  utr=("whisper_utr" if whisper else
+                       ("tencent_utr" if tencent else "rev_utr")),
                   **kwargs)
 
 #################### TRANSCRIBE ################################

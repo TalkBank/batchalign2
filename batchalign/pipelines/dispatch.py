@@ -7,7 +7,7 @@ from batchalign import (WhisperEngine, WhisperFAEngine, StanzaEngine, RevEngine,
                         NgramRetraceEngine, DisfluencyReplacementEngine, WhisperUTREngine,
                         RevUTREngine, EvaluationEngine, WhisperXEngine, NemoSpeakerEngine,
                         StanzaUtteranceEngine, CorefEngine, Wave2VecFAEngine, SeamlessTranslationModel, TencentEngine,
-                        GoogleTranslateEngine, OAIWhisperEngine)
+                        GoogleTranslateEngine, OAIWhisperEngine, TencentUTREngine)
 
 from batchalign import BatchalignPipeline
 from batchalign.models import resolve
@@ -136,6 +136,8 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
             engines.append(SeamlessTranslationModel())
         elif engine == "tencent":
             engines.append(TencentEngine(lang=lang))
+        elif engine == "tencent_utr":
+            engines.append(TencentUTREngine(lang=lang))
         elif engine == "gtrans":
             engines.append(GoogleTranslateEngine())
         elif engine == "whisper_oai":
