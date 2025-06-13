@@ -107,15 +107,7 @@ class TencentUTREngine(BatchalignEngine):
 
     def process(self, doc, **kwargs):
         # bring language code into the stack to access
-        lang = self.__lang
-        try:
-            lang = pycountry.languages.get(alpha_3=doc.langs[0]).alpha_2
-        except:
-            # some languages don't have alpha 2
-            pass
-
-        if lang == "zh":
-            lang = "cmn"
+        lang = doc.langs[0]
 
         client = self.__client
 
@@ -131,9 +123,6 @@ class TencentUTREngine(BatchalignEngine):
             assert doc.media != None and doc.media.url != None, f"We cannot add utterance timings to something that doesn't have a media path! Provided media tier='{doc.media}'"
 
         f = f if f else doc.media.url
-
-        lang = self.__lang
-        client = self.__client
 
 
 
