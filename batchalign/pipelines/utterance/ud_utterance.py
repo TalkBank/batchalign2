@@ -296,7 +296,10 @@ class StanzaUtteranceEngine(BatchalignEngine):
             
             if len(i.content) == 0:
                 continue
-            new_uts = process_ut(i, nlp)
+            try:
+                new_uts = process_ut(i, nlp)
+            except IndexError:
+                new_uts = [i]
             contents += new_uts
 
         doc.content = contents

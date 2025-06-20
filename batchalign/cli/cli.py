@@ -116,8 +116,7 @@ batchalign.add_command(train, "models")
 @click.option("--wor/--nowor",
               default=True, help="Should we write word level alignment line? Default to yes.")
 @click.option("--data",
-              help="the URL of the data",
-              type=str)
+              help="the URL of the data", type=str)
 @click.pass_context
 def align(ctx, in_dir, out_dir, whisper, wav2vec, tencent, **kwargs):
     """Align transcripts against corresponding media files."""
