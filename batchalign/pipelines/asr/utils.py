@@ -247,7 +247,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
                     seen_word = True
                     words.append(Form(text=word_replaced, time=(int(start), int(end))))
             else:
-                    words.append(Form(text=word_replaced, time=None))
+                    words.append(Form(text=word, time=None))
 
         final_utterances.append(Utterance(
             tier=participant,
