@@ -8,7 +8,7 @@ The TalkBank Project, of which Batchalign is a part, is supported by NIH grant H
 
 ## Quick Start
 
-The following instructions provide a quick start to installing Batchalign. For most users aiming to process CHAT and audio with Batchalign, we recommend more detailed usage instructions: for [usage](https://talkbank.org/info/BA2-usage.pdf) and [human transcript cleanup](https://talkbank.org/info/BA2-cleanup.pdf). The following provides a quick start guide for the program.
+The following instructions provide a quick start to installing Batchalign. For most users aiming to process CHAT and audio with Batchalign, we recommend more detailed usage instructions: for [usage](https://talkbank.org/0info/BA2-usage.pdf) and [human transcript cleanup](https://talkbank.org/0info/BA2-cleanup.pdf). The following provides a quick start guide for the program.
 
 ### Install and Update the Package
 Batchalign is on PyPi (as `batchalign`). We recommend the use of UV to install Batchalign:
