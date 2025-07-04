@@ -160,6 +160,8 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, tencent, **kwargs):
               default=False, help="Use Tencent instead of Rev.AI (default).")
 @click.option("--whisperx/--rev",
               default=False, help="Use WhisperX instead of Rev.AI (default). Superceeds --whisper.")
+@click.option("--alibaba/--rev",
+              default=False, help="Use Alibaba instead of Rev.AI (default). Superceeds --whisper.")
 @click.option("--diarize/--nodiarize",
               default=False, help="Perform speaker diarization (this flag is ignored with Rev.AI)")
 @click.option("--wor/--nowor",
@@ -188,6 +190,8 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
         asr = "tencent"
     if kwargs["whisper_oai"]:
         asr = "whisper_oai"
+    if kwargs["alibaba"]:
+        asr = "aliyun"
 
     def writer(doc, output):
         doc.content.insert(0, CustomLine(id="Comment", type=CustomLineType.INDEPENDENT,
