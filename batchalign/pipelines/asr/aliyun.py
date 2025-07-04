@@ -75,8 +75,7 @@ class Runner:
         # print("test_on_start:{}".format(message))
 
     def test_on_error(self, message, *args):
-        ...
-        # print("on_error {} args=>{}".format(message, args))
+        raise ValueError(message)
 
     def test_on_close(self, *args):
         ...
