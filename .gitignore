@@ -11,3 +11,4 @@ specification.py
 /.eggs/
 
 *.egg-info
+/.env

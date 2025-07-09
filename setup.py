@@ -59,6 +59,8 @@ setup(
         "tencentcloud-sdk-python-common",
         "tencentcloud-sdk-python-asr",
         "googletrans",
+        "aliyun-python-sdk-core>=2.13.3",
+        "oss2",
         "openai-whisper>=20240930"
     ],
     extras_require={
