@@ -237,11 +237,15 @@ def process_generation(output, lang="eng", utterance_engine=None):
             if word.strip() == "":
                 continue
             if word not in ENDING_PUNCT+MOR_PUNCT:
+                word_replaced = word
+                if word_replaced.strip() == "i":
+                    word_replaced = "I"
+                    
                 if start == None or end == None:
-                    words.append(Form(text=word, time=None))
+                    words.append(Form(text=word_replaced, time=None))
                 else:
                     seen_word = True
-                    words.append(Form(text=word, time=(int(start), int(end))))
+                    words.append(Form(text=word_replaced, time=(int(start), int(end))))
             else:
                     words.append(Form(text=word, time=None))
 
