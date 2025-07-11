@@ -13,5 +13,3 @@ L.basicConfig(format=LOG_FORMAT, level=L.ERROR)
 L.getLogger("stanza").setLevel(L.ERROR)
 L.getLogger('batchalign').setLevel(L.DEBUG)
 
-
-########
