@@ -38,9 +38,47 @@ def conform(x):
         elif "wanna" == i.strip():
             result.append("want")
             result.append("to")
+        elif "ii" == i.strip():
+            result.append("i")
+            result.append("i")
+        elif "i'd" == i.strip():
+            result.append("i")
+            result.append("had")
+        elif "tshirts" == i.strip():
+            result.append("t")
+            result.append("shirts")
+        elif "tshirts" == i.strip():
+            result.append("t")
+            result.append("shirts")
+        elif "anytime" == i.strip():
+            result.append("any")
+            result.append("time")
+        elif "alright" == i.strip():
+            result.append("all")
+            result.append("right")
+        elif "sorta" == i.strip():
+            result.append("sort")
+            result.append("of")
+        elif "alrightie" == i.strip():
+            result.append("all")
+            result.append("right")
+        elif "mm" == i.strip():
+            result.append("hm")
+        elif "ai" == i.strip():
+            result.append("a")
+            result.append("i")
+        elif "this'll" == i.strip():
+            result.append("this")
+            result.append("will")
         elif "gotta" == i.strip():
             result.append("got")
             result.append("to")
+        elif "eh" == i.strip():
+            result.append("uh")
+        elif "kinda" == i.strip():
+            result.append("a")
+            result.append("kind")
+            result.append("of")
         elif "farmhouse" == i.strip():
             result.append("farm")
             result.append("house")
