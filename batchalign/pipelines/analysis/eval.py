@@ -57,6 +57,11 @@ def conform(x):
 
     return result
 
+def match_fn(x,y):
+    return (y == x or
+            y.replace("(", "").replace(")", "") == x.replace("(", "").replace(")", "") or
+            re.sub(r"\((.*)\)",r"", y) == x or re.sub(r"\((.*)\)",r"", x) == y)
+
 class EvaluationEngine(BatchalignEngine):
     tasks = [ Task.WER ]
 
@@ -69,8 +74,8 @@ class EvaluationEngine(BatchalignEngine):
         forms = [i.replace("-", "") for i in forms if i.strip() not in MOR_PUNCT+ENDING_PUNCT]
         gold_forms = [i.replace("-", "") for i in gold_forms if i.strip() not in MOR_PUNCT+ENDING_PUNCT]
 
-        forms = [re.sub(r"\((.*)\)",r"", i) for i in forms]
-        gold_forms = [re.sub(r"\((.*)\)",r"", i) for i in gold_forms]
+        # forms = [re.sub(r"\((.*)\)",r"", i) for i in forms]
+        # gold_forms = [re.sub(r"\((.*)\)",r"", i) for i in gold_forms]
 
         # if there are single letter frames, we combine them tofgether
         # until the utterance is done or there isn't any left
@@ -111,7 +116,7 @@ class EvaluationEngine(BatchalignEngine):
         forms_final = conform(forms_final)
 
         # dp!
-        alignment = align(forms_final, gold_final, False)
+        alignment = align(forms_final, gold_final, False, match_fn)
 
         # calculate each type of error
         sub = 0

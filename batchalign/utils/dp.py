@@ -76,7 +76,7 @@ def __serialize_arr(src, tgt):
 
     return src_serialized, tgt_serialized
 
-def __dp(payload, reference, t):
+def __dp(payload, reference, t, match_fn):
     """Performs bottom-up dynamic programming alignment
 
     Parameters
@@ -149,7 +149,7 @@ def __dp(payload, reference, t):
             # get a match.
 
             # recall 1 indexing
-            is_match = (reference[i-1].key == payload[j-1].key)
+            is_match = match_fn(reference[i-1].key, payload[j-1].key)
 
             # calculate new distances
             new_dist1 = dist1+(0 if is_match else 2)
@@ -209,15 +209,16 @@ def __dp(payload, reference, t):
 
 def align(source_payload_sequence,
           target_reference_sequence,
-          tqdm=True):
+          tqdm=True,
+          match_fn=lambda x,y: x==y):
     """Align two sequences"""
 
     if (len(source_payload_sequence) > 0 and
         type(source_payload_sequence[0]) == PayloadTarget):
-        return __dp(source_payload_sequence, target_reference_sequence, tqdm)
+        return __dp(source_payload_sequence, target_reference_sequence, tqdm, match_fn)
     else:
         return __dp(*__serialize_arr(source_payload_sequence,
-                                     target_reference_sequence), tqdm)
+                                     target_reference_sequence), tqdm, match_fn)
 
 # align([1,2,3,4,4,5,5,5], [1,1,3,4,4,12,5,5,18])
 

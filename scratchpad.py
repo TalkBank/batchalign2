@@ -30,6 +30,16 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 # print(result["text"])
 
+asr = CHATFile(path="../talkbank-alignment/output/asr.cha").doc
+gold = CHATFile(path="../talkbank-alignment/output/gold.cha").doc
+
+asr
+gold
+
+eval = EvaluationEngine()
+print(eval.analyze(asr, gold=gold)["diff"])
+
+
 # # !uv pip install openai-whisper
 # # !uv pip freeze | grep openai
 # # !uv pip install googletrans
