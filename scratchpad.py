@@ -30,14 +30,14 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 # print(result["text"])
 
-asr = CHATFile(path="../talkbank-alignment/output/asr.cha").doc
-gold = CHATFile(path="../talkbank-alignment/output/gold.cha").doc
+# asr = CHATFile(path="../talkbank-alignment/output/asr.cha").doc
+# gold = CHATFile(path="../talkbank-alignment/output/gold.cha").doc
 
-asr
-gold
+# asr
+# gold
 
-eval = EvaluationEngine()
-print(eval.analyze(asr, gold=gold)["diff"])
+# eval = EvaluationEngine()
+# print(eval.analyze(asr, gold=gold)["diff"])
 
 
 # # !uv pip install openai-whisper
@@ -66,18 +66,31 @@ print(eval.analyze(asr, gold=gold)["diff"])
 # # # # #     json.dump(Document.model_json_schema(), df, indent=4)
 # # # # res
 # # # # ########### The Batchalign Core Test Harness ###########
-# # from batchalign.formats.chat.parser import chat_parse_utterance
-# # chat_parse_utterance
-# # # # from batchalign.formats.chat.generator import check_utterances_ordered
-# # # *ANA:	[- spa] para que vengan . •141170_142119•
-# # # %eng:	for them to come .
-# # # *GLO:	eh ? •142796_143154•
-# # # %eng:	what ?
+# from batchalign.formats.chat.parser import chat_parse_utterance
+# forms, delim = chat_parse_utterance("The binkybox .", None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim)
+# gold = Document(content=[utterance], langs=["eng"])
 
-# # # # doc[0].time = (0, 3232)
-# # # # doc[1].time = (3232, 19223)
-# # # # doc.content.append(CustomLine(id="he", type=CustomLineType.DEPENDENT, content="chicken"))
-# # # # import copy
+# forms, delim = chat_parse_utterance("The binkybox .", None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim)
+# asr = Document(content=[utterance], langs=["eng"])
+
+# result = EvaluationEngine().analyze(asr, gold=gold)
+# # print(CHATFile(doc=result)
+
+# print(result["diff"])
+
+# # # chat_parse_utterance
+# # # # # from batchalign.formats.chat.generator import check_utterances_ordered
+# # # # *ANA:	[- spa] para que vengan . •141170_142119•
+# # # # %eng:	for them to come .
+# # # # *GLO:	eh ? •142796_143154•
+# # # # %eng:	what ?
+
+# # # # # doc[0].time = (0, 3232)
+# # # # # doc[1].time = (3232, 19223)
+# # # # # doc.content.append(CustomLine(id="he", type=CustomLineType.DEPENDENT, content="chicken"))
+# # # # # import copy
 # # # # doc.content.append(copy.deepcopy(doc.content[0]))
 # # # # # doc.content[0].time = (0,1)
 # # # # doc.content[-1].time = (19223, 392039203)
@@ -115,7 +128,6 @@ print(eval.analyze(asr, gold=gold)["diff"])
 # # # doc = Document.new("記 得 細 心 聆 聽 每 個 情 景 呢 留 翻 一 個 相 關 嘅 經 歷 當 你 準 備 好 嘅 時 候 呢 就 可 以 話 畀 我 聽 啦 .", lang="zho")
 # # # # doc
 
-# # # # forms, delim = chat_parse_utterance("«Идроэлектрика»—–", None, None, None, None)
 # # # # utterance = Utterance(content=forms, delim=delim)
 # # # # doc = Document(content=[utterance], langs=["zho"])
 
@@ -200,7 +212,7 @@ print(eval.analyze(asr, gold=gold)["diff"])
 # # # # from batchalign.pipelines import BatchalignPipeline
 # # # forms, delim = chat_parse_utterance("[- spa] eat a chicken .", None, None, None, None)
 # # # utterance = Utterance(content=forms, delim=delim)
-# # # ut = Document(content=[utterance], langs=["eng"])
+# # ut = Document(content=[utterance], langs=["eng"])
 # # # ut[0].override_lang = "spa"
 
 

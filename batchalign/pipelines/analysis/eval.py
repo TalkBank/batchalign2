@@ -11,25 +11,47 @@ from batchalign.utils.config import config_read
 
 from batchalign.utils.dp import align, ExtraType, Extra, Match
 from batchalign.utils.names import names
+from batchalign.utils.compounds import compounds
 
 import logging
 L = logging.getLogger("batchalign")
 
+joined_compounds = ["".join(k) for k in compounds]
+
+fillers = ["um", "uhm", "em", "mhm", "uhhm", "eh", "uh"]
 def conform(x):
     result = []
     for i in x:
-        if "'s" in i.strip():
+        if i.strip() in joined_compounds:
+            for k in compounds[joined_compounds.index(i.strip())]:
+                result.append(k)
+        elif "'s" in i.strip():
             result.append(i.split("'")[0])
             result.append("is")
-        elif "americanstyle" == i.strip():
-            result.append("american")
-            result.append("style")
-        elif "postwar" == i.strip():
-            result.append("post")
-            result.append("war")
-        elif "postwar" == i.strip():
-            result.append("post")
-            result.append("war")
+        elif "'ve" in i.strip():
+            result.append(i.split("'")[0])
+            result.append("have")
+        elif "'s" in i.strip():
+            result.append(i.split("'")[0])
+            result.append("is")
+        elif "'d" in i.strip():
+            result.append(i.split("'")[0])
+            result.append("had")
+        elif "'m" in i.strip():
+            result.append(i.split("'")[0])
+            result.append("am")
+        elif i.strip() in fillers:
+            result.append("um")
+        elif "-" in i.strip():
+            result += [k.strip() for k in i.split("-")]
+        elif "ok" == i.strip():
+            result.append("okay")
+        elif "gimme" == i.strip():
+            result.append("give")
+            result.append("me")
+        elif "hafta" == i.strip() or "havta" == i.strip():
+            result.append("have")
+            result.append("to")
         elif i.strip() in names:
             result.append("name")
         elif "dunno" == i.strip():
@@ -38,21 +60,16 @@ def conform(x):
         elif "wanna" == i.strip():
             result.append("want")
             result.append("to")
+        elif "bbc" == i.strip():
+            result.append("b")
+            result.append("b")
+            result.append("c")
         elif "ii" == i.strip():
             result.append("i")
             result.append("i")
         elif "i'd" == i.strip():
             result.append("i")
             result.append("had")
-        elif "tshirts" == i.strip():
-            result.append("t")
-            result.append("shirts")
-        elif "tshirts" == i.strip():
-            result.append("t")
-            result.append("shirts")
-        elif "anytime" == i.strip():
-            result.append("any")
-            result.append("time")
         elif "alright" == i.strip():
             result.append("all")
             result.append("right")
@@ -73,18 +90,34 @@ def conform(x):
         elif "gotta" == i.strip():
             result.append("got")
             result.append("to")
+        elif "hadta" == i.strip():
+            result.append("had")
+            result.append("to")
         elif "eh" == i.strip():
             result.append("uh")
         elif "kinda" == i.strip():
-            result.append("a")
             result.append("kind")
             result.append("of")
+        elif "gonna" == i.strip():
+            result.append("going")
+            result.append("to")
+        elif "shoulda" == i.strip():
+            result.append("should")
+            result.append("have")
+        elif "sposta" == i.strip():
+            result.append("supposed")
+            result.append("to")
         elif "farmhouse" == i.strip():
             result.append("farm")
             result.append("house")
         elif "aa" == i.strip():
             result.append("a")
             result.append("a")
+        elif "aa" == i.strip():
+            result.append("a")
+            result.append("a")
+        elif "em" == i.strip():
+            result.append("them")
         elif "hmm" == i.strip():
             result.append("hm")
         elif "_" in i.strip():
