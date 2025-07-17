@@ -73,11 +73,30 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # # %eng:	for them to come .
 # # # *GLO:	eh ? •142796_143154•
 # # # %eng:	what ?
+# forms, delim = chat_parse_utterance("The binkybox .", None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim)
+# gold = Document(content=[utterance], langs=["eng"])
 
-# # # # doc[0].time = (0, 3232)
-# # # # doc[1].time = (3232, 19223)
-# # # # doc.content.append(CustomLine(id="he", type=CustomLineType.DEPENDENT, content="chicken"))
-# # # # import copy
+# forms, delim = chat_parse_utterance("The binkybox .", None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim)
+# asr = Document(content=[utterance], langs=["eng"])
+
+# result = EvaluationEngine().analyze(asr, gold=gold)
+# # print(CHATFile(doc=result)
+
+# print(result["diff"])
+
+# # # chat_parse_utterance
+# # # # # from batchalign.formats.chat.generator import check_utterances_ordered
+# # # # *ANA:	[- spa] para que vengan . •141170_142119•
+# # # # %eng:	for them to come .
+# # # # *GLO:	eh ? •142796_143154•
+# # # # %eng:	what ?
+
+# # # # # doc[0].time = (0, 3232)
+# # # # # doc[1].time = (3232, 19223)
+# # # # # doc.content.append(CustomLine(id="he", type=CustomLineType.DEPENDENT, content="chicken"))
+# # # # # import copy
 # # # # doc.content.append(copy.deepcopy(doc.content[0]))
 # # # # # doc.content[0].time = (0,1)
 # # # # doc.content[-1].time = (19223, 392039203)
@@ -123,6 +142,12 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # pipeline = BatchalignPipeline(StanzaEngine())
 # result = pipeline(doc, retokenize=True)
 # print(CHATFile(doc=result))
+# # # # utterance = Utterance(content=forms, delim=delim)
+# # # # doc = Document(content=[utterance], langs=["zho"])
+
+# # # pipeline = BatchalignPipeline(GoogleTranslateEngine())
+# # # result = pipeline(doc)
+# # # print(CHATFile(doc=result))
 # # # # !uv pip install googletrans
 # # # # # with open("/Users/houjun/Downloads/talkbank_ch11m-cha_2025-01-22_0939/output/tmp_gold.json") as df:
 # # # # #     gold = Document.model_validate(json.load(df))
@@ -201,7 +226,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # # # from batchalign.pipelines import BatchalignPipeline
 # # # forms, delim = chat_parse_utterance("[- spa] eat a chicken .", None, None, None, None)
 # # # utterance = Utterance(content=forms, delim=delim)
-# # # ut = Document(content=[utterance], langs=["eng"])
+# # ut = Document(content=[utterance], langs=["eng"])
 # # # ut[0].override_lang = "spa"
 
 
