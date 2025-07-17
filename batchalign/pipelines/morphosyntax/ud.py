@@ -72,6 +72,8 @@ def handler(word, lang=None):
     # if the lemma is ", return the word
     # not sure what errors are coming along?
     target = word.lemma
+    if target.strip() == "」" or target.strip() == "「":
+        target = word.text
 
     if target == '"':
         target = word.text
@@ -885,7 +887,6 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, status_hoo
                 L.debug(f"Encountered an utterance that's likely devoid of morphological information; skipping... utterance='{doc.content[indx]}'")
                 continue
 
-
             if retokenize:
                 # rewrite the sentence with our desired tokenizations
                 ut, end = chat_parse_utterance(" ".join([i.text for i in sents[0].tokens])+" "+ending,
@@ -944,7 +945,7 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, status_hoo
                     # we want to replace the morphology of forms that are not actually
                     # supposed to be analyzed
                     elif isinstance(i, Extra) and i.extra_type == ExtraType.REFERENCE:
-                        if ut[i.payload].text != ",":
+                        if ut[i.payload].text not in MOR_PUNCT:
                             ut[i.payload].morphology = [Morphology(
                                 lemma = sents[0].tokens[i.payload].text if len(sents) > 0 and len(sents[0].tokens) > i.payload and sents[0].tokens[i.payload].text != "xbxxx" else ut[i.payload].text,
                                 pos = ut[i.payload].morphology[0].pos if (ut[i.payload].morphology and len(ut[i.payload].morphology) > 0) else "x",
