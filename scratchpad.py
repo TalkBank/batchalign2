@@ -30,14 +30,14 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 # print(result["text"])
 
-asr = CHATFile(path="../talkbank-alignment/output/asr.cha").doc
-gold = CHATFile(path="../talkbank-alignment/output/gold.cha").doc
+# asr = CHATFile(path="../talkbank-alignment/output/asr.cha").doc
+# gold = CHATFile(path="../talkbank-alignment/output/gold.cha").doc
 
-asr
-gold
+# asr
+# gold
 
-eval = EvaluationEngine()
-print(eval.analyze(asr, gold=gold)["diff"])
+# eval = EvaluationEngine()
+# print(eval.analyze(asr, gold=gold)["diff"])
 
 
 # # !uv pip install openai-whisper
@@ -66,7 +66,7 @@ print(eval.analyze(asr, gold=gold)["diff"])
 # # # # #     json.dump(Document.model_json_schema(), df, indent=4)
 # # # # res
 # # # # ########### The Batchalign Core Test Harness ###########
-# # from batchalign.formats.chat.parser import chat_parse_utterance
+# from batchalign.formats.chat.parser import chat_parse_utterance
 # # chat_parse_utterance
 # # # # from batchalign.formats.chat.generator import check_utterances_ordered
 # # # *ANA:	[- spa] para que vengan . •141170_142119•
@@ -114,14 +114,15 @@ print(eval.analyze(asr, gold=gold)["diff"])
 
 # # # doc = Document.new("記 得 細 心 聆 聽 每 個 情 景 呢 留 翻 一 個 相 關 嘅 經 歷 當 你 準 備 好 嘅 時 候 呢 就 可 以 話 畀 我 聽 啦 .", lang="zho")
 # # # # doc
+# 
+# forms, delim = chat_parse_utterance("むどー.", None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim)
+# doc = Document(content=[utterance], langs=["jpn"])
+# doc = CHATFile(path="../talkbank-alignment/input/test.cha").doc
 
-# # # # forms, delim = chat_parse_utterance("«Идроэлектрика»—–", None, None, None, None)
-# # # # utterance = Utterance(content=forms, delim=delim)
-# # # # doc = Document(content=[utterance], langs=["zho"])
-
-# # # pipeline = BatchalignPipeline(GoogleTranslateEngine())
-# # # result = pipeline(doc)
-# # # print(CHATFile(doc=result))
+# pipeline = BatchalignPipeline(StanzaEngine())
+# result = pipeline(doc, retokenize=True)
+# print(CHATFile(doc=result))
 # # # # !uv pip install googletrans
 # # # # # with open("/Users/houjun/Downloads/talkbank_ch11m-cha_2025-01-22_0939/output/tmp_gold.json") as df:
 # # # # #     gold = Document.model_validate(json.load(df))
