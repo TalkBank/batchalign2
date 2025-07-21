@@ -60,6 +60,14 @@ def conform(x):
         elif "wanna" == i.strip():
             result.append("want")
             result.append("to")
+        elif "mba" == i.strip():
+            result.append("m")
+            result.append("b")
+            result.append("a")
+        elif "tli" == i.strip():
+            result.append("t")
+            result.append("l")
+            result.append("i")
         elif "bbc" == i.strip():
             result.append("b")
             result.append("b")
