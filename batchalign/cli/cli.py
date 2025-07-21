@@ -346,6 +346,8 @@ def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
               help="the URL of the data",
               type=str)
 @click.option("-n", "--num_speakers", type=int, help="number of speakers in the language sample", default=2)
+@click.option("--wor/--nowor",
+              default=False, help="Should we write word level alignment line? Default to no.")
 @click.pass_context
 def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, **kwargs):
     """Benchmark ASR utilities for their word accuracy"""
@@ -369,7 +371,8 @@ def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, **kwar
             df.write(str(doc["wer"]))
         with open(Path(output).with_suffix(".diff"), 'w') as df:
             df.write(str(doc["diff"]))
-        CHATFile(doc=doc["doc"]).write(str(Path(output).with_suffix(".asr.cha")))
+        CHATFile(doc=doc["doc"]).write(str(Path(output).with_suffix(".asr.cha")),
+                                       write_wor=kwargs.get("wor", False))
 
 
     _dispatch("benchmark", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
