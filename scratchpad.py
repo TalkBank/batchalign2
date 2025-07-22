@@ -16,6 +16,8 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 ########
 
+# 1+1
+
 # import whisper
 
 # model = whisper.load_model("turbo")
@@ -76,15 +78,18 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # forms, delim = chat_parse_utterance("The binkybox .", None, None, None, None)
 # utterance = Utterance(content=forms, delim=delim)
 # gold = Document(content=[utterance], langs=["eng"])
+from batchalign.formats.chat.parser import chat_parse_utterance
+forms, delim = chat_parse_utterance("The binkybox e c g ecg .", None, None, None, None)
+utterance = Utterance(content=forms, delim=delim)
+gold = Document(content=[utterance], langs=["eng"])
 
-# forms, delim = chat_parse_utterance("The binkybox .", None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim)
-# asr = Document(content=[utterance], langs=["eng"])
+forms, delim = chat_parse_utterance("The binky box ecg e c g .", None, None, None, None)
+utterance = Utterance(content=forms, delim=delim)
+asr = Document(content=[utterance], langs=["eng"])
 
-# result = EvaluationEngine().analyze(asr, gold=gold)
-# # print(CHATFile(doc=result)
+result = EvaluationEngine().analyze(asr, gold=gold)
 
-# print(result["diff"])
+print(result["diff"])
 
 # # # chat_parse_utterance
 # # # # # from batchalign.formats.chat.generator import check_utterances_ordered
