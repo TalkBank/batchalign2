@@ -12,11 +12,13 @@ from batchalign.utils.config import config_read
 from batchalign.utils.dp import align, ExtraType, Extra, Match
 from batchalign.utils.names import names
 from batchalign.utils.compounds import compounds
+from batchalign.utils.abbrev import abbrev
 
 import logging
 L = logging.getLogger("batchalign")
 
 joined_compounds = ["".join(k) for k in compounds]
+lowered_abbrev = [k.lower() for k in abbrev]
 
 fillers = ["um", "uhm", "em", "mhm", "uhhm", "eh", "uh"]
 def conform(x):
@@ -25,6 +27,9 @@ def conform(x):
         if i.strip() in joined_compounds:
             for k in compounds[joined_compounds.index(i.strip())]:
                 result.append(k)
+        elif i.strip() in lowered_abbrev:
+            for j in i.strip():
+                result.append(j)
         elif "'s" in i.strip():
             result.append(i.split("'")[0])
             result.append("is")
