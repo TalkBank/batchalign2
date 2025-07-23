@@ -156,7 +156,7 @@ regex==2024.11.6
     #   nltk
     #   tiktoken
     #   transformers
-requests==2.32.3
+requests==2.32.4
     # via
     #   huggingface-hub
     #   rev-ai
@@ -189,7 +189,7 @@ scipy==1.15.2
     #   scikit-learn
 sentencepiece==0.2.0
     # via batchalign (./setup.py)
-setuptools==76.0.0
+setuptools==78.1.1
     # via batchalign (./setup.py)
 six==1.17.0
     # via
@@ -216,7 +216,7 @@ tokenizers==0.21.1
     #   transformers
 toml==0.10.2
     # via coverage
-torch==2.6.0
+torch==2.7.1
     # via
     #   batchalign (./setup.py)
     #   accelerate
