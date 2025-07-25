@@ -68,7 +68,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # # # #     json.dump(Document.model_json_schema(), df, indent=4)
 # # # # res
 # # # # ########### The Batchalign Core Test Harness ###########
-# from batchalign.formats.chat.parser import chat_parse_utterance
+from batchalign.formats.chat.parser import chat_parse_utterance
 # # chat_parse_utterance
 # # # # from batchalign.formats.chat.generator import check_utterances_ordered
 # # # *ANA:	[- spa] para que vengan . •141170_142119•
@@ -78,18 +78,20 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # forms, delim = chat_parse_utterance("The binkybox .", None, None, None, None)
 # utterance = Utterance(content=forms, delim=delim)
 # gold = Document(content=[utterance], langs=["eng"])
-from batchalign.formats.chat.parser import chat_parse_utterance
-forms, delim = chat_parse_utterance("The binkybox e c g ecg .", None, None, None, None)
+# from batchalign.formats.chat.parser import chat_parse_utterance
+forms, delim = chat_parse_utterance("beoh [!] <oh (.) wee oh> [>] +/.", None, None, None, None)
 utterance = Utterance(content=forms, delim=delim)
-gold = Document(content=[utterance], langs=["eng"])
+doc = Document(content=[utterance], langs=["eng"])
+print(doc)
 
-forms, delim = chat_parse_utterance("The binky box ecg e c g .", None, None, None, None)
-utterance = Utterance(content=forms, delim=delim)
-asr = Document(content=[utterance], langs=["eng"])
 
-result = EvaluationEngine().analyze(asr, gold=gold)
+# forms, delim = chat_parse_utterance("The binky box ecg e c g .", None, None, None, None)
+# utterance = Utterance(content=forms, delim=delim)
+# asr = Document(content=[utterance], langs=["eng"])
 
-print(result["diff"])
+# result = EvaluationEngine().analyze(asr, gold=gold)
+
+# print(result["diff"])
 
 # # # chat_parse_utterance
 # # # # # from batchalign.formats.chat.generator import check_utterances_ordered
