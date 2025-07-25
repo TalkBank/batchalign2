@@ -47,7 +47,7 @@ class UtteranceLexer:
                     decoded.append((i, type))
         return decoded
 
-    def __get_until(self, end_tokens=[' ']):
+    def _get_until(self, end_tokens=[' ']):
         has_read_nonempty = False
         tokens = []
         while True:
@@ -79,7 +79,8 @@ class UtteranceLexer:
             # self.__clauses.append((form.strip(), TokenType.FEAT))
         elif form.strip() in NORMAL_GROUP_MARKS:
             # basically ignore the form
-            pass
+            self.__clauses.append((self.__clauses.pop(-1)[0], TokenType.REGULAR))
+            # pass
             # self.__clauses.append((form.strip(), TokenType.FEAT))
         elif form[0] == "[" and form[:2] != "[:":
             # we ignore all other things which are simple annotations
@@ -97,13 +98,13 @@ class UtteranceLexer:
             self.__clauses.append((annotation_clean(form).strip(), TokenType.REGULAR))
 
     def __pull(self):
-        form, num, delim = self.__get_until()
+        form, num, delim = self._get_until()
 
         self.__handle(form, num, delim)
 
         return form
 
-    def __get_group(self, form, type):
+    def _get_group(self, form, type):
         text = ""
         group = [form]
 
@@ -113,10 +114,9 @@ class UtteranceLexer:
 
         # scan forward until we have the first actual form, if
         # its a selection group
-        if type == ">" and annotation_clean(form, special=True) == "":
-            form, num, delim = self.__get_until()
+        if type == ">" and annotation_clean(form, special=True) == "" and form != "<":
+            form, num, delim = self._get_until()
             group = [group.pop(0).strip()+annotation_clean(form)]
-
 
         # decrement nesting first
         if form not in REPEAT_GROUP_MARKS and form not in NORMAL_GROUP_MARKS:
@@ -127,7 +127,7 @@ class UtteranceLexer:
 
         # grab forward the entire group 
         while (type not in form) or (nesting != -1):
-            form, num, delim = self.__get_until()
+            form, num, delim = self._get_until()
 
             sform = copy.deepcopy(form)
             for i in REPEAT_GROUP_MARKS + NORMAL_GROUP_MARKS:
@@ -157,7 +157,6 @@ class UtteranceLexer:
         words = [re.compile(r"[^A-Za-zÀ-ÖØ-öø-ÿ']").sub("", i).strip() for i in group
                  if re.compile(r"[^A-Za-zÀ-ÖØ-öø-ÿ']").sub("", i).strip()!= ""]
 
-
         if type == "]":
             return words, special[0], text
         else:
@@ -167,7 +166,7 @@ class UtteranceLexer:
         orig_form = form
 
         # scan the group
-        words, special, text = self.__get_group(form, type)
+        words, special, text = self._get_group(form, type)
         text = form + text
 
         if len(text.strip()) == 0:
