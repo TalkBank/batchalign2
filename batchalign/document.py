@@ -225,9 +225,9 @@ class Utterance(BaseModel):
         t = re.sub(r" +", " ", t.strip()).strip()
         t = t.replace("+ ,", "+,").strip()
 
-        abbrevs =  [" " .join(list(i)) for i in abbrev]
+        abbrevs =  [" "+" " .join(list(i))+" " for i in abbrev]
         for i in abbrevs:
-            t = t.replace(i, i.replace(" ", ""))
+            t = t.replace(i, " "+i.replace(" ", "")+" ")
 
         return t
 

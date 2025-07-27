@@ -79,10 +79,11 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # utterance = Utterance(content=forms, delim=delim)
 # gold = Document(content=[utterance], langs=["eng"])
 # from batchalign.formats.chat.parser import chat_parse_utterance
-forms, delim = chat_parse_utterance("beoh [!] <oh (.) wee oh> [>] +/.", None, None, None, None)
+forms, delim = chat_parse_utterance("&=laughs [>] .", None, None, None, None)
 utterance = Utterance(content=forms, delim=delim)
 doc = Document(content=[utterance], langs=["eng"])
-print(doc)
+# print(doc)
+#!uv pip install numpy==2.2
 
 
 # forms, delim = chat_parse_utterance("The binky box ecg e c g .", None, None, None, None)
