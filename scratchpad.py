@@ -69,19 +69,10 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # # # res
 # # # # ########### The Batchalign Core Test Harness ###########
 from batchalign.formats.chat.parser import chat_parse_utterance
-# # chat_parse_utterance
-# # # # from batchalign.formats.chat.generator import check_utterances_ordered
-# # # *ANA:	[- spa] para que vengan . •141170_142119•
-# # # %eng:	for them to come .
-# # # *GLO:	eh ? •142796_143154•
-# # # %eng:	what ?
-# forms, delim = chat_parse_utterance("The binkybox .", None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim)
-# gold = Document(content=[utterance], langs=["eng"])
-# from batchalign.formats.chat.parser import chat_parse_utterance
-forms, delim = chat_parse_utterance("&=laughs [>] .", None, None, None, None)
+forms, delim = chat_parse_utterance("&=laughing &~menga .", None, None, None, None)
 utterance = Utterance(content=forms, delim=delim)
 doc = Document(content=[utterance], langs=["eng"])
+print(str(CHATFile(doc=doc)))
 # print(doc)
 #!uv pip install numpy==2.2
 
@@ -113,7 +104,6 @@ doc = Document(content=[utterance], langs=["eng"])
 # # # # # check_utterances_ordered(doc)
 # # # # # 
 
-# # # # print(str(CHATFile(doc=doc)))
 
 # # # # doc = CHATFile(path="../talkbank-alignment/testing_playground_2/input/test.cha").doc
 # # # # pipe = Wave2
