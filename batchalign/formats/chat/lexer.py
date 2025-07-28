@@ -80,8 +80,9 @@ class UtteranceLexer:
         elif form.strip() in NORMAL_GROUP_MARKS:
             # basically ignore the form
             popped = self.__clauses.pop(-1)[0]
-            if not popped.startswith("&="):
-                self.__clauses.append((popped, TokenType.REGULAR))
+            for i in popped:
+                self.__clauses.append(i)
+            # if isinstance(popped, str) and :
             # pass
             # self.__clauses.append((form.strip(), TokenType.FEAT))
         elif form[0] == "[" and form[:2] != "[:":
