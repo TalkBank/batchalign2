@@ -68,12 +68,12 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # # # #     json.dump(Document.model_json_schema(), df, indent=4)
 # # # # res
 # # # # ########### The Batchalign Core Test Harness ###########
-# from batchalign.formats.chat.parser import chat_parse_utterance
-# forms, delim = chat_parse_utterance("&=laughing &~menga .", None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim)
-# doc = Document(content=[utterance], langs=["eng"])
+from batchalign.formats.chat.parser import chat_parse_utterance
+forms, delim = chat_parse_utterance("look at his big [!] eyes .", None, None, None, None)
+utterance = Utterance(content=forms, delim=delim)
+doc = Document(content=[utterance], langs=["eng"])
 # file = CHATFile(path="../talkbank-alignment/input/1042.cha")
-# print(str(CHATFile(doc=file.doc)))
+print(str(CHATFile(doc=doc)))
 # print(doc)
 #!uv pip install numpy==2.2
 
