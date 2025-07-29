@@ -69,17 +69,20 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # # # res
 # # # # ########### The Batchalign Core Test Harness ###########
 from batchalign.formats.chat.parser import chat_parse_utterance
-forms, delim = chat_parse_utterance("&=laughing &~menga .", None, None, None, None)
+forms, delim = chat_parse_utterance("look at his big [!] eyes .", None, None, None, None)
 utterance = Utterance(content=forms, delim=delim)
 doc = Document(content=[utterance], langs=["eng"])
+# file = CHATFile(path="../talkbank-alignment/input/1042.cha")
 print(str(CHATFile(doc=doc)))
 # print(doc)
 #!uv pip install numpy==2.2
 
 
-# forms, delim = chat_parse_utterance("The binky box ecg e c g .", None, None, None, None)
+# forms, delim = chat_parse_utterance("it got a re@u .", None, None, None, None)
 # utterance = Utterance(content=forms, delim=delim)
 # asr = Document(content=[utterance], langs=["eng"])
+
+
 
 # result = EvaluationEngine().analyze(asr, gold=gold)
 
