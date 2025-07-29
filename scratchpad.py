@@ -72,14 +72,17 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # forms, delim = chat_parse_utterance("&=laughing &~menga .", None, None, None, None)
 # utterance = Utterance(content=forms, delim=delim)
 # doc = Document(content=[utterance], langs=["eng"])
-# print(str(CHATFile(doc=doc)))
+# file = CHATFile(path="../talkbank-alignment/input/1042.cha")
+# print(str(CHATFile(doc=file.doc)))
 # print(doc)
 #!uv pip install numpy==2.2
 
 
-# forms, delim = chat_parse_utterance("The binky box ecg e c g .", None, None, None, None)
+# forms, delim = chat_parse_utterance("it got a re@u .", None, None, None, None)
 # utterance = Utterance(content=forms, delim=delim)
 # asr = Document(content=[utterance], langs=["eng"])
+
+
 
 # result = EvaluationEngine().analyze(asr, gold=gold)
 

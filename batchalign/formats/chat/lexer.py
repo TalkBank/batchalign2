@@ -81,7 +81,8 @@ class UtteranceLexer:
             # basically ignore the form
             popped = self.__clauses.pop(-1)[0]
             for i in popped:
-                self.__clauses.append(i)
+                if not isinstance(i, str):
+                    self.__clauses.append(i)
             # if isinstance(popped, str) and :
             # pass
             # self.__clauses.append((form.strip(), TokenType.FEAT))
