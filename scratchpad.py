@@ -135,14 +135,16 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # # doc = Document.new("記 得 細 心 聆 聽 每 個 情 景 呢 留 翻 一 個 相 關 嘅 經 歷 當 你 準 備 好 嘅 時 候 呢 就 可 以 話 畀 我 聽 啦 .", lang="zho")
 # # # # doc
 # 
-# forms, delim = chat_parse_utterance("むどー.", None, None, None, None)
+# forms, delim = chat_parse_utterance("&=cough [>] .", None, None, None, None)
 # utterance = Utterance(content=forms, delim=delim)
-# doc = Document(content=[utterance], langs=["jpn"])
-# doc = CHATFile(path="../talkbank-alignment/input/test.cha").doc
+# doc = Document(content=[utterance], langs=["eng"])
+# doc[0]
+# doc = CHATFile(path="../talkbank-alignment/input/010606.cha").doc
+# doc[1][2]
 
 # pipeline = BatchalignPipeline(StanzaEngine())
 # result = pipeline(doc, retokenize=True)
-# print(CHATFile(doc=result))
+# print(CHATFile(doc=doc))
 # # # # utterance = Utterance(content=forms, delim=delim)
 # # # # doc = Document(content=[utterance], langs=["zho"])
 
@@ -452,4 +454,6 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # # # gra = None
 
 # # # # chat_parse_utterance(main, mor, gra, None, None)
+
+
 
