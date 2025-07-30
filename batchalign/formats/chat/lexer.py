@@ -82,9 +82,11 @@ class UtteranceLexer:
             popped = self.__clauses.pop(-1)[0]
             if not isinstance(popped, str):
                 for i in popped:
-                    self.__clauses.append(i)
+                    if i[0] not in CHAT_IGNORE:
+                        self.__clauses.append(i)
             else:
-                self.__clauses.append((popped, TokenType.REGULAR))
+                if popped not in CHAT_IGNORE:
+                    self.__clauses.append((popped, TokenType.REGULAR))
             # if isinstance(popped, str) and :
             # pass
             # self.__clauses.append((form.strip(), TokenType.FEAT))
