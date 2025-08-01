@@ -44,9 +44,9 @@ class FunAudioEngine(BatchalignEngine):
     @property
     def tasks(self):
         if self.__engine:
-            return [ Task.ASR, Task.SPEAKER_RECOGNITION, Task.UTTERANCE_SEGMENTATION ]
+            return [ Task.ASR, Task.UTTERANCE_SEGMENTATION ]
         else:
-            return [ Task.ASR, Task.SPEAKER_RECOGNITION ]
+            return [ Task.ASR ]
         
     def __init__(self, model="FunAudioLLM/SenseVoiceSmall", lang="yue"):
 
@@ -216,7 +216,7 @@ class FunAudioEngine(BatchalignEngine):
 
             turns.append({
                 "elements": turn,
-                "speaker": "unknown" 
+                "speaker": 0
             })
 
         L.debug(f"Funaudio done.")
