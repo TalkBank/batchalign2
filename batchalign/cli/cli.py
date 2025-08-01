@@ -112,13 +112,15 @@ batchalign.add_command(train, "models")
               default=True, help="Use Whisper instead of Wav2Vec for English (defaults for Whisper for non-English)")
 @click.option("--tencent/--rev",
               default=False, help="Use Tencent instead of Rev.AI (default).")
+@click.option("--funaudio/--rev",
+              default=False, help="Use FunAudio instead of Rev.AI (default).")
 @click.option("--pauses", type=bool, default=False, help="Should we try to bullet each word or should we try to add pauses in between words by grouping them? Default: no pauses.", is_flag=True)
 @click.option("--wor/--nowor",
               default=True, help="Should we write word level alignment line? Default to yes.")
 @click.option("--data",
               help="the URL of the data", type=str)
 @click.pass_context
-def align(ctx, in_dir, out_dir, whisper, wav2vec, tencent, **kwargs):
+def align(ctx, in_dir, out_dir, whisper, wav2vec, tencent, funaudio, **kwargs):
     """Align transcripts against corresponding media files."""
     def loader(file):
         return (
@@ -135,8 +137,9 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, tencent, **kwargs):
                   in_dir, out_dir,
                   loader, writer, C,
                   fa="whisper_fa",
-                  utr=("whisper_utr" if whisper else
-                       ("tencent_utr" if tencent else "rev_utr")),
+                  utr = ("whisper_utr" if whisper else
+                         ("tencent_utr" if tencent else
+                         ("funaudio_utr" if funaudio else "rev_utr"))),
                   **kwargs)
     else:
         _dispatch("align", "eng", 1,
@@ -144,8 +147,9 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, tencent, **kwargs):
                   in_dir, out_dir,
                   loader, writer, C,
                   fa="wav2vec_fa",
-                  utr=("whisper_utr" if whisper else
-                       ("tencent_utr" if tencent else "rev_utr")),
+                  utr = ("whisper_utr" if whisper else
+                         ("tencent_utr" if tencent else
+                         ("funaudio_utr" if funaudio else "rev_utr"))),
                   **kwargs)
 
 #################### TRANSCRIBE ################################
@@ -162,6 +166,8 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, tencent, **kwargs):
               default=False, help="Use WhisperX instead of Rev.AI (default). Superceeds --whisper.")
 @click.option("--alibaba/--rev",
               default=False, help="Use Alibaba instead of Rev.AI (default). Superceeds --whisper.")
+@click.option("--funaudio/--rev",
+              default=False, help="Use FunAudio instead of Rev.AI (default). Superceeds --whisper.")
 @click.option("--diarize/--nodiarize",
               default=False, help="Perform speaker diarization (this flag is ignored with Rev.AI)")
 @click.option("--wor/--nowor",
@@ -192,6 +198,8 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
         asr = "whisper_oai"
     if kwargs["alibaba"]:
         asr = "aliyun"
+    if kwargs["funaudio"]:
+        asr = "funaudio"
 
     def writer(doc, output):
         doc.content.insert(0, CustomLine(id="Comment", type=CustomLineType.INDEPENDENT,
@@ -337,6 +345,8 @@ def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
               default=False, help="Use OpenAI Whisper (ASR) instead of Rev.AI (default).")
 @click.option("--tencent/--rev",
               default=False, help="Use Tencent instead of Rev.AI (default).")
+@click.option("--funaudio/--rev",
+              default=False, help="Use Tencent instead of Rev.AI (default).")
 @click.option("--lang",
               help="sample language in three-letter ISO 3166-1 alpha-3 code",
               show_default=True,
@@ -346,8 +356,6 @@ def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
               help="the URL of the data",
               type=str)
 @click.option("-n", "--num_speakers", type=int, help="number of speakers in the language sample", default=2)
-@click.option("--wor/--nowor",
-              default=False, help="Should we write word level alignment line? Default to no.")
 @click.pass_context
 def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, **kwargs):
     """Benchmark ASR utilities for their word accuracy"""
@@ -371,14 +379,13 @@ def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, **kwar
             df.write(str(doc["wer"]))
         with open(Path(output).with_suffix(".diff"), 'w') as df:
             df.write(str(doc["diff"]))
-        CHATFile(doc=doc["doc"]).write(str(Path(output).with_suffix(".asr.cha")),
-                                       write_wor=kwargs.get("wor", False))
+        CHATFile(doc=doc["doc"]).write(str(Path(output).with_suffix(".asr.cha")))
 
 
     _dispatch("benchmark", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
               in_dir, out_dir,
               loader, writer, C,
-              asr="whisper" if whisper else ("tencent" if tencent else "rev"), **kwargs)
+              asr="whisper" if whisper else ("funaudio" if funaudio else ("tencent" if tencent else "rev")), **kwargs)
 
 
 #################### SETUP ################################
