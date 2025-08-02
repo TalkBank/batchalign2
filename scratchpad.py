@@ -68,12 +68,14 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # # # #     json.dump(Document.model_json_schema(), df, indent=4)
 # # # # res
 # # # # ########### The Batchalign Core Test Harness ###########
-# from batchalign.formats.chat.parser import chat_parse_utterance
-# forms, delim = chat_parse_utterance("xxx [>] .", None, None, None, None)
-# utterance = Utterance(content=forms, delim=delim)
-# doc = Document(content=[utterance], langs=["eng"])
+from batchalign.formats.chat.parser import chat_parse_utterance
+forms, delim = chat_parse_utterance("&-uh [<] I don't like it !", None, None, None, None)
+utterance = Utterance(content=forms, delim=delim)
+doc = Document(content=[utterance], langs=["eng"])
+
+pipeline = BatchalignPipeline(StanzaEngine())
+print(str(CHATFile(doc=pipeline(doc))))
 # file = CHATFile(path="../talkbank-alignment/input/010606.cha")
-# print(str(CHATFile(doc=doc)))
 # print(doc)
 #!uv pip install numpy==2.2
 
@@ -142,7 +144,6 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # doc = CHATFile(path="../talkbank-alignment/input/010606.cha").doc
 # doc[1][2]
 
-# pipeline = BatchalignPipeline(StanzaEngine())
 # result = pipeline(doc, retokenize=True)
 # print(CHATFile(doc=doc))
 # # # # utterance = Utterance(content=forms, delim=delim)

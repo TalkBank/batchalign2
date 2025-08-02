@@ -206,8 +206,8 @@ class Utterance(BaseModel):
     def __len__(self):
         return len(self.content)
 
-    def __str__(self):
-        if self.text != None:
+    def tostring(self, always_detokenize=False):
+        if self.text != None and not always_detokenize:
             t = self.text
         else:
             t = self._detokenize()
@@ -230,6 +230,9 @@ class Utterance(BaseModel):
             t = t.replace(i, " "+i.replace(" ", "")+" ")
 
         return t
+
+    def __str__(self):
+        return self.tostring()
 
     def __repr__(self):
         return str(self)
