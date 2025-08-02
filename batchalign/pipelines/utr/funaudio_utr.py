@@ -45,10 +45,8 @@ class FunAudioUTREngine(BatchalignEngine):
         res = self.__funaudio.generate(
             audio_file_path=doc.media.url
         )
-        
-        print(res.content)
+
         element_lit = res.content
-        print(type(res.content))
         res_content = []
         for item in element_lit:
             text = item[0]

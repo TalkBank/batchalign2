@@ -8,6 +8,34 @@ from batchalign.pipelines.asr.num2chinese import num2chinese
 from num2words import num2words
 import pycountry
 
+from batchalign.utils.compounds import compounds
+
+from copy import deepcopy
+
+def merge_on_wordlist(x):
+    """merges generation list x on compounds"""
+    x = deepcopy(x)
+    if len(x) < 2:
+        return x
+
+    emit = []
+    buf = []
+    while len(x) > 0:
+        while len(x) > 0 and len(buf) < 2:
+            buf.append(x.pop(0))
+        if [i["value"] for i in buf] in compounds:
+            emit.append({
+                "value": "".join([i["value"] for i in buf]),
+                "ts": buf[0]["ts"],
+                "end_ts": buf[-1]["ts"],
+                "type": "text",
+            })
+            buf = []
+        else:
+            emit.append(buf.pop(0))
+    emit += buf
+
+    return emit
 
 def retokenize(intermediate_output):
     """Retokenize the output of the ASR system from one giant blob to utterances
@@ -134,8 +162,8 @@ def process_generation(output, lang="eng", utterance_engine=None):
 
     for utterance in output["monologues"]:
         # get a list of words
-        words = utterance["elements"]
-        print("words:", words)
+        words = merge_on_wordlist(utterance["elements"])
+        # words = utterance["elements"]
         # coallate words (not punct) into the shape we expect
         # which is ['word', [start_ms, end_ms]]. Yes, this would
         # involve multiplying by 1000 to s => ms
@@ -144,7 +172,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
                 for i in words # for each word
                     if i["value"].strip() != "" and
                     not re.match(r'<.*>', i["value"])] # if its text (i.e. not "pause")
-        print("words:", words)
+
 
         # sometimes, the system outputs two forms with a space as one single
         # word. we need to interpolate the space between them
@@ -162,6 +190,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
             # if we only have one part, we don't interpolate
             if len(word_parts) == 1:
                 final_words.append([word, [i,o]])
+                words = merge_on_wordlist(utterance["elements"])
                 continue
             # otherwise, we interpolate the itme
             cur = i
