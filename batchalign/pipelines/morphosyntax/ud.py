@@ -729,7 +729,7 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, status_hoo
                 pass
 
 
-# pycountry.languages.get(alpha_3=i).alpha_2 for i in lang
+    # pycountry.languages.get(alpha_3=i).alpha_2 for i in lang
 
     config = {"processors": {"tokenize": "default",
                              "pos": "default",
@@ -813,6 +813,9 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, status_hoo
             line_cut = i.strip(join_with_spaces=True)
         else:
             line_cut = i.strip(join_with_spaces=True)[:-len(ending)].strip()
+
+        # import ipdb
+        # ipdb.set_trace()
             # ending = ending.replace("+//", "")
 
         # if we don't have anything in line cut, just take the original

@@ -79,14 +79,16 @@ class UtteranceLexer:
             # self.__clauses.append((form.strip(), TokenType.FEAT))
         elif form.strip() in NORMAL_GROUP_MARKS:
             # basically ignore the form
-            popped = self.__clauses.pop(-1)[0]
-            if not isinstance(popped, str):
-                for i in popped:
-                    if i[0] not in CHAT_IGNORE and i[0] != "&":
-                        self.__clauses.append(i)
-            else:
-                if popped not in CHAT_IGNORE and popped[0] != "&":
-                    self.__clauses.append((popped, TokenType.REGULAR))
+            o = self.__clauses.pop(-1)
+            if len(o) <= 1 or o[1] != TokenType.FP:
+                popped = o[0]
+                if not isinstance(popped, str):
+                    for i in popped:
+                        if i[0] not in CHAT_IGNORE and i[0] != "&":
+                            self.__clauses.append(i)
+                else:
+                    if popped not in CHAT_IGNORE and popped[0] != "&":
+                        self.__clauses.append((popped, TokenType.REGULAR))
             # if isinstance(popped, str) and :
             # pass
             # self.__clauses.append((form.strip(), TokenType.FEAT))
