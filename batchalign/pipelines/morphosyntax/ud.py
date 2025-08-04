@@ -884,6 +884,7 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, status_hoo
 
             # parse the stanza output
             mor, gra = parse_sentence(sents[0], ending, special_forms_cleaned, lang[0])
+            mor = mor.replace("~part|s verb|", "~aux|is verb|")
             # breakpoint()
 
             if mor.strip() == "" or mor.strip() in ENDING_PUNCT:
