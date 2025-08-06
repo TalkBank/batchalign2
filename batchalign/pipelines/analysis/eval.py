@@ -20,7 +20,7 @@ L = logging.getLogger("batchalign")
 joined_compounds = ["".join(k) for k in compounds]
 lowered_abbrev = [k.lower() for k in abbrev]
 
-fillers = ["um", "uhm", "em", "mhm", "uhhm", "eh", "uh"]
+fillers = ["um", "uhm", "em", "mhm", "uhhm", "eh", "uh", "hm"]
 def conform(x):
     result = []
     for i in x:
