@@ -4,3 +4,4 @@ from .whisperx import WhisperXEngine
 from .tencent import TencentEngine
 from .oai_whisper import OAIWhisperEngine
 from .aliyun import AliyunEngine
+from .funaudio import FunAudioEngine

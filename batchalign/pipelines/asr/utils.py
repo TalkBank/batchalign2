@@ -163,14 +163,16 @@ def process_generation(output, lang="eng", utterance_engine=None):
     for utterance in output["monologues"]:
         # get a list of words
         words = merge_on_wordlist(utterance["elements"])
+        # words = utterance["elements"]
         # coallate words (not punct) into the shape we expect
         # which is ['word', [start_ms, end_ms]]. Yes, this would
         # involve multiplying by 1000 to s => ms
         words = [[i["value"], [round(i["ts"]*1000) if i.get("ts") != None else None,
-                               round(i["end_ts"]*1000) if i.get("end_ts") != None else the]] # None shape
+                                round(i["end_ts"]*1000) if i.get("end_ts") != None else None]] # the shape
                 for i in words # for each word
                     if i["value"].strip() != "" and
-                 not re.match(r'<.*>', i["value"])] # if its text (i.e. not "pause")
+                    not re.match(r'<.*>', i["value"])] # if its text (i.e. not "pause")
+
 
         # sometimes, the system outputs two forms with a space as one single
         # word. we need to interpolate the space between them
@@ -188,6 +190,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
             # if we only have one part, we don't interpolate
             if len(word_parts) == 1:
                 final_words.append([word, [i,o]])
+                words = merge_on_wordlist(utterance["elements"])
                 continue
             # otherwise, we interpolate the itme
             cur = i

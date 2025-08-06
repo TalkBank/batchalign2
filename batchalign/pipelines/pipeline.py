@@ -109,7 +109,8 @@ class BatchalignPipeline:
             L.debug(f"Calling generator: {self.__generator}")
             if callback:
                 callback(0,total_tasks, self.__generator.tasks)
-            doc = self.__generator.generate(doc.media.url, **kwargs)
+            
+            doc = self.__generator.generate(doc.media.url)
             if callback:
                 callback(1,total_tasks, self.__generator.tasks)
 
