@@ -62,7 +62,8 @@ setup(
         "googletrans",
         "aliyun-python-sdk-core>=2.13.3",
         "oss2",
-        "openai-whisper>=20240930"
+        "openai-whisper>=20240930",
+        "funasr"
     ],
     extras_require={
         'dev': [
