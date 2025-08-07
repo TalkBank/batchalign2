@@ -769,10 +769,16 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, status_hoo
         else:
             config["processors"]["mwt"] = "default"
 
+    if "ja" in lang:
+        config["processors"]["tokenize"] = "combined"
+        config["processors"]["pos"] = "combined"
+        config["processors"]["lemma"] = "combined"
+        config["processors"]["depparse"] = "combined"
+
+
     configs = {}
     for l in lang:
         configs[l] = config.copy()
-
 
     if len(lang) > 1:
         nlp = stanza.MultilingualPipeline(
