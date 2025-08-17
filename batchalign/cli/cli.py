@@ -356,6 +356,51 @@ def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
               in_dir, out_dir,
               loader, writer, C,
               asr="whisper" if whisper else "rev", **kwargs)
+    
+
+#################### AVQI ################################
+
+@batchalign.command()
+@click.argument("cs_file", type=click.Path(exists=True, file_okay=True))
+@click.argument("sv_file", type=click.Path(exists=True, file_okay=True))
+@click.option("--lang",
+              help="sample language in three-letter ISO 3166-1 alpha-3 code",
+              show_default=True,
+              default="eng",
+              type=str)
+@click.pass_context
+def avqi(ctx, cs_file, sv_file, lang, **kwargs):
+    """Calculate Acoustic Voice Quality Index (AVQI) from continuous speech and sustained vowel audio files."""
+    
+    # Import AVQI engine
+    from batchalign.pipelines.avqi import AVQIEngine
+    
+    # Get output file path (same directory as cs_file, with .avqi.txt extension)
+    cs_path = Path(cs_file)
+    output_file = cs_path.with_suffix('.avqi.txt')
+    
+    # Create AVQI engine
+    avqi_engine = AVQIEngine()
+    
+    try:
+        # Calculate AVQI
+        C.print(f"\n[blue]Calculating AVQI[/blue] for:")
+        C.print(f"  Continuous Speech: [cyan]{cs_file}[/cyan]")
+        C.print(f"  Sustained Vowel:   [cyan]{sv_file}[/cyan]")
+        C.print(f"  Language:          [cyan]{lang}[/cyan]")
+        C.print(f"  Output:            [cyan]{output_file}[/cyan]\n")
+        
+        results = avqi_engine.analyze(cs_file, sv_file, str(output_file), lang)
+        
+        C.print(f"[bold green]✓ AVQI calculation completed![/bold green]")
+        C.print(f"[bold]AVQI Score: {results['avqi']:.3f}[/bold]")
+        C.print(f"Results saved to: [cyan]{output_file}[/cyan]\n")
+        
+    except Exception as e:
+        C.print(f"[bold red]ERROR[/bold red]: {str(e)}")
+        if ctx.obj["verbose"] > 0:
+            import traceback
+            C.print(traceback.format_exc())
 
 
 #################### SETUP ################################
@@ -379,3 +424,4 @@ def version(ctx, **kwargs):
            f"[italic]{RELEASE_NOTES.strip()}[/italic]"+"\n" +
            "\nDeveloped by Brian MacWhinney and Houjun Liu")
     C.print("\n\n"+ptr+"\n\n")
+
