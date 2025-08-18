@@ -167,7 +167,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
         # which is ['word', [start_ms, end_ms]]. Yes, this would
         # involve multiplying by 1000 to s => ms
         words = [[i["value"], [round(i["ts"]*1000) if i.get("ts") != None else None,
-                               round(i["end_ts"]*1000) if i.get("end_ts") != None else the]] # None shape
+                               round(i["end_ts"]*1000) if i.get("end_ts") != None else None]] # the shape
                 for i in words # for each word
                     if i["value"].strip() != "" and
                  not re.match(r'<.*>', i["value"])] # if its text (i.e. not "pause")
