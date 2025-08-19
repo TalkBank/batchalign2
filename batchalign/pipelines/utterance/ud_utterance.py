@@ -68,7 +68,7 @@ def rollout_to_leaf(tree):
 def parse_tree(subtree):
     stack = []
 
-    subtree_labels = [i.label.lower() for i in subtree.children]
+    subtree_labels = [i.label.lower() if i.label else "" for i in subtree.children]
     possible_labels = ["cc", "conj"]
     # if we have a coordinating conjuction at this level
     # we will consider all full sentence phrases in this
