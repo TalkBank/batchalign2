@@ -57,7 +57,8 @@ setup(
         "blobfile",
         "sentencepiece",
         "googletrans",
-        "openai-whisper>=20240930"
+        "openai-whisper>=20240930",
+        "praat-parselmouth==0.4.6"  # Added parselmouth for AVQI
     ],
     extras_require={
         'dev': [
@@ -113,5 +114,3 @@ setup(
         "Topic :: Utilities"
     ]
 )
-
-
