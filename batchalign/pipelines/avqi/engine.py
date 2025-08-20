@@ -13,6 +13,8 @@ from pathlib import Path
 import logging
 
 from batchalign.pipelines.base import BatchalignEngine
+from batchalign.document import Task
+
 
 L = logging.getLogger('batchalign')
 
@@ -22,7 +24,7 @@ class AVQIEngine(BatchalignEngine):
     
     def __init__(self):
         super().__init__()
-        self._tasks = ["avqi"]
+        self._tasks = [Task.FEATURE_EXTRACT]
     
     @property
     def tasks(self):
