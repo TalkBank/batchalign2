@@ -162,7 +162,10 @@ def process_generation(output, lang="eng", utterance_engine=None):
 
     for utterance in output["monologues"]:
         # get a list of words
-        words = merge_on_wordlist(utterance["elements"])
+        if lang == "eng":
+            words = merge_on_wordlist(utterance["elements"])
+        else:
+            words = utterance["elements"]
         # words = utterance["elements"]
         # coallate words (not punct) into the shape we expect
         # which is ['word', [start_ms, end_ms]]. Yes, this would
@@ -190,7 +193,10 @@ def process_generation(output, lang="eng", utterance_engine=None):
             # if we only have one part, we don't interpolate
             if len(word_parts) == 1:
                 final_words.append([word, [i,o]])
-                words = merge_on_wordlist(utterance["elements"])
+                if lang == "eng":
+                    words = merge_on_wordlist(utterance["elements"])
+                else:
+                    words = utterance["elements"]
                 continue
             # otherwise, we interpolate the itme
             cur = i

@@ -203,8 +203,17 @@ class FunAudioEngine(BatchalignEngine):
             print("Number of items:", num_items)              
             for index, item in enumerate(items):
                 print(f"Processing item {index + 1}/{num_items}: {item}")
-                item_start, item_end = timestamps[index]
-                
+                try:
+                    item_start, item_end = timestamps[index]
+                except IndexError:
+                    turn.append({
+                        "type": "text",
+                        "ts": None,
+                        "end_ts": None,
+                        "value": item  
+                    })
+                    continue
+
 
                 turn.append({
                     "type": "text",
