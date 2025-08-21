@@ -58,7 +58,7 @@ class FunAudioEngine(BatchalignEngine):
             output_timestamps=True,
             vad_model="fsmn-vad",
             vad_kwargs={"max_single_segment_time": 30000},
-            device="cuda:0",  # GPU
+            device="cpu",  # GPU
             hub="hf",
             cache={},
             language="yue", 
