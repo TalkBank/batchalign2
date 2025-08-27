@@ -58,7 +58,8 @@ setup(
         "sentencepiece",
         "googletrans",
         "openai-whisper>=20240930",
-        "praat-parselmouth==0.4.6"  # Added parselmouth for AVQI
+        "praat-parselmouth==0.4.6",
+        "opensmile>=2.3.0"
     ],
     extras_require={
         'dev': [
