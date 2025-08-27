@@ -111,12 +111,12 @@ class OpenSMILEEngine(BatchalignEngine):
             # Determine output format and save
             output_path = Path(output_file)
             if output_path.suffix.lower() == '.csv':
-                features_df.to_csv(output_file, index=True)
+                features_df.T.to_csv(output_file, header=['value'], index_label='feature')
             elif output_path.suffix.lower() == '.tsv':
                 features_df.to_csv(output_file, sep='\t', index=True)
             else:
                 # Default to CSV if no extension or unknown extension
-                features_df.to_csv(output_file, index=True)
+                features_df.T.to_csv(output_file, header=['value'], index_label='feature')
             
             # Prepare summary results
             num_features = len(features_df.columns)
