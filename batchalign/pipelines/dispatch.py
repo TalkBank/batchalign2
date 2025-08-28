@@ -7,7 +7,7 @@ from batchalign import (WhisperEngine, WhisperFAEngine, StanzaEngine, RevEngine,
                         NgramRetraceEngine, DisfluencyReplacementEngine, WhisperUTREngine,
                         RevUTREngine, EvaluationEngine, WhisperXEngine, NemoSpeakerEngine,
                         StanzaUtteranceEngine, CorefEngine, Wave2VecFAEngine, SeamlessTranslationModel,
-                        GoogleTranslateEngine, OAIWhisperEngine)
+                        GoogleTranslateEngine, OAIWhisperEngine, PyannoteEngine)
 from batchalign import BatchalignPipeline
 from batchalign.models import resolve
 
@@ -22,7 +22,7 @@ DEFAULT_PACKAGES = {
     "asr": "whisper_oai",
     "utr": "whisper_utr",
     "fa": "whisper_fa",
-    "speaker": "nemo_speaker",
+    "speaker": "pyannote",
     "morphosyntax": "stanza",
     "disfluency": "replacement",
     "retracing": "ngram",
@@ -72,6 +72,8 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
     # if asr is in engines but disfluency or retracing is not
     # add them
     if "asr" in packages:
+        if "speaker" not in packages:
+            packages.append("speaker")
         if "disfluency" not in packages:
             packages.append("disfluency")
         if "retracing" not in packages:
@@ -137,6 +139,9 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
             engines.append(GoogleTranslateEngine())
         elif engine == "whisper_oai":
             engines.append(OAIWhisperEngine())
+        elif engine == "pyannote":
+            engines.append(PyannoteEngine())
+
 
     L.debug(f"Done initalizing packages.")
     return BatchalignPipeline(*engines)

@@ -163,9 +163,11 @@ def _dispatch(command, lang, num_speakers,
                                    callback=lambda *args:progress_callback(file, *args),
                                    **kw)
                 msgs = [escape(str(i.message)).strip() for i in w]
+                msgs = [i for i in msgs if "torchaudio" not in i.lower()]
                 # write the format, as needed
                 writer(doc, output)
                 # print any warnings
+
                 if len(msgs) > 0:
                     if ctx.obj["verbose"] > 1:
                         Console().print(f"\n[bold yellow]WARN[/bold yellow] on {file}:\n","\n".join(msgs)+"\n")
