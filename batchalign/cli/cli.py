@@ -385,8 +385,8 @@ def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, **kwar
     _dispatch("benchmark", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
               in_dir, out_dir,
               loader, writer, C,
-              asr="whisper" if whisper else ("funaudio" if funaudio else ("tencent" if tencent else "rev")), **kwargs)
-              asr="whisper" if whisper else "rev", **kwargs)
+              asr="whisper" if whisper else ("funaudio" if funaudio else ("tencent" if tencent else "rev")),
+              **kwargs)
     
 
 #################### AVQI ################################
