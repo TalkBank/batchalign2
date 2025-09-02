@@ -28,9 +28,9 @@ class RevEngine(BatchalignEngine):
         # if there is no utterance segmentation scheme, we only
         # run ASR
         if self.__engine:
-            return [ Task.ASR, Task.SPEAKER_RECOGNITION, Task.UTTERANCE_SEGMENTATION ]
+            return [ Task.ASR, Task.UTTERANCE_SEGMENTATION ]
         else:
-            return [ Task.ASR, Task.SPEAKER_RECOGNITION ]
+            return [ Task.ASR ]
 
     def __init__(self, key:str=None, lang="eng", num_speakers=2):
 

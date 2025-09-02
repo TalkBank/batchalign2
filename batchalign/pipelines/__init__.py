@@ -13,4 +13,7 @@ from .utr import WhisperUTREngine, RevUTREngine, TencentUTREngine, FunAudioUTREn
 from .analysis import EvaluationEngine
 from .utterance import StanzaUtteranceEngine
 
-# from .translate import SeamlessTranslationModel, GoogleTranslateEngine
+from .translate import SeamlessTranslationModel, GoogleTranslateEngine
+from .avqi import AVQIEngine
+
+from .diarization import PyannoteEngine

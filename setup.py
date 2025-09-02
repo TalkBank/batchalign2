@@ -40,6 +40,8 @@ setup(
         "plotly>=5.3.0",
         "transformers>=4.38.2",
         "tokenizers>=0.14.1",
+        "numba>=0.61.0",
+        "numpy<=2.2",
         "pycountry>=22.3",
         "stanza[transformers]>=1.10.1",
         "scipy~=1.11",
@@ -64,7 +66,12 @@ setup(
         "oss2",
         "openai-whisper>=20240930",
         "funasr",
-        "cos-python-sdk-v5"
+        "cos-python-sdk-v5",
+        "openai-whisper",
+        "llvmlite>=0.44.0",
+        "praat-parselmouth==0.4.6",  # Added parselmouth for AVQI
+        "pyannote.audio",
+        "onnxruntime"
     ],
     extras_require={
         'dev': [
@@ -120,5 +127,3 @@ setup(
         "Topic :: Utilities"
     ]
 )
-
-
