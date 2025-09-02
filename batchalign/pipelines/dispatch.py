@@ -72,8 +72,6 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
     # if asr is in engines but disfluency or retracing is not
     # add them
     if "asr" in packages:
-        if "speaker" not in packages:
-            packages.append("speaker")
         if "disfluency" not in packages:
             packages.append("disfluency")
         if "retracing" not in packages:
