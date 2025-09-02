@@ -22,8 +22,15 @@ UV_PYTHON=3.11 uv tool install batchalign
 
 #### Windows
 
+There are two commands used to install Batchalign. Run both in `powershell`:
+
 ```
 powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+Restart `powershell` and run the second command:
+
+```
 uv tool install batchalign
 ```
 
