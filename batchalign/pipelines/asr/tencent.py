@@ -26,10 +26,13 @@ import soundfile as sf
 import base64
 from tencentcloud.common.credential import Credential
 from tencentcloud.asr.v20190614.asr_client import AsrClient, models
+from qcloud_cos import CosConfig
+from qcloud_cos import CosS3Client
 
 import asyncio
 import tempfile
 import os
+import uuid
 # from pydub import AudioSegment
 # from pydub.effects import normalize
 # from pydub.exceptions import CouldntDecodeError
@@ -54,8 +57,20 @@ class TencentEngine(BatchalignEngine):
             try:
                 id = config["asr"]["engine.tencent.id"] 
                 key = config["asr"]["engine.tencent.key"] 
+                region = config["asr"]["engine.tencent.region"]
+                bucket_name = config["asr"]["engine.tencent.bucket"]
             except KeyError:
                 raise ConfigError("No Tencent Cloud key found. Tencent Cloud was not set up! Please write one yourself and place it at ~/.batchalign.ini.")
+
+        config = CosConfig(
+            Region=region,
+            SecretId=id,
+            SecretKey=key,
+            Token=None,
+            Scheme="https"
+        )
+        self.__bucket = CosS3Client(config)
+        self.__bucket_name = bucket_name
 
         self.__lang_code = lang
         self.__num_speakers = num_speakers
@@ -120,15 +135,22 @@ class TencentEngine(BatchalignEngine):
     def generate(self, f, **kwargs):
         lang = self.__lang
         client = self.__client
+        bucket = self.__bucket
+        bucket_name = self.__bucket_name
+        uid = str(uuid.uuid4())
 
-        # processed_path = self.__preprocess_audio(f)
-        # audio = AudioSegment.from_file(processed_path)
+        # read and upload the cos path
+        # f = "/Users/houjun/Documents/Projects/talkbank-alignment/input/SD05.mp3"
+        L.info(f"Tencent is uploading '{pathlib.Path(f).stem}'...")
+        response = bucket.upload_file(
+            Bucket=bucket_name,
+            LocalFilePath=f,
+            Key=uid+pathlib.Path(f).suffix,
+            PartSize=1,
+            MAXThread=10,
+            EnableMD5=False
+        )
         
-        L.info(f"Uploading '{pathlib.Path(f).stem}'...")
-        # we will send the file for processing
-        if not str(f).startswith("http"):
-            with open(f, "rb") as image_file:
-                encoded_string = base64.b64encode(image_file.read())
 
         req = models.CreateRecTaskRequest()
         if lang in {'zho', 'yue', 'wuu', 'nan','hak'}:
@@ -138,12 +160,8 @@ class TencentEngine(BatchalignEngine):
         req.ResTextFormat = 1
         req.SpeakerDiarization = 1
         req.ChannelNum = 1
-        if not str(f).startswith("http"):
-            req.Data = encoded_string.decode('ascii')
-            req.SourceType = 1
-        else:
-            req.Url = f
-            req.SourceType = 0
+        req.Url = response["Location"]
+        req.SourceType = 0
         resp = client.CreateRecTask(req)
 
         L.info(f"Tencent is transcribing '{pathlib.Path(f).stem}'...")
@@ -157,6 +175,12 @@ class TencentEngine(BatchalignEngine):
 
         if res.Data.Status in ["3", 3]:
             raise RuntimeError(f"Tencent reports job failed! error='{res.Data.ErrorMsg}'")
+
+        # delete the file
+        response = bucket.delete_object(
+            Bucket=bucket_name,
+            Key=response["Key"]
+        )
 
         turns = []
         for i in res.Data.ResultDetail:

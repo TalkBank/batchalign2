@@ -63,7 +63,8 @@ setup(
         "aliyun-python-sdk-core>=2.13.3",
         "oss2",
         "openai-whisper>=20240930",
-        "funasr"
+        "funasr",
+        "cos-python-sdk-v5"
     ],
     extras_require={
         'dev': [
