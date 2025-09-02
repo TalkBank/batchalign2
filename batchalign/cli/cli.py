@@ -117,8 +117,6 @@ batchalign.add_command(train, "models")
 @click.option("--pauses", type=bool, default=False, help="Should we try to bullet each word or should we try to add pauses in between words by grouping them? Default: no pauses.", is_flag=True)
 @click.option("--wor/--nowor",
               default=True, help="Should we write word level alignment line? Default to yes.")
-@click.option("--data",
-              help="the URL of the data", type=str)
 @click.pass_context
 def align(ctx, in_dir, out_dir, whisper, wav2vec, tencent, funaudio, **kwargs):
     """Align transcripts against corresponding media files."""
@@ -172,9 +170,6 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, tencent, funaudio, **kwargs):
               default=False, help="Perform speaker diarization (this flag is ignored with Rev.AI)")
 @click.option("--wor/--nowor",
               default=False, help="Should we write word level alignment line? Default to no.")
-@click.option("--data",
-              help="the URL of the data",
-              type=str)
 @click.option("--lang",
               help="sample language in three-letter ISO 3166-1 alpha-3 code",
               show_default=True,
@@ -351,9 +346,6 @@ def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
               help="sample language in three-letter ISO 3166-1 alpha-3 code",
               show_default=True,
               default="eng",
-              type=str)
-@click.option("--data",
-              help="the URL of the data",
               type=str)
 @click.option("-n", "--num_speakers", type=int, help="number of speakers in the language sample", default=2)
 @click.pass_context

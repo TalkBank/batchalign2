@@ -188,7 +188,6 @@ def _dispatch(command, lang, num_speakers,
                     # RUN THE PUPPY!
                     doc = pipeline(doc,
                                    callback=lambda *args:progress_callback(file, *args),
-                                   extra_info={"extra_input": extr_data_mapping.get(file)},
                                    **kw)
                 msgs = [escape(str(i.message)).strip() for i in w]
                 msgs = [i for i in msgs if "torchaudio" not in i.lower()]
