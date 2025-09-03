@@ -79,6 +79,8 @@ def handler(word, lang=None):
         target = word.text
     if not target:
         target = word.text
+    target = target.replace("」", "")
+    target = target.replace("「", "")
 
     # unknown flag
     unknown = False
@@ -145,7 +147,7 @@ def handler(word, lang=None):
         pos,target = verbform(pos,target,word.text)
         target = target.replace(',', 'cm')
 
-    target = re.sub(r'@\w$', '', target)
+    target = re.sub(r'@\w$', '', target).strip()
     return f"{'' if not unknown else '0'}{pos}|{target}"
 
 # POS specific handler
