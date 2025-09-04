@@ -19,23 +19,25 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 from batchalign import *
 from batchalign.formats.chat.parser import chat_parse_utterance
+# 
+# text = "うんそれはフキの葉だxxx ."
+# langs = ["jpn"]
+# parsed, delim = chat_parse_utterance(text, None, None, None, None)
+# ut = Utterance(content=parsed, delim=delim, text=text)
+# doc = Document(content=[ut], langs=langs)
 
-text = "うん それ は フキ の 葉 だ ."
-langs = ["jpn"]
-parsed, delim = chat_parse_utterance(text, None, None, None, None)
-ut = Utterance(content=parsed, delim=delim, text=text)
-doc = Document(content=[ut], langs=langs)
+# pipe = BatchalignPipeline.new("morphosyntax", lang="jpn")
+# doc_out = pipe(doc, retokenize=True)
 
-pipe = BatchalignPipeline.new("morphosyntax", lang="jpn")
-doc_out = pipe(doc, retokenize=True)
-
-print(str(CHATFile(doc=doc_out)))
-
-
-
-# doc = CHATFile(path="../talkbank-alignment/input/Untitled.cha").doc
+# print(str(CHATFile(doc=doc_out)))
 
 
+
+# doc = CHATFile(path="../talkbank-alignment/input/011116.cha").doc
+# newdoc = Document(content=[doc[4]], langs=["heb"])
+# pipe = StanzaEngine()
+# res = pipe(newdoc)
+# print(CHATFile(doc=res))
 
 # ours = BatchalignPipeline.new("asr", lang="eng", asr="rev")
 # doc = Document.new(media_path="../talkbank-alignment/input/test.mp3", lang="eng")
