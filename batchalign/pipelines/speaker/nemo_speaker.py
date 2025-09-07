@@ -55,6 +55,9 @@ class NemoSpeakerEngine(BatchalignEngine):
 
         for ut in doc.content:
             if isinstance(ut, Utterance):
+                if ut.alignment is None:
+                    continue
+                    # @todo look into why its possible for the alignment item to be null, for now we skip it.
                 ut_start = ut.alignment[0]
                 # peek and check if the next tier starts before
                 # ut_start
