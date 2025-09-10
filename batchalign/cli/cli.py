@@ -402,6 +402,87 @@ def avqi(ctx, cs_file, sv_file, lang, **kwargs):
             import traceback
             C.print(traceback.format_exc())
 
+#################### OPENSMILE ################################
+
+@batchalign.command()
+@click.argument("audio_file", type=click.Path(exists=True, file_okay=True))
+@click.option("--feature-set", 
+              type=click.Choice(['eGeMAPSv02', 'eGeMAPSv01b', 'GeMAPSv01b', 'ComParE_2016']),
+              default='eGeMAPSv02',
+              help="Feature set to extract")
+@click.option("--output", "-o",
+              type=click.Path(),
+              help="Output file path (default: audio_file.opensmile.csv)")
+@click.option("--format",
+              type=click.Choice(['csv', 'tsv']),
+              default='csv',
+              help="Output format")
+@click.option("--lang",
+              help="sample language in three-letter ISO 3166-1 alpha-3 code",
+              show_default=True, default="eng", type=str)
+@click.pass_context
+def opensmile(ctx, audio_file, feature_set, output, format, lang, **kwargs):
+    """Extract openSMILE audio features from speech samples."""
+    
+    from batchalign.pipelines.opensmile import OpenSMILEEngine
+    
+    # Setup output path
+    if not output:
+        audio_path = Path(audio_file)
+        ext = '.csv' if format == 'csv' else '.tsv'
+        output = audio_path.with_suffix(f'.opensmile{ext}')
+    
+    # Create engine
+    try:
+        engine = OpenSMILEEngine(feature_set=feature_set)
+    except Exception as e:
+        C.print(f"[bold red]ERROR[/bold red]: Failed to initialize openSMILE engine: {str(e)}")
+        if ctx.obj["verbose"] > 0:
+            C.print(traceback.format_exc())
+        return
+    
+    try:
+        # User feedback
+        feature_info = engine.get_feature_set_info(feature_set)
+        
+        C.print(f"\n[blue]Extracting openSMILE features[/blue]:")
+        C.print(f"  Audio File:    [cyan]{audio_file}[/cyan]")
+        C.print(f"  Feature Set:   [cyan]{feature_set}[/cyan] ({feature_info.get('num_features', 'unknown')} features)")
+        C.print(f"  Description:   [dim]{feature_info.get('description', 'N/A')}[/dim]")
+        C.print(f"  Output Format: [cyan]{format.upper()}[/cyan]")
+        C.print(f"  Output:        [cyan]{output}[/cyan]\n")
+        
+        # Show warning for large feature sets
+        if feature_set == 'ComParE_2016':
+            C.print("[yellow]⚠ Warning: ComParE_2016 extracts 6000+ features and may take longer to process.[/yellow]\n")
+        
+        # Extract features
+        results = engine.analyze(audio_file, str(output), feature_set=feature_set)
+        
+        # Handle results
+        if results.get('success', False):
+            C.print(f"[bold green]✓ Feature extraction completed![/bold green]")
+            C.print(f"[bold]Features extracted: {results['num_features']}[/bold]")
+            if results['duration_segments'] > 1:
+                C.print(f"[bold]Duration segments: {results['duration_segments']}[/bold]")
+            C.print(f"Results saved to: [cyan]{output}[/cyan]\n")
+            
+            # Show sample features if verbose
+            if ctx.obj["verbose"] > 0 and results.get('features_sample'):
+                C.print("[dim]Sample features (first 5):[/dim]")
+                sample_features = list(results['features_sample'].items())[:5]
+                for feat_name, feat_value in sample_features:
+                    C.print(f"  {feat_name}: {feat_value:.4f}")
+                if len(results['features_sample']) > 5:
+                    C.print(f"  ... and {len(results['features_sample']) - 5} more features")
+                C.print()
+        else:
+            C.print(f"[bold red]ERROR[/bold red]: {results.get('error', 'Unknown error occurred')}")
+        
+    except Exception as e:
+        C.print(f"[bold red]ERROR[/bold red]: {str(e)}")
+        if ctx.obj["verbose"] > 0:
+            C.print(traceback.format_exc())
 
 #################### SETUP ################################
 
