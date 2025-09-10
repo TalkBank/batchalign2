@@ -14,5 +14,6 @@ from .utterance import StanzaUtteranceEngine
 
 from .translate import SeamlessTranslationModel, GoogleTranslateEngine
 from .avqi import AVQIEngine
+from .opensmile import OpenSMILEEngine
 
 from .diarization import PyannoteEngine
