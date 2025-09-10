@@ -55,19 +55,31 @@ class OpenSMILEEngine(BatchalignEngine):
         return self._tasks
 
     def analyze(self, audio_file: str, output_file: str = None, 
-               feature_set: str = None, **kwargs) -> Dict:
+               feature_set: str = None, output_format: str = 'csv', **kwargs) -> Dict:
         """
-        Extract openSMILE features from audio file.
+        Extract openSMILE features from audio file for dispatch system.
         
         Args:
-            audio_file: Path to input audio file
+            audio_file: Path to input audio file (can be a Document with media or string path)
             output_file: Path to output feature file  
             feature_set: Feature set to use (ignored on M1 Mac)
+            output_format: Output format ('csv' or 'tsv')
             **kwargs: Additional arguments
             
         Returns:
             Dictionary with extraction results and metadata
         """
+
+        # Handle Document input from dispatch system
+        if hasattr(audio_file, 'media') and audio_file.media:
+            actual_audio_path = audio_file.media.url
+        elif isinstance(audio_file, str):
+            actual_audio_path = audio_file
+        else:
+            return {
+                'error': 'Invalid audio input - expected file path or Document with media',
+                'success': False
+            }
 
         # Handle feature set switching (not supported on M1 Mac)
         if feature_set and feature_set != self.feature_set:
@@ -91,31 +103,33 @@ class OpenSMILEEngine(BatchalignEngine):
                     }
 
         try:
-            L.info(f"Extracting features from: {Path(audio_file).name}")
+            L.info(f"Extracting features from: {Path(actual_audio_path).name}")
             if self.is_m1_mac:
                 L.info("Using M1-compatible default feature set (eGeMAPSv02 equivalent)")
             else:
                 L.info(f"Using {self.feature_set} feature set")
 
             # Extract features using openSMILE
-            features_df = self.smile.process_file(audio_file)
+            features_df = self.smile.process_file(actual_audio_path)
 
             if features_df is None or features_df.empty:
                 raise ValueError("Feature extraction returned empty results")
 
-            # Handle output file creation
+            # Handle output file creation for dispatch system
             if output_file is None:
-                audio_path = Path(audio_file)
-                output_file = str(audio_path.with_suffix('.opensmile.csv'))
+                audio_path = Path(actual_audio_path)
+                ext = '.csv' if output_format == 'csv' else '.tsv'
+                output_file = str(audio_path.with_suffix(f'.opensmile{ext}'))
 
             # Determine output format and save
             output_path = Path(output_file)
-            if output_path.suffix.lower() == '.csv':
+            if output_format == 'csv' or output_path.suffix.lower() == '.csv':
+                # Transpose for better CSV format (features as rows)
                 features_df.T.to_csv(output_file, header=['value'], index_label='feature')
-            elif output_path.suffix.lower() == '.tsv':
+            elif output_format == 'tsv' or output_path.suffix.lower() == '.tsv':
                 features_df.to_csv(output_file, sep='\t', index=True)
             else:
-                # Default to CSV if no extension or unknown extension
+                # Default to CSV
                 features_df.T.to_csv(output_file, header=['value'], index_label='feature')
 
             # Prepare summary results
@@ -138,7 +152,7 @@ class OpenSMILEEngine(BatchalignEngine):
                 'num_features': num_features,
                 'duration_segments': duration_segments,
                 'output_file': str(output_file),
-                'audio_file': str(audio_file),
+                'audio_file': str(actual_audio_path),
                 'features_sample': first_row_features,
                 'success': True,
                 'm1_compatibility_mode': self.is_m1_mac
@@ -152,13 +166,13 @@ class OpenSMILEEngine(BatchalignEngine):
             return results
 
         except Exception as e:
-            L.error(f"Error extracting openSMILE features from {audio_file}: {e}")
+            L.error(f"Error extracting openSMILE features from {actual_audio_path}: {e}")
             return {
                 'feature_set': self.feature_set,
                 'feature_level': self.feature_level,
                 'num_features': 0,
                 'duration_segments': 0,
-                'audio_file': str(audio_file),
+                'audio_file': str(actual_audio_path),
                 'error': str(e),
                 'success': False,
                 'm1_compatibility_mode': self.is_m1_mac
