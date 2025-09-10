@@ -426,14 +426,11 @@ def opensmile(ctx, input_dir, output_dir, feature_set, format, lang, **kwargs):
         return file, {"feature_set": feature_set, "output_format": format}
 
     def writer(results, output):
-        # The engine handles file writing internally
-        # Just handle error cases by writing error files
         if not results.get('success', False):
             error_file = Path(output).with_suffix('.error.txt')
             with open(error_file, 'w') as f:
                 f.write(f"OpenSMILE extraction failed: {results.get('error', 'Unknown error')}\n")
 
-    # Map feature sets to engine names for dispatch
     feature_to_engine = {
         'eGeMAPSv02': 'opensmile_egemaps',
         'eGeMAPSv01b': 'opensmile_eGeMAPSv01b', 
