@@ -402,6 +402,48 @@ def avqi(ctx, cs_file, sv_file, lang, **kwargs):
             import traceback
             C.print(traceback.format_exc())
 
+#################### OPENSMILE ################################
+
+@batchalign.command()
+@click.argument("input_dir", type=click.Path(exists=True, file_okay=False))
+@click.argument("output_dir", type=click.Path(exists=True, file_okay=False))
+@click.option("--feature-set", 
+              type=click.Choice(['eGeMAPSv02', 'eGeMAPSv01b', 'GeMAPSv01b', 'ComParE_2016']),
+              default='eGeMAPSv02',
+              help="Feature set to extract")
+@click.option("--format",
+              type=click.Choice(['csv', 'tsv']),
+              default='csv',
+              help="Output format")
+@click.option("--lang",
+              help="sample language in three-letter ISO 3166-1 alpha-3 code",
+              show_default=True, default="eng", type=str)
+@click.pass_context
+def opensmile(ctx, input_dir, output_dir, feature_set, format, lang, **kwargs):
+    """Extract openSMILE audio features from speech samples."""
+    
+    def loader(file):
+        return file, {"feature_set": feature_set, "output_format": format}
+
+    def writer(results, output):
+        if not results.get('success', False):
+            error_file = Path(output).with_suffix('.error.txt')
+            with open(error_file, 'w') as f:
+                f.write(f"OpenSMILE extraction failed: {results.get('error', 'Unknown error')}\n")
+
+    feature_to_engine = {
+        'eGeMAPSv02': 'opensmile_egemaps',
+        'eGeMAPSv01b': 'opensmile_eGeMAPSv01b', 
+        'GeMAPSv01b': 'opensmile_gemaps',
+        'ComParE_2016': 'opensmile_compare'
+    }
+
+    engine_name = feature_to_engine.get(feature_set, 'opensmile_egemaps')
+
+    _dispatch("opensmile", lang, 1, ["mp3", "mp4", "wav"], ctx,
+              input_dir, output_dir,
+              loader, writer, C,
+              opensmile=engine_name, **kwargs)
 
 #################### SETUP ################################
 

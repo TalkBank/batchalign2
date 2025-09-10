@@ -49,6 +49,7 @@ Cmd2Task = {
     "utseg": "utterance",
     "coref": "coref",
     "translate": "translate",
+    "opensmile": "opensmile",
 }
 
 # this is the main runner used by all functions
