@@ -20,6 +20,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 from batchalign import *
 from batchalign.formats.chat.parser import chat_parse_utterance
 
+<<<<<<< Updated upstream
 # (.*)([a-z]) ([a-z])
 # \t\1\2\3
 
@@ -36,6 +37,30 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 # pipe = BatchalignPipeline.new("morphosyntax", lang="jpn")
 # doc_out = pipe(doc, retokenize=True)
 
+=======
+# text = "うん それ は フキ の 葉 だ ."
+# langs = ["jpn"]
+# parsed, delim = chat_parse_utterance(text, None, None, None, None)
+# ut = Utterance(content=parsed, delim=delim, text=text)
+# doc = Document(content=[ut], langs=langs)
+doc = Document.new(media_path="../talkbank-alignment/cantonese/input/528.mp3", lang="yue")
+pipe = BatchalignPipeline.new("asr", lang="yue", asr="tencent")
+res = pipe(doc)
+# res
+
+# from coverage import types
+# !uv pip uninstall coverage
+# !uv pip install ipdb
+
+# !uv pip install aliyun-python-sdk-core
+# !uv pip install funasr
+
+# doc_out = pipe(doc, retokenize=True)
+# !uv pip install --upgrade "coverage>=7.10"
+
+
+# print(str(CHATFile(doc=doc_out)))
+>>>>>>> Stashed changes
 
 
 
