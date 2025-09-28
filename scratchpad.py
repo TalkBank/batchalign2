@@ -20,16 +20,22 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 from batchalign import *
 from batchalign.formats.chat.parser import chat_parse_utterance
 
-text = "うん それ は フキ の 葉 だ ."
-langs = ["jpn"]
-parsed, delim = chat_parse_utterance(text, None, None, None, None)
-ut = Utterance(content=parsed, delim=delim, text=text)
-doc = Document(content=[ut], langs=langs)
+# (.*)([a-z]) ([a-z])
+# \t\1\2\3
 
-pipe = BatchalignPipeline.new("morphosyntax", lang="jpn")
-doc_out = pipe(doc, retokenize=True)
+# text = "啊 哈哈哈哈 是的 t h i s i s a t h i n g 啊哈哈哈哈 是的 ."
+# langs = ["yue"]
+# parsed, delim = chat_parse_utterance(text, None, None, None, None)
+# ut = Utterance(content=parsed, delim=delim, text=text)
+# doc = Document(content=[ut], langs=langs)
 
-print(str(CHATFile(doc=doc_out)))
+# doc
+
+# print(str(CHATFile(doc=doc)))
+
+# pipe = BatchalignPipeline.new("morphosyntax", lang="jpn")
+# doc_out = pipe(doc, retokenize=True)
+
 
 
 
