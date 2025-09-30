@@ -19,7 +19,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 from batchalign import *
 from batchalign.formats.chat.parser import chat_parse_utterance
-# 
+
 # text = "うんそれはフキの葉だxxx ."
 # langs = ["jpn"]
 # parsed, delim = chat_parse_utterance(text, None, None, None, None)
