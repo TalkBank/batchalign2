@@ -106,11 +106,15 @@ def conform(x):
         elif "hadta" == i.strip():
             result.append("had")
             result.append("to")
-        elif "eh" == i.strip():
+        elif "eh" == i.strip()j:
             result.append("uh")
         elif "kinda" == i.strip():
             result.append("kind")
             result.append("of")
+        elif "ed" == i.strip():
+            result.append("education")
+        elif "til" == i.strip():
+            result.append("until")
         elif "gonna" == i.strip():
             result.append("going")
             result.append("to")
