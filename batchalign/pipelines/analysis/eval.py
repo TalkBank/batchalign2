@@ -106,7 +106,7 @@ def conform(x):
         elif "hadta" == i.strip():
             result.append("had")
             result.append("to")
-        elif "eh" == i.strip()j:
+        elif "eh" == i.strip():
             result.append("uh")
         elif "kinda" == i.strip():
             result.append("kind")
