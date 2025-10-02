@@ -60,10 +60,11 @@ def retokenize(intermediate_output):
             word = word.replace("。", ".")
             word = word.replace("¿", " ").replace("¡", " ")
             tmp.append((word, bullet))
-            if len(word) > 0 and (word in ENDING_PUNCT or word[-1] in ENDING_PUNCT):
-                if word in ENDING_PUNCT:
+            if len(word) > 0 and (word in ENDING_PUNCT+["؟", "۔", "،", "؛"]
+                                  or word[-1] in ENDING_PUNCT+["؟", "۔", "،", "؛"]):
+                if word in ENDING_PUNCT+["؟", "۔", "،", "؛"]:
                     final_outputs.append((speaker, tmp))
-                elif word[-1] in ENDING_PUNCT:
+                elif word[-1] in ENDING_PUNCT+["؟", "۔", "،", "؛"]:
                     # we want to seperate the ending punct out
                     final, time = tmp.pop(-1)
                     tmp.append((final[:-1], time))
@@ -102,7 +103,7 @@ def retokenize_with_engine(intermediate_output, engine):
         # because we are using an utterance engine, we need
         # to get rid of all the preexisting punctuation
         for i in utterance:
-            for j in MOR_PUNCT+ENDING_PUNCT:
+            for j in MOR_PUNCT+ENDING_PUNCT+["؟", "۔", "،", "؛"]:
                 i[0] = i[0].strip(j).lower()
 
         # remove everything that's now blank
@@ -118,7 +119,7 @@ def retokenize_with_engine(intermediate_output, engine):
         # align the utterance against original splits and generate final outputs
         for i in split:
             # Check if the split has ending punctuation
-            if i[-1] in ENDING_PUNCT:
+            if i[-1] in ENDING_PUNCT+["؟", "۔", "،", "؛"]:
                 new_ut, delim = (i[:-1].split(" "), i[-1])
             else:
                 new_ut, delim = (i.split(" "), ".")
@@ -264,16 +265,8 @@ def process_generation(output, lang="eng", utterance_engine=None):
                 seen_word = False
             if word.strip() == "":
                 continue
-            if word not in ENDING_PUNCT+MOR_PUNCT:
+            if word not in ENDING_PUNCT+MOR_PUNCT+["؟", "۔", "،", "؛"]:
                 word_replaced = word
-                if word_replaced.strip() == "؟":
-                    word_replaced = "?"
-                elif word_replaced.strip() == "۔":
-                    word_replaced = "."
-                elif word_replaced.strip() == "،":
-                    word_replaced = ","
-                elif word_replaced.strip() == "؛":
-                    word_replaced = ";"
                     
                 if start == None or end == None:
                     words.append(Form(text=word_replaced, time=None))
@@ -281,7 +274,15 @@ def process_generation(output, lang="eng", utterance_engine=None):
                     seen_word = True
                     words.append(Form(text=word_replaced, time=(int(start), int(end))))
             else:
-                    words.append(Form(text=word, time=None))
+                if word.strip() == "؟":
+                    word = "?"
+                elif word.strip() == "۔":
+                    word = "."
+                elif word.strip() == "،":
+                    word = ","
+                elif word.strip() == "؛":
+                    word = ";"
+                words.append(Form(text=word, time=None))
 
         final_utterances.append(Utterance(
             tier=participant,
