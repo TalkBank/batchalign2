@@ -18,134 +18,136 @@ import logging
 L = logging.getLogger("batchalign")
 
 joined_compounds = ["".join(k) for k in compounds]
-lowered_abbrev = [k.lower() for k in abbrev]
+lowered_abbrev = [k for k in abbrev]
 
 fillers = ["um", "uhm", "em", "mhm", "uhhm", "eh", "uh", "hm"]
 def conform(x):
     result = []
     for i in x:
-        if i.strip() in joined_compounds:
+        if i.strip().lower() in joined_compounds:
             for k in compounds[joined_compounds.index(i.strip())]:
                 result.append(k)
         elif i.strip() in lowered_abbrev:
             for j in i.strip():
-                result.append(j)
-        elif "'s" in i.strip():
+                result.append(j.strip())
+        elif "'s" in i.strip().lower():
             result.append(i.split("'")[0])
             result.append("is")
-        elif "'ve" in i.strip():
+        elif "'ve" in i.strip().lower():
             result.append(i.split("'")[0])
             result.append("have")
-        elif "'s" in i.strip():
+        elif "'s" in i.strip().lower():
             result.append(i.split("'")[0])
             result.append("is")
-        elif "'d" in i.strip():
+        elif "'d" in i.strip().lower():
             result.append(i.split("'")[0])
             result.append("had")
-        elif "'m" in i.strip():
+        elif "'m" in i.strip().lower():
             result.append(i.split("'")[0])
             result.append("am")
-        elif i.strip() in fillers:
+        elif i.strip().lower() in fillers:
             result.append("um")
-        elif "-" in i.strip():
-            result += [k.strip() for k in i.split("-")]
-        elif "ok" == i.strip():
+        elif "-" in i.strip().lower():
+            result += [k.strip() for k in i.split("-").lower()]
+        elif "ok" == i.strip().lower():
             result.append("okay")
-        elif "gimme" == i.strip():
+        elif "gimme" == i.strip().lower():
             result.append("give")
             result.append("me")
-        elif "hafta" == i.strip() or "havta" == i.strip():
+        elif "hafta" == i.strip().lower() or "havta" == i.strip().lower():
             result.append("have")
             result.append("to")
-        elif i.strip() in names:
+        elif i.strip().lower() in names:
             result.append("name")
-        elif "dunno" == i.strip():
+        elif "dunno" == i.strip().lower():
             result.append("don't")
             result.append("know")
-        elif "wanna" == i.strip():
+        elif "wanna" == i.strip().lower():
             result.append("want")
             result.append("to")
-        elif "mba" == i.strip():
+        elif "mba" == i.strip().lower():
             result.append("m")
             result.append("b")
             result.append("a")
-        elif "tli" == i.strip():
+        elif "tli" == i.strip().lower():
             result.append("t")
             result.append("l")
             result.append("i")
-        elif "bbc" == i.strip():
+        elif "bbc" == i.strip().lower():
             result.append("b")
             result.append("b")
             result.append("c")
-        elif "ii" == i.strip():
+        elif "ii" == i.strip().lower():
             result.append("i")
             result.append("i")
-        elif "i'd" == i.strip():
+        elif "i'd" == i.strip().lower():
             result.append("i")
             result.append("had")
-        elif "alright" == i.strip():
+        elif "alright" == i.strip().lower():
             result.append("all")
             result.append("right")
-        elif "sorta" == i.strip():
+        elif "sorta" == i.strip().lower():
             result.append("sort")
             result.append("of")
-        elif "alrightie" == i.strip():
+        elif "alrightie" == i.strip().lower():
             result.append("all")
             result.append("right")
-        elif "mm" == i.strip():
+        elif "mm" == i.strip().lower():
             result.append("hm")
-        elif "ai" == i.strip():
+        elif "ai" == i.strip().lower():
             result.append("a")
             result.append("i")
-        elif "this'll" == i.strip():
+        elif "this'll" == i.strip().lower():
             result.append("this")
             result.append("will")
-        elif "gotta" == i.strip():
+        elif "gotta" == i.strip().lower():
             result.append("got")
             result.append("to")
-        elif "hadta" == i.strip():
+        elif "hadta" == i.strip().lower():
             result.append("had")
             result.append("to")
-        elif "eh" == i.strip():
+        elif "eh" == i.strip().lower():
             result.append("uh")
-        elif "kinda" == i.strip():
+        elif "kinda" == i.strip().lower():
             result.append("kind")
             result.append("of")
-        elif "ed" == i.strip():
+        elif "ed" == i.strip().lower():
             result.append("education")
-        elif "til" == i.strip():
+        elif "til" == i.strip().lower():
             result.append("until")
-        elif "gonna" == i.strip():
+        elif "gonna" == i.strip().lower():
             result.append("going")
             result.append("to")
-        elif "shoulda" == i.strip():
+        elif "shoulda" == i.strip().lower():
             result.append("should")
             result.append("have")
-        elif "sposta" == i.strip():
+        elif "sposta" == i.strip().lower():
             result.append("supposed")
             result.append("to")
-        elif "farmhouse" == i.strip():
+        elif "farmhouse" == i.strip().lower():
             result.append("farm")
             result.append("house")
-        elif "aa" == i.strip():
+        elif "aa" == i.strip().lower():
             result.append("a")
             result.append("a")
-        elif "aa" == i.strip():
+        elif "aa" == i.strip().lower():
             result.append("a")
             result.append("a")
-        elif "em" == i.strip():
+        elif "em" == i.strip().lower():
             result.append("them")
-        elif "hmm" == i.strip():
+        elif "hmm" == i.strip().lower():
             result.append("hm")
-        elif "_" in i.strip():
+        elif "_" in i.strip().lower():
             for j in i.strip().split("_"):
                 result.append(j)
         else:
-            result.append(i)
+            result.append(i.lower())
 
     return result
 
 def match_fn(x,y):
+    x = x.lower()
+    y = y.lower()
     return (y == x or
             y.replace("(", "").replace(")", "") == x.replace("(", "").replace(")", "") or
             re.sub(r"\((.*)\)",r"", y) == x or re.sub(r"\((.*)\)",r"", x) == y)
@@ -156,8 +158,8 @@ class EvaluationEngine(BatchalignEngine):
     @staticmethod
     def __compute_wer(doc, gold):
         # get the text of the document and get the text of the gold
-        forms = [ j.text.lower() for i in doc.content for j in i.content if isinstance(i, Utterance)]
-        gold_forms = [ j.text.lower() for i in gold.content for j in i.content if isinstance(i, Utterance)]
+        forms = [ j.text for i in doc.content for j in i.content if isinstance(i, Utterance)]
+        gold_forms = [ j.text for i in gold.content for j in i.content if isinstance(i, Utterance)]
 
         forms = [i.replace("-", "") for i in forms if i.strip() not in MOR_PUNCT+ENDING_PUNCT]
         gold_forms = [i.replace("-", "") for i in gold_forms if i.strip() not in MOR_PUNCT+ENDING_PUNCT]
