@@ -1,146 +1,146 @@
 """
 dispatch.py
-Tabulate default packages and options.
+Resolves requested packages for automatic model selection, downloading, loading, and caching
 """
 
-from batchalign import (WhisperEngine, WhisperFAEngine, StanzaEngine, RevEngine,
+from batchalign.pipelines import (WhisperEngine, RevEngine, NgramRetraceEngine, 
                         NgramRetraceEngine, DisfluencyReplacementEngine, WhisperUTREngine,
                         RevUTREngine, EvaluationEngine, WhisperXEngine, NemoSpeakerEngine,
                         StanzaUtteranceEngine, CorefEngine, Wave2VecFAEngine, SeamlessTranslationModel,
-                        GoogleTranslateEngine, OAIWhisperEngine, PyannoteEngine)
+                        GoogleTranslateEngine, OAIWhisperEngine, PyannoteEngine, OpenSMILEEngine)
 from batchalign import BatchalignPipeline
 from batchalign.models import resolve
 
-from batchalign.utils.config import config_read
-from batchalign.errors import *
+import logging as L 
+baL = L.getLogger('batchalign')
 
-import logging
-L = logging.getLogger("batchalign")
-
-# default for all languages
+# default packages to use for each of the different operations
+# to modify a package, pass in its name as a kwarg to dispatch
 DEFAULT_PACKAGES = {
-    "asr": "whisper_oai",
-    "utr": "whisper_utr",
+    "asr": "whisperx",
     "fa": "whisper_fa",
-    "speaker": "pyannote",
-    "morphosyntax": "stanza",
-    "disfluency": "replacement",
-    "retracing": "ngram",
-    "eval": "evaluation",
+    "retrace": "ngram_retrace",
+    "ng": "ngram_retrace",
+    "disfluency": "disfluency",
+    "cleanup": "disfluency",
+    "utr": "whisper_utr",
+    "eval": "eval",
+    "speaker": "nemo_speaker",
     "utterance": "stanza_utt",
     "coref": "stanza_coref",
     "translate": "gtrans",
+    "opensmile": "opensmile_egemaps",
 }
 
 LANGUAGE_OVERRIDE_PACKAGES = {
-    "eng": {
+    "yue": {
+        "asr": "whisper",
+        "fa": "whisper_fa"
     }
 }
 
 def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
-    """Dispatch pipeline with sane defaults.
-
+    """Resolve packages from given information.
+    
     Parameters
     ----------
     pkg_str : str
-        The user requested pipeline string description.
+        Comma seperated string of packages to use.
+        If not overrided, each package will resolve to a
+        default model for that operation. 
     lang : str
-        Lang code, 3 letters.
-    num_speakers : Optional[int]
-        Number of speakers
+        ISO-639-3 language code (eng, spa, etc.)
+    num_speakers : int
+        Number of speakers; if there is one speaker, speaker
+        diarization will not be performed.
+    arg_overrides: dict
+        Dictionary of arguments to override. Each argument is
+        a package name, and the value is the name of a model to
+        use instead. For instance, `asr='rev'` will use Rev.ai
+        instead of the default ASR model.
 
     Returns
     -------
     BatchalignPipeline
-        The requested pipeline.
+        A fully configured BatchalignPipeline with all utilities
+        requested.
+
     """
-    
-    packages = [i.strip() for i in pkg_str.split(",")]
 
-    try:
-        config = dict(config_read())
-    except ConfigNotFoundError:
-        config = {}
-
-    L.debug(f"Initializing packages, got: packages='{packages}' and config='{config}'")
-
-
-    # create all the engines
-    engines = []
+    # resolve language overrides
     overrides = LANGUAGE_OVERRIDE_PACKAGES.get(lang, {})
 
-    # if asr is in engines but disfluency or retracing is not
-    # add them
-    if "asr" in packages:
-        if "disfluency" not in packages:
-            packages.append("disfluency")
-        if "retracing" not in packages:
-            packages.append("retracing")
-        if "utterance" not in packages and resolve("utterance", lang) == None and lang in ["cho", "eng", "ind", "ita",
-                                                                                           "jpn", "por", "spa", "tur", "vie"]:
-            packages.append("utterance")
-    if "fa" in packages:
-        if "utr" not in packages:
-            packages.append("utr")
+    L.debug(f"Got packages string {pkg_str} with language {lang}; attempting to resolve.")
 
-    L.info(f"Initializing engines...")
-    L.info(f"-------------------------------")
-    for key in packages:
-        # default is the default
-        engine = DEFAULT_PACKAGES.get(key)
-        # apply language override
-        engine = overrides.get(key, engine)
-        # apply user preference
-        engine = dict(config.get(key, {})).get("engine", engine)
-        # apply argument-level overrides
-        engine = arg_overrides.get(key, engine)
+    engines = []
+    for pkg in pkg_str.split(","):
+        # see if user requested an override for this package name
+        if pkg in arg_overrides:
+            engine = arg_overrides[pkg]
+        # see if the language requested any overrides
+        elif pkg in overrides:
+            engine = overrides[pkg]
+        # default to the defaults
+        else:
+            engine = DEFAULT_PACKAGES[pkg]
 
-        if engine == None:
-            raise ValueError(f"Unknown task short name; we can't get a package automatically for that. Provided task: '{key}'.")
+        L.debug(f"Attempting to resolve package {pkg} to model {engine}...")
 
-        L.info(f"| {key: <12} | {engine:>12} |")
-        L.info(f"-------------------------------")
+        # having figured out the model name, initialize the
+        # actual python class that does the processing
 
-       
-        # decode and initialize
-        if engine == "whisper":
-            engines.append(WhisperEngine(lang=lang))
-        elif engine == "whisperx":
-            engines.append(WhisperXEngine(lang=lang))
-        elif engine == "rev":
-            engines.append(RevEngine(lang=lang, num_speakers=num_speakers))
-        elif engine == "stanza":
-            engines.append(StanzaEngine())
-        elif engine == "replacement":
-            engines.append(DisfluencyReplacementEngine())
-        elif engine == "ngram":
-            engines.append(NgramRetraceEngine())
+        # each engine which needs a .pt or model loading requires
+        # resolve to be called. having called that, you initialize it
+        if engine == "wave2vec_fa":
+            model = resolve(engine, lang=lang)
+            from batchalign.models.wave2vec import infer_fa
+            engines.append(Wave2VecFAEngine(model, infer_fa))
         elif engine == "whisper_fa":
-            engines.append(WhisperFAEngine())
+            model = resolve(engine, lang=lang)
+            from batchalign.models.whisper import infer_fa
+            engines.append(Wave2VecFAEngine(model, infer_fa))
+        # in some special cases, the engine IS a model which we downloaded
+        # so in those cases, instead of calling the model loader we just
+        # call the init of the engine
+        elif engine == "ngram_retrace":
+            model = resolve(engine, lang=lang)
+            engines.append(NgramRetraceEngine(model, lang))
+        elif engine == "disfluency":
+            engines.append(DisfluencyReplacementEngine(lang))
+        elif engine == "stanza_utt":
+            engines.append(StanzaUtteranceEngine(lang))
+        elif engine == "stanza_coref":
+            engines.append(CorefEngine(lang))
+        elif engine == "eval":
+            engines.append(EvaluationEngine())
         elif engine == "whisper_utr":
             engines.append(WhisperUTREngine(lang=lang))
         elif engine == "rev_utr":
-            engines.append(RevUTREngine(lang=lang))
-        elif engine == "evaluation":
-            engines.append(EvaluationEngine())
+            engines.append(RevUTREngine())
         elif engine == "nemo_speaker":
-            engines.append(NemoSpeakerEngine(num_speakers=num_speakers))
-        elif engine == "stanza_utt":
-            engines.append(StanzaUtteranceEngine())
-        elif engine == "stanza_coref":
-            engines.append(CorefEngine())
-        elif engine == "wav2vec_fa":
-            engines.append(Wave2VecFAEngine())
-        elif engine == "seamless_translate":
-            engines.append(SeamlessTranslationModel())
+            engines.append(NemoSpeakerEngine(num_speakers))
         elif engine == "gtrans":
             engines.append(GoogleTranslateEngine())
+        elif engine == "seamless":
+            engines.append(SeamlessTranslationModel())
+        elif engine == "rev":
+            engines.append(RevEngine(lang))
+        elif engine == "whisper":
+            engines.append(WhisperEngine(lang))
+        elif engine == "whisperx":
+            engines.append(WhisperXEngine(lang))
         elif engine == "whisper_oai":
             engines.append(OAIWhisperEngine())
         elif engine == "pyannote":
             engines.append(PyannoteEngine())
-
+        elif engine == "opensmile_egemaps":
+            engines.append(OpenSMILEEngine(feature_set='eGeMAPSv02'))
+        elif engine == "opensmile_gemaps":
+            engines.append(OpenSMILEEngine(feature_set='GeMAPSv01b'))
+        elif engine == "opensmile_compare":
+            engines.append(OpenSMILEEngine(feature_set='ComParE_2016'))
+        elif engine == "opensmile_eGeMAPSv01b":
+            engines.append(OpenSMILEEngine(feature_set='eGeMAPSv01b'))
 
     L.debug(f"Done initalizing packages.")
     return BatchalignPipeline(*engines)
-    

@@ -61,7 +61,8 @@ setup(
         "googletrans",
         "openai-whisper",
         "llvmlite>=0.44.0",
-        "praat-parselmouth==0.4.6",  # Added parselmouth for AVQI
+        "praat-parselmouth==0.4.6",  
+        "opensmile>=2.3.0",
         "pyannote.audio",
         "onnxruntime"
     ],
