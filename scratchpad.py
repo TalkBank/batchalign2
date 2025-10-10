@@ -20,7 +20,6 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 from batchalign import *
 from batchalign.formats.chat.parser import chat_parse_utterance
 
-
 # doc = CHATFile(path="../talkbank-alignment/input/011116.cha").doc
 # newdoc = Document(content=[doc[4]], langs=["heb"])
 # pipe = StanzaEngine()

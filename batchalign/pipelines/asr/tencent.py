@@ -189,40 +189,17 @@ class TencentEngine(BatchalignEngine):
             roman_cache = ""
             roman_cache_start = i.StartMs
             roman_cache_end = i.StartMs
+
             for j in i.Words:
                 word = j.Word
                 if self.__lang == "yue":
                     word = cc.convert(word)
-
                     word = self.replace_cantonese_words(word)
-
-                if self.is_roman(word):
-                    if roman_cache == "":
-                        roman_cache_start = (j.OffsetStartMs + start)
-                    roman_cache = roman_cache + word
-                    roman_cache_end = (j.OffsetEndMs + start)
-                else:
-                    if roman_cache != "":
-                        turn.append({
-                            "type": "text",
-                            "ts": roman_cache_start / 1000,
-                            "end_ts": roman_cache_end / 1000,
-                            "value": roman_cache
-                        })
-                    roman_cache = ""
-                    turn.append({
-                        "type": "text",
-                        "ts": (j.OffsetStartMs + start) / 1000,
-                        "end_ts": (j.OffsetEndMs + start) / 1000,
-                        "value": word
-                    })
-
-            if roman_cache != "":
                 turn.append({
                     "type": "text",
-                    "ts": roman_cache_start / 1000,
-                    "end_ts": roman_cache_end / 1000,
-                    "value": roman_cache
+                    "ts": (j.OffsetStartMs + start) / 1000,
+                    "end_ts": (j.OffsetEndMs + start) / 1000,
+                    "value": word
                 })
 
             turns.append({
@@ -232,7 +209,6 @@ class TencentEngine(BatchalignEngine):
         L.debug(f"Tencent done.")
 
         # Extract the text from the small volume parts for translation
-
         doc = process_generation({"monologues": turns},
                                 self.__lang_code, 
                                 utterance_engine=self.__engine)
