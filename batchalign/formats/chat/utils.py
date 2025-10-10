@@ -56,7 +56,7 @@ def chat_parse_mor(mor_str):
         lemmas, feats = zip(*[(i[0], "-".join(i[1:])) for i in feats])
         pos = [i[0] for i in mors]
     except:
-        raise CHATValidationException(f"mor parser recieved invalid mor string: '{mor_str}'")
+        raise CHATValidationException(f"mor parser received invalid mor string: '{mor_str}'")
 
 
     mors = []

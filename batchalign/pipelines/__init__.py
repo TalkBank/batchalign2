@@ -17,3 +17,4 @@ from .translate import SeamlessTranslationModel, GoogleTranslateEngine
 from .avqi import AVQIEngine
 
 from .diarization import PyannoteEngine
+from .opensmile import OpenSMILEEngine

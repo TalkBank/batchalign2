@@ -86,6 +86,7 @@ class RevEngine(BatchalignEngine):
         while status == JobStatus.IN_PROGRESS:
             time.sleep(15)
             status = client.get_job_details(job.id).status
+            L.debug(f"Rev.AI got '{status}'...")
 
         # if we failed, report failure and give up
         if status == JobStatus.FAILED:
