@@ -458,4 +458,3 @@ def version(ctx, **kwargs):
            f"[italic]{RELEASE_NOTES.strip()}[/italic]"+"\n" +
            "\nDeveloped by Brian MacWhinney and Houjun Liu")
     C.print("\n\n"+ptr+"\n\n")
-
