@@ -30,6 +30,7 @@ DEFAULT_PACKAGES = {
     "utterance": "stanza_utt",
     "coref": "stanza_coref",
     "translate": "gtrans",
+    "opensmile": "opensmile_egemaps",
 }
 
 LANGUAGE_OVERRIDE_PACKAGES = {
@@ -139,8 +140,19 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
             engines.append(OAIWhisperEngine())
         elif engine == "pyannote":
             engines.append(PyannoteEngine())
+        elif engine == "opensmile_egemaps":
+            from batchalign.pipelines.opensmile import OpenSMILEEngine
+            engines.append(OpenSMILEEngine(feature_set='eGeMAPSv02'))
+        elif engine == "opensmile_gemaps":
+            from batchalign.pipelines.opensmile import OpenSMILEEngine
+            engines.append(OpenSMILEEngine(feature_set='GeMAPSv01b'))
+        elif engine == "opensmile_compare":
+            from batchalign.pipelines.opensmile import OpenSMILEEngine
+            engines.append(OpenSMILEEngine(feature_set='ComParE_2016'))
+        elif engine == "opensmile_eGeMAPSv01b":
+            from batchalign.pipelines.opensmile import OpenSMILEEngine
+            engines.append(OpenSMILEEngine(feature_set='eGeMAPSv01b'))
 
 
     L.debug(f"Done initalizing packages.")
     return BatchalignPipeline(*engines)
-    
