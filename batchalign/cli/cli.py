@@ -402,7 +402,41 @@ def avqi(ctx, cs_file, sv_file, lang, **kwargs):
             import traceback
             C.print(traceback.format_exc())
 
+#################### OPENSMILE ################################
 
+@batchalign.command()
+@click.argument("input_dir", type=click.Path(exists=True, file_okay=False))
+@click.argument("output_dir", type=click.Path(exists=True, file_okay=False))
+@click.option("--feature-set", 
+              type=click.Choice(['eGeMAPSv02', 'eGeMAPSv01b', 'GeMAPSv01b', 'ComParE_2016']),
+              default='eGeMAPSv02',
+              help="Feature set to extract")
+@click.option("--lang",
+              help="sample language in three-letter ISO 3166-1 alpha-3 code",
+              show_default=True, default="eng", type=str)
+@click.pass_context
+def opensmile(ctx, input_dir, output_dir, feature_set, lang, **kwargs):
+    """Extract openSMILE audio features from speech samples."""
+
+    def loader(file):
+        doc = Document.new(media_path=file, lang=lang)
+        return doc, {"feature_set": feature_set}
+
+    def writer(results, output):
+        if results.get('success', False):
+            output_csv = Path(output).with_suffix('.opensmile.csv')
+            features_df = results.get('features_df')
+            if features_df is not None:
+                features_df.to_csv(output_csv, header=['value'], index_label='feature')
+        else:
+            error_file = Path(output).with_suffix('.error.txt')
+            with open(error_file, 'w') as f:
+                f.write(f"OpenSMILE extraction failed: {results.get('error', 'Unknown error')}\n")
+
+    _dispatch("opensmile", lang, 1, ["mp3", "mp4", "wav"], ctx,
+              input_dir, output_dir,
+              loader, writer, C, **kwargs)
+    
 #################### SETUP ################################
 
 @batchalign.command()
