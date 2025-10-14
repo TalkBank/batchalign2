@@ -62,7 +62,7 @@ setup(
         "openai-whisper",
         "llvmlite>=0.44.0",
         "praat-parselmouth==0.4.6",  
-        "opensmile>=2.3.0",
+        "opensmile>=2.5.0",
         "pyannote.audio",
         "onnxruntime"
     ],
