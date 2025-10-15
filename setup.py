@@ -30,7 +30,7 @@ setup(
         "nltk>=3.8",
         "praatio>=6.0.0,<6.1.0",
         "torch>=2.6.0",
-        "torchaudio",
+        "torchaudio<2.9",
         # "pyAudioAnalysis",
         # "hmmlearn==0.3.0",
         # "eyed3",
