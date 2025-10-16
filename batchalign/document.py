@@ -228,6 +228,7 @@ class Utterance(BaseModel):
         abbrevs =  [" "+" " .join(list(i))+" " for i in abbrev]
         for i in abbrevs:
             t = t.replace(i, " "+i.replace(" ", "")+" ")
+            t = t.replace(i.lower(), " "+i.replace(" ", "")+" ")
 
         return t
 
