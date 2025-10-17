@@ -13,7 +13,7 @@ from pathlib import Path
 import logging
 
 from batchalign.pipelines.base import BatchalignEngine
-from batchalign.document import Task
+from batchalign.document import Task, Document
 
 
 L = logging.getLogger('batchalign')
@@ -21,15 +21,15 @@ L = logging.getLogger('batchalign')
 
 class AVQIEngine(BatchalignEngine):
     """Engine for calculating Acoustic Voice Quality Index (AVQI)."""
-    
+
     def __init__(self):
         super().__init__()
         self._tasks = [Task.FEATURE_EXTRACT]
-    
+
     @property
     def tasks(self):
         return self._tasks
-    
+
     def extract_voiced_segments(self, sound):
         """Extract voiced segments from audio."""
         original = call(sound, "Copy", "original")
@@ -198,34 +198,57 @@ class AVQIEngine(BatchalignEngine):
             "slope": slope,
             "tilt": tilt,
         }
-    
-    def analyze(self, cs_file: str, sv_file: str, output_file: str, lang: str = 'eng', **kwargs) -> Dict:
+
+    def analyze(self, doc: Document, **kwargs) -> Dict:
         """
         Analyze audio files and calculate AVQI.
         
+        Expects the document to have a .cs audio file, and looks for matching .sv file.
+        
         Parameters
         ----------
-        cs_file : str
-            Path to continuous speech audio file
-        sv_file : str  
-            Path to sustained vowel audio file
-        output_file : str
-            Path to output file
-        lang : str
-            Language code (default: 'eng')
+        doc : Document
+            Document with .cs media attached
+        **kwargs : dict
+            Additional arguments
             
         Returns
         -------
         Dict
             Dictionary containing AVQI score and features
         """
-        L.info(f"Calculating AVQI for CS: {cs_file}, SV: {sv_file}")
         
+        if not doc.media or not doc.media.url:
+            return {
+                'error': 'Document has no media attached',
+                'success': False
+            }
+        
+        cs_file = doc.media.url
+        cs_path = Path(cs_file)
+        
+        # Check if this is a .cs file
+        if not '.cs.' in cs_path.name:
+            return {
+                'error': f'Expected .cs audio file, got {cs_path.name}',
+                'success': False
+            }
+        
+        # Find matching .sv file by replacing .cs. with .sv.
+        sv_name = cs_path.name.replace('.cs.', '.sv.')
+        sv_file = cs_path.parent / sv_name
+        
+        if not sv_file.exists():
+            return {
+                'error': f'Matching .sv file not found: {sv_name}',
+                'success': False
+            }
+        
+        L.info(f"Calculating AVQI for CS: {cs_path.name}, SV: {sv_name}")
+
         try:
-            # Calculate AVQI using the proper algorithm
-            avqi_score, features = self.calculate_avqi_features(cs_file, sv_file)
-            
-            # Prepare results
+            avqi_score, features = self.calculate_avqi_features(str(cs_file), str(sv_file))
+
             results = {
                 'avqi': avqi_score,
                 'cpps': features['cpps'],
@@ -233,26 +256,17 @@ class AVQIEngine(BatchalignEngine):
                 'shimmer_local': features['shimmer_local'],
                 'shimmer_local_db': features['shimmer_local_db'],
                 'slope': features['slope'],
-                'tilt': features['tilt']
+                'tilt': features['tilt'],
+                'cs_file': cs_path.name,
+                'sv_file': sv_name,
+                'success': True
             }
-            
-            # Write results to file
-            with open(output_file, 'w') as f:
-                f.write(f"AVQI: {avqi_score:.3f}\n")
-                f.write(f"CPPS: {features['cpps']:.3f}\n")
-                f.write(f"HNR: {features['hnr']:.3f}\n")
-                f.write(f"Shimmer Local: {features['shimmer_local']:.3f}\n")
-                f.write(f"Shimmer Local dB: {features['shimmer_local_db']:.3f}\n")
-                f.write(f"LTAS Slope: {features['slope']:.3f}\n")
-                f.write(f"LTAS Tilt: {features['tilt']:.3f}\n")
-                f.write(f"Language: {lang}\n")
-            
-            L.info(f"AVQI results written to: {output_file}")
+
+            L.info(f"AVQI Score: {avqi_score:.3f}")
             return results
-            
+
         except Exception as e:
             L.error(f"Error calculating AVQI: {e}")
-            # Return default values on error
             return {
                 'avqi': 0.0,
                 'cpps': 0.0,
@@ -260,5 +274,7 @@ class AVQIEngine(BatchalignEngine):
                 'shimmer_local': 0.0,
                 'shimmer_local_db': 0.0,
                 'slope': 0.0,
-                'tilt': 0.0
+                'tilt': 0.0,
+                'error': str(e),
+                'success': False
             }

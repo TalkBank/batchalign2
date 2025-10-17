@@ -20,17 +20,17 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 from batchalign import *
 from batchalign.formats.chat.parser import chat_parse_utterance
 
-# 1+1
-text = "Hello are you the f b i ?"
-langs = ["eng"]
-parsed, delim = chat_parse_utterance(text, None, None, None, None)
-ut = Utterance(content=parsed, delim=delim, text=text)
-doc = Document(content=[ut], langs=langs)
+# # 1+1
+# text = "Hello are you the f b i ?"
+# langs = ["eng"]
+# parsed, delim = chat_parse_utterance(text, None, None, None, None)
+# ut = Utterance(content=parsed, delim=delim, text=text)
+# doc = Document(content=[ut], langs=langs)
 
-# pipe = BatchalignPipeline.new("morphosyntax", lang="jpn")
-# doc_out = pipe(doc, retokenize=True)
+# # pipe = BatchalignPipeline.new("morphosyntax", lang="jpn")
+# # doc_out = pipe(doc, retokenize=True)
 
-print(str(CHATFile(doc=doc)))
+# print(str(CHATFile(doc=doc)))
 
 # 1+1
 
