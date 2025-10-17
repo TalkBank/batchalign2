@@ -361,46 +361,67 @@ def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
 #################### AVQI ################################
 
 @batchalign.command()
-@click.argument("cs_file", type=click.Path(exists=True, file_okay=True))
-@click.argument("sv_file", type=click.Path(exists=True, file_okay=True))
+@click.argument("input_dir", type=click.Path(exists=True, file_okay=False))
+@click.argument("output_dir", type=click.Path(exists=True, file_okay=False))
 @click.option("--lang",
               help="sample language in three-letter ISO 3166-1 alpha-3 code",
-              show_default=True,
-              default="eng",
-              type=str)
+              show_default=True, default="eng", type=str)
 @click.pass_context
-def avqi(ctx, cs_file, sv_file, lang, **kwargs):
-    """Calculate Acoustic Voice Quality Index (AVQI) from continuous speech and sustained vowel audio files."""
-    
-    # Import AVQI engine
+def avqi(ctx, input_dir, output_dir, lang, **kwargs):
+    """Calculate AVQI from paired .cs and .sv audio files in input directory."""
+
     from batchalign.pipelines.avqi import AVQIEngine
+    from pathlib import Path
+    import os
     
-    # Get output file path (same directory as cs_file, with .avqi.txt extension)
-    cs_path = Path(cs_file)
-    output_file = cs_path.with_suffix('.avqi.txt')
+    # Get all .cs files
+    cs_files = []
+    for root, dirs, files in os.walk(input_dir):
+        for f in files:
+            if '.cs.' in f and any(f.endswith(ext) for ext in ['.mp3', '.wav', '.mp4']):
+                cs_files.append(os.path.join(root, f))
     
-    # Create AVQI engine
-    avqi_engine = AVQIEngine()
+    if not cs_files:
+        C.print("[bold red]No .cs audio files found in input directory[/bold red]")
+        return
     
-    try:
-        # Calculate AVQI
-        C.print(f"\n[blue]Calculating AVQI[/blue] for:")
-        C.print(f"  Continuous Speech: [cyan]{cs_file}[/cyan]")
-        C.print(f"  Sustained Vowel:   [cyan]{sv_file}[/cyan]")
-        C.print(f"  Language:          [cyan]{lang}[/cyan]")
-        C.print(f"  Output:            [cyan]{output_file}[/cyan]\n")
+    C.print(f"\nMode: [blue]avqi[/blue]; got [bold cyan]{len(cs_files)}[/bold cyan] file pair{'s' if len(cs_files) > 1 else ''} to process from {input_dir}:\n")
+    
+    engine = AVQIEngine()
+    
+    for cs_file in cs_files:
+        cs_path = Path(cs_file)
+        C.print(f"Processing: [cyan]{cs_path.name}[/cyan]")
         
-        results = avqi_engine.analyze(cs_file, sv_file, str(output_file), lang)
+        doc = Document.new(media_path=cs_file, lang=lang)
+        results = engine.analyze(doc)
         
-        C.print(f"[bold green]✓ AVQI calculation completed![/bold green]")
-        C.print(f"[bold]AVQI Score: {results['avqi']:.3f}[/bold]")
-        C.print(f"Results saved to: [cyan]{output_file}[/cyan]\n")
+        # Create output path
+        rel_path = os.path.relpath(cs_file, input_dir)
+        output_path = Path(os.path.join(output_dir, rel_path))
+        os.makedirs(output_path.parent, exist_ok=True)
         
-    except Exception as e:
-        C.print(f"[bold red]ERROR[/bold red]: {str(e)}")
-        if ctx.obj["verbose"] > 0:
-            import traceback
-            C.print(traceback.format_exc())
+        if results.get('success', False):
+            output_txt = output_path.with_suffix('.avqi.txt')
+            with open(output_txt, 'w') as f:
+                f.write(f"AVQI: {results['avqi']:.3f}\n")
+                f.write(f"CPPS: {results['cpps']:.3f}\n")
+                f.write(f"HNR: {results['hnr']:.3f}\n")
+                f.write(f"Shimmer Local: {results['shimmer_local']:.3f}\n")
+                f.write(f"Shimmer Local dB: {results['shimmer_local_db']:.3f}\n")
+                f.write(f"LTAS Slope: {results['slope']:.3f}\n")
+                f.write(f"LTAS Tilt: {results['tilt']:.3f}\n")
+                f.write(f"CS File: {results['cs_file']}\n")
+                f.write(f"SV File: {results['sv_file']}\n")
+                f.write(f"Language: {lang}\n")
+            C.print(f"  [bold green]✓[/bold green] AVQI: {results['avqi']:.3f} → {output_txt.name}")
+        else:
+            error_file = output_path.with_suffix('.error.txt')
+            with open(error_file, 'w') as f:
+                f.write(f"AVQI calculation failed: {results.get('error', 'Unknown error')}\n")
+            C.print(f"  [bold red]✗[/bold red] Failed: {results.get('error', 'Unknown error')}")
+    
+    C.print(f"\nAll done. Results saved to {output_dir}!\n")
 
 #################### OPENSMILE ################################
 
