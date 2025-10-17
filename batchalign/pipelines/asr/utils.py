@@ -267,6 +267,9 @@ def process_generation(output, lang="eng", utterance_engine=None):
                 continue
             if word not in ENDING_PUNCT+MOR_PUNCT+["؟", "۔", "،", "؛"]:
                 word_replaced = word
+
+                for i in ENDING_PUNCT+MOR_PUNCT+["؟", "۔", "،", "؛"]:
+                    word_replaced = word_replaced.replace(i, "")
                     
                 if start == None or end == None:
                     words.append(Form(text=word_replaced, time=None))
