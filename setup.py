@@ -64,7 +64,8 @@ setup(
         "praat-parselmouth==0.4.6",  
         "opensmile>=2.5.0",
         "pyannote.audio",
-        "onnxruntime"
+        "onnxruntime",
+        "certifi>=2025.10.5"
     ],
     extras_require={
         'dev': [
