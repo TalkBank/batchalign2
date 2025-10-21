@@ -357,7 +357,7 @@ def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, whisper_oai, **
     _dispatch("benchmark", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
               in_dir, out_dir,
               loader, writer, C,
-              asr="whisper" if whisper else ("whisper_oai " if whisper_oai else "rev"),
+              asr="whisper" if whisper else ("whisper_oai" if whisper_oai else "rev"),
               **kwargs)
     
 
