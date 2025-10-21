@@ -352,7 +352,6 @@ def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
 @click.option("-n", "--num_speakers", type=int, help="number of speakers in the language sample", default=2)
 @click.pass_context
 def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, funaudio, whisper_oai, **kwargs):
->>>>>>> master
     """Benchmark ASR utilities for their word accuracy"""
     def loader(file):
         # try to find a .cha in the same directory
