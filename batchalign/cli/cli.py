@@ -179,7 +179,7 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
 
     def writer(doc, output):
         doc.content.insert(0, CustomLine(id="Comment", type=CustomLineType.INDEPENDENT,
-                                         content=f"Batchalign {VERSION_NUMBER.strip()}, ASR Engine {asr}. Unchecked output of ASR model; do not use."))
+                                         content=f"Batchalign {VERSION_NUMBER.strip()}, ASR Engine {asr}. Unchecked output of ASR model."))
         CHATFile(doc=doc).write(output
                                 .replace(".wav", ".cha")
                                 .replace(".WAV", ".cha")
