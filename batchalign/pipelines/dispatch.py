@@ -144,7 +144,7 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
         elif engine == "gtrans":
             engines.append(GoogleTranslateEngine())
         elif engine == "whisper_oai":
-            engines.append(OAIWhisperEngine())
+            engines.append(OAIWhisperEngine(lang=lang))
         elif engine == "aliyun":
             engines.append(AliyunEngine())
         elif engine == "funaudio":
