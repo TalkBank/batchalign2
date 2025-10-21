@@ -11,6 +11,7 @@ from typing import Tuple, Dict, Optional
 import os
 from pathlib import Path
 import logging
+import torchaudio
 
 from batchalign.pipelines.base import BatchalignEngine
 from batchalign.document import Task, Document
@@ -246,8 +247,37 @@ class AVQIEngine(BatchalignEngine):
         
         L.info(f"Calculating AVQI for CS: {cs_path.name}, SV: {sv_name}")
 
+        # Create mono versions of both files
+        cs_mono_path = None
+        sv_mono_path = None
+
         try:
-            avqi_score, features = self.calculate_avqi_features(str(cs_file), str(sv_file))
+            # Convert cs_file to mono
+            L.info(f"Converting {cs_path.name} to mono")
+            cs_waveform, cs_sample_rate = torchaudio.load(str(cs_file))
+            if cs_waveform.shape[0] > 1:
+                cs_mono = cs_waveform.mean(dim=0, keepdim=True)
+            else:
+                cs_mono = cs_waveform
+
+            # Create mono filename: file_name.cs.[extension].mono
+            cs_mono_path = cs_path.parent / f"{cs_path.name}.mono.wav"
+            torchaudio.save(str(cs_mono_path), cs_mono, cs_sample_rate)
+
+            # Convert sv_file to mono
+            L.info(f"Converting {sv_name} to mono")
+            sv_waveform, sv_sample_rate = torchaudio.load(str(sv_file))
+            if sv_waveform.shape[0] > 1:
+                sv_mono = sv_waveform.mean(dim=0, keepdim=True)
+            else:
+                sv_mono = sv_waveform
+
+            # Create mono filename: file_name.sv.[extension].mono
+            sv_mono_path = sv_file.parent / f"{sv_file.name}.mono.wav"
+            torchaudio.save(str(sv_mono_path), sv_mono, sv_sample_rate)
+
+            # Calculate AVQI using mono versions
+            avqi_score, features = self.calculate_avqi_features(str(cs_mono_path), str(sv_mono_path))
 
             results = {
                 'avqi': avqi_score,
@@ -278,3 +308,11 @@ class AVQIEngine(BatchalignEngine):
                 'error': str(e),
                 'success': False
             }
+        finally:
+            # Clean up temporary mono files
+            if cs_mono_path and cs_mono_path.exists():
+                L.info(f"Cleaning up temporary file: {cs_mono_path.name}")
+                cs_mono_path.unlink()
+            if sv_mono_path and sv_mono_path.exists():
+                L.info(f"Cleaning up temporary file: {sv_mono_path.name}")
+                sv_mono_path.unlink()

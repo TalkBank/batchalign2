@@ -25,7 +25,7 @@ def conform(x):
     result = []
     for i in x:
         if i.strip().lower() in joined_compounds:
-            for k in compounds[joined_compounds.index(i.strip())]:
+            for k in compounds[joined_compounds.index(i.strip().lower())]:
                 result.append(k)
         elif i.strip() in lowered_abbrev:
             for j in i.strip():

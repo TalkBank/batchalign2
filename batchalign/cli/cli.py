@@ -198,7 +198,7 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
 
     def writer(doc, output):
         doc.content.insert(0, CustomLine(id="Comment", type=CustomLineType.INDEPENDENT,
-                                         content=f"Batchalign {VERSION_NUMBER.strip()}, ASR Engine {asr}. Unchecked output of ASR model; do not use."))
+                                         content=f"Batchalign {VERSION_NUMBER.strip()}, ASR Engine {asr}. Unchecked output of ASR model."))
         CHATFile(doc=doc).write(output
                                 .replace(".wav", ".cha")
                                 .replace(".WAV", ".cha")
@@ -342,6 +342,8 @@ def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
               default=False, help="Use Tencent instead of Rev.AI (default).")
 @click.option("--funaudio/--rev",
               default=False, help="Use Tencent instead of Rev.AI (default).")
+@click.option("--whisper_oai/--rev",
+              default=False, help="Use the OpenAI's Whisper implementation instead of Rev.AI (default).")
 @click.option("--lang",
               help="sample language in three-letter ISO 3166-1 alpha-3 code",
               show_default=True,
@@ -349,7 +351,8 @@ def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
               type=str)
 @click.option("-n", "--num_speakers", type=int, help="number of speakers in the language sample", default=2)
 @click.pass_context
-def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, **kwargs):
+def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, funaudio, whisper_oai, **kwargs):
+>>>>>>> master
     """Benchmark ASR utilities for their word accuracy"""
     def loader(file):
         # try to find a .cha in the same directory
@@ -377,7 +380,7 @@ def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, **kwar
     _dispatch("benchmark", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
               in_dir, out_dir,
               loader, writer, C,
-              asr="whisper" if whisper else ("funaudio" if funaudio else ("tencent" if tencent else "rev")),
+              asr="whisper" if whisper else ("funaudio" if funaudio else ("tencent" if tencent else ("whisper_oai" if whisper_oai else "rev"))),
               **kwargs)
     
 
