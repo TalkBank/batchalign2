@@ -319,6 +319,8 @@ def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
 @common_options
 @click.option("--whisper/--rev",
               default=False, help="Use OpenAI Whisper (ASR) instead of Rev.AI (default).")
+@click.option("--whisper_oai/--rev",
+              default=False, help="Use the OpenAI's Whisper implementation instead of Rev.AI (default).")
 @click.option("--lang",
               help="sample language in three-letter ISO 3166-1 alpha-3 code",
               show_default=True,
@@ -328,7 +330,7 @@ def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
 @click.option("--wor/--nowor",
               default=False, help="Should we write word level alignment line? Default to no.")
 @click.pass_context
-def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
+def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, whisper_oai, **kwargs):
     """Benchmark ASR utilities for their word accuracy"""
     def loader(file):
         # try to find a .cha in the same directory
@@ -355,7 +357,8 @@ def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, **kwargs):
     _dispatch("benchmark", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
               in_dir, out_dir,
               loader, writer, C,
-              asr="whisper" if whisper else "rev", **kwargs)
+              asr="whisper" if whisper else ("whisper_oai" if whisper_oai else "rev"),
+              **kwargs)
     
 
 #################### AVQI ################################
