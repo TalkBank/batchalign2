@@ -1,6 +1,7 @@
 import re
 from batchalign.document import *
 from batchalign.utils import *
+from batchalign.pipelines.asr.num2lang import NUM2LANG
 
 from batchalign.constants import ENDING_PUNCT
 from batchalign.pipelines.asr.num2chinese import num2chinese
@@ -229,6 +230,10 @@ def process_generation(output, lang="eng", utterance_engine=None):
                     elif lang == "yue":
                         return num2chinese(i, simp=False)
                     else:
+                        if NUM2LANG.get(lang) is not None:
+                            n2l = NUM2LANG.get(lang)
+                            for a,b in list(reversed(n2l.items())):
+                                i = i.replace(a,b).strip()
                         return i
                 except:
                     return i
