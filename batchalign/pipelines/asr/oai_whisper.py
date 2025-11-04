@@ -8,6 +8,10 @@ import pycountry
 import logging
 L = logging.getLogger("batchalign")
 
+from opencc import OpenCC
+cc_t2s = OpenCC('t2s')
+cc_s2hk = OpenCC('s2hk')
+
 from batchalign.utils.utils import correct_timing
 from batchalign.models import resolve
 
@@ -67,11 +71,16 @@ class OAIWhisperEngine(BatchalignEngine):
         for i in res["segments"]:
             turn = []
             for j in i["words"]:
+                word = j["word"]
+                if self.__lang == "zho":
+                    word = cc_t2s.convert(word)
+                elif self.__lang == "yue":
+                    word = cc_s2hk.convert(word)
                 turn.append({
                     "type": "text",
                     "ts": j["start"],
                     "end_ts": j["end"],
-                    "value": j["word"]
+                    "value": word
                 })
             turns.append({
                 "elements": turn,
