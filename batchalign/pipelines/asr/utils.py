@@ -230,8 +230,8 @@ def process_generation(output, lang="eng", utterance_engine=None):
                     elif lang == "yue":
                         return num2chinese(i, simp=False)
                     else:
-                        if NUM2LANG.get(lang) is not None:
-                            n2l = NUM2LANG.get(lang)
+                        if NUM2LANG.get(lang.lower()) is not None:
+                            n2l = NUM2LANG.get(lang.lower())
                             for a,b in list(reversed(n2l.items())):
                                 i = i.replace(a,b).strip()
                         return i
