@@ -1,0 +1,23 @@
+IND = {
+    "1":"satu",
+    "2":"dua",
+    "3":"tiga",
+    "4":"empat",
+    "5":"lima",
+    "6":"enam",
+    "7":"tujuh",
+    "8":"delapan",
+    "9":"sempilan",
+    "10":"sepuluh",
+    "11":"sebelas",
+    "12":"dua belas",
+    "13":"tiga belas",
+    "14":"empat  belas",
+    "15":"lima belas",
+    "16":"enam belas",
+    "17":"tujuh belas",
+    "18":"delapan belas",
+    "19":"sembilan belas",
+    "20":"dua puluh",
+    "21":"dua puluh satu"
+}
