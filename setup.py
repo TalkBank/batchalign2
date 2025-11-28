@@ -73,7 +73,8 @@ setup(
         "opensmile>=2.5.0",
         "pyannote.audio",
         "onnxruntime",
-        "certifi>=2025.10.5"
+        "certifi>=2025.10.5",
+        "regex"
     ],
     extras_require={
         'dev': [
