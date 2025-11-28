@@ -123,7 +123,7 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, tencent, funaudio, **kwargs):
     def loader(file):
         return (
             CHATFile(path=os.path.abspath(file)).doc,
-            {"pauses": kwargs.get("pauses", False)}
+            {"pauses": kwargs.get("pauses", False)010803.cha010803.mp3
         )
 
     def writer(doc, output):
