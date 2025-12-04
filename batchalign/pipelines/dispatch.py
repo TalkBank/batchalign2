@@ -9,7 +9,7 @@ from batchalign import (WhisperEngine, WhisperFAEngine, StanzaEngine, RevEngine,
                         StanzaUtteranceEngine, CorefEngine, Wave2VecFAEngine, TencentEngine,
                         OAIWhisperEngine, TencentUTREngine, AliyunEngine, FunAudioEngine,
                         FunAudioUTREngine, SeamlessTranslationModel, GoogleTranslateEngine,
-                        OAIWhisperEngine, PyannoteEngine)
+                        OAIWhisperEngine, PyannoteEngine, IICFAEngine)
 
 from batchalign import BatchalignPipeline
 from batchalign.models import resolve
@@ -135,6 +135,8 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
             engines.append(CorefEngine())
         elif engine == "wav2vec_fa":
             engines.append(Wave2VecFAEngine())
+        elif engine == "iic_fa":
+            engines.append(IICFAEngine())
         elif engine == "seamless_translate":
             engines.append(SeamlessTranslationModel())
         elif engine == "tencent":
