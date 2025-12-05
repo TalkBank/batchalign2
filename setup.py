@@ -41,7 +41,7 @@ setup(
         "transformers>=4.38.2",
         "tokenizers>=0.14.1",
         "numba>=0.61.0",
-        "numpy<=2.2",
+        "numpy<=1.26.4",
         "pycountry>=22.3",
         "stanza[transformers]>=1.10.1",
         "scipy~=1.11",
