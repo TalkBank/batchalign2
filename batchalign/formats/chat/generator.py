@@ -11,7 +11,7 @@ import warnings
 # document[3].text = None
 # document[3].model_dump()
 
-def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=True):
+def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=True, merge_abbrev=False):
     """Converts at Utterance to a CHAT string.
 
     Parameters
@@ -27,7 +27,7 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
         The generated string.
     """
     
-    main_line = str(utterance)
+    main_line = utterance.tostring(merge_abbrev=merge_abbrev)
     # last minut ecorrections
     # main_line = re.sub(r"<([\w ]+) \[\/", r"<\1> [/", main_line)
     main_line = re.sub(r"«", "“", main_line)
