@@ -52,14 +52,14 @@ einops==0.8.1
     # via pyannote-audio
 emoji==2.14.1
     # via stanza
-filelock==3.19.1
+filelock==3.20.1
     # via
     #   blobfile
     #   huggingface-hub
     #   pyannote-pipeline
     #   torch
     #   transformers
-fonttools==4.59.2
+fonttools==4.61.0
     # via matplotlib
 frozenlist==1.7.0
     # via
@@ -469,7 +469,7 @@ typing-inspection==0.4.1
     # via pydantic
 tzdata==2025.2
     # via pandas
-urllib3==2.5.0
+urllib3==2.6.0
     # via
     #   blobfile
     #   requests
