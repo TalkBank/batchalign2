@@ -12,7 +12,7 @@ import regex as re
 # document[3].text = None
 # document[3].model_dump()
 
-def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=True, merge_letters=False):
+def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=True, merge_letters=False, merge_abbrev=False):
     """Converts at Utterance to a CHAT string.
 
     Parameters
@@ -28,7 +28,7 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
         The generated string.
     """
     
-    main_line = str(utterance)
+    main_line = utterance.tostring(merge_abbrev=merge_abbrev)
     # last minut ecorrections
     # main_line = re.sub(r"<([\w ]+) \[\/", r"<\1> [/", main_line)
     if merge_letters:
@@ -109,7 +109,7 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
 
     #### WOR LINE GENERATION ####
     if has_wor and write_wor:
-        result.append("%wor:\t"+" ".join(wor_elems))
+        result.append(("%wor:\t"+" ".join(wor_elems)).replace("-\x15", "- \x15"))
     if has_coref:
         result.append("%coref:\t"+(", ".join(coref_elems)))
     if utterance.translation != None and utterance.translation.strip() not in ["", ".", "!", "?"]:
