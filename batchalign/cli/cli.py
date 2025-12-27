@@ -110,6 +110,7 @@ batchalign.add_command(train, "models")
               default=False, help="For utterance timing recovery, OpenAI Whisper (ASR) instead of Rev.AI (default).")
 @click.option("--wav2vec/--whisper_fa",
               default=True, help="Use Whisper instead of Wav2Vec for English (defaults for Whisper for non-English)")
+@click.option("--iic", is_flag=True, default=False, help="Use IIC forced alignment (for Chinese).")
 @click.option("--tencent/--rev",
               default=False, help="Use Tencent instead of Rev.AI (default).")
 @click.option("--funaudio/--rev",
@@ -118,7 +119,7 @@ batchalign.add_command(train, "models")
 @click.option("--wor/--nowor",
               default=True, help="Should we write word level alignment line? Default to yes.")
 @click.pass_context
-def align(ctx, in_dir, out_dir, whisper, wav2vec, tencent, funaudio, **kwargs):
+def align(ctx, in_dir, out_dir, whisper, wav2vec, iic, tencent, funaudio, **kwargs):
     """Align transcripts against corresponding media files."""
     def loader(file):
         return (
@@ -129,26 +130,23 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, tencent, funaudio, **kwargs):
     def writer(doc, output):
         CHATFile(doc=doc).write(output, write_wor=kwargs.get("wor", True))
 
-    if not wav2vec:
-        _dispatch("align", "eng", 1,
-                  ["cha"], ctx,
-                  in_dir, out_dir,
-                  loader, writer, C,
-                  fa="whisper_fa",
-                  utr = ("whisper_utr" if whisper else
-                         ("tencent_utr" if tencent else
-                         ("funaudio_utr" if funaudio else "rev_utr"))),
-                  **kwargs)
+    # Determine FA engine
+    if iic:
+        fa_engine = "iic_fa"
+    elif not wav2vec:
+        fa_engine = "whisper_fa"
     else:
-        _dispatch("align", "eng", 1,
-                  ["cha"], ctx,
-                  in_dir, out_dir,
-                  loader, writer, C,
-                  fa="wav2vec_fa",
-                  utr = ("whisper_utr" if whisper else
-                         ("tencent_utr" if tencent else
-                         ("funaudio_utr" if funaudio else "rev_utr"))),
-                  **kwargs)
+        fa_engine = "wav2vec_fa"
+
+    _dispatch("align", "eng", 1,
+              ["cha"], ctx,
+              in_dir, out_dir,
+              loader, writer, C,
+              fa=fa_engine,
+              utr = ("whisper_utr" if whisper else
+                     ("tencent_utr" if tencent else
+                     ("funaudio_utr" if funaudio else "rev_utr"))),
+              **kwargs)
 
 #################### TRANSCRIBE ################################
 
