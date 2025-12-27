@@ -98,7 +98,7 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
 
     #### WOR LINE GENERATION ####
     if has_wor and write_wor:
-        result.append("%wor:\t"+" ".join(wor_elems))
+        result.append(("%wor:\t"+" ".join(wor_elems)).replace("-\x15", "- \x15"))
     if has_coref:
         result.append("%coref:\t"+(", ".join(coref_elems)))
     if utterance.translation != None and utterance.translation.strip() not in ["", ".", "!", "?"]:
