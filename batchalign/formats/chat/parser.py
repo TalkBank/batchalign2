@@ -222,7 +222,7 @@ def chat_parse_doc(lines, special_mor=False):
 
             # we throw away participants because there are duplicate
             # info of the same thing in @ID
-            if "@Participants" in line or "@Options" in line:
+            if "@Participants" in line or ("@Options" in line and "CA" not in line):
                 continue
             # we split because there are multiple languages possible 
             elif "@Languages" in line.strip():
