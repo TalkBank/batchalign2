@@ -7,7 +7,7 @@ from .morphosyntax import StanzaEngine, CorefEngine
 from .cleanup import NgramRetraceEngine, DisfluencyReplacementEngine
 from .speaker import NemoSpeakerEngine
 
-from .fa import WhisperFAEngine, Wave2VecFAEngine, IICFAEngine
+from .fa import WhisperFAEngine, Wave2VecFAEngine, IICFAEngine, Wave2VecFAEngineCantonese
 from .utr import WhisperUTREngine, RevUTREngine, TencentUTREngine, FunAudioUTREngine
 
 from .analysis import EvaluationEngine

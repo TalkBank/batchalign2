@@ -80,7 +80,8 @@ class TencentUTREngine(BatchalignEngine):
         self.__client = AsrClient(cred, "ap-hongkong")
 
 
-    def replace_cantonese_words(self, word):
+    @staticmethod
+    def replace_cantonese_words(word):
         """Function to replace Cantonese words with custom replacements."""
         word_replacements = {
             "系": "係", 
@@ -194,7 +195,7 @@ class TencentUTREngine(BatchalignEngine):
             roman_cache_end = i.StartMs
             for j in i.Words:
                 word = j.Word
-                if self.__lang == "yue":
+                if lang == "yue":
                     word = cc.convert(word)
 
                     word = self.replace_cantonese_words(word)

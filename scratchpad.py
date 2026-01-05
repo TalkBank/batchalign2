@@ -16,9 +16,57 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 ########
 
+# from batchalign import *
+# from batchalign.formats.chat.parser import chat_parse_utterance
 
-from batchalign import *
-from batchalign.formats.chat.parser import chat_parse_utterance
+# # !uv pip install pycantonese
+# doc = CHATFile(path="/Users/houjun/Documents/Projects/talkbank-alignment/cantonese/input/030021s.cha").doc
+
+# pipe = BatchalignPipeline(TencentUTREngine(), Wave2VecFAEngineCantonese())
+# doc = pipe(doc)
+
+# # [i.alignment for i in doc.content if isinstance(i, Utterance)]
+# # [i.time for i in doc if isinstance(i, Ut]
+
+
+# # res = pipe(doc)
+# CHATFile(doc=doc).write("/Users/houjun/Documents/Projects/talkbank-alignment/cantonese/input/030021s.out.cha")
+
+# # f = Wave2VecFAEngineCantonese()._Wave2VecFAEngineCantonese__wav2vec.load(doc.media.url)
+# # f
+# # f.tensor.size(0)//f.rate
+# # 1+1
+# # 1+1
+
+
+
+
+
+
+# pipe = BatchalignPipeline(Wave2VecFAEngine())
+# pipe
+# res
+# audio =
+# model = Wave2VecFAModel()
+# audio = model.load(doc.media.url)
+# 1+1
+# text = str(res[12]).split(".")[0]
+# full_audio = audio
+# # res[12]
+# audio = audio.chunk(12460, 14610)
+# audio
+# res[6][0]
+# 1+1
+# f1 = '饭'
+# f2 = '飯'
+
+# cc.convert(f1)
+
+# doc.langs
+
+# import ipdb
+# ipdb.set_trace()
+
 
 # # 1+1
 # text = "Hello are you the f b i ?"
@@ -34,6 +82,8 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 # 1+1
 
+
+# !uv pip install pycantonese
 
 # doc = CHATFile(path="../talkbank-alignment/input/011116.cha").doc
 # newdoc = Document(content=[doc[4]], langs=["heb"])

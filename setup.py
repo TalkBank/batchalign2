@@ -75,7 +75,8 @@ setup(
         "pyannote.audio",
         "onnxruntime",
         "certifi>=2025.10.5",
-        "regex"
+        "regex",
+        "pycantonese"
     ],
     extras_require={
         'dev': [
