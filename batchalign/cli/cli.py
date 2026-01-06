@@ -129,7 +129,7 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, iic, wav2vec_yue, tencent, fun
         )
 
     def writer(doc, output):
-        CHATFile(doc=doc).write(output, write_wor=kwargs.get("wor", True))
+        CHATFile(doc=doc).write(output, write_wor=kwargs.get("wor", True), dont_merge_letters=True)
 
     # Determine FA engine
     if iic:
