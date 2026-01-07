@@ -51,6 +51,7 @@ class GoogleTranslateEngine(BatchalignEngine):
             translated_text_from_text = translated_text_from_text.replace("。", ".")
             translated_text_from_text = translated_text_from_text.replace("’", "'")
             translated_text_from_text = translated_text_from_text.replace("\t", " ")
+            translated_text_from_text = translated_text_from_text.replace('\u200b', "")
 
             i.translation = translated_text_from_text
             for j in MOR_PUNCT + ENDING_PUNCT:
