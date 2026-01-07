@@ -128,7 +128,8 @@ class CHATFile(BaseFormat):
                 continue
             else:
                 main.append(generate_chat_utterance(i, special and doc.langs[0] == "eng",
-                                                    write_wor=write_wor))
+                                                    write_wor=write_wor,
+                                                    merge_abbrev="eng" in doc.langs))
         main.append("@End\n")
 
         raw = "\n".join(main)

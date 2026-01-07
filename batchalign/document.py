@@ -206,7 +206,7 @@ class Utterance(BaseModel):
     def __len__(self):
         return len(self.content)
 
-    def tostring(self, always_detokenize=False):
+    def tostring(self, always_detokenize=False, merge_abbrev=False):
         if self.text != None and not always_detokenize:
             t = self.text
         else:
@@ -225,10 +225,11 @@ class Utterance(BaseModel):
         t = re.sub(r" +", " ", t.strip()).strip()
         t = t.replace("+ ,", "+,").strip()
 
-        abbrevs =  [" "+" " .join(list(i))+" " for i in abbrev]
-        for i in abbrevs:
-            t = t.replace(i, " "+i.replace(" ", "")+" ")
-            t = t.replace(i.lower(), " "+i.replace(" ", "")+" ")
+        if merge_abbrev:
+            abbrevs =  [" "+" " .join(list(i))+" " for i in abbrev]
+            for i in abbrevs:
+                t = t.replace(i, " "+i.replace(" ", "")+" ")
+                t = t.replace(i.lower(), " "+i.replace(" ", "")+" ")
 
         return t
 

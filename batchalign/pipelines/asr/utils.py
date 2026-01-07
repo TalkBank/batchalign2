@@ -221,7 +221,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
                 return i
             try:
                 return num2words(i, lang=lang_2)
-            except NotImplementedError:
+            except (NotImplementedError, AttributeError) as _:
                 try:
                     if lang == "zho":
                         return num2chinese(i)
