@@ -48,7 +48,7 @@ def handle_verbosity(verbosity):
     L.getLogger('stanza').handlers.clear()
     L.getLogger('transformers').handlers.clear()
     L.getLogger('nemo_logger').handlers.clear()
-    L.getLogger("stanza").setLevel(L.INFO)
+    L.getLogger("stanza").setLevel(L.WARN)
     L.getLogger('nemo_logger').setLevel(L.CRITICAL)
     L.getLogger('batchalign').setLevel(L.WARN)
     L.getLogger('lightning.pytorch.utilities.migration.utils').setLevel(L.ERROR)
@@ -59,6 +59,7 @@ def handle_verbosity(verbosity):
         L.getLogger('batchalign').setLevel(L.INFO)
     if verbosity >= 3:
         L.getLogger('batchalign').setLevel(L.DEBUG)
+        L.getLogger("stanza").setLevel(L.INFO)
     if verbosity >= 4:
         L.getLogger('batchalign').setLevel(L.DEBUG)
         L.getLogger('transformers').setLevel(L.INFO)
@@ -67,7 +68,8 @@ def handle_verbosity(verbosity):
 @click.pass_context
 @click.version_option(VERSION_NUMBER)
 @click.option("-v", "--verbose", type=int, count=True, default=0, help="How loquacious Batchalign should be.")
-def batchalign(ctx, verbose):
+@click.option("--workers", type=int, default=os.cpu_count(), help="Number of worker processes to use.")
+def batchalign(ctx, verbose, workers):
     """process .cha and/or audio files in IN_DIR and dumps them to OUT_DIR using recipe COMMAND"""
 
     ## setup commands ##
@@ -79,6 +81,7 @@ def batchalign(ctx, verbose):
     handle_verbosity(verbose)
     # add to arguments
     ctx.obj["verbose"] = verbose
+    ctx.obj["workers"] = workers
     # setup config
     from batchalign.utils import config
     ctx.obj["config"] = config.config_read(True)
@@ -257,7 +260,7 @@ def morphotag(ctx, in_dir, out_dir, **kwargs):
 
     _dispatch("morphotag", "eng", 1, ["cha"], ctx,
               in_dir, out_dir,
-              loader, writer, C)
+              loader, writer, C, **kwargs)
 
 
 #################### MORPHOTAG ################################

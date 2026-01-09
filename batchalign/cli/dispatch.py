@@ -17,17 +17,123 @@ from rich.markup import escape
 
 from pathlib import Path
 
+import concurrent.futures
+import multiprocessing
+from functools import partial
+
 # Oneliner of directory-based glob and replace
 globase = lambda path, statement: glob(os.path.join(path, statement))
 repath_file = lambda file_path, new_dir: os.path.join(new_dir, Path(file_path).name)
 
 import tempfile
+import time
 
 import traceback
 import logging as L
 baL = L.getLogger('batchalign')
 
 warnings.filterwarnings('ignore', category=UserWarning, message='TypedStorage is deprecated')
+
+# Global cache for the pipeline in worker processes
+_worker_pipeline = None
+
+def _get_worker_pipeline(command, lang, num_speakers, **kwargs):
+    global _worker_pipeline
+    if _worker_pipeline is None:
+        from batchalign.pipelines import BatchalignPipeline
+        _worker_pipeline = BatchalignPipeline.new(Cmd2Task[command],
+                                                lang=lang, num_speakers=num_speakers, **kwargs)
+    return _worker_pipeline
+
+def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_info, **kwargs):
+    """The task executed in each worker process."""
+    import sys
+    import os
+    import tempfile
+    
+    file, output = file_info
+    pid = os.getpid()
+    
+    # Use a temporary file to capture ALL output at the FD level
+    # This is the most robust way to prevent interleaved output
+    with tempfile.TemporaryFile(mode='w+') as log_file:
+        old_stdout_fd = os.dup(sys.stdout.fileno())
+        old_stderr_fd = os.dup(sys.stderr.fileno())
+        
+        try:
+            # Redirect FD 1 and 2 to our temp file
+            os.dup2(log_file.fileno(), sys.stdout.fileno())
+            os.dup2(log_file.fileno(), sys.stderr.fileno())
+            
+            pipeline = _get_worker_pipeline(command, lang, num_speakers, **kwargs)
+            
+            # For now, we'll re-import what we need
+            from batchalign.formats.chat import CHATFile
+            
+            # Morphosyntax specific loader/writer logic moved here for picklability
+            if command == "morphotag":
+                # Extract morphotag-specific arguments from kwargs
+                mwt = kwargs.pop("mwt", {})
+                retokenize = kwargs.pop("retokenize", False)
+                skipmultilang = kwargs.pop("skipmultilang", False)
+                
+                cf = CHATFile(path=os.path.abspath(file), special_mor_=True)
+                doc = cf.doc
+                if str(cf).count("%mor") > 0:
+                    doc.ba_special_["special_mor_notation"] = True
+                
+                # Prepare arguments for the pipeline
+                pipeline_kwargs = {
+                    "retokenize": retokenize,
+                    "skipmultilang": skipmultilang,
+                    "mwt": mwt
+                }
+                # Add any remaining kwargs
+                pipeline_kwargs.update(kwargs)
+                
+                # Process
+                doc = pipeline(doc, **pipeline_kwargs)
+                
+                # Write
+                CHATFile(doc=doc, special_mor_=doc.ba_special_.get("special_mor_notation", False)).write(output)
+            
+            # Add other commands as needed, or use a more generic registry
+            elif command == "align":
+                cf = CHATFile(path=os.path.abspath(file))
+                doc = cf.doc
+                kw = {"pauses": kwargs.get("pauses", False)}
+                doc = pipeline(doc, **kw)
+                CHATFile(doc=doc).write(output, write_wor=kwargs.get("wor", True))
+            
+            else:
+                loader, writer = loader_info, writer_info
+                doc = loader(os.path.abspath(file))
+                kw = {}
+                if isinstance(doc, tuple) and len(doc) > 1:
+                    doc, kw = doc
+                doc = pipeline(doc, **kw)
+                writer(doc, output)
+            
+            # Flush everything before reading back
+            sys.stdout.flush()
+            sys.stderr.flush()
+            log_file.seek(0)
+            captured = log_file.read()
+            
+            return file, None, None, captured
+        except Exception as e:
+            # Flush everything before reading back
+            sys.stdout.flush()
+            sys.stderr.flush()
+            log_file.seek(0)
+            captured = log_file.read()
+            return file, traceback.format_exc(), e, captured
+        finally:
+            # Restore original FDs
+            os.dup2(old_stdout_fd, sys.stdout.fileno())
+            os.dup2(old_stderr_fd, sys.stderr.fileno())
+            os.close(old_stdout_fd)
+            os.close(old_stderr_fd)
 
 # this dictionary maps what commands are executed
 # against what BatchalignPipeline tasks are actually ran 
@@ -50,7 +156,8 @@ def _dispatch(command, lang, num_speakers,
               **kwargs):
 
     C = console
-    from batchalign.constants import FORCED_CONVERSION, TaskFriendlyName
+    from batchalign.constants import FORCED_CONVERSION
+    from batchalign.document import TaskFriendlyName
 
     # get files by walking the directory
     files = []
@@ -109,6 +216,23 @@ def _dispatch(command, lang, num_speakers,
 
     C.print(f"\nMode: [blue]{command}[/blue]; got [bold cyan]{len(files)}[/bold cyan] transcript{'s' if len(files) > 1 else ''} to process from {in_dir}:\n")
 
+    # Determine number of workers
+    num_workers = kwargs.get("num_workers", ctx.obj.get("workers", os.cpu_count()))
+
+    # Pre-download stanza resources if needed to avoid interleaved downloads in workers
+    if command in ["morphotag", "utseg", "coref"]:
+        try:
+            import stanza
+            stanza.download_resources_json()
+        except:
+            pass
+
+    # For some commands or environments, we might want to limit this
+    if command in ["transcribe", "transcribe_s"]:
+        num_workers = min(num_workers, 2) # GPU memory limits
+
+    C.print(f"Using [bold]{num_workers}[/bold] worker processes.\n")
+
     # create the spinner
     prog = Progress(SpinnerColumn(), *Progress.get_default_columns()[:-1],
                     TimeElapsedColumn(),
@@ -118,59 +242,66 @@ def _dispatch(command, lang, num_speakers,
 
     with prog as prog:
         tasks = {}
-        errors = []
         # create the spinner bars
         for f in files:
-            tasks[f] = prog.add_task(Path(f).name, start=False, processor="")
+            tasks[f] = prog.add_task(Path(f).name, start=False, processor="Waiting...")
 
-        # create pipeline and read files
-        from batchalign.pipelines import BatchalignPipeline
-        baL.debug("Attempting to create BatchalignPipeline for CLI...")
-        pipeline = BatchalignPipeline.new(Cmd2Task[command],
-                                          lang=lang, num_speakers=num_speakers, **kwargs)
-        baL.debug(f"Successfully created BatchalignPipeline... {pipeline}")
+        # Parallel execution
+        with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
+            # We pass None for loader/writer if we handle them specially in _worker_task
+            worker_func = partial(_worker_task, 
+                                 command=command, 
+                                 lang=lang, 
+                                 num_speakers=num_speakers,
+                                 loader_info=None, 
+                                 writer_info=None, 
+                                 **kwargs)
+            
+            future_to_file = {executor.submit(worker_func, (f, o)): f for f, o in zip(files, outputs)}
+            
+            # Start all tasks in the UI to show they are queued/running
+            for f in files:
+                prog.start_task(tasks[f])
+                prog.update(tasks[f], processor="Processing...")
 
-        # create callback used to update spinner
-        def progress_callback(file, step, total, tools):
-            # total = 0 signals there is an error
-            if total == 0:
-                prog.update(tasks[file], total=0, start=True, processor=f"[bold red]FAIL[/bold red]")
-            elif total == step:
-                prog.update(tasks[file], total=total, completed=step, processor=f"[bold green]DONE[/bold green]")
-            else:
-                prog.update(tasks[file], total=total, completed=step, processor="Running: "+TaskFriendlyName[tools[0]] if tools else "")
-                # call the pipeline
-        for file, output in zip(files, outputs):
-            try:
-                # set the file as started
-                prog.start_task(tasks[file])
-                with warnings.catch_warnings(record=True) as w:
-                    # parse the input format, as needed
-                    doc = loader(os.path.abspath(file))
-                    # if we ended up with a tuple of length two,
-                    # that means that the loader requested kwargs
-                    kw = {}
-                    if isinstance(doc, tuple) and len(doc) > 1:
-                        doc, kw = doc
-                    # RUN THE PUPPY!
-                    doc = pipeline(doc,
-                                   callback=lambda *args:progress_callback(file, *args),
-                                   **kw)
-                msgs = [escape(str(i.message)).strip() for i in w]
-                msgs = [i for i in msgs if "torchaudio" not in i.lower()]
-                # write the format, as needed
-                writer(doc, output)
-                # print any warnings
-
-                if len(msgs) > 0:
-                    if ctx.obj["verbose"] > 1:
-                        Console().print(f"\n[bold yellow]WARN[/bold yellow] on {file}:\n","\n".join(msgs)+"\n")
+            for future in concurrent.futures.as_completed(future_to_file):
+                file = future_to_file[future]
+                try:
+                    res_file, trcbk, e, captured = future.result()
+                    if e:
+                        prog.update(tasks[file], total=0, start=True, processor=f"[bold red]FAIL[/bold red]")
+                        errors.append((res_file, trcbk, e, captured))
                     else:
-                        prog.console.print(f"[bold yellow]WARN[/bold yellow] on {file}:\n","\n".join(msgs)+"\n")
-                prog.update(tasks[file], processor=f"[bold green]DONE[/bold green]")
-            except Exception as e:
-                progress_callback(file, 0, 0, e)
-                errors.append((file, traceback.format_exc(), e))
+                        prog.update(tasks[file], completed=100, total=100, processor=f"[bold green]DONE[/bold green]")
+                        # If verbose, we might want to store logs even for success
+                        if ctx.obj["verbose"] >= 1 and captured.strip():
+                             errors.append((res_file, "Logs only (Success)", None, captured))
+                except Exception as e:
+                    prog.update(tasks[file], total=0, start=True, processor=f"[bold red]FAIL[/bold red]")
+                    errors.append((file, traceback.format_exc(), e, ""))
+
+    if len(errors) > 0:
+        C.print()
+        for file, trcbk, e, captured in errors:
+            rel_path = os.path.relpath(str(Path(file).absolute()), in_dir)
+            if e:
+                C.print(f"[bold red]ERROR[/bold red] on file [italic]{rel_path}[/italic]: {escape(str(e))}\n")
+                if captured.strip():
+                    C.print(f"[dim]Captured Worker Output:[/dim]\n{escape(captured.strip())}\n")
+                if ctx.obj["verbose"] == 1:
+                    C.print(escape(str(trcbk)))
+                elif ctx.obj["verbose"] > 1:
+                    Console().print(escape(str(trcbk)))
+            elif captured.strip(): # Success logs in verbose mode
+                C.print(f"[bold blue]INFO[/bold blue] on file [italic]{rel_path}[/italic]:\n")
+                C.print(f"{escape(captured.strip())}\n")
+    else:
+        C.print(f"\nAll done. Results saved to {out_dir}!\n")
+    if ctx.obj["verbose"] > 1:
+        C.end_capture()
+
+    if __tf:
+        __tf.close()
 
     if len(errors) > 0:
         C.print()
