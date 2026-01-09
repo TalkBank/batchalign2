@@ -11,14 +11,6 @@ import warnings
 import shutil
 import os
 import glob
-import shutil
-
-
-from batchalign.pipelines import BatchalignPipeline
-from batchalign.document import *
-from batchalign.constants import *
-from batchalign.formats.chat import CHATFile
-from batchalign.utils import config
 
 from rich.console import Console
 from rich.markup import escape
@@ -32,10 +24,9 @@ repath_file = lambda file_path, new_dir: os.path.join(new_dir, Path(file_path).n
 import tempfile
 
 import traceback
-import logging as L 
+import logging as L
 baL = L.getLogger('batchalign')
 
-import warnings
 warnings.filterwarnings('ignore', category=UserWarning, message='TypedStorage is deprecated')
 
 # this dictionary maps what commands are executed
@@ -59,6 +50,7 @@ def _dispatch(command, lang, num_speakers,
               **kwargs):
 
     C = console
+    from batchalign.constants import FORCED_CONVERSION, TaskFriendlyName
 
     # get files by walking the directory
     files = []
@@ -132,6 +124,7 @@ def _dispatch(command, lang, num_speakers,
             tasks[f] = prog.add_task(Path(f).name, start=False, processor="")
 
         # create pipeline and read files
+        from batchalign.pipelines import BatchalignPipeline
         baL.debug("Attempting to create BatchalignPipeline for CLI...")
         pipeline = BatchalignPipeline.new(Cmd2Task[command],
                                           lang=lang, num_speakers=num_speakers, **kwargs)
