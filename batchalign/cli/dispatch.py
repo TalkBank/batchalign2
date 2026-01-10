@@ -214,6 +214,11 @@ def _dispatch(command, lang, num_speakers,
         __tf = tempfile.NamedTemporaryFile(delete=True, mode='w')
         C = Console(file=__tf)
 
+    # process largest inputs first to avoid late stragglers
+    file_pairs = list(zip(files, outputs))
+    file_pairs.sort(key=lambda fo: os.path.getsize(fo[0]) if os.path.exists(fo[0]) else 0, reverse=True)
+    files, outputs = zip(*file_pairs) if file_pairs else ([], [])
+
     C.print(f"\nMode: [blue]{command}[/blue]; got [bold cyan]{len(files)}[/bold cyan] transcript{'s' if len(files) > 1 else ''} to process from {in_dir}:\n")
 
     # Determine number of workers
