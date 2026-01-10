@@ -30,10 +30,11 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
     main_line = utterance.tostring(merge_abbrev=merge_abbrev)
     # last minut ecorrections
     # main_line = re.sub(r"<([\w ]+) \[\/", r"<\1> [/", main_line)
+    main_line = re.sub(r"^,", "", main_line.strip()) # remove initial commas
     main_line = re.sub(r"«", "“", main_line)
     main_line = re.sub(r"»", "”", main_line)
     main_line = re.sub(r"—", "-", main_line)
-    main_line = re.sub(r"–", "-", main_line)
+    main_line = re.sub(r"–", "-", main_line).strip()
     tier = utterance.tier
 
     mors = []
