@@ -4,13 +4,14 @@ CLI runner dispatch. Essentially the translation layer between `command` in CLI
 and actual BatchalignPipeline.
 """
 
-from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn, BarColumn
+from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 
 import warnings
 
 import shutil
 import os
 import glob
+import queue
 
 from rich.console import Console
 from rich.markup import escape
@@ -45,7 +46,7 @@ def _get_worker_pipeline(command, lang, num_speakers, **kwargs):
                                                 lang=lang, num_speakers=num_speakers, **kwargs)
     return _worker_pipeline
 
-def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_info, **kwargs):
+def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_info, progress_queue=None, **kwargs):
     """The task executed in each worker process."""
     import sys
     import os
@@ -66,6 +67,14 @@ def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_inf
             os.dup2(log_file.fileno(), sys.stderr.fileno())
             
             pipeline = _get_worker_pipeline(command, lang, num_speakers, **kwargs)
+
+            def progress_callback(completed, total, tasks):
+                if not progress_queue:
+                    return
+                try:
+                    progress_queue.put((file, completed, total, tasks))
+                except Exception:
+                    pass
             
             # For now, we'll re-import what we need
             from batchalign.formats.chat import CHATFile
@@ -92,7 +101,7 @@ def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_inf
                 pipeline_kwargs.update(kwargs)
                 
                 # Process
-                doc = pipeline(doc, **pipeline_kwargs)
+                doc = pipeline(doc, callback=progress_callback, **pipeline_kwargs)
                 
                 # Write
                 CHATFile(doc=doc, special_mor_=doc.ba_special_.get("special_mor_notation", False)).write(output)
@@ -102,7 +111,7 @@ def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_inf
                 cf = CHATFile(path=os.path.abspath(file))
                 doc = cf.doc
                 kw = {"pauses": kwargs.get("pauses", False)}
-                doc = pipeline(doc, **kw)
+                doc = pipeline(doc, callback=progress_callback, **kw)
                 CHATFile(doc=doc).write(output, write_wor=kwargs.get("wor", True))
             
             else:
@@ -111,7 +120,7 @@ def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_inf
                 kw = {}
                 if isinstance(doc, tuple) and len(doc) > 1:
                     doc, kw = doc
-                doc = pipeline(doc, **kw)
+                doc = pipeline(doc, callback=progress_callback, **kw)
                 writer(doc, output)
             
             # Flush everything before reading back
@@ -229,7 +238,7 @@ def _dispatch(command, lang, num_speakers,
         try:
             import stanza
             stanza.download_resources_json()
-        except:
+        except Exception:
             pass
 
     # For some commands or environments, we might want to limit this
@@ -238,52 +247,97 @@ def _dispatch(command, lang, num_speakers,
 
     C.print(f"Using [bold]{num_workers}[/bold] worker processes.\n")
 
+    manager = multiprocessing.Manager() if files else None
+    progress_queue = manager.Queue() if manager else None
+
+    def render_stage(stage_tasks):
+        if not stage_tasks:
+            return "Processing..."
+        if not isinstance(stage_tasks, (list, tuple)):
+            stage_tasks = [stage_tasks]
+        names = [TaskFriendlyName.get(task, str(task)) for task in stage_tasks]
+        return ", ".join(names)
+
     # create the spinner
     prog = Progress(SpinnerColumn(), *Progress.get_default_columns()[:-1],
                     TimeElapsedColumn(),
-                    TextColumn("[cyan]{task.fields[processor]}[/cyan]"), console=C) 
-    # cache the errors
+                    TextColumn("[cyan]{task.fields[processor]}[/cyan]"), console=C)
     errors = []
 
-    with prog as prog:
-        tasks = {}
-        # create the spinner bars
-        for f in files:
-            tasks[f] = prog.add_task(Path(f).name, start=False, processor="Waiting...")
+    try:
+        with prog as prog:
+            tasks = {}
+            task_totals = {}
 
-        # Parallel execution
-        with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
-            # We pass None for loader/writer if we handle them specially in _worker_task
-            worker_func = partial(_worker_task, 
-                                 command=command, 
-                                 lang=lang, 
-                                 num_speakers=num_speakers,
-                                 loader_info=None, 
-                                 writer_info=None, 
-                                 **kwargs)
-            
-            future_to_file = {executor.submit(worker_func, (f, o)): f for f, o in zip(files, outputs)}
-            
-            # Start all tasks in the UI to show they are queued/running
             for f in files:
-                prog.start_task(tasks[f])
-                prog.update(tasks[f], processor="Processing...")
+                tasks[f] = prog.add_task(Path(f).name, start=False, total=1, processor="Waiting...")
+                task_totals[f] = 1
 
-            for future in concurrent.futures.as_completed(future_to_file):
-                file = future_to_file[future]
-                try:
-                    res_file, trcbk, e, captured = future.result()
-                    if e:
-                        prog.update(tasks[file], total=0, start=True, processor=f"[bold red]FAIL[/bold red]")
-                        errors.append((res_file, trcbk, e, captured))
-                    else:
-                        prog.update(tasks[file], completed=100, total=100, processor=f"[bold green]DONE[/bold green]")
-                        # If verbose, we might want to store logs even for success
-                        if ctx.obj["verbose"] >= 1 and captured.strip():
-                             errors.append((res_file, "Logs only (Success)", None, captured))
-                except Exception as e:
-                    prog.update(tasks[file], total=0, start=True, processor=f"[bold red]FAIL[/bold red]")
-                    errors.append((file, traceback.format_exc(), e, ""))
+            def drain_progress_queue():
+                if not progress_queue:
+                    return
+                while True:
+                    try:
+                        file, completed, total, stage_tasks = progress_queue.get_nowait()
+                    except queue.Empty:
+                        break
+                    except Exception:
+                        break
+                    if file not in tasks:
+                        continue
+                    task_total = max(int(total) if total else task_totals.get(file, 1), 1)
+                    task_totals[file] = task_total
+                    prog.update(tasks[file],
+                                total=task_total,
+                                completed=min(int(completed), task_total),
+                                processor=render_stage(stage_tasks))
+
+            with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
+                worker_func = partial(_worker_task,
+                                      command=command,
+                                      lang=lang,
+                                      num_speakers=num_speakers,
+                                      loader_info=None,
+                                      writer_info=None,
+                                      progress_queue=progress_queue,
+                                      **kwargs)
+
+                future_to_file = {executor.submit(worker_func, (f, o)): f for f, o in zip(files, outputs)}
+
+                for f in files:
+                    prog.start_task(tasks[f])
+                    prog.update(tasks[f], processor="Processing...")
+
+                pending = set(future_to_file.keys())
+                while pending:
+                    done, pending = concurrent.futures.wait(
+                        pending,
+                        timeout=0.1,
+                        return_when=concurrent.futures.FIRST_COMPLETED,
+                    )
+                    drain_progress_queue()
+
+                    for future in done:
+                        file = future_to_file[future]
+                        try:
+                            res_file, trcbk, e, captured = future.result()
+                            final_total = max(task_totals.get(file, 1), 1)
+                            if e:
+                                prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold red]FAIL[/bold red]")
+                                errors.append((res_file, trcbk, e, captured))
+                            else:
+                                prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold green]DONE[/bold green]")
+                                if ctx.obj["verbose"] >= 1 and captured.strip():
+                                    errors.append((res_file, "Logs only (Success)", None, captured))
+                        except Exception as e:
+                            final_total = max(task_totals.get(file, 1), 1)
+                            prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold red]FAIL[/bold red]")
+                            errors.append((file, traceback.format_exc(), e, ""))
+
+                drain_progress_queue()
+    finally:
+        if manager:
+            manager.shutdown()
 
     if len(errors) > 0:
         C.print()
@@ -297,27 +351,12 @@ def _dispatch(command, lang, num_speakers,
                     C.print(escape(str(trcbk)))
                 elif ctx.obj["verbose"] > 1:
                     Console().print(escape(str(trcbk)))
-            elif captured.strip(): # Success logs in verbose mode
+            elif captured.strip():
                 C.print(f"[bold blue]INFO[/bold blue] on file [italic]{rel_path}[/italic]:\n")
                 C.print(f"{escape(captured.strip())}\n")
     else:
         C.print(f"\nAll done. Results saved to {out_dir}!\n")
-    if ctx.obj["verbose"] > 1:
-        C.end_capture()
 
-    if __tf:
-        __tf.close()
-
-    if len(errors) > 0:
-        C.print()
-        for file, trcbk, e in errors:
-            C.print(f"[bold red]ERROR[/bold red] on file [italic]{os.path.relpath(str(Path(file).absolute()), in_dir)}[/italic]: {escape(str(e))}\n")
-            if ctx.obj["verbose"] == 1:
-                C.print(escape(str(trcbk)))
-            elif ctx.obj["verbose"] > 1:
-                Console().print(escape(str(trcbk)))
-    else:
-        C.print(f"\nAll done. Results saved to {out_dir}!\n")
     if ctx.obj["verbose"] > 1:
         C.end_capture()
 
