@@ -42,10 +42,11 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
         main_line = re.sub(r"(?:[a-z]) ?\(([a-z]+) ?\)", r"(\1)", main_line)
         main_line = re.sub(r"([a-z]) _", r"\1_", main_line)
         main_line = re.sub(r"  ", r" ", main_line)
+    main_line = re.sub(r"^,", "", main_line.strip()) # remove initial commas
     main_line = re.sub(r"«", "“", main_line)
     main_line = re.sub(r"»", "”", main_line)
     main_line = re.sub(r"—", "-", main_line)
-    main_line = re.sub(r"–", "-", main_line)
+    main_line = re.sub(r"–", "-", main_line).strip()
     tier = utterance.tier
 
     mors = []

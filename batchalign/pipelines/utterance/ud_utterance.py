@@ -53,7 +53,7 @@ def rollout_to_leaf(tree):
     try:
         children = tree.children
     except AttributeError:
-        breakpoint()
+        return []
     leafs = []
 
     for c in children:

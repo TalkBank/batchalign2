@@ -78,7 +78,9 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 # # pipe = BatchalignPipeline.new("morphosyntax", lang="jpn")
 # # doc_out = pipe(doc, retokenize=True)
 
-# print(str(CHATFile(doc=doc)))
+# cf = CHATFile(path="/Users/houjun/Documents/Projects/talkbank-alignment/comma/mm.cha")
+# print(str(cf))
+# print(str())
 
 # 1+1
 
