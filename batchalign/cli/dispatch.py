@@ -46,103 +46,131 @@ def _get_worker_pipeline(command, lang, num_speakers, **kwargs):
                                                 lang=lang, num_speakers=num_speakers, **kwargs)
     return _worker_pipeline
 
-def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_info, progress_queue=None, **kwargs):
+def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_info, progress_queue=None, verbose=0, **kwargs):
     """The task executed in each worker process."""
     import sys
     import os
     import tempfile
-    
+    import logging
+
     file, output = file_info
     pid = os.getpid()
-    
-    # Use a temporary file to capture ALL output at the FD level
-    # This is the most robust way to prevent interleaved output
-    with tempfile.TemporaryFile(mode='w+') as log_file:
+
+    # Configure logging in this worker process
+    if verbose >= 1:
+        # Ensure basicConfig is called so logging works
+        logging.basicConfig(format="%(levelname)s - %(name)s - %(message)s", level=logging.ERROR)
+
+    # Configure batchalign logger level in this worker process
+    baL = logging.getLogger('batchalign')
+    if verbose == 0:
+        baL.setLevel(logging.WARN)
+    elif verbose == 1:
+        baL.setLevel(logging.INFO)
+    else:
+        baL.setLevel(logging.DEBUG)
+
+    # Only capture output if not in verbose mode
+    # In verbose mode, let logs stream naturally to the console
+    should_capture = verbose == 0
+
+    if should_capture:
+        # Use a temporary file to capture ALL output at the FD level
+        # This is the most robust way to prevent interleaved output
+        log_file = tempfile.TemporaryFile(mode='w+')
         old_stdout_fd = os.dup(sys.stdout.fileno())
         old_stderr_fd = os.dup(sys.stderr.fileno())
-        
-        try:
-            # Redirect FD 1 and 2 to our temp file
-            os.dup2(log_file.fileno(), sys.stdout.fileno())
-            os.dup2(log_file.fileno(), sys.stderr.fileno())
-            
-            pipeline = _get_worker_pipeline(command, lang, num_speakers, **kwargs)
 
-            def progress_callback(completed, total, tasks):
-                if not progress_queue:
-                    return
-                try:
-                    progress_queue.put((file, completed, total, tasks))
-                except Exception:
-                    pass
-            
-            # For now, we'll re-import what we need
-            from batchalign.formats.chat import CHATFile
-            
-            # Morphosyntax specific loader/writer logic moved here for picklability
-            if command == "morphotag":
-                # Extract morphotag-specific arguments from kwargs
-                mwt = kwargs.pop("mwt", {})
-                retokenize = kwargs.pop("retokenize", False)
-                skipmultilang = kwargs.pop("skipmultilang", False)
-                
-                cf = CHATFile(path=os.path.abspath(file), special_mor_=True)
-                doc = cf.doc
-                if str(cf).count("%mor") > 0:
-                    doc.ba_special_["special_mor_notation"] = True
-                
-                # Prepare arguments for the pipeline
-                pipeline_kwargs = {
-                    "retokenize": retokenize,
-                    "skipmultilang": skipmultilang,
-                    "mwt": mwt
-                }
-                # Add any remaining kwargs
-                pipeline_kwargs.update(kwargs)
-                
-                # Process
-                doc = pipeline(doc, callback=progress_callback, **pipeline_kwargs)
-                
-                # Write
-                CHATFile(doc=doc, special_mor_=doc.ba_special_.get("special_mor_notation", False)).write(output)
-            
-            # Add other commands as needed, or use a more generic registry
-            elif command == "align":
-                cf = CHATFile(path=os.path.abspath(file))
-                doc = cf.doc
-                kw = {"pauses": kwargs.get("pauses", False)}
-                doc = pipeline(doc, callback=progress_callback, **kw)
-                CHATFile(doc=doc).write(output, write_wor=kwargs.get("wor", True))
-            
-            else:
-                loader, writer = loader_info, writer_info
-                doc = loader(os.path.abspath(file))
-                kw = {}
-                if isinstance(doc, tuple) and len(doc) > 1:
-                    doc, kw = doc
-                doc = pipeline(doc, callback=progress_callback, **kw)
-                writer(doc, output)
-            
-            # Flush everything before reading back
+        # Redirect FD 1 and 2 to our temp file
+        os.dup2(log_file.fileno(), sys.stdout.fileno())
+        os.dup2(log_file.fileno(), sys.stderr.fileno())
+
+    try:
+        pipeline = _get_worker_pipeline(command, lang, num_speakers, **kwargs)
+
+        def progress_callback(completed, total, tasks):
+            if not progress_queue:
+                return
+            try:
+                progress_queue.put((file, completed, total, tasks))
+            except Exception:
+                pass
+
+        # For now, we'll re-import what we need
+        from batchalign.formats.chat import CHATFile
+
+        # Morphosyntax specific loader/writer logic moved here for picklability
+        if command == "morphotag":
+            # Extract morphotag-specific arguments from kwargs
+            mwt = kwargs.pop("mwt", {})
+            retokenize = kwargs.pop("retokenize", False)
+            skipmultilang = kwargs.pop("skipmultilang", False)
+
+            cf = CHATFile(path=os.path.abspath(file), special_mor_=True)
+            doc = cf.doc
+            if str(cf).count("%mor") > 0:
+                doc.ba_special_["special_mor_notation"] = True
+
+            # Prepare arguments for the pipeline
+            pipeline_kwargs = {
+                "retokenize": retokenize,
+                "skipmultilang": skipmultilang,
+                "mwt": mwt
+            }
+            # Add any remaining kwargs
+            pipeline_kwargs.update(kwargs)
+
+            # Process
+            doc = pipeline(doc, callback=progress_callback, **pipeline_kwargs)
+
+            # Write
+            CHATFile(doc=doc, special_mor_=doc.ba_special_.get("special_mor_notation", False)).write(output)
+
+        # Add other commands as needed, or use a more generic registry
+        elif command == "align":
+            cf = CHATFile(path=os.path.abspath(file))
+            doc = cf.doc
+            kw = {"pauses": kwargs.get("pauses", False)}
+            doc = pipeline(doc, callback=progress_callback, **kw)
+            CHATFile(doc=doc).write(output, write_wor=kwargs.get("wor", True))
+
+        else:
+            loader, writer = loader_info, writer_info
+            doc = loader(os.path.abspath(file))
+            kw = {}
+            if isinstance(doc, tuple) and len(doc) > 1:
+                doc, kw = doc
+            doc = pipeline(doc, callback=progress_callback, **kw)
+            writer(doc, output)
+
+        # Flush and read captured output if we were capturing
+        if should_capture:
             sys.stdout.flush()
             sys.stderr.flush()
             log_file.seek(0)
             captured = log_file.read()
-            
-            return file, None, None, captured
-        except Exception as e:
-            # Flush everything before reading back
+        else:
+            captured = ""
+
+        return file, None, None, captured
+    except Exception as e:
+        # Flush and read captured output if we were capturing
+        if should_capture:
             sys.stdout.flush()
             sys.stderr.flush()
             log_file.seek(0)
             captured = log_file.read()
-            return file, traceback.format_exc(), e, captured
-        finally:
-            # Restore original FDs
+        else:
+            captured = ""
+        return file, traceback.format_exc(), e, captured
+    finally:
+        # Restore original FDs only if we redirected them
+        if should_capture:
             os.dup2(old_stdout_fd, sys.stdout.fileno())
             os.dup2(old_stderr_fd, sys.stderr.fileno())
             os.close(old_stdout_fd)
             os.close(old_stderr_fd)
+            log_file.close()
 
 # this dictionary maps what commands are executed
 # against what BatchalignPipeline tasks are actually ran 
@@ -300,6 +328,7 @@ def _dispatch(command, lang, num_speakers,
                                       loader_info=None,
                                       writer_info=None,
                                       progress_queue=progress_queue,
+                                      verbose=ctx.obj["verbose"],
                                       **kwargs)
 
                 future_to_file = {executor.submit(worker_func, (f, o)): f for f, o in zip(files, outputs)}
