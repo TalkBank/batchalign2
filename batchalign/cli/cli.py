@@ -3,37 +3,23 @@ cli.py
 The Batchalign command-line interface
 """
 
-import multiprocessing
 import rich_click as click
 import functools
 
 import os
-from glob import glob
 
-from multiprocessing import Process, freeze_support
+from multiprocessing import freeze_support
 
-from batchalign.pipelines import BatchalignPipeline
-
+from pathlib import Path
 from rich.traceback import install
 from rich.console import Console
-from rich.panel import Panel
-from pathlib import Path
-from batchalign.document import *
-from batchalign.formats.chat import CHATFile
-from batchalign.utils import config
 from rich.logging import RichHandler
 
 from batchalign.cli.dispatch import _dispatch
 from batchalign.models.training.run import cli as train
 
-from enum import Enum
-
-import traceback
-
 import pyfiglet
-from rich import pretty
-import logging as L 
-baL = L.getLogger('batchalign')
+import logging as L
 
 C = Console()
 
@@ -62,7 +48,7 @@ def handle_verbosity(verbosity):
     L.getLogger('stanza').handlers.clear()
     L.getLogger('transformers').handlers.clear()
     L.getLogger('nemo_logger').handlers.clear()
-    L.getLogger("stanza").setLevel(L.INFO)
+    L.getLogger("stanza").setLevel(L.WARN)
     L.getLogger('nemo_logger').setLevel(L.CRITICAL)
     L.getLogger('batchalign').setLevel(L.WARN)
     L.getLogger('lightning.pytorch.utilities.migration.utils').setLevel(L.ERROR)
@@ -73,6 +59,7 @@ def handle_verbosity(verbosity):
         L.getLogger('batchalign').setLevel(L.INFO)
     if verbosity >= 3:
         L.getLogger('batchalign').setLevel(L.DEBUG)
+        L.getLogger("stanza").setLevel(L.INFO)
     if verbosity >= 4:
         L.getLogger('batchalign').setLevel(L.DEBUG)
         L.getLogger('transformers').setLevel(L.INFO)
@@ -81,7 +68,8 @@ def handle_verbosity(verbosity):
 @click.pass_context
 @click.version_option(VERSION_NUMBER)
 @click.option("-v", "--verbose", type=int, count=True, default=0, help="How loquacious Batchalign should be.")
-def batchalign(ctx, verbose):
+@click.option("--workers", type=int, default=os.cpu_count(), help="Number of worker processes to use.")
+def batchalign(ctx, verbose, workers):
     """process .cha and/or audio files in IN_DIR and dumps them to OUT_DIR using recipe COMMAND"""
 
     ## setup commands ##
@@ -93,7 +81,9 @@ def batchalign(ctx, verbose):
     handle_verbosity(verbose)
     # add to arguments
     ctx.obj["verbose"] = verbose
+    ctx.obj["workers"] = workers
     # setup config
+    from batchalign.utils import config
     ctx.obj["config"] = config.config_read(True)
     # make everything look better
     # pretty.install()
@@ -116,6 +106,7 @@ batchalign.add_command(train, "models")
 @click.pass_context
 def align(ctx, in_dir, out_dir, whisper, wav2vec, **kwargs):
     """Align transcripts against corresponding media files."""
+    from batchalign.formats.chat import CHATFile
     def loader(file):
         return (
             CHATFile(path=os.path.abspath(file)).doc,
@@ -165,6 +156,8 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, **kwargs):
 @click.pass_context
 def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     """Create a transcript from audio files."""
+    from batchalign.document import CustomLine, CustomLineType
+    from batchalign.formats.chat import CHATFile
     def loader(file):
         return file
 
@@ -209,6 +202,7 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
 @click.pass_context
 def translate(ctx, in_dir, out_dir, **kwargs):
     """Translate the transcript to English."""
+    from batchalign.formats.chat import CHATFile
 
     def loader(file):
         cf = CHATFile(path=os.path.abspath(file), special_mor_=True)
@@ -239,6 +233,7 @@ def translate(ctx, in_dir, out_dir, **kwargs):
 @click.pass_context
 def morphotag(ctx, in_dir, out_dir, **kwargs):
     """Perform morphosyntactic analysis on transcripts."""
+    from batchalign.formats.chat import CHATFile
 
     def loader(file):
         mwt = {}
@@ -265,7 +260,7 @@ def morphotag(ctx, in_dir, out_dir, **kwargs):
 
     _dispatch("morphotag", "eng", 1, ["cha"], ctx,
               in_dir, out_dir,
-              loader, writer, C)
+              loader, writer, C, **kwargs)
 
 
 #################### MORPHOTAG ################################
@@ -275,6 +270,7 @@ def morphotag(ctx, in_dir, out_dir, **kwargs):
 @click.pass_context
 def coref(ctx, in_dir, out_dir, **kwargs):
     """Perform coreference analysis on transcripts."""
+    from batchalign.formats.chat import CHATFile
 
     def loader(file):
         cf = CHATFile(path=os.path.abspath(file))
@@ -302,6 +298,7 @@ def coref(ctx, in_dir, out_dir, **kwargs):
 @click.pass_context
 def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     """Perform morphosyntactic analysis on transcripts."""
+    from batchalign.formats.chat import CHATFile
 
     def loader(file):
         return CHATFile(path=os.path.abspath(file)).doc
@@ -332,6 +329,7 @@ def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
 @click.pass_context
 def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, whisper_oai, **kwargs):
     """Benchmark ASR utilities for their word accuracy"""
+    from batchalign.formats.chat import CHATFile
     def loader(file):
         # try to find a .cha in the same directory
         p = Path(file)
@@ -374,6 +372,7 @@ def avqi(ctx, input_dir, output_dir, lang, **kwargs):
     """Calculate AVQI from paired .cs and .sv audio files in input directory."""
 
     from batchalign.pipelines.avqi import AVQIEngine
+    from batchalign.document import Document
     from pathlib import Path
     import os
     
@@ -441,6 +440,7 @@ def avqi(ctx, input_dir, output_dir, lang, **kwargs):
 @click.pass_context
 def opensmile(ctx, input_dir, output_dir, feature_set, lang, **kwargs):
     """Extract openSMILE audio features from speech samples."""
+    from batchalign.document import Document
 
     def loader(file):
         doc = Document.new(media_path=file, lang=lang)
@@ -468,6 +468,7 @@ def opensmile(ctx, input_dir, output_dir, feature_set, lang, **kwargs):
 def setup(ctx):
     """Reconfigure Batchalign settings, such as Rev.AI key."""
 
+    from batchalign.utils import config
     config.interactive_setup()
 
 #################### VERSION ################################

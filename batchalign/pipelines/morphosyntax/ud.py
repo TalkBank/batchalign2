@@ -515,7 +515,7 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
         try:
             mor_clone[clitic-1] = mor_clone[clitic-1]+"$"+mor_clone[clitic]
         except IndexError:
-            breakpoint()
+            pass
         mor_clone[clitic] = None
 
     # connect auxiliaries with a "~"
@@ -635,8 +635,6 @@ def tokenizer_processor(tokenized, lang, sent):
     # the same unit), we combine it into one
     groups = []
     alignment = align(targets, refs, tqdm=False)
-    if any([isinstance(i, Extra) for i in alignment]):
-        breakpoint()
     alignments = groupby(alignment, lambda x:x.reference_payload)
     for key, grp in alignments:
         group = []
@@ -714,7 +712,7 @@ def adlist_postprocessor(i, lang, adlist):
     return cpy
 
 ######
-def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, status_hook:callable = None, **kwargs):
+def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, nlp, tokenizer_context=None, status_hook:callable = None, **kwargs):
 
     L.debug("Starting Stanza...")
     inputs = []
@@ -730,70 +728,8 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, status_hoo
                 # some languages don't have alpha 2
                 pass
 
-
-    # pycountry.languages.get(alpha_3=i).alpha_2 for i in lang
-
-    config = {"processors": {"tokenize": "default",
-                             "pos": "default",
-                             # "mwt": "gum" if ("en" in lang) else "default",
-                             "lemma": "default",
-                             "depparse": "default"},
-              "tokenize_no_ssplit": True}
-
-    tokenizer_postprocessor = lambda x:[tokenizer_processor(i, lang, inputs[-1]) for i in x] 
-
-    if len(kwargs.get("mwt", {})) > 0 and len(lang) > 1:
-        raise ValueError("Batchalign cannot handle code-switching documents with custom MWT lists!\nHint: Please remove the MWT list OR remove the secondary language in the transcript ID.")
-        
-    if len(kwargs.get("mwt", {})) > 0:
-        adlist_processor = lambda x:[adlist_postprocessor(i, lang, kwargs.get("mwt", {})) for i in x]
-    else:
-        adlist_processor = lambda x:x
-
-    if not retokenize:
-        config["tokenize_postprocessor"] = lambda x:adlist_processor(tokenizer_postprocessor(x))
-    else:
-        config["tokenize_postprocessor"] = lambda x:adlist_processor(x)
-
-    download_resources_json()
-    resources = load_resources_json()
-    mwt_exclusion = ["hr", "zh", "zh-hans", "zh-hant", "ja", "ko",
-                     "sl", "sr", "bg", "ru", "et", "hu",
-                     "eu", "el", "he", "af", "ga", "da", "ro"]
-    
-    if "zh" in lang:
-        lang.pop(lang.index("zh"))
-        lang.append("zh-hans")
-        
-    elif not any(i in mwt_exclusion or "mwt" not in get_language_resources(resources, i) for i in lang):
-        if "en" in lang:
-            config["processors"]["mwt"] = "gum"
-        else:
-            config["processors"]["mwt"] = "default"
-
-    if "ja" in lang:
-        config["processors"]["tokenize"] = "combined"
-        config["processors"]["pos"] = "combined"
-        config["processors"]["lemma"] = "combined"
-        config["processors"]["depparse"] = "combined"
-
-
-    configs = {}
-    for l in lang:
-        configs[l] = config.copy()
-
-    if len(lang) > 1:
-        nlp = stanza.MultilingualPipeline(
-            lang_configs = configs,
-            lang_id_config = {"langid_lang_subset": lang},
-            download_method=DownloadMethod.REUSE_RESOURCES
-        )
-    else:
-        nlp = stanza.Pipeline(
-            lang=lang[0],
-            **configs[lang[0]],
-            download_method=DownloadMethod.REUSE_RESOURCES
-        )
+    # Pre-compile cleanup regex for performance
+    CLEANUP_RE = re.compile(r"\+<|\+/|\(|\)|\+\^|\+//|\+\.\.\.|_|[#]")
 
     for indx, i in enumerate(doc.content):
         L.info(f"Stanza processing utterance {indx+1}/{len(doc.content)}")
@@ -814,7 +750,7 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, status_hoo
         try:
             ending = i.strip(join_with_spaces=True).split(" ")[-1]
         except AttributeError:
-            breakpoint()
+            pass
 
         if re.findall(r"\w", ending):
             ending = "."
@@ -843,16 +779,8 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, status_hoo
         if line_cut == "":
             line_cut = ending
 
-        # line_cut = line_cut.replace("_", "-")
-        line_cut = line_cut.replace("+<", "")
-        line_cut = line_cut.replace("+/", "")
-        line_cut = line_cut.replace("(", "")
-        line_cut = line_cut.replace(")", "")
-        line_cut = line_cut.replace("+^", "")
-        line_cut = line_cut.replace("+//", "")
-        line_cut = line_cut.replace("+...", "")
-        line_cut = line_cut.replace("_", "")
-        line_cut = line_cut.replace("#", "")
+        # Efficient cleanup using pre-compiled regex
+        line_cut = CLEANUP_RE.sub("", line_cut)
 
         # xbxxx is a sepecial xxx-class token to mark
         # special form markers, used for processing later
@@ -877,8 +805,10 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, status_hoo
         # line_cut = line_cut.replace("c'est", "c' est")
 
 
-        # try:
+        # Keep track of the raw sentence for tokenizer post-processing (restores pre-parallel behavior)
         inputs.append(line_cut)
+        if tokenizer_context is not None:
+            tokenizer_context["sentence"] = line_cut
 
         try:
             sents = nlp(line_cut.replace("(","").replace(")","").strip()).sentences
@@ -1026,8 +956,112 @@ class StanzaEngine(BatchalignEngine):
     tasks = [ Task.MORPHOSYNTAX ]
     status_hook = None
 
+    def __init__(self):
+        # Cache stanza pipelines per (langs, retokenize, mwt) combo to avoid rebuilding
+        self._nlp_cache = {}
+
     def _hook_status(self, status_hook):
         self.status_hook = status_hook
 
+    @staticmethod
+    def _lang_alpha2(doc_langs):
+        langs = []
+        for code in doc_langs:
+            if code == "yue":
+                langs.append("zh-hant")
+            else:
+                try:
+                    langs.append(pycountry.languages.get(alpha_3=code).alpha_2)
+                except Exception:
+                    pass
+        return tuple(langs)
+
+    @staticmethod
+    def _mwt_signature(mwt):
+        # Hashable signature of custom MWT entries
+        return tuple(sorted((k, tuple(v) if isinstance(v, (list, tuple)) else (v,)) for k, v in mwt.items()))
+
+    def _build_nlp(self, langs_alpha2, retokenize, mwt):
+        # This mirrors the pre-parallel behavior: tokenizer post-processing depends on retokenize/mwt
+        config = {"processors": {"tokenize": "default",
+                                 "pos": "default",
+                                 "lemma": "default",
+                                 "depparse": "default"},
+                  "tokenize_no_ssplit": True}
+
+        tokenizer_context = {"sentence": ""}
+        tokenizer_postprocessor = lambda x:[tokenizer_processor(i, list(langs_alpha2), tokenizer_context.get("sentence", "")) for i in x]
+
+        if len(mwt) > 0 and len(langs_alpha2) > 1:
+            raise ValueError("Batchalign cannot handle code-switching documents with custom MWT lists!\nHint: Please remove the MWT list OR remove the secondary language in the transcript ID.")
+
+        if len(mwt) > 0:
+            adlist_processor = lambda x:[adlist_postprocessor(i, list(langs_alpha2), mwt) for i in x]
+        else:
+            adlist_processor = lambda x:x
+
+        if not retokenize:
+            config["tokenize_postprocessor"] = lambda x:adlist_processor(tokenizer_postprocessor(x))
+        else:
+            config["tokenize_postprocessor"] = lambda x:adlist_processor(x)
+
+        download_resources_json()
+        resources = load_resources_json()
+        mwt_exclusion = ["hr", "zh", "zh-hans", "zh-hant", "ja", "ko",
+                         "sl", "sr", "bg", "ru", "et", "hu",
+                         "eu", "el", "he", "af", "ga", "da", "ro"]
+
+        langs = list(langs_alpha2)
+        if "zh" in langs:
+            langs.pop(langs.index("zh"))
+            langs.append("zh-hans")
+        elif not any(i in mwt_exclusion or "mwt" not in get_language_resources(resources, i) for i in langs):
+            if "en" in langs:
+                config["processors"]["mwt"] = "gum"
+            else:
+                config["processors"]["mwt"] = "default"
+
+        if "ja" in langs:
+            config["processors"]["tokenize"] = "combined"
+            config["processors"]["pos"] = "combined"
+            config["processors"]["lemma"] = "combined"
+            config["processors"]["depparse"] = "combined"
+
+        configs = {}
+        for l in langs:
+            configs[l] = config.copy()
+
+        if len(langs) > 1:
+            return tokenizer_context, stanza.MultilingualPipeline(
+                lang_configs = configs,
+                lang_id_config = {"langid_lang_subset": langs},
+                download_method=DownloadMethod.REUSE_RESOURCES
+            )
+        return tokenizer_context, stanza.Pipeline(
+            lang=langs[0],
+            **configs[langs[0]],
+            download_method=DownloadMethod.REUSE_RESOURCES
+        )
+
+    def _get_or_create_nlp(self, langs_alpha2, retokenize, mwt):
+        key = (langs_alpha2, retokenize, self._mwt_signature(mwt))
+        if key not in self._nlp_cache:
+            self._nlp_cache[key] = self._build_nlp(langs_alpha2, retokenize, mwt)
+        return self._nlp_cache[key]
+
     def process(self, doc, **kwargs):
-        return morphoanalyze(doc, retokenize=kwargs.get("retokenize", False), skipmultilang=kwargs.get("skipmultilang", False), status_hook=self.status_hook, mwt=kwargs.get("mwt", {}))
+        sub_kwargs = kwargs.copy()
+        retokenize_val = sub_kwargs.pop("retokenize", False)
+        skipmultilang_val = sub_kwargs.pop("skipmultilang", False)
+        mwt_val = sub_kwargs.pop("mwt", {})
+
+        langs_alpha2 = self._lang_alpha2(doc.langs)
+        tokenizer_context, nlp = self._get_or_create_nlp(langs_alpha2, retokenize_val, mwt_val)
+
+        return morphoanalyze(doc,
+                             nlp=nlp,
+                             retokenize=retokenize_val,
+                             skipmultilang=skipmultilang_val,
+                     tokenizer_context=tokenizer_context,
+                             status_hook=self.status_hook,
+                             **sub_kwargs)
