@@ -32,6 +32,7 @@ import time
 import traceback
 import logging as L
 baL = L.getLogger('batchalign')
+import psutil
 
 warnings.filterwarnings('ignore', category=UserWarning, message='TypedStorage is deprecated')
 
@@ -55,6 +56,29 @@ def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_inf
 
     file, output = file_info
     pid = os.getpid()
+    rss_start = None
+    rss_end = None
+    rss_peak = None
+
+    def _safe_rss():
+        try:
+            import psutil
+            return psutil.Process(pid).memory_info().rss
+        except Exception:
+            return None
+
+    def _safe_peak_rss():
+        try:
+            import resource
+            peak = resource.getrusage(resource.RUSAGE_SELF).ru_maxrss
+            if peak is None:
+                return None
+            # ru_maxrss is KB on Linux, bytes on macOS; normalize to bytes.
+            return int(peak * 1024) if peak < 1024 * 1024 * 1024 else int(peak)
+        except Exception:
+            return None
+
+    rss_start = _safe_rss()
 
     # Configure logging in this worker process
     if verbose >= 1:
@@ -70,9 +94,8 @@ def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_inf
     else:
         baL.setLevel(logging.DEBUG)
 
-    # Only capture output if not in verbose mode
-    # In verbose mode, let logs stream naturally to the console
-    should_capture = verbose == 0
+    # Always capture output to avoid interleaving with progress rendering.
+    should_capture = True
 
     if should_capture:
         # Use a temporary file to capture ALL output at the FD level
@@ -152,7 +175,15 @@ def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_inf
         else:
             captured = ""
 
-        return file, None, None, captured
+        rss_end = _safe_rss()
+        rss_peak = _safe_peak_rss()
+        mem_info = {
+            "pid": pid,
+            "rss_start": rss_start,
+            "rss_end": rss_end,
+            "rss_peak": rss_peak,
+        }
+        return file, None, None, captured, mem_info
     except Exception as e:
         # Flush and read captured output if we were capturing
         if should_capture:
@@ -162,7 +193,15 @@ def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_inf
             captured = log_file.read()
         else:
             captured = ""
-        return file, traceback.format_exc(), e, captured
+        rss_end = _safe_rss()
+        rss_peak = _safe_peak_rss()
+        mem_info = {
+            "pid": pid,
+            "rss_start": rss_start,
+            "rss_end": rss_end,
+            "rss_peak": rss_peak,
+        }
+        return file, traceback.format_exc(), e, captured, mem_info
     finally:
         # Restore original FDs only if we redirected them
         if should_capture:
@@ -255,6 +294,7 @@ def _dispatch(command, lang, num_speakers,
     file_pairs = list(zip(files, outputs))
     file_pairs.sort(key=lambda fo: os.path.getsize(fo[0]) if os.path.exists(fo[0]) else 0, reverse=True)
     files, outputs = zip(*file_pairs) if file_pairs else ([], [])
+    file_sizes = {f: os.path.getsize(f) if os.path.exists(f) else 0 for f in files}
 
     C.print(f"\nMode: [blue]{command}[/blue]; got [bold cyan]{len(files)}[/bold cyan] transcript{'s' if len(files) > 1 else ''} to process from {in_dir}:\n")
 
@@ -289,8 +329,66 @@ def _dispatch(command, lang, num_speakers,
     # create the spinner
     prog = Progress(SpinnerColumn(), *Progress.get_default_columns()[:-1],
                     TimeElapsedColumn(),
-                    TextColumn("[cyan]{task.fields[processor]}[/cyan]"), console=C)
+                    TextColumn("[magenta]{task.fields[mem]}[/magenta]"),
+                    TextColumn("[cyan]{task.fields[processor]}[/cyan]"),
+                    console=C, refresh_per_second=5)
     errors = []
+    mem_records = {}
+    mem_samples = []
+    last_low_mem_warn = 0.0
+
+    def _format_bytes(count, precision=2):
+        if count is None:
+            return "unknown"
+        units = ["B", "KB", "MB", "GB", "TB"]
+        idx = 0
+        size = float(count)
+        while size >= 1024 and idx < len(units) - 1:
+            size /= 1024
+            idx += 1
+        if idx == 0:
+            return f"{int(size)}{units[idx]}"
+        return f"{size:.{precision}f}{units[idx]}"
+
+    def _mem_label(base, available=None, low_mem=False):
+        parts = [base]
+        if available is not None:
+            parts.append(f"avail {_format_bytes(available, precision=1)}")
+        if low_mem:
+            parts.append("LOW MEM")
+        return " | ".join(parts)
+
+    def _system_memory():
+        try:
+            vm = psutil.virtual_memory()
+            return vm.total, vm.available
+        except Exception:
+            return None, None
+
+    def _memory_reserve(total):
+        if total is None:
+            return None
+        return max(int(total * 0.10), 2 * 1024 * 1024 * 1024)
+
+    def _estimate_worker_bytes(file_size):
+        if not mem_samples:
+            return 512 * 1024 * 1024
+        ratios = [mem / size for size, mem in mem_samples if size and mem]
+        if not ratios:
+            return 512 * 1024 * 1024
+        ratios.sort()
+        median_ratio = ratios[len(ratios) // 2]
+        est = int(median_ratio * file_size)
+        return max(512 * 1024 * 1024, min(est, 6 * 1024 * 1024 * 1024))
+
+    def _should_throttle(est_bytes):
+        total, available = _system_memory()
+        if total is None or available is None:
+            return False, total, available
+        reserve = _memory_reserve(total)
+        if reserve is None:
+            return False, total, available
+        return (available - est_bytes) < reserve, total, available
 
     try:
         with prog as prog:
@@ -298,8 +396,9 @@ def _dispatch(command, lang, num_speakers,
             task_totals = {}
 
             for f in files:
-                tasks[f] = prog.add_task(Path(f).name, start=False, total=1, processor="Waiting...")
+                tasks[f] = prog.add_task(Path(f).name, start=False, total=1, processor="Waiting...", mem="queued")
                 task_totals[f] = 1
+                prog.start_task(tasks[f])
 
             def drain_progress_queue():
                 if not progress_queue:
@@ -315,10 +414,16 @@ def _dispatch(command, lang, num_speakers,
                         continue
                     task_total = max(int(total) if total else task_totals.get(file, 1), 1)
                     task_totals[file] = task_total
+                    total_mem, available_mem = _system_memory()
+                    reserve = _memory_reserve(total_mem)
+                    low_mem = False
+                    if reserve is not None and available_mem is not None:
+                        low_mem = available_mem < reserve
                     prog.update(tasks[file],
                                 total=task_total,
                                 completed=min(int(completed), task_total),
-                                processor=render_stage(stage_tasks))
+                                processor=render_stage(stage_tasks),
+                                mem=_mem_label("running", available_mem, low_mem))
 
             with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
                 worker_func = partial(_worker_task,
@@ -331,11 +436,54 @@ def _dispatch(command, lang, num_speakers,
                                       verbose=ctx.obj["verbose"],
                                       **kwargs)
 
-                future_to_file = {executor.submit(worker_func, (f, o)): f for f, o in zip(files, outputs)}
+                file_iter = iter(zip(files, outputs))
+                future_to_file = {}
 
-                for f in files:
-                    prog.start_task(tasks[f])
-                    prog.update(tasks[f], processor="Processing...")
+                def submit_one(file_path, output_path):
+                    future = executor.submit(worker_func, (file_path, output_path))
+                    future_to_file[future] = file_path
+                    est_bytes = _estimate_worker_bytes(file_sizes.get(file_path, 0))
+                    total_mem, available_mem = _system_memory()
+                    reserve = _memory_reserve(total_mem)
+                    low_mem = False
+                    if reserve is not None and available_mem is not None:
+                        low_mem = available_mem < reserve
+                    prog.update(
+                        tasks[file_path],
+                        processor="Processing...",
+                        mem=_mem_label(f"est {_format_bytes(est_bytes)}", available_mem, low_mem),
+                    )
+
+                def schedule_available():
+                    nonlocal last_low_mem_warn
+                    while len(future_to_file) < num_workers:
+                        try:
+                            next_file, next_output = next(file_iter)
+                        except StopIteration:
+                            break
+                        est_bytes = _estimate_worker_bytes(file_sizes.get(next_file, 0))
+                        throttle, total, available = _should_throttle(est_bytes)
+                        if throttle and future_to_file:
+                            now = time.time()
+                            if now - last_low_mem_warn > 10:
+                                reserve = _memory_reserve(total)
+                                prog.console.print(
+                                    f"[bold yellow]Low memory[/bold yellow]: "
+                                    f"{_format_bytes(available)} free, "
+                                    f"{_format_bytes(reserve)} reserve. "
+                                    f"Throttling new workers."
+                                )
+                                last_low_mem_warn = now
+                            break
+                        if throttle and not future_to_file:
+                            prog.console.print(
+                                f"[bold yellow]Low memory[/bold yellow]: "
+                                f"{_format_bytes(available)} free. "
+                                "Continuing with a single worker."
+                            )
+                        submit_one(next_file, next_output)
+
+                schedule_available()
 
                 pending = set(future_to_file.keys())
                 while pending:
@@ -348,8 +496,9 @@ def _dispatch(command, lang, num_speakers,
 
                     for future in done:
                         file = future_to_file[future]
+                        future_to_file.pop(future, None)
                         try:
-                            res_file, trcbk, e, captured = future.result()
+                            res_file, trcbk, e, captured, mem_info = future.result()
                             final_total = max(task_totals.get(file, 1), 1)
                             if e:
                                 prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold red]FAIL[/bold red]")
@@ -357,12 +506,25 @@ def _dispatch(command, lang, num_speakers,
                             else:
                                 prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold green]DONE[/bold green]")
                                 if ctx.obj["verbose"] >= 1 and captured.strip():
-                                    errors.append((res_file, "Logs only (Success)", None, captured))
+                                    prog.console.print(f"[bold blue]INFO[/bold blue] on file [italic]{Path(file).name}[/italic]:\n{escape(captured.strip())}\n")
+                            if mem_info:
+                                mem_records[file] = mem_info
+                                peak = mem_info.get("rss_peak") or mem_info.get("rss_end")
+                                if peak:
+                                    mem_samples.append((file_sizes.get(file, 0), peak))
+                                    total_mem, available_mem = _system_memory()
+                                    reserve = _memory_reserve(total_mem)
+                                    low_mem = False
+                                    if reserve is not None and available_mem is not None:
+                                        low_mem = available_mem < reserve
+                                    prog.update(tasks[file], mem=_mem_label(_format_bytes(peak), available_mem, low_mem))
                         except Exception as e:
                             final_total = max(task_totals.get(file, 1), 1)
                             prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold red]FAIL[/bold red]")
                             errors.append((file, traceback.format_exc(), e, ""))
 
+                    schedule_available()
+                    pending = set(future_to_file.keys())
                 drain_progress_queue()
     finally:
         if manager:
@@ -385,6 +547,16 @@ def _dispatch(command, lang, num_speakers,
                 C.print(f"{escape(captured.strip())}\n")
     else:
         C.print(f"\nAll done. Results saved to {out_dir}!\n")
+
+    if mem_records and ctx.obj["verbose"] >= 1:
+        C.print("\nMemory usage per file (worker RSS peak):")
+        for file, info in mem_records.items():
+            rel_path = os.path.relpath(str(Path(file).absolute()), in_dir)
+            peak = info.get("rss_peak") or info.get("rss_end")
+            C.print(f"- {rel_path}: {_format_bytes(peak)}")
+        total, available = _system_memory()
+        if total is not None and available is not None:
+            C.print(f"\nSystem memory available: {_format_bytes(available)} / {_format_bytes(total)}")
 
     if ctx.obj["verbose"] > 1:
         C.end_capture()
