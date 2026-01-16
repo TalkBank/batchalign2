@@ -157,8 +157,87 @@ def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_inf
             doc = pipeline(doc, callback=progress_callback, **kw)
             CHATFile(doc=doc).write(output, write_wor=kwargs.get("wor", True))
 
+        elif command in ["transcribe", "transcribe_s"]:
+            from batchalign.document import CustomLine, CustomLineType
+            # For transcribe, the "loader" just passes the file path
+            doc = file
+
+            # Process through pipeline
+            doc = pipeline(doc, callback=progress_callback)
+
+            # Write output with ASR comment
+            asr = kwargs.get("asr", "rev")
+            with open(Path(__file__).parent.parent / "version", 'r') as df:
+                VERSION_NUMBER = df.readline().strip()
+            doc.content.insert(0, CustomLine(id="Comment", type=CustomLineType.INDEPENDENT,
+                                             content=f"Batchalign {VERSION_NUMBER}, ASR Engine {asr}. Unchecked output of ASR model."))
+            CHATFile(doc=doc).write(output
+                                    .replace(".wav", ".cha")
+                                    .replace(".WAV", ".cha")
+                                    .replace(".mp4", ".cha")
+                                    .replace(".MP4", ".cha")
+                                    .replace(".mp3", ".cha")
+                                    .replace(".MP3", ".cha"),
+                                    write_wor=kwargs.get("wor", False))
+
+        elif command == "translate":
+            cf = CHATFile(path=os.path.abspath(file), special_mor_=True)
+            doc = cf.doc
+            doc = pipeline(doc, callback=progress_callback)
+            CHATFile(doc=doc).write(output)
+
+        elif command == "utseg":
+            doc = CHATFile(path=os.path.abspath(file)).doc
+            doc = pipeline(doc, callback=progress_callback)
+            CHATFile(doc=doc).write(output)
+
+        elif command == "coref":
+            cf = CHATFile(path=os.path.abspath(file))
+            doc = cf.doc
+            doc = pipeline(doc, callback=progress_callback)
+            CHATFile(doc=doc).write(output)
+
+        elif command == "benchmark":
+            # Find gold transcript
+            from pathlib import Path as P
+            p = P(file)
+            cha = p.with_suffix(".cha")
+            if not cha.exists():
+                raise FileNotFoundError(f"No gold .cha transcript found for benchmarking. audio: {p.name}, desired cha: {cha.name}, looked in: {str(cha)}")
+
+            gold_doc = CHATFile(path=str(cha), special_mor_=True).doc
+            doc = pipeline(file, callback=progress_callback, gold=gold_doc)
+
+            # Write benchmark results
+            import os
+            os.remove(P(output).with_suffix(".cha"))
+            with open(P(output).with_suffix(".wer.txt"), 'w') as df:
+                df.write(str(doc["wer"]))
+            with open(P(output).with_suffix(".diff"), 'w') as df:
+                df.write(str(doc["diff"]))
+            CHATFile(doc=doc["doc"]).write(str(P(output).with_suffix(".asr.cha")),
+                                           write_wor=kwargs.get("wor", False))
+
+        elif command == "opensmile":
+            from batchalign.document import Document
+            doc = Document.new(media_path=file, lang=lang)
+            results = pipeline(doc, callback=progress_callback, feature_set=kwargs.get("feature_set", "eGeMAPSv02"))
+
+            # Write opensmile results
+            if results.get('success', False):
+                output_csv = Path(output).with_suffix('.opensmile.csv')
+                features_df = results.get('features_df')
+                if features_df is not None:
+                    features_df.to_csv(output_csv, header=['value'], index_label='feature')
+            else:
+                error_file = Path(output).with_suffix('.error.txt')
+                with open(error_file, 'w') as f:
+                    f.write(f"OpenSMILE extraction failed: {results.get('error', 'Unknown error')}\n")
+
         else:
             loader, writer = loader_info, writer_info
+            if loader is None or writer is None:
+                raise ValueError(f"Command '{command}' requires loader and writer functions, but they are None. This may indicate an unimplemented command or configuration issue.")
             doc = loader(os.path.abspath(file))
             kw = {}
             if isinstance(doc, tuple) and len(doc) > 1:
@@ -430,8 +509,8 @@ def _dispatch(command, lang, num_speakers,
                                       command=command,
                                       lang=lang,
                                       num_speakers=num_speakers,
-                                      loader_info=None,
-                                      writer_info=None,
+                                      loader_info=loader,
+                                      writer_info=writer,
                                       progress_queue=progress_queue,
                                       verbose=ctx.obj["verbose"],
                                       **kwargs)
