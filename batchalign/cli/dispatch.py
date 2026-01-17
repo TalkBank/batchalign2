@@ -311,6 +311,22 @@ def _dispatch(command, lang, num_speakers,
               **kwargs):
 
     C = console
+    worker_handled = {
+        "align",
+        "transcribe",
+        "transcribe_s",
+        "translate",
+        "morphotag",
+        "utseg",
+        "coref",
+        "benchmark",
+        "opensmile",
+    }
+    if command in worker_handled:
+        # Avoid pickling CLI-local loader/writer functions when the worker
+        # implements the command-specific IO logic.
+        loader = None
+        writer = None
     from batchalign.constants import FORCED_CONVERSION
     from batchalign.document import TaskFriendlyName
 
