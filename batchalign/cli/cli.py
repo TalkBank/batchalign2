@@ -158,6 +158,8 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, iic, wav2vec_yue, tencent, fun
               default=False, help="Use Alibaba instead of Rev.AI (default). Superceeds --whisper.")
 @click.option("--funaudio/--rev",
               default=False, help="Use FunAudio instead of Rev.AI (default). Superceeds --whisper.")
+@click.option("--paraformer/--rev",
+              default=False, help="Use FunAudio instead of Rev.AI (default). Superceeds --whisper.")
 @click.option("--diarize/--nodiarize",
               default=False, help="Perform speaker diarization (this flag is ignored with Rev.AI)")
 @click.option("--wor/--nowor",
@@ -189,6 +191,8 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
         asr = "aliyun"
     if kwargs["funaudio"]:
         asr = "funaudio"
+    if kwargs["paraformer"]:
+        asr = "paraformer"
 
     def writer(doc, output):
         doc.content.insert(0, CustomLine(id="Comment", type=CustomLineType.INDEPENDENT,
