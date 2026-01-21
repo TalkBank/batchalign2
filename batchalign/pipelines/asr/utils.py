@@ -93,11 +93,15 @@ def retokenize_with_engine(intermediate_output, engine):
     ----------
     intermediate_output : List
         Rev.AI style output.
-        
+
     engine : UtteranceEngine
         The utterance Engine to use.
     """
-    
+
+    # Safety check: if engine is None or not callable, fall back to regular retokenize
+    if engine is None or not callable(engine):
+        return retokenize(intermediate_output)
+
     final_outputs = []
 
     for speaker, utterance in intermediate_output:
