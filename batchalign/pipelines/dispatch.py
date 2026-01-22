@@ -152,7 +152,9 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
         elif engine == "aliyun":
             engines.append(AliyunEngine())
         elif engine == "funaudio":
-            engines.append(FunAudioEngine())
+            engines.append(FunAudioEngine(model="FunAudioLLM/SenseVoiceSmall"))
+        elif engine == "paraformer":
+            engines.append(FunAudioEngine(model="paraformer-zh"))
         elif engine ==  "funaudio_utr":
             engines.append(FunAudioUTREngine(lang=lang))
         elif engine == "pyannote":
