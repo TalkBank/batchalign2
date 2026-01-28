@@ -3,39 +3,30 @@ import re
 import string
 import random
 
-# tokenization utilitise
-import nltk
-from nltk import word_tokenize, sent_tokenize
-
-# torch
-import torch
-from torch.utils.data import dataset 
-from torch.utils.data.dataloader import DataLoader
-from torch.optim import AdamW
-
-# import huggingface utils
-from transformers import AutoTokenizer, BertForTokenClassification
-from transformers import DataCollatorForTokenClassification
-
-# tqdm
-from tqdm import tqdm
-
-# seed device and tokens
-DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+# heavy imports moved to local scope
 
 # seed model
 class BertUtteranceModel(object):
 
     def __init__(self, model):
+        import torch
+        from transformers import AutoTokenizer, BertForTokenClassification
+        
+        device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        
         # seed tokenizers and model
         self.tokenizer = AutoTokenizer.from_pretrained(model)
-        self.model = BertForTokenClassification.from_pretrained(model).to(DEVICE)
+        self.model = BertForTokenClassification.from_pretrained(model).to(device)
+        self.device = device
 
         # eval mode
         self.model.eval()
 
     def __call__(self, passage):
-        # print(passage)
+        import torch
+        import nltk
+        from nltk import sent_tokenize
+        
         # input passage words removed of all preexisting punctuation
         passage = passage.lower()
         passage = passage.replace('.','')
@@ -48,7 +39,7 @@ class BertUtteranceModel(object):
         # pass it through the tokenizer and model
         tokd = self.tokenizer([input_tokenized],
                               return_tensors='pt',
-                              is_split_into_words=True).to(DEVICE)
+                              is_split_into_words=True).to(self.device)
 
         # pass it through the model
         res = self.model(**tokd).logits
@@ -107,7 +98,6 @@ class BertUtteranceModel(object):
 
         # compose final passage
         final_passage = self.tokenizer.convert_tokens_to_string(res_toks)
-        # print(final_passage)
         try: 
             split_passage = sent_tokenize(final_passage)
         except LookupError:

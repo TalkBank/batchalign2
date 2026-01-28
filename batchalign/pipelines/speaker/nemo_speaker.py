@@ -1,4 +1,3 @@
-from batchalign.models import NemoSpeakerModel
 from batchalign.document import *
 from batchalign.pipelines.base import *
 from batchalign.utils import *
@@ -23,9 +22,12 @@ class NemoSpeakerEngine(BatchalignEngine):
 
         self.status_hook = None
         self.num_speakers = num_speakers
-        self.__model = NemoSpeakerModel()
+        self.__model = None
 
     def process(self, doc:Document, **kwargs):
+        if self.__model is None:
+            from batchalign.models.speaker import NemoSpeakerModel
+            self.__model = NemoSpeakerModel()
         # check that the document has a media path to align to
         assert doc.media != None and doc.media.url != None, f"We cannot speaker ID something that doesn't have speaker information path! Provided media tier='{doc.media}'"
         # assume num speaker is class default, or 2 if there isn't

@@ -16,7 +16,7 @@ import time
 import pathlib
 import pycountry
 
-from rev_ai import apiclient, JobStatus
+# removed top-level rev_ai and model imports
 
 import logging
 L = logging.getLogger("batchalign")
@@ -41,6 +41,9 @@ class RevEngine(BatchalignEngine):
             except KeyError:
                 raise ConfigError("No Rev.AI key found. Rev.AI was not set up! Please set up Rev.ai through the initial setup process by running 'batchalign setup' in the command line to generate one, or write one yourself and place it at `~/.batchalign.ini`.")
 
+        from batchalign.models import BertUtteranceModel, BertCantoneseUtteranceModel, resolve
+        from rev_ai import apiclient
+
         self.__lang_code = lang
         self.__num_speakers = num_speakers
         self.__lang = pycountry.languages.get(alpha_3=lang).alpha_2
@@ -60,6 +63,8 @@ class RevEngine(BatchalignEngine):
 
 
     def generate(self, f, **kwargs):
+        from rev_ai import JobStatus
+        
         # bring language code into the stack to access
         lang = self.__lang
         client = self.__client

@@ -5,7 +5,7 @@ from batchalign.utils import *
 from batchalign.utils.dp import *
 from batchalign.constants import *
 
-from transformers import AutoProcessor, SeamlessM4TModel
+# transformers imports moved to local scope
 
 import logging
 L = logging.getLogger("batchalign")
@@ -24,6 +24,7 @@ class SeamlessTranslationModel(BatchalignEngine):
         self.status_hook = status_hook
 
     def __init__(self):
+        from transformers import AutoProcessor, SeamlessM4TModel
         self.status_hook = None
         self.processor = AutoProcessor.from_pretrained("facebook/hf-seamless-m4t-medium")
         self.model = SeamlessM4TModel.from_pretrained("facebook/hf-seamless-m4t-medium")

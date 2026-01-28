@@ -3,12 +3,11 @@ OpenSMILE Engine for Batchalign2
 Audio feature extraction using the openSMILE toolkit
 """
 
-import opensmile
-from opensmile import FeatureSet, FeatureLevel
-import pandas as pd
 from pathlib import Path
 import logging
 from typing import Dict
+
+# opensmile and pandas imports moved to local scope
 
 from batchalign.pipelines.base import BatchalignEngine
 from batchalign.document import Task, TaskType, Document
@@ -18,13 +17,21 @@ L = logging.getLogger('batchalign')
 class OpenSMILEEngine(BatchalignEngine):
     """Engine for extracting openSMILE audio features."""
 
-    # Map string names to FeatureSet enums
-    FEATURE_SET_MAP = {
-        'eGeMAPSv02': FeatureSet.eGeMAPSv02,
-        'eGeMAPSv01b': FeatureSet.eGeMAPSv01b,
-        'GeMAPSv01b': FeatureSet.GeMAPSv01b,
-        'ComParE_2016': FeatureSet.ComParE_2016,
-    }
+    # Map string names to FeatureSet enums placeholder
+    # Actual enums will be fetched from opensmile library lazily
+    _FEATURE_SET_MAP = None
+
+    @classmethod
+    def _get_feature_set_map(cls):
+        if cls._FEATURE_SET_MAP is None:
+            import opensmile
+            cls._FEATURE_SET_MAP = {
+                'eGeMAPSv02': opensmile.FeatureSet.eGeMAPSv02,
+                'eGeMAPSv01b': opensmile.FeatureSet.eGeMAPSv01b,
+                'GeMAPSv01b': opensmile.FeatureSet.GeMAPSv01b,
+                'ComParE_2016': opensmile.FeatureSet.ComParE_2016,
+            }
+        return cls._FEATURE_SET_MAP
 
     def __init__(self, feature_set: str = 'eGeMAPSv02', 
                  feature_level: str = 'functionals'):
@@ -35,8 +42,10 @@ class OpenSMILEEngine(BatchalignEngine):
         self.feature_level = feature_level
 
         try:
-            feature_set_enum = self.FEATURE_SET_MAP.get(feature_set, FeatureSet.eGeMAPSv02)
-            feature_level_enum = FeatureLevel.Functionals if feature_level == 'functionals' else FeatureLevel.LowLevelDescriptors
+            import opensmile
+            feature_set_map = self._get_feature_set_map()
+            feature_set_enum = feature_set_map.get(feature_set, opensmile.FeatureSet.eGeMAPSv02)
+            feature_level_enum = opensmile.FeatureLevel.Functionals if feature_level == 'functionals' else opensmile.FeatureLevel.LowLevelDescriptors
             
             self.smile = opensmile.Smile(
                 feature_set=feature_set_enum,
@@ -62,6 +71,7 @@ class OpenSMILEEngine(BatchalignEngine):
         Returns:
             Dictionary with extraction results and metadata
         """
+        import pandas as pd
 
         if not doc.media or not doc.media.url:
             return {

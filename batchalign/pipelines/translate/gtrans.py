@@ -6,7 +6,7 @@ from batchalign.utils.dp import *
 from batchalign.constants import *
 from batchalign.pipelines.translate.utils import run_coroutine_sync
 
-from googletrans import Translator
+# googletrans import moved to local scope
 
 import logging
 L = logging.getLogger("batchalign")
@@ -31,6 +31,7 @@ class GoogleTranslateEngine(BatchalignEngine):
         self.status_hook = None
 
     async def translate(self, text):
+        from googletrans import Translator
         translator = Translator()
         return await translator.translate(text)
 

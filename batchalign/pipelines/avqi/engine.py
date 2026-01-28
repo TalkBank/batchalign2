@@ -3,20 +3,17 @@ AVQI Engine for Batchalign2
 Acoustic Voice Quality Index calculation for voice quality assessment
 """
 
-import parselmouth
 import numpy as np
-from parselmouth.praat import call
 import re
 from typing import Tuple, Dict, Optional
 import os
 from pathlib import Path
 import logging
-import torchaudio
+
+# parselmouth and torchaudio imports moved to local scope
 
 from batchalign.pipelines.base import BatchalignEngine
 from batchalign.document import Task, Document
-
-
 L = logging.getLogger('batchalign')
 
 
@@ -33,6 +30,7 @@ class AVQIEngine(BatchalignEngine):
 
     def extract_voiced_segments(self, sound):
         """Extract voiced segments from audio."""
+        from parselmouth.praat import call
         original = call(sound, "Copy", "original")
         sampling_rate = call(original, "Get sampling frequency")
         onlyVoice = call("Create Sound", "onlyVoice", 0, 0.001, sampling_rate, "0")
@@ -85,6 +83,8 @@ class AVQIEngine(BatchalignEngine):
 
     def calculate_avqi_features(self, cs_file, sv_file):
         """Calculate AVQI score and features from continuous speech and sustained vowel files."""
+        import parselmouth
+        from parselmouth.praat import call
         cs_sound = parselmouth.Sound(cs_file)
         sv_sound = parselmouth.Sound(sv_file)
         cs_filtered = call(cs_sound, "Filter (stop Hann band)", 0, 34, 0.1)
@@ -218,6 +218,7 @@ class AVQIEngine(BatchalignEngine):
         Dict
             Dictionary containing AVQI score and features
         """
+        import torchaudio
         
         if not doc.media or not doc.media.url:
             return {

@@ -69,22 +69,56 @@ class WhisperFAEngine(BatchalignEngine):
 
         L.debug(f"Begin Whisper Inference...")
 
+        # Initialize cache infrastructure
+        from batchalign.pipelines.cache import (
+            CacheManager, AlignmentCacheKey, _get_batchalign_version
+        )
+        cache = CacheManager()
+        key_gen = AlignmentCacheKey()
+        ba_version = _get_batchalign_version()
+        engine_version = "whisper-fa-v1" # engine identifier
+        override_cache = kwargs.get("override_cache", False)
+
         for indx, grp in enumerate(groups):
             L.info(f"Whisper FA processing segment {indx+1}/{len(groups)}...")
             if self.status_hook != None:
                 self.status_hook(indx+1, len(groups))
+
+            # Cache at the group level
+            group_key = None
+            try:
+                # Use a dummy utterance representing the group for key generation
+                group_text = detokenize(word[0].text for word in grp)
+                group_start = grp[0][1][0]
+                group_end = grp[-1][1][1]
+
+                # Tiny audio fingerprint for the group
+                audio_hash = f.hash_chunk(group_start, group_end)
+
+                # Combine into group key
+                group_key = key_gen.generate_key(group_text, audio_hash, pauses)
+
+                if not override_cache:
+                    cached = cache.get(group_key, "forced_alignment", engine_version)
+                    if cached is not None:
+                        # Re-apply cached word timings to the group
+                        cached_timings = key_gen.deserialize_output(cached)
+                        if len(cached_timings) == len(grp):
+                            for (word, _), t in zip(grp, cached_timings):
+                                word.time = tuple(t) if t else None
+                            continue # Skip Whisper
+            except Exception as e:
+                L.debug(f"Cache check failed for group {indx}: {e}")
 
             # perform alignment
             # we take a 2 second buffer in each direction
             try:
                 detokenized = detokenize(word[0].text for word in grp)
                 # replace ANY punctuation
-                for i in MOR_PUNCT + ENDING_PUNCT:
-                    detokenized = detokenized.replace(i, "").strip()
+                for p in MOR_PUNCT + ENDING_PUNCT:
+                    detokenized = detokenized.replace(p, "").strip()
                 # to ensure that combined words are pased correctly 
                 detokenized = detokenized.replace("_", " ")
-                # if "noone's" in detokenized:
-                    # breakpoint()
                 res = self.__whisper(audio=f.chunk(grp[0][1][0], grp[-1][1][1]),
                                      text=detokenized, pauses=pauses)
             except IndexError:
@@ -93,16 +127,16 @@ class WhisperFAEngine(BatchalignEngine):
 
             # create reference backplates, which are the word ids to set the timing for
             ref_targets = []
-            for indx, (word, _) in enumerate(grp):
+            for i_idx, (word, _) in enumerate(grp):
                 for char in word.text:
-                    ref_targets.append(ReferenceTarget(char, payload=indx))
+                    ref_targets.append(ReferenceTarget(char, payload=i_idx))
             # create target backplates for the timings
             payload_targets = []
             timings = []
-            for indx, (word, time) in enumerate(res):
+            for i_idx, (word, time) in enumerate(res):
                 timings.append(time)
                 for char in word:
-                    payload_targets.append(PayloadTarget(char, payload=indx))
+                    payload_targets.append(PayloadTarget(char, payload=i_idx))
             # alignment!
             alignments = align(payload_targets, ref_targets, tqdm=False)
 
@@ -110,10 +144,10 @@ class WhisperFAEngine(BatchalignEngine):
             # we do this BACKWARDS because we went to have the first timestamp
             # we get about a word first
             alignments.reverse()
-            for indx,elem in enumerate(alignments):
+            for i_idx,elem in enumerate(alignments):
                 if isinstance(elem, Match):
                     if pauses:
-                        next_elem = indx - 1 # remember this is backwards, see above
+                        next_elem = i_idx - 1 # remember this is backwards, see above
                         while next_elem >= 0 and alignments[next_elem].payload == elem.payload:
                             next_elem -= 1
                         if next_elem < 0:
@@ -131,6 +165,14 @@ class WhisperFAEngine(BatchalignEngine):
                                                                           grp[0][1][0]))),
                                                                int(round((timings[elem.payload]*1000 +
                                                                           grp[0][1][0]))))
+            
+            # Cache the results for this group
+            if group_key is not None:
+                try:
+                    group_timings = [word[0].time for word in grp]
+                    cache.put(group_key, "forced_alignment", engine_version, ba_version, {"timings": group_timings})
+                except Exception as e:
+                    L.debug(f"Failed to cache group {indx}: {e}")
 
         L.debug(f"Correcting text...")
 

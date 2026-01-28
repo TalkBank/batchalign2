@@ -5,20 +5,9 @@ from itertools import groupby
 # pathing tools
 from pathlib import Path
 
-# UD tools
-import stanza
-
 import copy
 
-from stanza.utils.conll import CoNLL
-from stanza import Document, DownloadMethod
-from stanza.models.common.doc import Token
-from stanza.pipeline.core import CONSTITUENCY
-from stanza import DownloadMethod
-from torch import heaviside
-
-from stanza.pipeline.processor import ProcessorVariant, register_processor_variant
-from stanza.resources.common import download_resources_json, load_resources_json, get_language_resources
+# UD tools imports removed from top-level to speed up cache-only runs
 
 # the loading bar
 from tqdm import tqdm
@@ -29,8 +18,6 @@ from nltk import word_tokenize
 from collections import defaultdict
 
 import warnings
-
-from stanza.utils.conll import CoNLL
 
 # Oneliner of directory-based glob and replace
 globase = lambda path, statement: glob.glob(os.path.join(path, statement))
@@ -982,6 +969,10 @@ class StanzaEngine(BatchalignEngine):
         return tuple(sorted((k, tuple(v) if isinstance(v, (list, tuple)) else (v,)) for k, v in mwt.items()))
 
     def _build_nlp(self, langs_alpha2, retokenize, mwt):
+        import stanza
+        from stanza import DownloadMethod
+        from stanza.resources.common import download_resources_json, load_resources_json, get_language_resources
+
         # This mirrors the pre-parallel behavior: tokenizer post-processing depends on retokenize/mwt
         config = {"processors": {"tokenize": "default",
                                  "pos": "default",
@@ -1049,19 +1040,154 @@ class StanzaEngine(BatchalignEngine):
             self._nlp_cache[key] = self._build_nlp(langs_alpha2, retokenize, mwt)
         return self._nlp_cache[key]
 
+    def get_stanza_version(self):
+        """Get the stanza version without a full import."""
+        try:
+            import importlib.metadata
+            return importlib.metadata.version("stanza")
+        except Exception:
+            import stanza
+            return stanza.__version__
+
     def process(self, doc, **kwargs):
         sub_kwargs = kwargs.copy()
         retokenize_val = sub_kwargs.pop("retokenize", False)
         skipmultilang_val = sub_kwargs.pop("skipmultilang", False)
         mwt_val = sub_kwargs.pop("mwt", {})
+        override_cache = sub_kwargs.pop("override_cache", False)
 
+        # Import caching components
+        from batchalign.pipelines.cache import (
+            CacheManager, MorphotagCacheKey, _get_batchalign_version
+        )
+
+        # Initialize cache infrastructure
+        cache = CacheManager()
+        key_gen = MorphotagCacheKey()
+        engine_version = self.get_stanza_version()
+        ba_version = _get_batchalign_version()
+
+        # Get primary language for cache key
+        lang = doc.langs[0] if doc.langs else "eng"
+
+        # Phase 1: Check cache for each utterance and collect indices
+        cache_hits = 0
+        cache_misses = 0
+        cached_indices = []
+        uncached_indices = []
+
+        # Pre-generate keys and map them to indices
+        idx_to_key = {}
+
+        for idx, item in enumerate(doc.content):
+            if not isinstance(item, Utterance):
+                continue
+            if item.override_lang and skipmultilang_val:
+                continue
+
+            # Skip if it's something morphoanalyze would skip (just punctuation)
+            # This prevents permanent cache misses for untaggable utterances
+            if item.strip().strip() in ENDING_PUNCT:
+                continue
+
+            try:
+                key = key_gen.generate_key(
+                    item,
+                    lang=lang,
+                    retokenize=retokenize_val,
+                    mwt=mwt_val
+                )
+                idx_to_key[idx] = key
+            except Exception:
+                # If key generation fails, treat as cache miss
+                uncached_indices.append(idx)
+                cache_misses += 1
+
+        # Perform batch query
+        cached_results = {}
+        if not override_cache and idx_to_key:
+            cached_results = cache.get_batch(list(idx_to_key.values()), "morphosyntax", engine_version)
+
+        # Process results in original order
+        for idx, key in idx_to_key.items():
+            if key in cached_results:
+                item = doc.content[idx]
+                # Apply cached results to utterance
+                key_gen.deserialize_output(cached_results[key], item)
+                cached_indices.append(idx)
+                cache_hits += 1
+            else:
+                # Cache miss
+                uncached_indices.append(idx)
+                cache_misses += 1
+
+        # Log cache statistics
+        total = cache_hits + cache_misses
+        if total > 0:
+            hit_rate = (cache_hits / total) * 100
+            L.info(f"Cache: {cache_hits} hits, {cache_misses} misses ({hit_rate:.1f}% hit rate)")
+
+        # Phase 2: If all utterances were cached, return early
+        if not uncached_indices:
+            L.debug("All utterances served from cache, skipping Stanza")
+            return doc
+
+        # Phase 3: Create a temporary document with only uncached utterances for processing
         langs_alpha2 = self._lang_alpha2(doc.langs)
         tokenizer_context, nlp = self._get_or_create_nlp(langs_alpha2, retokenize_val, mwt_val)
 
-        return morphoanalyze(doc,
-                             nlp=nlp,
-                             retokenize=retokenize_val,
-                             skipmultilang=skipmultilang_val,
-                     tokenizer_context=tokenizer_context,
-                             status_hook=self.status_hook,
-                             **sub_kwargs)
+        # Create a temporary document containing only uncached utterances
+        # We MUST deep copy them so that changes in morphoanalyze are isolated
+        # and then we explicitly copy them back.
+        temp_doc = Document(langs=doc.langs)
+        temp_index_map = {}  # Maps temp doc index to original doc index
+        for temp_idx, orig_idx in enumerate(uncached_indices):
+            # Create a shallow copy of the utterance to be safe
+            item = doc.content[orig_idx]
+            temp_doc.content.append(copy.deepcopy(item))
+            temp_index_map[temp_idx] = orig_idx
+
+        # Process only the uncached utterances with Stanza
+        temp_doc = morphoanalyze(temp_doc,
+                                nlp=nlp,
+                                retokenize=retokenize_val,
+                                skipmultilang=skipmultilang_val,
+                                tokenizer_context=tokenizer_context,
+                                status_hook=self.status_hook,
+                                **sub_kwargs)
+
+        # Copy results back to original document
+        for temp_idx, orig_idx in temp_index_map.items():
+            doc.content[orig_idx] = temp_doc.content[temp_idx]
+
+        # Phase 4: Store newly processed utterances in cache
+        entries_to_cache = []
+        for temp_idx, orig_idx in temp_index_map.items():
+            item = doc.content[orig_idx]
+            if not isinstance(item, Utterance):
+                continue
+
+            # Check if utterance actually has morphology after processing
+            has_content = any(
+                form.morphology and len(form.morphology) > 0
+                for form in item.content
+            )
+            if not has_content:
+                continue
+
+            try:
+                key = key_gen.generate_key(
+                    item,
+                    lang=lang,
+                    retokenize=retokenize_val,
+                    mwt=mwt_val
+                )
+                data = key_gen.serialize_output(item)
+                entries_to_cache.append((key, data))
+            except Exception as e:
+                L.debug(f"Failed to cache utterance at index {orig_idx}: {e}")
+
+        if entries_to_cache:
+            cache.put_batch(entries_to_cache, "morphosyntax", engine_version, ba_version)
+
+        return doc

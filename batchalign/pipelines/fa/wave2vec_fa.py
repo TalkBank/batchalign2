@@ -64,10 +64,42 @@ class Wave2VecFAEngine(BatchalignEngine):
 
         L.debug(f"Begin Wav2Vec Inference...")
 
+        # Initialize cache infrastructure
+        from batchalign.pipelines.cache import (
+            CacheManager, AlignmentCacheKey, _get_batchalign_version
+        )
+        cache = CacheManager()
+        key_gen = AlignmentCacheKey()
+        ba_version = _get_batchalign_version()
+        engine_version = "wave2vec-fa-v1" # engine identifier
+        override_cache = kwargs.get("override_cache", False)
+
         for indx, grp in enumerate(groups):
             L.info(f"Wave2Vec FA processing segment {indx+1}/{len(groups)}...")
             if self.status_hook != None:
                 self.status_hook(indx+1, len(groups))
+
+            # Cache check for group
+            group_key = None
+            try:
+                group_text = detokenize(word[0].text for word in grp)
+                group_start = grp[0][1][0]
+                group_end = grp[-1][1][1]
+                audio_hash = f.hash_chunk(group_start, group_end)
+
+                # Combine into group key
+                group_key = key_gen.generate_key(group_text, audio_hash, False) # no pauses in wav2vec
+
+                if not override_cache:
+                    cached = cache.get(group_key, "forced_alignment", engine_version)
+                    if cached is not None:
+                        cached_timings = key_gen.deserialize_output(cached)
+                        if len(cached_timings) == len(grp):
+                            for (word, _), t in zip(grp, cached_timings):
+                                word.time = tuple(t) if t else None
+                            continue
+            except Exception as e:
+                L.debug(f"Cache check failed for group {indx}: {e}")
 
             # perform alignment
             # we take a 2 second buffer in each direction
@@ -76,28 +108,27 @@ class Wave2VecFAEngine(BatchalignEngine):
                 # replace ANY punctuation
                 for p in MOR_PUNCT + ENDING_PUNCT:
                     transcript = [i.replace("_", " ") for i in transcript if i.strip() != p]
-                # if "noone's" in detokenized:
-                    # breakpoint()
                 if (grp[-1][1][1] - grp[0][1][0]) < 20*1000:
                     res = self.__wav2vec(audio=f.chunk(grp[0][1][0], grp[-1][1][1]), text=transcript)
-            except:
-                # utterance contains nothing
+            except (IndexError, ValueError):
+                # utterance contains nothing or invalid data
                 continue
 
             # create reference backplates, which are the word ids to set the timing for
             ref_targets = []
-            for indx, (word, _) in enumerate(grp):
+            for i_idx, (word, _) in enumerate(grp):
                 for char in word.text:
-                    ref_targets.append(ReferenceTarget(char, payload=indx))
+                    ref_targets.append(ReferenceTarget(char, payload=i_idx))
             # create target backplates for the timings
             payload_targets = []
             timings = []
             try:
-                for indx, (word, time) in enumerate(res):
+                for i_idx, (word, time) in enumerate(res):
                     timings.append(time)
                     for char in word:
-                        payload_targets.append(PayloadTarget(char, payload=indx))
-            except:
+                        payload_targets.append(PayloadTarget(char, payload=i_idx))
+            except (NameError, TypeError):
+                # res may be undefined or invalid
                 continue
             # alignment!
             alignments = align(payload_targets, ref_targets, tqdm=False)
@@ -106,12 +137,20 @@ class Wave2VecFAEngine(BatchalignEngine):
             # we do this BACKWARDS because we went to have the first timestamp
             # we get about a word first
             alignments.reverse()
-            for indx,elem in enumerate(alignments):
+            for i_idx,elem in enumerate(alignments):
                 if isinstance(elem, Match):
                     grp[elem.reference_payload][0].time = (int(round((timings[elem.payload][0] +
                                                                       grp[0][1][0]))),
                                                            int(round((timings[elem.payload][1] +
                                                                       grp[0][1][0]))))
+            
+            # Cache results
+            if group_key is not None:
+                try:
+                    group_timings = [word[0].time for word in grp]
+                    cache.put(group_key, "forced_alignment", engine_version, ba_version, {"timings": group_timings})
+                except Exception as e:
+                    L.debug(f"Failed to cache group {indx}: {e}")
 
         L.debug(f"Correcting text...")
 

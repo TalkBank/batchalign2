@@ -27,6 +27,8 @@ setup(
     long_description_content_type='text/markdown',
     install_requires=[
         "pydantic>=2.4",
+        "platformdirs>=4.3.0",
+        "filelock>=3.0.0",
         "nltk>=3.8",
         "praatio>=6.0.0,<6.1.0",
         "torch>=2.6.0",

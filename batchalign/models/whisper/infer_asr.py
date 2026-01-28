@@ -1,49 +1,23 @@
-from torchaudio import transforms as T
-from torchaudio import load
 import numpy as np 
 import os
 
 import re
-from transformers import pipeline
 
 from dataclasses import dataclass
 
 from collections import defaultdict
 from pathlib import Path
 
-import torch
-from transformers import WhisperProcessor, WhisperTokenizer, GenerationConfig, WhisperForConditionalGeneration
-
-
+# Heavy imports removed from top-level
 
 from batchalign.document import *
-from batchalign.pipelines.base import *
-from batchalign.pipelines.asr.utils import *
 
-from batchalign.pipelines.asr.utils import *
-
-from batchalign.models.utils import _extract_token_timestamps as ett
 from batchalign.models.utils import ASRAudioFile
-
-
-WhisperForConditionalGeneration._extract_token_timestamps = ett
 
 import pycountry 
 
 import logging
 L = logging.getLogger("batchalign")
-
-# DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-# DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
-# PYTORCH_ENABLE_MPS_FALLBACK=1
-# pretrained model path
-# # PRETRAINED = "openai/whisper-small"
-# PRETRAINED = "talkbank/CHATWhisper-en-large-v1"
-# # PRETRAINED = "openai/whisper-large-v2"
-# # FILE = "./data/test.wav"
-# FILE = "../talkbank-alignment/testing_playground_2/input/test.wav"
-# # FILE = "../talkbank-alignment/broken2/input/53.wav"
 
 # inference engine
 class WhisperASRModel(object):
@@ -64,6 +38,15 @@ class WhisperASRModel(object):
     """
 
     def __init__(self, model, base="openai/whisper-large-v3", language="english", target_sample_rate=16000):
+        import torch
+        from transformers import pipeline, WhisperProcessor, WhisperTokenizer, GenerationConfig, WhisperForConditionalGeneration
+        from batchalign.models.utils import _extract_token_timestamps as ett
+        
+        # Monkey patch
+        WhisperForConditionalGeneration._extract_token_timestamps = ett
+
+        device = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
+
         L.debug("Initializing whisper model...")
         self.__config = GenerationConfig.from_pretrained(base)
         self.__config.no_repeat_ngram_size = 4
@@ -91,7 +74,7 @@ class WhisperASRModel(object):
                 tokenizer=WhisperTokenizer.from_pretrained(base),
                 chunk_length_s=25,
                 stride_length_s=3,
-                device=DEVICE,
+                device=device,
                 torch_dtype=torch.bfloat16,
                 return_timestamps=True,
             )
@@ -102,7 +85,7 @@ class WhisperASRModel(object):
                 tokenizer=WhisperTokenizer.from_pretrained(base),
                 chunk_length_s=25,
                 stride_length_s=3,
-                device=DEVICE,
+                device=device,
                 torch_dtype=torch.float16,
                 return_timestamps=True,
             )
@@ -131,9 +114,12 @@ class WhisperASRModel(object):
         Tuple[ASRAudioFile, List[dict]]
             Return processed audio file and speaker segments.
         """
+        import torch
+        import torchaudio
+        from torchaudio import transforms as T
 
         # function: load and resample audio
-        audio_arr, rate = load(f)
+        audio_arr, rate = torchaudio.load(f)
 
         # resample if needed
         if rate != self.sample_rate:

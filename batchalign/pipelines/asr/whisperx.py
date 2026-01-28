@@ -17,10 +17,7 @@ from contextlib import redirect_stdout, redirect_stderr
 import io
 import os
 
-import gc 
-import torch
-
-DEVICE = "cuda" if torch.cuda.is_available() else "cpu"
+import gc
 
 class WhisperXEngine(BatchalignEngine):
 
@@ -35,13 +32,16 @@ class WhisperXEngine(BatchalignEngine):
 
 
     def __init__(self, lang="eng"):
+        import torch
 
         try:
             import whisperx
-            print("Batchalign: If you got a warning about pyannote versioning, bad things will not happen. Please disregard.")
+            L.info("Batchalign: If you got a warning about pyannote versioning, bad things will not happen. Please disregard.")
         except ImportError:
             raise ImportError("Cannot import WhisperX, please ensure it is installed.\nHint: install WhisperX by running `pip install git+https://github.com/m-bain/whisperx.git`.")
 
+        # Determine device at init time to defer torch import
+        self.__device = "cuda" if torch.cuda.is_available() else "cpu"
 
         if lang == "yue":
             language = "yue"
@@ -52,11 +52,11 @@ class WhisperXEngine(BatchalignEngine):
         self.__lang_code = language
 
         L.info("Loading (and possibly downloading) WhisperX models...")
-        self.__model = whisperx.load_model("large-v2", device=DEVICE,
+        self.__model = whisperx.load_model("large-v2", device=self.__device,
                                         compute_type=("float16"
-                                                        if DEVICE == "cuda" else "float32"),
+                                                        if self.__device == "cuda" else "float32"),
                                         language=language)
-        self.__fa, self.__meta = whisperx.load_align_model(device=DEVICE,
+        self.__fa, self.__meta = whisperx.load_align_model(device=self.__device,
                                                         language_code=language)
         L.info("Done loading WhisperX models!")
 
@@ -83,7 +83,7 @@ class WhisperXEngine(BatchalignEngine):
         result = self.__model.transcribe(audio, batch_size=8)
         result = whisperx.align(result["segments"], self.__fa,
                                 self.__meta, audio,
-                                DEVICE, return_char_alignments=False)
+                                self.__device, return_char_alignments=False)
 
         # tally turns together
         turns = []
@@ -119,13 +119,5 @@ class WhisperXEngine(BatchalignEngine):
 
         return correct_timing(doc)
 
-
-    # model="openai/whisper-large-v2", language="english"
-
-# e = WhisperXEngine()
-# tmp = e.generate("./batchalign/tests/pipelines/asr/support/test.mp3")
-# tmp[0][0]
-# tmp.model_dump()
-# file = "./batchalign/tests/pipelines/asr/support/test.mp3"
 
 
