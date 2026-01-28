@@ -164,7 +164,9 @@ class FunAudioEngine(BatchalignEngine):
             # Extracting text and timestamps from the segment
             text = segment["text"]
             print(text)
-            timestamps = segment["timestamp"]
+            timestamps = segment.get("timestamp")
+            if timestamps is None:
+                continue
 
             # Check if timestamps is a list of tuples
             utterances = []
