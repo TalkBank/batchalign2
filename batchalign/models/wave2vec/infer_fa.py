@@ -1,21 +1,10 @@
-from transformers import WhisperProcessor, WhisperTokenizer, WhisperForConditionalGeneration
-
-import torch
-from torchaudio import load
-from torchaudio import transforms as T
 from batchalign.models.utils import ASRAudioFile
-
-import torchaudio
-bundle = torchaudio.pipelines.MMS_FA
-import torchaudio.functional as AF
 
 import numpy as np
 
 import logging
 L = logging.getLogger("batchalign")
 
-# DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
 TIME_PRECISION = 0.02
 
 # inference engine
@@ -37,8 +26,13 @@ class Wave2VecFAModel(object):
     """
 
     def __init__(self, target_sample_rate=16000):
+        import torch
+        import torchaudio
+        bundle = torchaudio.pipelines.MMS_FA
+        device = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
+
         L.debug("Initializing Wave2vec FA model")
-        self.model = bundle.get_model().to(DEVICE)
+        self.model = bundle.get_model().to(device)
         L.debug("Wave2Vec FA initialization done.")
 
         # save the target sample rate
@@ -59,9 +53,12 @@ class Wave2VecFAModel(object):
         Tuple[ASRAudioFile, List[dict]]
             Return processed audio file and speaker segments.
         """
+        import torch
+        import torchaudio
+        from torchaudio import transforms as T
 
         # function: load and resample audio
-        audio_arr, rate = load(f)
+        audio_arr, rate = torchaudio.load(f)
 
         # resample if needed
         if rate != self.sample_rate:
@@ -74,28 +71,16 @@ class Wave2VecFAModel(object):
         return ASRAudioFile(f, resampled, self.sample_rate)
 
     def __call__(self, audio, text):
-        """Run forced alignment on the audio file.
+        import torch
+        import torchaudio.functional as AF
+        from torchaudio.pipelines import MMS_FA as bundle
+        
+        device = next(self.model.parameters()).device
 
-        Arguments
-        ----------
-        audio : tensor
-            The audio file to process.
-        text : str
-            The transcript to align to.
-
-        Returns
-        -------
-        List[Tuple[str, Tuple[int, int]]]
-                A list of speaker segments
-        """
-
-        L.debug("Running Wav2Vec word-level forced alignment...")
-
-        # complete the call function, don't write anything else
         L.debug("Running Wav2Vec word-level forced alignment...")
 
         # Move audio to device and normalize
-        audio = audio.to(DEVICE)
+        audio = audio.to(device)
 
         # Get emission matrix from model
         emission, _ = self.model(audio.unsqueeze(0))

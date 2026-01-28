@@ -94,8 +94,9 @@ def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_inf
     else:
         baL.setLevel(logging.DEBUG)
 
-    # Always capture output to avoid interleaving with progress rendering.
-    should_capture = True
+    # Always capture output to avoid interleaving with progress rendering,
+    # unless high verbosity is requested for debugging.
+    should_capture = verbose < 2
 
     if should_capture:
         # Use a temporary file to capture ALL output at the FD level
@@ -128,6 +129,7 @@ def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_inf
             mwt = kwargs.pop("mwt", {})
             retokenize = kwargs.pop("retokenize", False)
             skipmultilang = kwargs.pop("skipmultilang", False)
+            override_cache = kwargs.pop("override_cache", False)
 
             cf = CHATFile(path=os.path.abspath(file), special_mor_=True)
             doc = cf.doc
@@ -138,7 +140,8 @@ def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_inf
             pipeline_kwargs = {
                 "retokenize": retokenize,
                 "skipmultilang": skipmultilang,
-                "mwt": mwt
+                "mwt": mwt,
+                "override_cache": override_cache
             }
             # Add any remaining kwargs
             pipeline_kwargs.update(kwargs)
