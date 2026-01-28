@@ -3,12 +3,6 @@ dispatch.py
 Tabulate default packages and options.
 """
 
-from batchalign import (WhisperEngine, WhisperFAEngine, StanzaEngine, RevEngine,
-                        NgramRetraceEngine, DisfluencyReplacementEngine, WhisperUTREngine,
-                        RevUTREngine, EvaluationEngine, WhisperXEngine, NemoSpeakerEngine,
-                        StanzaUtteranceEngine, CorefEngine, Wave2VecFAEngine, SeamlessTranslationModel,
-                        GoogleTranslateEngine, OAIWhisperEngine, PyannoteEngine)
-from batchalign import BatchalignPipeline
 from batchalign.models import resolve
 
 from batchalign.utils.config import config_read
@@ -105,40 +99,58 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
        
         # decode and initialize
         if engine == "whisper":
+            from batchalign.pipelines.asr import WhisperEngine
             engines.append(WhisperEngine(lang=lang))
         elif engine == "whisperx":
+            from batchalign.pipelines.asr import WhisperXEngine
             engines.append(WhisperXEngine(lang=lang))
         elif engine == "rev":
+            from batchalign.pipelines.asr import RevEngine
             engines.append(RevEngine(lang=lang, num_speakers=num_speakers))
         elif engine == "stanza":
+            from batchalign.pipelines.morphosyntax import StanzaEngine
             engines.append(StanzaEngine())
         elif engine == "replacement":
+            from batchalign.pipelines.cleanup import DisfluencyReplacementEngine
             engines.append(DisfluencyReplacementEngine())
         elif engine == "ngram":
+            from batchalign.pipelines.cleanup import NgramRetraceEngine
             engines.append(NgramRetraceEngine())
         elif engine == "whisper_fa":
+            from batchalign.pipelines.fa import WhisperFAEngine
             engines.append(WhisperFAEngine())
         elif engine == "whisper_utr":
+            from batchalign.pipelines.utr import WhisperUTREngine
             engines.append(WhisperUTREngine(lang=lang))
         elif engine == "rev_utr":
+            from batchalign.pipelines.utr import RevUTREngine
             engines.append(RevUTREngine(lang=lang))
         elif engine == "evaluation":
+            from batchalign.pipelines.analysis import EvaluationEngine
             engines.append(EvaluationEngine())
         elif engine == "nemo_speaker":
+            from batchalign.pipelines.speaker import NemoSpeakerEngine
             engines.append(NemoSpeakerEngine(num_speakers=num_speakers))
         elif engine == "stanza_utt":
+            from batchalign.pipelines.utterance import StanzaUtteranceEngine
             engines.append(StanzaUtteranceEngine())
         elif engine == "stanza_coref":
+            from batchalign.pipelines.morphosyntax import CorefEngine
             engines.append(CorefEngine())
         elif engine == "wav2vec_fa":
+            from batchalign.pipelines.fa import Wave2VecFAEngine
             engines.append(Wave2VecFAEngine())
         elif engine == "seamless_translate":
+            from batchalign.pipelines.translate import SeamlessTranslationModel
             engines.append(SeamlessTranslationModel())
         elif engine == "gtrans":
+            from batchalign.pipelines.translate import GoogleTranslateEngine
             engines.append(GoogleTranslateEngine())
         elif engine == "whisper_oai":
+            from batchalign.pipelines.asr import OAIWhisperEngine
             engines.append(OAIWhisperEngine(lang=lang))
         elif engine == "pyannote":
+            from batchalign.pipelines.diarization import PyannoteEngine
             engines.append(PyannoteEngine())
         elif engine == "opensmile_egemaps":
             from batchalign.pipelines.opensmile import OpenSMILEEngine
@@ -155,4 +167,5 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
 
 
     L.debug(f"Done initalizing packages.")
+    from batchalign.pipelines.pipeline import BatchalignPipeline
     return BatchalignPipeline(*engines)

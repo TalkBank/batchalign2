@@ -187,6 +187,37 @@ class ASRAudioFile:
 
         return data
 
+    def hash_chunk(self, begin_ms, end_ms):
+        """Generate a tiny SHA256 hash of a chunk of audio for caching."""
+        import hashlib
+        data = self.chunk(begin_ms, end_ms)
+        num_samples = data.numel()
+        
+        # Tiny fingerprint: 100 samples from the middle + total length
+        if num_samples > 100:
+            mid = num_samples // 2
+            samples = data[mid-50:mid+50]
+        else:
+            samples = data
+
+        # Include length to catch simple duration changes
+        header = f"{num_samples}|".encode()
+        return hashlib.sha256(header + samples.cpu().numpy().tobytes()).hexdigest()
+
+    def hash_all(self):
+        """Generate a tiny SHA256 hash of the entire audio file."""
+        import hashlib
+        num_samples = self.tensor.numel()
+        
+        if num_samples > 100:
+            mid = num_samples // 2
+            samples = self.tensor[mid-50:mid+50]
+        else:
+            samples = self.tensor
+
+        header = f"{num_samples}|".encode()
+        return hashlib.sha256(header + samples.cpu().numpy().tobytes()).hexdigest()
+
     def all(self):
         """Get the audio in its entirety
 

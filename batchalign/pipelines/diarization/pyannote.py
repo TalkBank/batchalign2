@@ -5,20 +5,9 @@ from itertools import groupby
 # pathing tools
 from pathlib import Path
 
-# UD tools
-import stanza
-
 import copy
 
-from stanza.utils.conll import CoNLL
-from stanza import Document, DownloadMethod
-from stanza.models.common.doc import Token
-from stanza.pipeline.core import CONSTITUENCY
-from stanza import DownloadMethod
-from torch import heaviside
-
-from stanza.pipeline.processor import ProcessorVariant, register_processor_variant
-from stanza.resources.common import download_resources_json, load_resources_json, get_language_resources
+# removed unused stanza imports
 
 # the loading bar
 from tqdm import tqdm
@@ -29,8 +18,6 @@ from nltk import word_tokenize
 from collections import defaultdict
 
 import warnings
-
-from stanza.utils.conll import CoNLL
 
 # Oneliner of directory-based glob and replace
 globase = lambda path, statement: glob.glob(os.path.join(path, statement))
@@ -44,8 +31,6 @@ from batchalign.formats.chat.parser import chat_parse_utterance
 
 from batchalign.utils.dp import *
 
-from pyannote.audio import Pipeline
-
 import logging
 L = logging.getLogger("batchalign")
 
@@ -56,10 +41,13 @@ class PyannoteEngine(BatchalignEngine):
     status_hook = None
 
     def __init__(self, num_speakers=2):
-        self.pipe = Pipeline.from_pretrained("talkbank/dia-fork")
+        self.pipe = None
         self.num_speakers = num_speakers
 
     def process(self, doc):
+        if self.pipe is None:
+            from pyannote.audio import Pipeline
+            self.pipe = Pipeline.from_pretrained("talkbank/dia-fork")
         assert doc.media != None and doc.media.url != None, f"We cannot diarize something that doesn't have a media path! Provided media tier='{doc.media}'"
         res = self.pipe(doc.media.url, num_speakers=self.num_speakers)
 

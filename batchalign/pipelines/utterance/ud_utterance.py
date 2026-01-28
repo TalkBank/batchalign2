@@ -5,19 +5,9 @@ from itertools import groupby
 # pathing tools
 from pathlib import Path
 
-# UD tools
-import stanza
-
 import copy
 
-from stanza.utils.conll import CoNLL
-from stanza import Document, DownloadMethod
-from stanza.models.common.doc import Token
-from stanza.pipeline.core import CONSTITUENCY
-from stanza import DownloadMethod
-from torch import heaviside
-
-from stanza.pipeline.processor import ProcessorVariant, register_processor_variant
+# UD tools imports removed from top-level to speed up runs
 
 # the loading bar
 from tqdm import tqdm
@@ -28,8 +18,6 @@ from nltk import word_tokenize
 from collections import defaultdict
 
 import warnings
-
-from stanza.utils.conll import CoNLL
 
 # Oneliner of directory-based glob and replace
 globase = lambda path, statement: glob.glob(os.path.join(path, statement))
@@ -84,6 +72,7 @@ def parse_tree(subtree):
                      for i in stack]
 
 def process_ut(ut, nlp):
+    import stanza
 
     # remove punct
     if (ut.content[-1].type == TokenType.PUNCT or
@@ -230,63 +219,96 @@ class StanzaUtteranceEngine(BatchalignEngine):
     def _hook_status(self, status_hook):
         self.status_hook = status_hook
 
+    def _get_stanza_version(self):
+        """Get the stanza version without a full import."""
+        try:
+            import importlib.metadata
+            return importlib.metadata.version("stanza")
+        except Exception:
+            import stanza
+            return stanza.__version__
+
     def process(self, doc, **kwargs):
+        import stanza
+        from stanza import DownloadMethod
+        
+        # Import caching components
+        from batchalign.pipelines.cache import (
+            CacheManager, UtteranceSegmentationCacheKey, _get_batchalign_version
+        )
+
+        # Initialize cache infrastructure
+        cache = CacheManager()
+        key_gen = UtteranceSegmentationCacheKey()
+        engine_version = self._get_stanza_version()
+        ba_version = _get_batchalign_version()
+        override_cache = kwargs.get("override_cache", False)
+
+        # Get primary language for cache key
+        primary_lang = doc.langs[0] if doc.langs else "eng"
+
         L.debug("Starting Stanza...")
-        lang = []
+        lang_alpha2 = []
         for i in doc.langs:
             if i == "yue":
-                lang.append("zh-hant")
+                lang_alpha2.append("zh-hant")
             else:
                 try:
-                    lang.append(pycountry.languages.get(alpha_3=i).alpha_2)
+                    lang_alpha2.append(pycountry.languages.get(alpha_3=i).alpha_2)
                 except:
                     # some languages don't have alpha 2
                     pass
 
 
-        # pycountry.languages.get(alpha_3=i).alpha_2 for i in lang
+        # pycountry.languages.get(alpha_3=i).alpha_2 for i in lang_alpha2
 
         config = {"processors": {"tokenize": "default",
                                     "pos": "default",
-                                    # "mwt": "gum" if ("en" in lang) else "default",
+                                    # "mwt": "gum" if ("en" in lang_alpha2) else "default",
                                     "lemma": "default",
                                     "constituency": "default"}}
 
 
-        if "zh" in lang:
-            lang.pop(lang.index("zh"))
-            lang.append("zh-hans")
+        if "zh" in lang_alpha2:
+            lang_alpha2.pop(lang_alpha2.index("zh"))
+            lang_alpha2.append("zh-hans")
 
         elif not any([i in ["hr", "zh", "zh-hans", "zh-hant", "ja", "ko",
                             "sl", "sr", "bg", "ru", "et", "hu",
-                            "eu", "el", "he", "af", "ga", "da"] for i in lang]):
-            if "en" in lang:
+                            "eu", "el", "he", "af", "ga", "da"] for i in lang_alpha2]):
+            if "en" in lang_alpha2:
                 config["processors"]["mwt"] = "gum"
             else:
                 config["processors"]["mwt"] = "default"
 
         configs = {}
-        for l in lang:
+        for l in lang_alpha2:
             configs[l] = config.copy()
-
-
-        if len(lang) > 1:
-            nlp = stanza.MultilingualPipeline(
-                lang_configs = configs,
-                lang_id_config = {"langid_lang_subset": lang},
-                download_method=DownloadMethod.REUSE_RESOURCES
-            )
-        else:
-            nlp = stanza.Pipeline(
-                lang=lang[0],
-                **configs[lang[0]],
-                download_method=DownloadMethod.REUSE_RESOURCES
-            )
 
         L.debug("Stanza Loaded.")
         contents = []
+        
+        # Phase 1: Pre-generate keys and check cache
+        idx_to_key = {}
+        for idx, item in enumerate(doc.content):
+            if not isinstance(item, Utterance) or len(item.content) == 0:
+                continue
+            
+            try:
+                key = key_gen.generate_key(item, lang=primary_lang)
+                idx_to_key[idx] = key
+            except Exception:
+                pass
+
+        cached_results = {}
+        if not override_cache and idx_to_key:
+            cached_results = cache.get_batch(list(idx_to_key.values()), "utterance_segmentation", engine_version)
+
+        # Phase 2: Process utterances (using cache or Stanza)
+        nlp_obj = None
+        new_cached_entries = []
+
         for indx, i in enumerate(doc.content):
-            L.info(f"Stanza utseg processing turn {indx+1}/{len(doc.content)}")
             if self.status_hook:
                 self.status_hook(indx+1, len(doc.content))
 
@@ -296,14 +318,46 @@ class StanzaUtteranceEngine(BatchalignEngine):
             
             if len(i.content) == 0:
                 continue
+
+            # Check cache
+            key = idx_to_key.get(indx)
+            if key and key in cached_results:
+                new_uts = key_gen.deserialize_output(cached_results[key], i)
+                contents += new_uts
+                continue
+
+            # Cache miss - need Stanza
+            if nlp_obj is None:
+                L.info(f"Stanza utseg cache miss at index {indx}, loading model...")
+                if len(lang_alpha2) > 1:
+                    nlp_obj = stanza.MultilingualPipeline(
+                        lang_configs = configs,
+                        lang_id_config = {"langid_lang_subset": lang_alpha2},
+                        download_method=DownloadMethod.REUSE_RESOURCES
+                    )
+                else:
+                    nlp_obj = stanza.Pipeline(
+                        lang=lang_alpha2[0],
+                        **configs[lang_alpha2[0]],
+                        download_method=DownloadMethod.REUSE_RESOURCES
+                    )
+
+            L.info(f"Stanza utseg processing turn {indx+1}/{len(doc.content)}")
             try:
-                new_uts = process_ut(i, nlp)
+                new_uts = process_ut(i, nlp_obj)
+                # Store for batch caching
+                if key:
+                    data = key_gen.serialize_output(new_uts)
+                    new_cached_entries.append((key, data))
             except IndexError:
                 new_uts = [i]
             contents += new_uts
 
-        doc.content = contents
+        # Phase 3: Store newly processed results in cache
+        if new_cached_entries:
+            cache.put_batch(new_cached_entries, "utterance_segmentation", engine_version, ba_version)
 
+        doc.content = contents
         return doc
 
 

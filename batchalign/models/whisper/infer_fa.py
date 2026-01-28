@@ -1,24 +1,10 @@
-from transformers import WhisperProcessor, WhisperTokenizer, WhisperForConditionalGeneration
-
-import torch
-from torchaudio import load
-from torchaudio import transforms as T
-from scipy.ndimage import median_filter
-from transformers.models.whisper.generation_whisper import _dynamic_time_warping as dtw
-from transformers.models.whisper.generation_whisper import _median_filter as median_filter
-
 from batchalign.models.utils import ASRAudioFile
 
-from batchalign.models.utils import _extract_token_timestamps as ett
-
-WhisperForConditionalGeneration._extract_token_timestamps = ett
 import numpy as np
 
 import logging
 L = logging.getLogger("batchalign")
 
-# DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
-DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
 TIME_PRECISION = 0.02
 
 # inference engine
@@ -40,8 +26,17 @@ class WhisperFAModel(object):
     """
 
     def __init__(self, model="openai/whisper-large-v2", target_sample_rate=16000):
+        import torch
+        from transformers import WhisperProcessor, WhisperForConditionalGeneration
+        from batchalign.models.utils import _extract_token_timestamps as ett
+        
+        # Monkey patch
+        WhisperForConditionalGeneration._extract_token_timestamps = ett
+
+        device = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
+
         L.debug("Initializing whisper FA model...")
-        self.__model = WhisperForConditionalGeneration.from_pretrained(model, attn_implementation="eager").to(DEVICE)
+        self.__model = WhisperForConditionalGeneration.from_pretrained(model, attn_implementation="eager").to(device)
         self.__model.eval()
         L.debug("Done, initalizing processor and config...")
         self.__processor = WhisperProcessor.from_pretrained(model)
@@ -65,9 +60,12 @@ class WhisperFAModel(object):
         Tuple[ASRAudioFile, List[dict]]
             Return processed audio file and speaker segments.
         """
+        import torch
+        import torchaudio
+        from torchaudio import transforms as T
 
         # function: load and resample audio
-        audio_arr, rate = load(f)
+        audio_arr, rate = torchaudio.load(f)
 
         # resample if needed
         if rate != self.sample_rate:
@@ -80,6 +78,12 @@ class WhisperFAModel(object):
         return ASRAudioFile(f, resampled, self.sample_rate)
 
     def __call__(self, audio, text, pauses=False):
+        import torch
+        from transformers.models.whisper.generation_whisper import _dynamic_time_warping as dtw
+        from transformers.models.whisper.generation_whisper import _median_filter as median_filter
+        
+        device = self.__model.device
+
         L.debug("Whisper Preprocessing...")
         # input features
         features = self.__processor(audio=audio, text=(" ".join(list(text)) if pauses else text),
@@ -90,7 +94,7 @@ class WhisperFAModel(object):
         L.debug("Running inference...")
         # perform inference to get cached qs
         with torch.inference_mode():
-            output = self.__model(**features.to(DEVICE), output_attentions=True)
+            output = self.__model(**features.to(device), output_attentions=True)
 
         L.debug("Collecting and normalizing activations...")
         # get decoder layer across attentions

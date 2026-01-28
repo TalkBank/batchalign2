@@ -17,7 +17,7 @@ import time
 import pathlib
 import pycountry
 
-from rev_ai import apiclient, JobStatus
+# rev_ai import moved to process()
 
 import logging
 L = logging.getLogger("batchalign")
@@ -36,10 +36,16 @@ class RevUTREngine(BatchalignEngine):
 
         self.__lang_code = lang
         self.__lang = pycountry.languages.get(alpha_3=lang).alpha_2
-        self.__client = apiclient.RevAiAPIClient(key)
+        self.__key = key
+        self.__client = None
 
 
     def process(self, doc, **kwargs):
+        from rev_ai import apiclient, JobStatus
+        
+        if self.__client is None:
+            self.__client = apiclient.RevAiAPIClient(self.__key)
+
         # bring language code into the stack to access
         lang = self.__lang
         try:
