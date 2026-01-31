@@ -87,7 +87,7 @@ def _row_costs(reference: Sequence[ReferenceTarget],
             ins_cost = cur[pay_idx] + 1
             cur.append(min(sub_cost, del_cost, ins_cost))
         prev = cur
-        if progress:
+        if progress is not None:
             progress.update(len(payload))
     return prev
 
@@ -122,7 +122,7 @@ def _align_small(reference: Sequence[ReferenceTarget],
             else:
                 dp[i][j] = (dist_ins, OutputType.EXTRA_PAYLOAD, (i, j-1))
 
-    if progress:
+    if progress is not None:
         progress.update((rows-1) * (cols-1))
 
     output: List[Any] = []
@@ -217,9 +217,8 @@ def align(source_payload_sequence,
     try:
         return _hirschberg(reference_seq, payload_seq, match_fn, progress)
     finally:
-        if progress:
+        if progress is not None:
             progress.close()
 
 # align([1,2,3,4,4,5,5,5], [1,1,3,4,4,12,5,5,18])
-
 

@@ -1,10 +1,15 @@
-from batchalign.document import *
+from typing import Any, Optional
+
+from batchalign.document import (
+    Document, Utterance, Form, Tier, Media, MediaType,
+    CustomLine, CustomLineType, Morphology, Dependency, ENDING_PUNCT
+)
 from batchalign.utils import *
-from batchalign.errors import *
+from batchalign.errors import CHATValidationException
 from batchalign.constants import *
 
 from batchalign.formats.base import BaseFormat
-from batchalign.formats.chat.utils import *
+from batchalign.formats.chat.utils import chat_parse_mor, chat_parse_gra
 from batchalign.formats.chat.lexer import lex, TokenType
 
 import re
@@ -120,14 +125,19 @@ def chat_parse_utterance(text, mor, gra, wor, additional):
     if wor == None:
         wor = [None for i in range(len(phonated_words))]
     else:
-        words = re.findall(rf"[^{''.join([i for i in ENDING_PUNCT if len(i) == 1])} ]+ ?(\x15\d+_\d+\x15)?", wor)
+        # Match word with optional timing marker - use non-capturing group
+        wor_words = re.findall(rf"[^{''.join([i for i in ENDING_PUNCT if len(i) == 1])} ]+ ?(?:\x15\d+_\d+\x15)?", wor)
         wor = []
-        for i in words:
-            if i.strip() == "":
+        for word_match in wor_words:
+            if word_match.strip() == "":
                 wor.append(None)
                 continue
-            x, y = re.findall(r"\d+", i)
-            wor.append([int(x),int(y)])
+            timing_nums = re.findall(r"\d+", word_match)
+            if len(timing_nums) >= 2:
+                x, y = timing_nums[0], timing_nums[1]
+                wor.append([int(x), int(y)])
+            else:
+                wor.append(None)
 
     # check lengths
     if len(lexed_words) != len(mor):
@@ -204,7 +214,7 @@ def chat_parse_doc(lines, special_mor=False):
             pid = end.strip()
     raw.pop(0)
 
-    results = {
+    results: dict[str, Any] = {
         "content": [], 
         "langs": [], 
         "media": None,

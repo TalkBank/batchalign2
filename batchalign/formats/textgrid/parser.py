@@ -39,7 +39,7 @@ def load_textgrid_word(tg, lang, corpus_name):
                                                 int(entry.end*1000)))))
 
     # sorts all the forms
-    forms = sorted(forms, key=lambda x:x[1].time[0])
+    forms = sorted(forms, key=lambda x:x[1].time[0] if x[1].time is not None else 0)
 
     # if the textgrid returned no forms (which shouldn't be the case
     # because return_empty_forms is false), we just return in kind an empty doc
@@ -65,7 +65,7 @@ def load_textgrid_word(tg, lang, corpus_name):
     turns.append((par, copy.deepcopy(turn)))
 
     # cache the tiers
-    tiers = {}
+    tiers: dict[str, Tier] = {}
     utterances = []
 
     for spk, turn in turns:
@@ -103,7 +103,7 @@ def load_textgrid_utterance(tg, lang, corpus_name):
 
     # collect all the forms together
     forms = []
-    tiers = {}
+    tiers: dict[str, Tier] = {}
 
     for tier in tg.tiers:
         # collect all the forms into one place

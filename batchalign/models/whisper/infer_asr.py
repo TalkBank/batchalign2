@@ -144,6 +144,8 @@ class WhisperASRModel(object):
         return lazy_audio
 
     def __call__(self, data, segments=None):
+        if isinstance(data, ASRAudioFile):
+            data = data.all()
         # we now perform the sweep line algorithm to align the
         # segment timestamps against the words
         groups = []
@@ -209,10 +211,18 @@ class WhisperASRModel(object):
 
         L.debug("Whisper Postprocessing...")
         for word in words:
+            timestamp = word.get("timestamp")
+            if not timestamp or len(timestamp) < 2:
+                continue
+            start, end = timestamp
+            if start is None:
+                continue
+            if end is None:
+                end = start + 1
             groups.append({
                 "type": "text",
-                "start": word["timestamp"][0],
-                "end": word["timestamp"][1],
+                "start": start,
+                "end": end,
                 "payload": word["text"]
             })
 
@@ -268,7 +278,7 @@ class WhisperASRModel(object):
                     "elements": current_turn,
                     "speaker": current_speaker[0] if type(current_speaker) == tuple else current_speaker
                 })
-                current_speaker = element["payload"],
+                current_speaker = element["payload"]
                 current_turn = []
 
         turns.append({

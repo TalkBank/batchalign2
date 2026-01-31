@@ -1,5 +1,6 @@
 # system utils
 import glob, os, re
+import pathlib
 from itertools import groupby
 
 # pathing tools
@@ -44,7 +45,7 @@ class PyannoteEngine(BatchalignEngine):
         self.pipe = None
         self.num_speakers = num_speakers
 
-    def process(self, doc):
+    def process(self, doc: Document, **kwargs) -> Document:
         if self.pipe is None:
             from pyannote.audio import Pipeline
             self.pipe = Pipeline.from_pretrained("talkbank/dia-fork")
@@ -87,5 +88,4 @@ class PyannoteEngine(BatchalignEngine):
         # doc.tiers = list(tiers.values())
 
         return doc
-
 

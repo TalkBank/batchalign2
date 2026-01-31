@@ -53,14 +53,16 @@ def chat_parse_mor(mor_str):
             # feats = [re.split("[-&]", i[1]) for i in mors]
         # else:
         feats = [re.split("-", i[1]) for i in mors]
-        lemmas, feats = zip(*[(i[0], "-".join(i[1:])) for i in feats])
+        lemmas_tuple, feats_tuple = zip(*[(i[0], "-".join(i[1:])) for i in feats])
+        lemmas = list(lemmas_tuple)
+        feats_list = list(feats_tuple)
         pos = [i[0] for i in mors]
     except:
         raise CHATValidationException(f"mor parser received invalid mor string: '{mor_str}'")
 
 
     mors = []
-    for p,l,f in zip(pos, lemmas, feats):
+    for p,l,f in zip(pos, lemmas, feats_list):
         # if "+" not in mor_str:
         mors.append(Morphology.model_validate({
             "lemma": l,

@@ -28,7 +28,7 @@ class OAIWhisperEngine(BatchalignEngine):
 
         # try to resolve our internal model
         res = resolve("whisper", lang)
-        if res:
+        if res and isinstance(res, tuple):
             model, base = res
         else:
             model = "openai/whisper-large-v3"

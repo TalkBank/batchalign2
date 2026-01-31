@@ -17,6 +17,7 @@ import contextlib
 import io
 
 from rich.console import Console
+from typing import Callable
 from rich.markup import escape
 
 from pathlib import Path
@@ -26,7 +27,7 @@ import multiprocessing
 from functools import partial
 
 # Oneliner of directory-based glob and replace
-globase = lambda path, statement: glob(os.path.join(path, statement))
+globase = lambda path, statement: glob.glob(os.path.join(path, statement))
 repath_file = lambda file_path, new_dir: os.path.join(new_dir, Path(file_path).name)
 
 import tempfile
@@ -82,13 +83,15 @@ def _get_worker_pipeline(command, lang, num_speakers, **kwargs):
                                                 lang=lang, num_speakers=num_speakers, **kwargs)
     return _worker_pipeline
 
-def _run_pipeline_for_file(command, pipeline, file, output, loader_info, writer_info, progress_queue=None, **kwargs):
+def _run_pipeline_for_file(command, pipeline, file, output, loader_info, writer_info, progress_queue: queue.Queue | None = None, **kwargs):
     def progress_callback(completed, total, tasks):
-        if not progress_queue:
+        if progress_queue is None:
             return
         try:
-            progress_queue.put((file, completed, total, tasks))
+            # Use put_nowait to avoid blocking workers when queue is full
+            progress_queue.put_nowait((file, completed, total, tasks))
         except Exception:
+            # Queue full or connection issue - skip this progress update
             pass
 
     # For now, we'll re-import what we need
@@ -220,7 +223,7 @@ def _run_pipeline_for_file(command, pipeline, file, output, loader_info, writer_
         doc = pipeline(doc, callback=progress_callback, **kw)
         writer(doc, output)
 
-def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_info, progress_queue=None, verbose=0, **kwargs):
+def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_info, progress_queue: queue.Queue | None = None, verbose=0, **kwargs):
     """The task executed in each worker process."""
     import sys
     import os
@@ -349,7 +352,7 @@ Cmd2Task = {
 # this is the main runner used by all functions
 def _dispatch(command, lang, num_speakers,
               extensions, ctx, in_dir, out_dir,
-              loader:callable, writer:callable, console,
+              loader: Callable | None, writer: Callable | None, console,
               **kwargs):
 
     C = console
@@ -373,8 +376,8 @@ def _dispatch(command, lang, num_speakers,
     from batchalign.document import TaskFriendlyName
 
     # get files by walking the directory
-    files = []
-    outputs = []
+    files: list[str] = []
+    outputs: list[str] = []
 
     for basedir, _, fs in os.walk(in_dir):
         for f in fs:
@@ -432,8 +435,11 @@ def _dispatch(command, lang, num_speakers,
     # process largest inputs first to avoid late stragglers
     file_pairs = list(zip(files, outputs))
     file_pairs.sort(key=lambda fo: os.path.getsize(fo[0]) if os.path.exists(fo[0]) else 0, reverse=True)
-    files, outputs = zip(*file_pairs) if file_pairs else ([], [])
-    file_sizes = {f: os.path.getsize(f) if os.path.exists(f) else 0 for f in files}
+    if file_pairs:
+        files, outputs = map(list, zip(*file_pairs))
+    else:
+        files, outputs = [], []
+    file_sizes: dict[str, int] = {f: os.path.getsize(f) if os.path.exists(f) else 0 for f in files}
 
     C.print(f"\nMode: [blue]{command}[/blue]; got [bold cyan]{len(files)}[/bold cyan] transcript{'s' if len(files) > 1 else ''} to process from {in_dir}:\n")
 
@@ -534,6 +540,7 @@ def _dispatch(command, lang, num_speakers,
         else:
             C.print(f"Using [bold]{num_workers}[/bold] worker processes.\n")
 
+    progress_queue: queue.Queue | None = None  # type: ignore[var-annotated]
     if pool_mode_enabled:
         manager = None
         progress_queue = queue.Queue()
@@ -556,8 +563,8 @@ def _dispatch(command, lang, num_speakers,
                     TextColumn("[cyan]{task.fields[processor]}[/cyan]"),
                     console=C, refresh_per_second=5)
     errors = []
-    mem_records = {}
-    mem_samples = []
+    mem_records: dict = {}
+    mem_samples: list = []
     last_low_mem_warn = 0.0
     adaptive_cap_reported = None
     history_sizes = []
@@ -736,7 +743,7 @@ def _dispatch(command, lang, num_speakers,
                 prog.start_task(tasks[f])
 
             def drain_progress_queue():
-                if not progress_queue:
+                if progress_queue is None:
                     return
                 while True:
                     try:
@@ -826,11 +833,11 @@ def _dispatch(command, lang, num_speakers,
                             file = future_to_file[future]
                             future_to_file.pop(future, None)
                             try:
-                                res_file, trcbk, e, captured, mem_info = future.result()
+                                res_file, trcbk, exc, captured, mem_info = future.result()
                                 final_total = max(task_totals.get(file, 1), 1)
-                                if e:
+                                if exc:
                                     prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold red]FAIL[/bold red]")
-                                    errors.append((res_file, trcbk, e, captured))
+                                    errors.append((res_file, trcbk, exc, captured))
                                 else:
                                     prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold green]DONE[/bold green]")
                                 if mem_info:
@@ -843,10 +850,10 @@ def _dispatch(command, lang, num_speakers,
                                                rss_peak=mem_info.get("rss_peak"),
                                                rss_end=mem_info.get("rss_end"),
                                                rss_start=mem_info.get("rss_start"))
-                            except Exception as e:
+                            except Exception as exc_inner:
                                 final_total = max(task_totals.get(file, 1), 1)
                                 prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold red]FAIL[/bold red]")
-                                errors.append((file, traceback.format_exc(), e, ""))
+                                errors.append((file, traceback.format_exc(), exc_inner, ""))
 
                         drain_progress_queue()
             else:
@@ -859,7 +866,7 @@ def _dispatch(command, lang, num_speakers,
                     except Exception:
                         pass
 
-                with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers, **executor_opts) as executor:
+                with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers, **executor_opts) as executor:  # type: ignore[misc,call-overload]
                     worker_func = partial(_worker_task,
                                           command=command,
                                           lang=lang,
@@ -958,11 +965,11 @@ def _dispatch(command, lang, num_speakers,
                             file = future_to_file[future]
                             future_to_file.pop(future, None)
                             try:
-                                res_file, trcbk, e, captured, mem_info = future.result()
+                                res_file, trcbk, exc, captured, mem_info = future.result()
                                 final_total = max(task_totals.get(file, 1), 1)
-                                if e:
+                                if exc:
                                     prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold red]FAIL[/bold red]")
-                                    errors.append((res_file, trcbk, e, captured))
+                                    errors.append((res_file, trcbk, exc, captured))
                                 else:
                                     prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold green]DONE[/bold green]")
                                     if ctx.obj["verbose"] >= 1 and captured.strip():
@@ -983,10 +990,10 @@ def _dispatch(command, lang, num_speakers,
                                                rss_peak=mem_info.get("rss_peak"),
                                                rss_end=mem_info.get("rss_end"),
                                                rss_start=mem_info.get("rss_start"))
-                            except Exception as e:
+                            except Exception as exc:
                                 final_total = max(task_totals.get(file, 1), 1)
                                 prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold red]FAIL[/bold red]")
-                                errors.append((file, traceback.format_exc(), e, ""))
+                                errors.append((file, traceback.format_exc(), exc, ""))
 
                         schedule_available()
                         pending = set(future_to_file.keys())
@@ -1001,10 +1008,10 @@ def _dispatch(command, lang, num_speakers,
 
     if len(errors) > 0:
         C.print()
-        for file, trcbk, e, captured in errors:
+        for file, trcbk, err, captured in errors:
             rel_path = os.path.relpath(str(Path(file).absolute()), in_dir)
-            if e:
-                C.print(f"[bold red]ERROR[/bold red] on file [italic]{rel_path}[/italic]: {escape(str(e))}\n")
+            if err:
+                C.print(f"[bold red]ERROR[/bold red] on file [italic]{rel_path}[/italic]: {escape(str(err))}\n")
                 if captured.strip():
                     C.print(f"[dim]Captured Worker Output:[/dim]\n{escape(captured.strip())}\n")
                 if ctx.obj["verbose"] == 1:

@@ -27,7 +27,7 @@ DEFAULT_PACKAGES = {
     "opensmile": "opensmile_egemaps",
 }
 
-LANGUAGE_OVERRIDE_PACKAGES = {
+LANGUAGE_OVERRIDE_PACKAGES: dict = {
     "eng": {
     }
 }

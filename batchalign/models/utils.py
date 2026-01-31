@@ -172,8 +172,8 @@ class ASRAudioFile:
     tensor : torch.Tensor
     rate : int
     _lazy : bool = False
-    _cache : dict = None
-    _cache_order : list = None
+    _cache : dict | None = None
+    _cache_order : list | None = None
     _cache_limit : int = 4
 
     def _init_cache(self):
@@ -223,6 +223,8 @@ class ASRAudioFile:
             return self.tensor[begin_frame:end_frame]
 
         self._init_cache()
+        assert self._cache is not None
+        assert self._cache_order is not None
         key = (begin_frame, end_frame)
         if key in self._cache:
             return self._cache[key]

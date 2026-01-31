@@ -127,7 +127,7 @@ class OpenSMILEEngine(BatchalignEngine):
 
     def get_available_feature_sets(self) -> list:
         """Return list of available feature sets."""
-        return list(self.FEATURE_SET_MAP.keys())
+        return list(self._get_feature_set_map().keys())
 
     def get_feature_set_info(self, feature_set: str) -> dict:
         """Get information about a specific feature set."""

@@ -124,9 +124,9 @@ class WhisperXEngine(BatchalignEngine):
                     segments.append(segment)
                 start_frame = end_frame
         except Exception:
-            segments = None
+            segments = []
 
-        if segments is None:
+        if len(segments) == 0:
             audio = whisperx.load_audio(source_path)
             result = self.__model.transcribe(audio, batch_size=8)
             result = whisperx.align(result["segments"], self.__fa,

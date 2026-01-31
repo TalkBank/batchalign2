@@ -46,7 +46,8 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
 
     for i in utterance.content:
         mors.append(i.morphology)
-        gras.append(i.dependency)
+        if i.dependency:
+            gras.append(i.dependency)
         if i.time:
             has_wor = True
             wor_elems.append(re.sub(r"@(\w)(\w\w\w)", r"@\1:\2", f"{i.text} \x15{str(i.time[0])}_{str(i.time[1])}\x15"))
@@ -68,7 +69,7 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
         else:
             coref_elems.append("-")
 
-        if bool(mors[-1]) != bool(gras[-1]):
+        if bool(mors[-1]) != bool(i.dependency):
             warnings.warn(f"Batchalign has detected a mismatch between lengths of mor and gra tiers for utterance; output will not pass CHATTER; line='{main_line}'")
 
 
@@ -91,11 +92,10 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
 
     #### GRA LINE GENERATION ####
     # gra list is not different for MWT tokens so we flatten it
-    gras = [i for j in gras if j for i in j]
-    # assemble gra line
-    gra_line = None
     if len(gras) > 0:
-        result.append(f"%{'u' if special_mor else ''}gra:\t"+" ".join([f"{i.id}|{i.dep_id}|{i.dep_type}" for i in gras]))
+        flat_gras = [i for j in gras if j for i in j]
+        if flat_gras:
+            result.append(f"%{'u' if special_mor else ''}gra:\t"+" ".join([f"{i.id}|{i.dep_id}|{i.dep_type}" for i in flat_gras]))
 
     #### WOR LINE GENERATION ####
     if has_wor and write_wor:
