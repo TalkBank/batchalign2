@@ -92,6 +92,9 @@ batchalign [verb] --help
 
 to learn more about other options.
 
+### Performance defaults (simple mode)
+When you run Batchalign on multiple files, it automatically uses a pooled model mode that reuses loaded models in memory for speed and stability. If any engine is not safe for pooling, Batchalign falls back to the standard process-based workers automatically. Single-file runs use the existing process-based mode for predictability.
+
 ### Verbosity
 
 Placing one or multiple `-v` *behind the word `batchalign`* (i.e. behind the `[verb]` will not work) increases the verbosity of Batchalign. The default mode and one `-v` will use the normal Batchalign interface, whereas Batchalign with more than 1 `-v` will switch to the text-based "logging" interface.
@@ -232,4 +235,3 @@ tg_word.write("tg_w.TextGrid")
 ```
 ## Questions?
 If you have any questions or concerns, please reach out! If something isn't working right, [open an issue on GitHub](https://github.com/TalkBank/batchalign2/issues); if you need support, please feel free to email `houjun at cmu edu` and `macw at cmu edu`.
-

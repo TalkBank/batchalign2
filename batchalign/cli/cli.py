@@ -68,14 +68,14 @@ def handle_verbosity(verbosity):
 @click.pass_context
 @click.version_option(VERSION_NUMBER)
 @click.option("-v", "--verbose", type=int, count=True, default=0, help="How loquacious Batchalign should be.")
-@click.option("--workers", type=int, default=os.cpu_count(), help="Number of worker processes to use.")
+@click.option("--workers", type=int, default=os.cpu_count(), help="Number of workers (threads when pooled, processes otherwise).")
 @click.option("--memlog", is_flag=True, default=False, help="Write memory telemetry log to OUT_DIR.")
 @click.option("--mem-guard", is_flag=True, default=False, help="Abort early if available memory is too low to start a new worker.")
 @click.option("--adaptive-workers/--no-adaptive-workers", default=True, help="Adaptively cap workers based on observed memory.")
 @click.option("--adaptive-safety-factor", type=float, default=1.35, show_default=True, help="Safety factor applied to observed worker RSS peaks.")
 @click.option("--adaptive-warmup", type=int, default=2, show_default=True, help="Initial worker count before adaptive cap kicks in.")
 @click.option("--force-cpu/--no-force-cpu", default=False, help="Disable MPS/CUDA and force CPU-only models.")
-@click.option("--shared-models/--no-shared-models", default=False, help="Preload models and fork workers to share read-only memory.")
+@click.option("--shared-models/--no-shared-models", default=False, help="Preload models and fork workers to share read-only memory (advanced; ignored in pooled mode).")
 def batchalign(ctx, verbose, workers, memlog, mem_guard, adaptive_workers, adaptive_safety_factor, adaptive_warmup, force_cpu, shared_models):
     """process .cha and/or audio files in IN_DIR and dumps them to OUT_DIR using recipe COMMAND"""
 

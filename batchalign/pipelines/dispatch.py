@@ -32,6 +32,44 @@ LANGUAGE_OVERRIDE_PACKAGES = {
     }
 }
 
+def resolve_engine_specs(pkg_str, lang, num_speakers=None, **arg_overrides):
+    """Resolve engine names for a pipeline without instantiating them."""
+    packages = [i.strip() for i in pkg_str.split(",")]
+
+    try:
+        config = dict(config_read())
+    except ConfigNotFoundError:
+        config = {}
+
+    # if asr is in engines but disfluency or retracing is not
+    # add them
+    if "asr" in packages:
+        if "disfluency" not in packages:
+            packages.append("disfluency")
+        if "retracing" not in packages:
+            packages.append("retracing")
+        if "utterance" not in packages and resolve("utterance", lang) == None and lang in ["cho", "eng", "ind", "ita",
+                                                                                           "jpn", "por", "spa", "tur", "vie"]:
+            packages.append("utterance")
+    if "fa" in packages:
+        if "utr" not in packages:
+            packages.append("utr")
+
+    overrides = LANGUAGE_OVERRIDE_PACKAGES.get(lang, {})
+    specs = []
+    for key in packages:
+        engine = DEFAULT_PACKAGES.get(key)
+        engine = overrides.get(key, engine)
+        engine = dict(config.get(key, {})).get("engine", engine)
+        engine = arg_overrides.get(key, engine)
+
+        if engine == None:
+            raise ValueError(f"Unknown task short name; we can't get a package automatically for that. Provided task: '{key}'.")
+
+        specs.append((key, engine))
+
+    return specs
+
 def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
     """Dispatch pipeline with sane defaults.
 
@@ -50,49 +88,16 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
         The requested pipeline.
     """
     
-    packages = [i.strip() for i in pkg_str.split(",")]
+    specs = resolve_engine_specs(pkg_str, lang, num_speakers, **arg_overrides)
 
-    try:
-        config = dict(config_read())
-    except ConfigNotFoundError:
-        config = {}
-
-    L.debug(f"Initializing packages, got: packages='{packages}' and config='{config}'")
-
+    L.debug(f"Initializing packages, got: packages='{[k for k, _ in specs]}'")
 
     # create all the engines
     engines = []
-    overrides = LANGUAGE_OVERRIDE_PACKAGES.get(lang, {})
-
-    # if asr is in engines but disfluency or retracing is not
-    # add them
-    if "asr" in packages:
-        if "disfluency" not in packages:
-            packages.append("disfluency")
-        if "retracing" not in packages:
-            packages.append("retracing")
-        if "utterance" not in packages and resolve("utterance", lang) == None and lang in ["cho", "eng", "ind", "ita",
-                                                                                           "jpn", "por", "spa", "tur", "vie"]:
-            packages.append("utterance")
-    if "fa" in packages:
-        if "utr" not in packages:
-            packages.append("utr")
 
     L.info(f"Initializing engines...")
     L.info(f"-------------------------------")
-    for key in packages:
-        # default is the default
-        engine = DEFAULT_PACKAGES.get(key)
-        # apply language override
-        engine = overrides.get(key, engine)
-        # apply user preference
-        engine = dict(config.get(key, {})).get("engine", engine)
-        # apply argument-level overrides
-        engine = arg_overrides.get(key, engine)
-
-        if engine == None:
-            raise ValueError(f"Unknown task short name; we can't get a package automatically for that. Provided task: '{key}'.")
-
+    for key, engine in specs:
         L.info(f"| {key: <12} | {engine:>12} |")
         L.info(f"-------------------------------")
 

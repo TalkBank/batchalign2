@@ -26,7 +26,7 @@ class FakeExecutor:
     def __init__(self, results):
         self._results = list(results)
 
-    def submit(self, _fn, _args):
+    def submit(self, _fn, *args, **kwargs):
         return FakeFuture(self._results.pop(0))
 
     def __enter__(self):
@@ -55,6 +55,12 @@ def _base_ctx(tmp_path, **overrides):
     return type("Ctx", (), {"obj": ctx})()
 
 
+def _force_process_mode(monkeypatch):
+    monkeypatch.setattr(dispatch_module, "POOL_UNSAFE_ENGINES", {"wav2vec_fa"})
+    monkeypatch.setattr(dispatch_module, "POOL_SAFE_ENGINES", set())
+    monkeypatch.setattr(dispatch_module.pipeline_dispatch, "resolve_engine_specs", lambda *a, **k: [("fa", "wav2vec_fa")])
+
+
 def test_memlog_and_history(tmp_path, monkeypatch):
     in_dir = tmp_path / "in"
     out_dir = tmp_path / "out"
@@ -69,6 +75,8 @@ def test_memlog_and_history(tmp_path, monkeypatch):
         (str(in_dir / "b.cha"), None, None, "", mem_info),
     ]
 
+    _force_process_mode(monkeypatch)
+    monkeypatch.setattr(dispatch_module.pipeline_dispatch, "resolve_engine_specs", lambda *a, **k: [("fa", "wav2vec_fa")])
     monkeypatch.setattr(dispatch_module.concurrent.futures, "ProcessPoolExecutor", lambda *a, **k: FakeExecutor(results))
     monkeypatch.setattr(dispatch_module.concurrent.futures, "wait", _drain_wait)
     monkeypatch.setattr(dispatch_module.psutil, "virtual_memory", lambda: DummyVM(8 * 1024**3, 6 * 1024**3))
@@ -101,6 +109,8 @@ def test_mem_guard_abort(tmp_path, monkeypatch):
     out_dir.mkdir()
     _write_cha(in_dir, "a.cha")
 
+    _force_process_mode(monkeypatch)
+    monkeypatch.setattr(dispatch_module.pipeline_dispatch, "resolve_engine_specs", lambda *a, **k: [("fa", "wav2vec_fa")])
     monkeypatch.setattr(dispatch_module.psutil, "virtual_memory", lambda: DummyVM(4 * 1024**3, 512 * 1024**2))
     mem_info = {"rss_peak": 1024 * 1024 * 1024, "rss_end": 512 * 1024 * 1024, "rss_start": 128}
     monkeypatch.setattr(dispatch_module.concurrent.futures, "ProcessPoolExecutor", lambda *a, **k: FakeExecutor([
@@ -132,6 +142,8 @@ def test_adaptive_warm_start_message(tmp_path, monkeypatch, capsys):
         "commands": {"align": {"peaks": [1024 * 1024 * 1024], "sizes": [1024]}}
     }))
 
+    _force_process_mode(monkeypatch)
+    monkeypatch.setattr(dispatch_module.pipeline_dispatch, "resolve_engine_specs", lambda *a, **k: [("fa", "wav2vec_fa")])
     mem_info = {"rss_peak": 1024 * 1024 * 1024, "rss_end": 512 * 1024 * 1024, "rss_start": 128}
     results = [(str(in_dir / "a.cha"), None, None, "", mem_info)]
     monkeypatch.setattr(dispatch_module.concurrent.futures, "ProcessPoolExecutor", lambda *a, **k: FakeExecutor(results))
@@ -156,6 +168,8 @@ def test_force_cpu_disables_mps(tmp_path, monkeypatch):
     out_dir.mkdir()
     _write_cha(in_dir, "a.cha")
 
+    _force_process_mode(monkeypatch)
+    monkeypatch.setattr(dispatch_module.pipeline_dispatch, "resolve_engine_specs", lambda *a, **k: [("fa", "wav2vec_fa")])
     mem_info = {"rss_peak": 1024 * 1024 * 1024, "rss_end": 512 * 1024 * 1024, "rss_start": 128}
     results = [(str(in_dir / "a.cha"), None, None, "", mem_info)]
     monkeypatch.setattr(dispatch_module.concurrent.futures, "ProcessPoolExecutor", lambda *a, **k: FakeExecutor(results))
@@ -184,6 +198,8 @@ def test_shared_models_requires_force_cpu_on_macos(tmp_path, monkeypatch, capsys
     out_dir.mkdir()
     _write_cha(in_dir, "a.cha")
 
+    _force_process_mode(monkeypatch)
+    monkeypatch.setattr(dispatch_module.pipeline_dispatch, "resolve_engine_specs", lambda *a, **k: [("fa", "wav2vec_fa")])
     mem_info = {"rss_peak": 1024 * 1024 * 1024, "rss_end": 512 * 1024 * 1024, "rss_start": 128}
     results = [(str(in_dir / "a.cha"), None, None, "", mem_info)]
     monkeypatch.setattr(dispatch_module.concurrent.futures, "ProcessPoolExecutor", lambda *a, **k: FakeExecutor(results))
@@ -222,6 +238,8 @@ def test_skip_mp4_conversion_when_wav_exists(tmp_path, monkeypatch):
             raise AssertionError("pydub import should be skipped when wav exists")
         return original_import(name, *args, **kwargs)
 
+    _force_process_mode(monkeypatch)
+    monkeypatch.setattr(dispatch_module.pipeline_dispatch, "resolve_engine_specs", lambda *a, **k: [("fa", "wav2vec_fa")])
     monkeypatch.setattr(dispatch_module, "_get_worker_pipeline", lambda *a, **k: object())
     monkeypatch.setattr(dispatch_module, "_worker_task", lambda *a, **k: None)
     monkeypatch.setattr(dispatch_module, "user_cache_dir", lambda *a, **k: str(tmp_path / "cache"))
@@ -240,3 +258,33 @@ def test_skip_mp4_conversion_when_wav_exists(tmp_path, monkeypatch):
     ctx = _base_ctx(tmp_path, mem_guard=False)
     dispatch_module._dispatch("align", "eng", 1, ["cha"], ctx, str(in_dir), str(out_dir), None, None, dispatch_module.Console())
     # no pydub import => conversion skipped
+
+
+def test_pooled_mode_skips_memory_history(tmp_path, monkeypatch):
+    in_dir = tmp_path / "in"
+    out_dir = tmp_path / "out"
+    in_dir.mkdir()
+    out_dir.mkdir()
+    _write_cha(in_dir, "a.cha")
+    _write_cha(in_dir, "b.cha")
+
+    monkeypatch.setattr(dispatch_module.concurrent.futures, "ThreadPoolExecutor", lambda *a, **k: FakeExecutor([
+        (str(in_dir / "a.cha"), None, None, "", {"rss_peak": 123, "rss_end": 123, "rss_start": 1}),
+        (str(in_dir / "b.cha"), None, None, "", {"rss_peak": 456, "rss_end": 456, "rss_start": 1}),
+    ]))
+    monkeypatch.setattr(dispatch_module.concurrent.futures, "wait", _drain_wait)
+    monkeypatch.setattr(dispatch_module, "_run_pipeline_for_file", lambda *a, **k: None)
+    monkeypatch.setattr(dispatch_module, "apply_force_cpu", lambda: None)
+    monkeypatch.setattr(dispatch_module, "force_cpu_preferred", lambda: False)
+    monkeypatch.setattr(dispatch_module, "user_cache_dir", lambda *a, **k: str(tmp_path / "cache"))
+    monkeypatch.setattr(dispatch_module, "POOL_UNSAFE_ENGINES", set())
+    monkeypatch.setattr(dispatch_module, "POOL_SAFE_ENGINES", {"rev"})
+    monkeypatch.setattr(dispatch_module, "Cmd2Task", {"align": "fa"})
+    monkeypatch.setattr(dispatch_module.pipeline_dispatch, "resolve_engine_specs", lambda *a, **k: [("asr", "rev")])
+    monkeypatch.setattr(dispatch_module.pipeline_dispatch, "dispatch_pipeline", lambda *a, **k: object())
+
+    ctx = _base_ctx(tmp_path)
+    dispatch_module._dispatch("align", "eng", 1, ["cha"], ctx, str(in_dir), str(out_dir), None, None, dispatch_module.Console())
+
+    history_path = Path(tmp_path / "cache" / "memory_history.json")
+    assert not history_path.exists()

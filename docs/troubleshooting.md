@@ -21,6 +21,9 @@ Once you have done this, scroll down to the matching error type to learn more.
 
 ## Tips
 
+### Batch runs are slow or memory-heavy
+Batchalign automatically uses pooled model execution when multiple files are provided, reusing models to reduce memory spikes. If pooling is unsafe for a selected engine, Batchalign falls back to process-based workers automatically. You can adjust concurrency with `--workers`.
+
 ### ConnectTimeout
 
 ```python

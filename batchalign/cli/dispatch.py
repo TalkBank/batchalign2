@@ -12,6 +12,9 @@ import shutil
 import os
 import glob
 import queue
+import threading
+import contextlib
+import io
 
 from rich.console import Console
 from rich.markup import escape
@@ -36,6 +39,35 @@ baL = L.getLogger('batchalign')
 import psutil
 from platformdirs import user_cache_dir
 from batchalign.utils.device import apply_force_cpu, force_cpu_preferred
+from batchalign.pipelines import dispatch as pipeline_dispatch
+
+POOL_UNSAFE_ENGINES = {
+    "whisper",
+    "whisperx",
+    "whisper_oai",
+    "whisper_fa",
+    "wav2vec_fa",
+    "whisper_utr",
+    "stanza",
+    "stanza_utt",
+    "stanza_coref",
+    "pyannote",
+    "nemo_speaker",
+    "seamless_translate",
+    "opensmile_egemaps",
+    "opensmile_gemaps",
+    "opensmile_compare",
+    "opensmile_eGeMAPSv01b",
+}
+
+POOL_SAFE_ENGINES = {
+    "rev",
+    "rev_utr",
+    "evaluation",
+    "gtrans",
+    "replacement",
+    "ngram",
+}
 
 warnings.filterwarnings('ignore', category=UserWarning, message='TypedStorage is deprecated')
 
@@ -49,6 +81,144 @@ def _get_worker_pipeline(command, lang, num_speakers, **kwargs):
         _worker_pipeline = BatchalignPipeline.new(Cmd2Task[command],
                                                 lang=lang, num_speakers=num_speakers, **kwargs)
     return _worker_pipeline
+
+def _run_pipeline_for_file(command, pipeline, file, output, loader_info, writer_info, progress_queue=None, **kwargs):
+    def progress_callback(completed, total, tasks):
+        if not progress_queue:
+            return
+        try:
+            progress_queue.put((file, completed, total, tasks))
+        except Exception:
+            pass
+
+    # For now, we'll re-import what we need
+    from batchalign.formats.chat import CHATFile
+    local_kwargs = dict(kwargs)
+
+    # Morphosyntax specific loader/writer logic moved here for picklability
+    if command == "morphotag":
+        # Extract morphotag-specific arguments from kwargs
+        mwt = local_kwargs.pop("mwt", {})
+        retokenize = local_kwargs.pop("retokenize", False)
+        skipmultilang = local_kwargs.pop("skipmultilang", False)
+        override_cache = local_kwargs.pop("override_cache", False)
+
+        cf = CHATFile(path=os.path.abspath(file), special_mor_=True)
+        doc = cf.doc
+        if str(cf).count("%mor") > 0:
+            doc.ba_special_["special_mor_notation"] = True
+
+        # Prepare arguments for the pipeline
+        pipeline_kwargs = {
+            "retokenize": retokenize,
+            "skipmultilang": skipmultilang,
+            "mwt": mwt,
+            "override_cache": override_cache
+        }
+        # Add any remaining kwargs
+        pipeline_kwargs.update(local_kwargs)
+
+        # Process
+        doc = pipeline(doc, callback=progress_callback, **pipeline_kwargs)
+
+        # Write
+        CHATFile(doc=doc, special_mor_=doc.ba_special_.get("special_mor_notation", False)).write(output)
+
+    # Add other commands as needed, or use a more generic registry
+    elif command == "align":
+        cf = CHATFile(path=os.path.abspath(file))
+        doc = cf.doc
+        kw = {"pauses": local_kwargs.get("pauses", False)}
+        doc = pipeline(doc, callback=progress_callback, **kw)
+        CHATFile(doc=doc).write(output, write_wor=local_kwargs.get("wor", True))
+
+    elif command in ["transcribe", "transcribe_s"]:
+        from batchalign.document import CustomLine, CustomLineType
+        # For transcribe, the "loader" just passes the file path
+        doc = file
+
+        # Process through pipeline
+        doc = pipeline(doc, callback=progress_callback)
+
+        # Write output with ASR comment
+        asr = local_kwargs.get("asr", "rev")
+        with open(Path(__file__).parent.parent / "version", 'r') as df:
+            VERSION_NUMBER = df.readline().strip()
+        doc.content.insert(0, CustomLine(id="Comment", type=CustomLineType.INDEPENDENT,
+                                         content=f"Batchalign {VERSION_NUMBER}, ASR Engine {asr}. Unchecked output of ASR model."))
+        CHATFile(doc=doc).write(output
+                                .replace(".wav", ".cha")
+                                .replace(".WAV", ".cha")
+                                .replace(".mp4", ".cha")
+                                .replace(".MP4", ".cha")
+                                .replace(".mp3", ".cha")
+                                .replace(".MP3", ".cha"),
+                                write_wor=local_kwargs.get("wor", False))
+
+    elif command == "translate":
+        cf = CHATFile(path=os.path.abspath(file), special_mor_=True)
+        doc = cf.doc
+        doc = pipeline(doc, callback=progress_callback)
+        CHATFile(doc=doc).write(output)
+
+    elif command == "utseg":
+        doc = CHATFile(path=os.path.abspath(file)).doc
+        doc = pipeline(doc, callback=progress_callback)
+        CHATFile(doc=doc).write(output)
+
+    elif command == "coref":
+        cf = CHATFile(path=os.path.abspath(file))
+        doc = cf.doc
+        doc = pipeline(doc, callback=progress_callback)
+        CHATFile(doc=doc).write(output)
+
+    elif command == "benchmark":
+        # Find gold transcript
+        from pathlib import Path as P
+        p = P(file)
+        cha = p.with_suffix(".cha")
+        if not cha.exists():
+            raise FileNotFoundError(f"No gold .cha transcript found for benchmarking. audio: {p.name}, desired cha: {cha.name}, looked in: {str(cha)}")
+
+        gold_doc = CHATFile(path=str(cha), special_mor_=True).doc
+        doc = pipeline(file, callback=progress_callback, gold=gold_doc)
+
+        # Write benchmark results
+        import os as _os
+        _os.remove(P(output).with_suffix(".cha"))
+        with open(P(output).with_suffix(".wer.txt"), 'w') as df:
+            df.write(str(doc["wer"]))
+        with open(P(output).with_suffix(".diff"), 'w') as df:
+            df.write(str(doc["diff"]))
+        CHATFile(doc=doc["doc"]).write(str(P(output).with_suffix(".asr.cha")),
+                                       write_wor=local_kwargs.get("wor", False))
+
+    elif command == "opensmile":
+        from batchalign.document import Document
+        doc = Document.new(media_path=file, lang=local_kwargs.get("lang", kwargs.get("lang", "eng")))
+        results = pipeline(doc, callback=progress_callback, feature_set=local_kwargs.get("feature_set", "eGeMAPSv02"))
+
+        # Write opensmile results
+        if results.get('success', False):
+            output_csv = Path(output).with_suffix('.opensmile.csv')
+            features_df = results.get('features_df')
+            if features_df is not None:
+                features_df.to_csv(output_csv, header=['value'], index_label='feature')
+        else:
+            error_file = Path(output).with_suffix('.error.txt')
+            with open(error_file, 'w') as f:
+                f.write(f"OpenSMILE extraction failed: {results.get('error', 'Unknown error')}\n")
+
+    else:
+        loader, writer = loader_info, writer_info
+        if loader is None or writer is None:
+            raise ValueError(f"Command '{command}' requires loader and writer functions, but they are None. This may indicate an unimplemented command or configuration issue.")
+        doc = loader(os.path.abspath(file))
+        kw = {}
+        if isinstance(doc, tuple) and len(doc) > 1:
+            doc, kw = doc
+        doc = pipeline(doc, callback=progress_callback, **kw)
+        writer(doc, output)
 
 def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_info, progress_queue=None, verbose=0, **kwargs):
     """The task executed in each worker process."""
@@ -114,142 +284,8 @@ def _worker_task(file_info, command, lang, num_speakers, loader_info, writer_inf
 
     try:
         pipeline = _get_worker_pipeline(command, lang, num_speakers, **kwargs)
-
-        def progress_callback(completed, total, tasks):
-            if not progress_queue:
-                return
-            try:
-                progress_queue.put((file, completed, total, tasks))
-            except Exception:
-                pass
-
-        # For now, we'll re-import what we need
-        from batchalign.formats.chat import CHATFile
-
-        # Morphosyntax specific loader/writer logic moved here for picklability
-        if command == "morphotag":
-            # Extract morphotag-specific arguments from kwargs
-            mwt = kwargs.pop("mwt", {})
-            retokenize = kwargs.pop("retokenize", False)
-            skipmultilang = kwargs.pop("skipmultilang", False)
-            override_cache = kwargs.pop("override_cache", False)
-
-            cf = CHATFile(path=os.path.abspath(file), special_mor_=True)
-            doc = cf.doc
-            if str(cf).count("%mor") > 0:
-                doc.ba_special_["special_mor_notation"] = True
-
-            # Prepare arguments for the pipeline
-            pipeline_kwargs = {
-                "retokenize": retokenize,
-                "skipmultilang": skipmultilang,
-                "mwt": mwt,
-                "override_cache": override_cache
-            }
-            # Add any remaining kwargs
-            pipeline_kwargs.update(kwargs)
-
-            # Process
-            doc = pipeline(doc, callback=progress_callback, **pipeline_kwargs)
-
-            # Write
-            CHATFile(doc=doc, special_mor_=doc.ba_special_.get("special_mor_notation", False)).write(output)
-
-        # Add other commands as needed, or use a more generic registry
-        elif command == "align":
-            cf = CHATFile(path=os.path.abspath(file))
-            doc = cf.doc
-            kw = {"pauses": kwargs.get("pauses", False)}
-            doc = pipeline(doc, callback=progress_callback, **kw)
-            CHATFile(doc=doc).write(output, write_wor=kwargs.get("wor", True))
-
-        elif command in ["transcribe", "transcribe_s"]:
-            from batchalign.document import CustomLine, CustomLineType
-            # For transcribe, the "loader" just passes the file path
-            doc = file
-
-            # Process through pipeline
-            doc = pipeline(doc, callback=progress_callback)
-
-            # Write output with ASR comment
-            asr = kwargs.get("asr", "rev")
-            with open(Path(__file__).parent.parent / "version", 'r') as df:
-                VERSION_NUMBER = df.readline().strip()
-            doc.content.insert(0, CustomLine(id="Comment", type=CustomLineType.INDEPENDENT,
-                                             content=f"Batchalign {VERSION_NUMBER}, ASR Engine {asr}. Unchecked output of ASR model."))
-            CHATFile(doc=doc).write(output
-                                    .replace(".wav", ".cha")
-                                    .replace(".WAV", ".cha")
-                                    .replace(".mp4", ".cha")
-                                    .replace(".MP4", ".cha")
-                                    .replace(".mp3", ".cha")
-                                    .replace(".MP3", ".cha"),
-                                    write_wor=kwargs.get("wor", False))
-
-        elif command == "translate":
-            cf = CHATFile(path=os.path.abspath(file), special_mor_=True)
-            doc = cf.doc
-            doc = pipeline(doc, callback=progress_callback)
-            CHATFile(doc=doc).write(output)
-
-        elif command == "utseg":
-            doc = CHATFile(path=os.path.abspath(file)).doc
-            doc = pipeline(doc, callback=progress_callback)
-            CHATFile(doc=doc).write(output)
-
-        elif command == "coref":
-            cf = CHATFile(path=os.path.abspath(file))
-            doc = cf.doc
-            doc = pipeline(doc, callback=progress_callback)
-            CHATFile(doc=doc).write(output)
-
-        elif command == "benchmark":
-            # Find gold transcript
-            from pathlib import Path as P
-            p = P(file)
-            cha = p.with_suffix(".cha")
-            if not cha.exists():
-                raise FileNotFoundError(f"No gold .cha transcript found for benchmarking. audio: {p.name}, desired cha: {cha.name}, looked in: {str(cha)}")
-
-            gold_doc = CHATFile(path=str(cha), special_mor_=True).doc
-            doc = pipeline(file, callback=progress_callback, gold=gold_doc)
-
-            # Write benchmark results
-            import os
-            os.remove(P(output).with_suffix(".cha"))
-            with open(P(output).with_suffix(".wer.txt"), 'w') as df:
-                df.write(str(doc["wer"]))
-            with open(P(output).with_suffix(".diff"), 'w') as df:
-                df.write(str(doc["diff"]))
-            CHATFile(doc=doc["doc"]).write(str(P(output).with_suffix(".asr.cha")),
-                                           write_wor=kwargs.get("wor", False))
-
-        elif command == "opensmile":
-            from batchalign.document import Document
-            doc = Document.new(media_path=file, lang=lang)
-            results = pipeline(doc, callback=progress_callback, feature_set=kwargs.get("feature_set", "eGeMAPSv02"))
-
-            # Write opensmile results
-            if results.get('success', False):
-                output_csv = Path(output).with_suffix('.opensmile.csv')
-                features_df = results.get('features_df')
-                if features_df is not None:
-                    features_df.to_csv(output_csv, header=['value'], index_label='feature')
-            else:
-                error_file = Path(output).with_suffix('.error.txt')
-                with open(error_file, 'w') as f:
-                    f.write(f"OpenSMILE extraction failed: {results.get('error', 'Unknown error')}\n")
-
-        else:
-            loader, writer = loader_info, writer_info
-            if loader is None or writer is None:
-                raise ValueError(f"Command '{command}' requires loader and writer functions, but they are None. This may indicate an unimplemented command or configuration issue.")
-            doc = loader(os.path.abspath(file))
-            kw = {}
-            if isinstance(doc, tuple) and len(doc) > 1:
-                doc, kw = doc
-            doc = pipeline(doc, callback=progress_callback, **kw)
-            writer(doc, output)
+        _run_pipeline_for_file(command, pipeline, file, output, loader_info, writer_info,
+                               progress_queue=progress_queue, **kwargs)
 
         # Flush and read captured output if we were capturing
         if should_capture:
@@ -410,6 +446,9 @@ def _dispatch(command, lang, num_speakers,
     adaptive_warmup = max(1, int(ctx.obj.get("adaptive_warmup", 2)))
     force_cpu_flag = ctx.obj.get("force_cpu", False)
     shared_models_requested = ctx.obj.get("shared_models", False)
+    pool_mode_enabled = False
+    pool_mode_reason = None
+    engine_specs = None
     memlog_path = None
     memlog_fp = None
     if memlog_enabled:
@@ -448,13 +487,53 @@ def _dispatch(command, lang, num_speakers,
         else:
             mp_ctx = multiprocessing.get_context("fork")
             shared_models_active = True
-    if shared_models_active:
-        C.print(f"Using [bold]{num_workers}[/bold] worker processes (shared models).\n")
+    # Determine whether pooled (threaded) execution is safe for this run.
+    if len(files) > 1:
+        try:
+            engine_specs = pipeline_dispatch.resolve_engine_specs(Cmd2Task[command], lang, num_speakers, **kwargs)
+        except Exception as e:
+            pool_mode_reason = f"Unable to resolve engines ({e})."
+        else:
+            engine_names = [engine for _, engine in engine_specs]
+            unsafe = [engine for engine in engine_names if engine in POOL_UNSAFE_ENGINES]
+            unknown = [engine for engine in engine_names if engine not in POOL_UNSAFE_ENGINES and engine not in POOL_SAFE_ENGINES]
+            if unsafe:
+                pool_mode_reason = "Engines not pool-safe: " + ", ".join(sorted(set(unsafe)))
+            elif unknown:
+                pool_mode_reason = "Unknown pool safety: " + ", ".join(sorted(set(unknown)))
+            else:
+                pool_mode_enabled = True
     else:
-        C.print(f"Using [bold]{num_workers}[/bold] worker processes.\n")
+        pool_mode_reason = None
 
-    manager = multiprocessing.Manager() if files else None
-    progress_queue = manager.Queue() if manager else None
+    if pool_mode_enabled and shared_models_requested:
+        C.print("[bold yellow]Shared models ignored[/bold yellow]: pooled mode uses threads.")
+        shared_models_active = False
+        mp_ctx = None
+
+    if pool_mode_enabled:
+        C.print(f"Using [bold]{num_workers}[/bold] worker threads (pooled models).\n")
+    elif pool_mode_reason:
+        if ctx.obj.get("verbose", 0) >= 1:
+            C.print(f"[bold yellow]Pooled mode disabled:[/bold yellow] {pool_mode_reason} Falling back to worker processes.")
+        else:
+            C.print("[bold yellow]Pooled mode disabled for safety;[/bold yellow] using worker processes.")
+        if shared_models_active:
+            C.print(f"Using [bold]{num_workers}[/bold] worker processes (shared models).\n")
+        else:
+            C.print(f"Using [bold]{num_workers}[/bold] worker processes.\n")
+    else:
+        if shared_models_active:
+            C.print(f"Using [bold]{num_workers}[/bold] worker processes (shared models).\n")
+        else:
+            C.print(f"Using [bold]{num_workers}[/bold] worker processes.\n")
+
+    if pool_mode_enabled:
+        manager = None
+        progress_queue = queue.Queue()
+    else:
+        manager = multiprocessing.Manager() if files else None
+        progress_queue = manager.Queue() if manager else None
 
     def render_stage(stage_tasks):
         if not stage_tasks:
@@ -619,24 +698,26 @@ def _dispatch(command, lang, num_speakers,
             "available_bytes": available,
             "workers": num_workers,
             "shared_models": shared_models_active,
+            "pooled": pool_mode_enabled,
         }
         record.update(data)
         memlog_fp.write(json.dumps(record) + "\n")
         memlog_fp.flush()
 
-    _load_memory_history()
-    if history_peaks:
-        history_peaks.sort()
-        history_peak_est = history_peaks[len(history_peaks) // 2]
-    if history_sizes and history_peaks:
-        ratio_pairs = [peak / size for size, peak in zip(history_sizes, history_peaks) if size and peak]
-        if ratio_pairs:
-            ratio_pairs.sort()
-            history_ratio_est = ratio_pairs[len(ratio_pairs) // 2]
+    if not pool_mode_enabled:
+        _load_memory_history()
+        if history_peaks:
+            history_peaks.sort()
+            history_peak_est = history_peaks[len(history_peaks) // 2]
+        if history_sizes and history_peaks:
+            ratio_pairs = [peak / size for size, peak in zip(history_sizes, history_peaks) if size and peak]
+            if ratio_pairs:
+                ratio_pairs.sort()
+                history_ratio_est = ratio_pairs[len(ratio_pairs) // 2]
 
     try:
         with prog as prog:
-            if history_peak_est:
+            if not pool_mode_enabled and history_peak_est:
                 prog.console.print(
                     f"[dim]Adaptive warm start:[/dim] {_format_bytes(history_peak_est)} median peak from history"
                 )
@@ -662,164 +743,255 @@ def _dispatch(command, lang, num_speakers,
                         continue
                     task_total = max(int(total) if total else task_totals.get(file, 1), 1)
                     task_totals[file] = task_total
-                    total_mem, available_mem = _system_memory()
-                    reserve = _memory_reserve(total_mem)
-                    low_mem = False
-                    if reserve is not None and available_mem is not None:
-                        low_mem = available_mem < reserve
+                    if pool_mode_enabled:
+                        mem_label = "running"
+                    else:
+                        total_mem, available_mem = _system_memory()
+                        reserve = _memory_reserve(total_mem)
+                        low_mem = False
+                        if reserve is not None and available_mem is not None:
+                            low_mem = available_mem < reserve
+                        mem_label = _mem_label("running", available_mem, low_mem)
                     prog.update(tasks[file],
                                 total=task_total,
                                 completed=min(int(completed), task_total),
                                 processor=render_stage(stage_tasks),
-                                mem=_mem_label("running", available_mem, low_mem))
+                                mem=mem_label)
 
-            executor_opts = {}
-            if mp_ctx is not None:
-                executor_opts["mp_context"] = mp_ctx
-            if mp_ctx is not None and command in ["align", "morphotag"]:
-                try:
-                    _get_worker_pipeline(command, lang, num_speakers, **kwargs)
-                except Exception:
-                    pass
+            if pool_mode_enabled:
+                from batchalign.pipelines import BatchalignPipeline
+                pipeline = BatchalignPipeline.new(Cmd2Task[command], lang=lang, num_speakers=num_speakers, **kwargs)
+                shared_lock = threading.Lock()
 
-            with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers, **executor_opts) as executor:
-                worker_func = partial(_worker_task,
-                                      command=command,
-                                      lang=lang,
-                                      num_speakers=num_speakers,
-                                      loader_info=loader,
-                                      writer_info=writer,
-                                      progress_queue=progress_queue,
-                                      verbose=ctx.obj["verbose"],
-                                      **kwargs)
-
-                file_iter = iter(zip(files, outputs))
-                future_to_file = {}
-
-                def submit_one(file_path, output_path):
-                    future = executor.submit(worker_func, (file_path, output_path))
-                    future_to_file[future] = file_path
-                    est_bytes = _estimate_worker_bytes(file_sizes.get(file_path, 0))
-                    total_mem, available_mem = _system_memory()
-                    reserve = _memory_reserve(total_mem)
-                    low_mem = False
-                    if reserve is not None and available_mem is not None:
-                        low_mem = available_mem < reserve
-                    _log_event("submit_worker",
-                               file=str(file_path),
-                               est_bytes=est_bytes,
-                               available_bytes=available_mem)
-                    prog.update(
-                        tasks[file_path],
-                        processor="Processing...",
-                        mem=_mem_label(f"est {_format_bytes(est_bytes)}", available_mem, low_mem),
-                    )
-
-                def schedule_available():
-                    nonlocal last_low_mem_warn, adaptive_cap_reported
-                    while len(future_to_file) < num_workers:
-                        if adaptive_workers_enabled:
-                            cap = _adaptive_cap()
-                            if cap != adaptive_cap_reported:
-                                prog.console.print(f"[dim]Adaptive cap:[/dim] {cap} worker{'s' if cap != 1 else ''}")
-                                adaptive_cap_reported = cap
-                            if len(future_to_file) >= cap:
-                                break
+                def _pool_worker(file_path, output_path):
+                    rss_start = None
+                    rss_end = None
+                    rss_peak = None
+                    try:
+                        rss_start = psutil.Process(os.getpid()).memory_info().rss
+                    except Exception:
+                        rss_start = None
+                    try:
+                        with shared_lock:
+                            _run_pipeline_for_file(command, pipeline, file_path, output_path, loader, writer,
+                                                   progress_queue=progress_queue, lang=lang, **kwargs)
                         try:
-                            next_file, next_output = next(file_iter)
-                        except StopIteration:
-                            break
-                        est_bytes = _estimate_worker_bytes(file_sizes.get(next_file, 0))
-                        throttle, total, available = _should_throttle(est_bytes)
-                        if throttle and future_to_file:
-                            now = time.time()
-                            if now - last_low_mem_warn > 10:
-                                reserve = _memory_reserve(total)
+                            rss_end = psutil.Process(os.getpid()).memory_info().rss
+                        except Exception:
+                            rss_end = None
+                        mem_info = {
+                            "pid": os.getpid(),
+                            "rss_start": rss_start,
+                            "rss_end": rss_end,
+                            "rss_peak": rss_end,
+                        }
+                        return file_path, None, None, "", mem_info
+                    except Exception as exc:
+                        try:
+                            rss_end = psutil.Process(os.getpid()).memory_info().rss
+                        except Exception:
+                            rss_end = None
+                        mem_info = {
+                            "pid": os.getpid(),
+                            "rss_start": rss_start,
+                            "rss_end": rss_end,
+                            "rss_peak": rss_end,
+                        }
+                        return file_path, traceback.format_exc(), exc, "", mem_info
+
+                with concurrent.futures.ThreadPoolExecutor(max_workers=num_workers) as executor:
+                    future_to_file = {}
+                    for file_path, output_path in zip(files, outputs):
+                        future = executor.submit(_pool_worker, file_path, output_path)
+                        future_to_file[future] = file_path
+                        _log_event("submit_worker", file=str(file_path))
+                        prog.update(tasks[file_path], processor="Processing...", mem="running")
+
+                    pending = set(future_to_file.keys())
+                    while pending:
+                        done, pending = concurrent.futures.wait(
+                            pending,
+                            timeout=0.1,
+                            return_when=concurrent.futures.FIRST_COMPLETED,
+                        )
+                        drain_progress_queue()
+
+                        for future in done:
+                            file = future_to_file[future]
+                            future_to_file.pop(future, None)
+                            try:
+                                res_file, trcbk, e, captured, mem_info = future.result()
+                                final_total = max(task_totals.get(file, 1), 1)
+                                if e:
+                                    prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold red]FAIL[/bold red]")
+                                    errors.append((res_file, trcbk, e, captured))
+                                else:
+                                    prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold green]DONE[/bold green]")
+                                if mem_info:
+                                    mem_records[file] = mem_info
+                                    peak = mem_info.get("rss_peak") or mem_info.get("rss_end")
+                                    if peak:
+                                        prog.update(tasks[file], mem=_format_bytes(peak))
+                                    _log_event("worker_complete",
+                                               file=str(file),
+                                               rss_peak=mem_info.get("rss_peak"),
+                                               rss_end=mem_info.get("rss_end"),
+                                               rss_start=mem_info.get("rss_start"))
+                            except Exception as e:
+                                final_total = max(task_totals.get(file, 1), 1)
+                                prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold red]FAIL[/bold red]")
+                                errors.append((file, traceback.format_exc(), e, ""))
+
+                        drain_progress_queue()
+            else:
+                executor_opts = {}
+                if mp_ctx is not None:
+                    executor_opts["mp_context"] = mp_ctx
+                if mp_ctx is not None and command in ["align", "morphotag"]:
+                    try:
+                        _get_worker_pipeline(command, lang, num_speakers, **kwargs)
+                    except Exception:
+                        pass
+
+                with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers, **executor_opts) as executor:
+                    worker_func = partial(_worker_task,
+                                          command=command,
+                                          lang=lang,
+                                          num_speakers=num_speakers,
+                                          loader_info=loader,
+                                          writer_info=writer,
+                                          progress_queue=progress_queue,
+                                          verbose=ctx.obj["verbose"],
+                                          **kwargs)
+
+                    file_iter = iter(zip(files, outputs))
+                    future_to_file = {}
+
+                    def submit_one(file_path, output_path):
+                        future = executor.submit(worker_func, (file_path, output_path))
+                        future_to_file[future] = file_path
+                        est_bytes = _estimate_worker_bytes(file_sizes.get(file_path, 0))
+                        total_mem, available_mem = _system_memory()
+                        reserve = _memory_reserve(total_mem)
+                        low_mem = False
+                        if reserve is not None and available_mem is not None:
+                            low_mem = available_mem < reserve
+                        _log_event("submit_worker",
+                                   file=str(file_path),
+                                   est_bytes=est_bytes,
+                                   available_bytes=available_mem)
+                        prog.update(
+                            tasks[file_path],
+                            processor="Processing...",
+                            mem=_mem_label(f"est {_format_bytes(est_bytes)}", available_mem, low_mem),
+                        )
+
+                    def schedule_available():
+                        nonlocal last_low_mem_warn, adaptive_cap_reported
+                        while len(future_to_file) < num_workers:
+                            if adaptive_workers_enabled:
+                                cap = _adaptive_cap()
+                                if cap != adaptive_cap_reported:
+                                    prog.console.print(f"[dim]Adaptive cap:[/dim] {cap} worker{'s' if cap != 1 else ''}")
+                                    adaptive_cap_reported = cap
+                                if len(future_to_file) >= cap:
+                                    break
+                            try:
+                                next_file, next_output = next(file_iter)
+                            except StopIteration:
+                                break
+                            est_bytes = _estimate_worker_bytes(file_sizes.get(next_file, 0))
+                            throttle, total, available = _should_throttle(est_bytes)
+                            if throttle and future_to_file:
+                                now = time.time()
+                                if now - last_low_mem_warn > 10:
+                                    reserve = _memory_reserve(total)
+                                    prog.console.print(
+                                        f"[bold yellow]Low memory[/bold yellow]: "
+                                        f"{_format_bytes(available)} free, "
+                                        f"{_format_bytes(reserve)} reserve. "
+                                        f"Throttling new workers."
+                                    )
+                                    last_low_mem_warn = now
+                                _log_event("throttle",
+                                           file=str(next_file),
+                                           est_bytes=est_bytes,
+                                           available_bytes=available,
+                                           reserve_bytes=reserve)
+                                break
+                            if throttle and not future_to_file:
                                 prog.console.print(
                                     f"[bold yellow]Low memory[/bold yellow]: "
-                                    f"{_format_bytes(available)} free, "
-                                    f"{_format_bytes(reserve)} reserve. "
-                                    f"Throttling new workers."
+                                    f"{_format_bytes(available)} free. "
+                                    "Continuing with a single worker."
                                 )
-                                last_low_mem_warn = now
-                            _log_event("throttle",
-                                       file=str(next_file),
-                                       est_bytes=est_bytes,
-                                       available_bytes=available,
-                                       reserve_bytes=reserve)
-                            break
-                        if throttle and not future_to_file:
-                            prog.console.print(
-                                f"[bold yellow]Low memory[/bold yellow]: "
-                                f"{_format_bytes(available)} free. "
-                                "Continuing with a single worker."
-                            )
-                            _log_event("low_mem_single_worker",
-                                       file=str(next_file),
-                                       est_bytes=est_bytes,
-                                       available_bytes=available)
-                            if mem_guard_enabled:
-                                prog.console.print(
-                                    "[bold red]Memory guard[/bold red]: "
-                                    "aborting to avoid system instability."
-                                )
-                                raise RuntimeError("Memory guard abort: insufficient available memory for new worker.")
-                        submit_one(next_file, next_output)
-
-                schedule_available()
-
-                pending = set(future_to_file.keys())
-                while pending:
-                    done, pending = concurrent.futures.wait(
-                        pending,
-                        timeout=0.1,
-                        return_when=concurrent.futures.FIRST_COMPLETED,
-                    )
-                    drain_progress_queue()
-
-                    for future in done:
-                        file = future_to_file[future]
-                        future_to_file.pop(future, None)
-                        try:
-                            res_file, trcbk, e, captured, mem_info = future.result()
-                            final_total = max(task_totals.get(file, 1), 1)
-                            if e:
-                                prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold red]FAIL[/bold red]")
-                                errors.append((res_file, trcbk, e, captured))
-                            else:
-                                prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold green]DONE[/bold green]")
-                                if ctx.obj["verbose"] >= 1 and captured.strip():
-                                    prog.console.print(f"[bold blue]INFO[/bold blue] on file [italic]{Path(file).name}[/italic]:\n{escape(captured.strip())}\n")
-                            if mem_info:
-                                mem_records[file] = mem_info
-                                peak = mem_info.get("rss_peak") or mem_info.get("rss_end")
-                                if peak:
-                                    mem_samples.append((file_sizes.get(file, 0), peak))
-                                    total_mem, available_mem = _system_memory()
-                                    reserve = _memory_reserve(total_mem)
-                                    low_mem = False
-                                    if reserve is not None and available_mem is not None:
-                                        low_mem = available_mem < reserve
-                                    prog.update(tasks[file], mem=_mem_label(_format_bytes(peak), available_mem, low_mem))
-                                _log_event("worker_complete",
-                                           file=str(file),
-                                           rss_peak=mem_info.get("rss_peak"),
-                                           rss_end=mem_info.get("rss_end"),
-                                           rss_start=mem_info.get("rss_start"))
-                        except Exception as e:
-                            final_total = max(task_totals.get(file, 1), 1)
-                            prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold red]FAIL[/bold red]")
-                            errors.append((file, traceback.format_exc(), e, ""))
+                                _log_event("low_mem_single_worker",
+                                           file=str(next_file),
+                                           est_bytes=est_bytes,
+                                           available_bytes=available)
+                                if mem_guard_enabled:
+                                    prog.console.print(
+                                        "[bold red]Memory guard[/bold red]: "
+                                        "aborting to avoid system instability."
+                                    )
+                                    raise RuntimeError("Memory guard abort: insufficient available memory for new worker.")
+                            submit_one(next_file, next_output)
 
                     schedule_available()
+
                     pending = set(future_to_file.keys())
-                drain_progress_queue()
+                    while pending:
+                        done, pending = concurrent.futures.wait(
+                            pending,
+                            timeout=0.1,
+                            return_when=concurrent.futures.FIRST_COMPLETED,
+                        )
+                        drain_progress_queue()
+
+                        for future in done:
+                            file = future_to_file[future]
+                            future_to_file.pop(future, None)
+                            try:
+                                res_file, trcbk, e, captured, mem_info = future.result()
+                                final_total = max(task_totals.get(file, 1), 1)
+                                if e:
+                                    prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold red]FAIL[/bold red]")
+                                    errors.append((res_file, trcbk, e, captured))
+                                else:
+                                    prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold green]DONE[/bold green]")
+                                    if ctx.obj["verbose"] >= 1 and captured.strip():
+                                        prog.console.print(f"[bold blue]INFO[/bold blue] on file [italic]{Path(file).name}[/italic]:\n{escape(captured.strip())}\n")
+                                if mem_info:
+                                    mem_records[file] = mem_info
+                                    peak = mem_info.get("rss_peak") or mem_info.get("rss_end")
+                                    if peak:
+                                        mem_samples.append((file_sizes.get(file, 0), peak))
+                                        total_mem, available_mem = _system_memory()
+                                        reserve = _memory_reserve(total_mem)
+                                        low_mem = False
+                                        if reserve is not None and available_mem is not None:
+                                            low_mem = available_mem < reserve
+                                        prog.update(tasks[file], mem=_mem_label(_format_bytes(peak), available_mem, low_mem))
+                                    _log_event("worker_complete",
+                                               file=str(file),
+                                               rss_peak=mem_info.get("rss_peak"),
+                                               rss_end=mem_info.get("rss_end"),
+                                               rss_start=mem_info.get("rss_start"))
+                            except Exception as e:
+                                final_total = max(task_totals.get(file, 1), 1)
+                                prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold red]FAIL[/bold red]")
+                                errors.append((file, traceback.format_exc(), e, ""))
+
+                        schedule_available()
+                        pending = set(future_to_file.keys())
+                    drain_progress_queue()
     finally:
         if manager:
             manager.shutdown()
         if memlog_fp is not None:
             memlog_fp.close()
-        _persist_memory_history()
+        if not pool_mode_enabled:
+            _persist_memory_history()
 
     if len(errors) > 0:
         C.print()
