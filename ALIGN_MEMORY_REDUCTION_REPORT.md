@@ -108,3 +108,6 @@ Date: 2026-01-31
 
 ### Recommendation (single server, now)
 Stay with built-in multiprocessing and adaptive caps/mem-guard. It replaces the manual multi-process hack with coordinated scheduling and safety controls without requiring a complex refactor.
+
+### New: persist memory history
+We now cache the median worker RSS peaks and file-size ratios per command so adaptive caps can start with a better estimate before any workers finish. This improves the initial cap decision and reduces early over-commit on cold starts.

@@ -34,6 +34,7 @@ import traceback
 import logging as L
 baL = L.getLogger('batchalign')
 import psutil
+from platformdirs import user_cache_dir
 
 warnings.filterwarnings('ignore', category=UserWarning, message='TypedStorage is deprecated')
 
@@ -416,6 +417,8 @@ def _dispatch(command, lang, num_speakers,
         except Exception as e:
             memlog_enabled = False
             console.print(f"[bold yellow]Warning:[/bold yellow] Failed to open memlog: {e}")
+    memory_history_path = Path(user_cache_dir("batchalign", "batchalign")) / "memory_history.json"
+    memory_history_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Pre-download stanza resources if needed to avoid interleaved downloads in workers
     if command in ["morphotag", "utseg", "coref"]:
@@ -453,6 +456,66 @@ def _dispatch(command, lang, num_speakers,
     mem_samples = []
     last_low_mem_warn = 0.0
     adaptive_cap_reported = None
+    history_sizes = []
+    history_peaks = []
+    history_peak_est = None
+    history_ratio_est = None
+
+    def _load_memory_history():
+        if not memory_history_path.exists():
+            return
+        try:
+            payload = json.loads(memory_history_path.read_text())
+        except Exception:
+            return
+        if payload.get("version") != 1:
+            return
+        command_data = payload.get("commands", {}).get(command)
+        if not command_data:
+            return
+        peaks = command_data.get("peaks", [])
+        sizes = command_data.get("sizes", [])
+        if peaks:
+            peaks = sorted(int(p) for p in peaks if p)
+            if peaks:
+                history_peaks.extend(peaks)
+        if sizes:
+            sizes = [int(s) for s in sizes if s]
+            if sizes:
+                history_sizes.extend(sizes)
+
+    def _persist_memory_history():
+        if not mem_records:
+            return
+        records = []
+        for path, info in mem_records.items():
+            peak = info.get("rss_peak") or info.get("rss_end")
+            size = file_sizes.get(path, 0)
+            if peak and size:
+                records.append((size, peak))
+        if not records:
+            return
+        try:
+            payload = {}
+            if memory_history_path.exists():
+                payload = json.loads(memory_history_path.read_text())
+        except Exception:
+            payload = {}
+        if payload.get("version") != 1:
+            payload = {"version": 1, "commands": {}}
+        commands = payload.setdefault("commands", {})
+        data = commands.setdefault(command, {"peaks": [], "sizes": []})
+        peaks = data.setdefault("peaks", [])
+        sizes = data.setdefault("sizes", [])
+        for size, peak in records:
+            peaks.append(int(peak))
+            sizes.append(int(size))
+        peaks[:] = peaks[-100:]
+        sizes[:] = sizes[-100:]
+        try:
+            memory_history_path.write_text(json.dumps(payload))
+        except Exception:
+            pass
 
     def _format_bytes(count, precision=2):
         if count is None:
@@ -488,15 +551,17 @@ def _dispatch(command, lang, num_speakers,
         return max(int(total * 0.10), 2 * 1024 * 1024 * 1024)
 
     def _estimate_worker_bytes(file_size):
-        if not mem_samples:
-            return 512 * 1024 * 1024
         ratios = [mem / size for size, mem in mem_samples if size and mem]
-        if not ratios:
-            return 512 * 1024 * 1024
-        ratios.sort()
-        median_ratio = ratios[len(ratios) // 2]
-        est = int(median_ratio * file_size)
-        return max(512 * 1024 * 1024, min(est, 6 * 1024 * 1024 * 1024))
+        if not ratios and history_ratio_est:
+            ratios = [history_ratio_est]
+        if ratios:
+            ratios.sort()
+            median_ratio = ratios[len(ratios) // 2]
+            est = int(median_ratio * file_size)
+            return max(512 * 1024 * 1024, min(est, 6 * 1024 * 1024 * 1024))
+        if history_peak_est:
+            return max(512 * 1024 * 1024, min(int(history_peak_est), 6 * 1024 * 1024 * 1024))
+        return 512 * 1024 * 1024
 
     def _should_throttle(est_bytes):
         total, available = _system_memory()
@@ -512,9 +577,9 @@ def _dispatch(command, lang, num_speakers,
         reserve = _memory_reserve(total)
         if reserve is None or available is None:
             return num_workers
-        if not mem_samples:
-            return min(num_workers, adaptive_warmup)
         peaks = sorted(mem for _, mem in mem_samples if mem)
+        if not peaks and history_peak_est:
+            peaks = [history_peak_est]
         if not peaks:
             return min(num_workers, adaptive_warmup)
         peak_est = peaks[len(peaks) // 2] * adaptive_safety_factor
@@ -539,8 +604,22 @@ def _dispatch(command, lang, num_speakers,
         memlog_fp.write(json.dumps(record) + "\n")
         memlog_fp.flush()
 
+    _load_memory_history()
+    if history_peaks:
+        history_peaks.sort()
+        history_peak_est = history_peaks[len(history_peaks) // 2]
+    if history_sizes and history_peaks:
+        ratio_pairs = [peak / size for size, peak in zip(history_sizes, history_peaks) if size and peak]
+        if ratio_pairs:
+            ratio_pairs.sort()
+            history_ratio_est = ratio_pairs[len(ratio_pairs) // 2]
+
     try:
         with prog as prog:
+            if history_peak_est:
+                prog.console.print(
+                    f"[dim]Adaptive warm start:[/dim] {_format_bytes(history_peak_est)} median peak from history"
+                )
             tasks = {}
             task_totals = {}
 
@@ -711,6 +790,7 @@ def _dispatch(command, lang, num_speakers,
             manager.shutdown()
         if memlog_fp is not None:
             memlog_fp.close()
+        _persist_memory_history()
 
     if len(errors) > 0:
         C.print()
