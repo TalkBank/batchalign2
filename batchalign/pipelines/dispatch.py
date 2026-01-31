@@ -9,7 +9,7 @@ from batchalign import (WhisperEngine, WhisperFAEngine, StanzaEngine, RevEngine,
                         StanzaUtteranceEngine, CorefEngine, Wave2VecFAEngine, SeamlessTranslationModel,
                         GoogleTranslateEngine, OAIWhisperEngine, PyannoteEngine)
 from batchalign import BatchalignPipeline
-from batchalign.models import resolve
+from batchalign.models.resolve import resolve
 
 from batchalign.utils.config import config_read
 from batchalign.errors import *
