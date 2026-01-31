@@ -1,4 +1,3 @@
-import stanza
 from batchalign.utils.dp import PayloadTarget, ReferenceTarget, Match, align
 from warnings import warn
 from batchalign.document import *
@@ -14,6 +13,7 @@ class CorefEngine(BatchalignEngine):
     tasks = [ Task.COREF ]
 
     def process(self, doc, **kwargs):
+        import stanza
         if "eng" not in doc.langs:
             warn("Coreference resolution is only supported for English documents.")
             return 

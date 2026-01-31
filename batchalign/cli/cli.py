@@ -92,6 +92,9 @@ def batchalign(ctx, verbose, workers):
 
 batchalign.add_command(train, "models")
 
+from batchalign.cli.cache import cache
+batchalign.add_command(cache, "cache")
+
 #################### ALIGN ################################
 
 @batchalign.command()
@@ -230,6 +233,8 @@ def translate(ctx, in_dir, out_dir, **kwargs):
               type=click.Path(exists=True,
                               file_okay=True, dir_okay=False),
               help="Comma seperated manual lexicon override")
+@click.option("--override-cache/--use-cache",
+              default=False, help="Bypass cache and recompute all utterances.")
 @click.pass_context
 def morphotag(ctx, in_dir, out_dir, **kwargs):
     """Perform morphosyntactic analysis on transcripts."""
