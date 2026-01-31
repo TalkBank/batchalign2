@@ -33,7 +33,11 @@ class WhisperFAModel(object):
         # Monkey patch
         WhisperForConditionalGeneration._extract_token_timestamps = ett
 
-        device = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
+        from batchalign.utils.device import force_cpu_preferred
+        if force_cpu_preferred():
+            device = torch.device('cpu')
+        else:
+            device = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
 
         L.debug("Initializing whisper FA model...")
         self.__model = WhisperForConditionalGeneration.from_pretrained(model, attn_implementation="eager").to(device)
@@ -133,4 +137,3 @@ class WhisperFAModel(object):
         L.debug("Whisper FA done.")
         # we now return the ruslts for later processing
         return timestamped_tokens
-

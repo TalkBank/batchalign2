@@ -29,7 +29,11 @@ class Wave2VecFAModel(object):
         import torch
         import torchaudio
         bundle = torchaudio.pipelines.MMS_FA
-        device = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
+        from batchalign.utils.device import force_cpu_preferred
+        if force_cpu_preferred():
+            device = torch.device('cpu')
+        else:
+            device = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
 
         L.debug("Initializing Wave2vec FA model")
         self.model = bundle.get_model().to(device)

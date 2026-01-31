@@ -3,7 +3,7 @@ dispatch.py
 Tabulate default packages and options.
 """
 
-from batchalign.models import resolve
+from batchalign.models.resolve import resolve
 
 from batchalign.utils.config import config_read
 from batchalign.errors import *

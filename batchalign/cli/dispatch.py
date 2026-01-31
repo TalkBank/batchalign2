@@ -35,6 +35,7 @@ import logging as L
 baL = L.getLogger('batchalign')
 import psutil
 from platformdirs import user_cache_dir
+from batchalign.utils.device import apply_force_cpu, force_cpu_preferred
 
 warnings.filterwarnings('ignore', category=UserWarning, message='TypedStorage is deprecated')
 
@@ -407,6 +408,8 @@ def _dispatch(command, lang, num_speakers,
     adaptive_workers_enabled = ctx.obj.get("adaptive_workers", True)
     adaptive_safety_factor = ctx.obj.get("adaptive_safety_factor", 1.35)
     adaptive_warmup = max(1, int(ctx.obj.get("adaptive_warmup", 2)))
+    force_cpu_flag = ctx.obj.get("force_cpu", False)
+    shared_models_requested = ctx.obj.get("shared_models", False)
     memlog_path = None
     memlog_fp = None
     if memlog_enabled:
@@ -417,6 +420,9 @@ def _dispatch(command, lang, num_speakers,
         except Exception as e:
             memlog_enabled = False
             console.print(f"[bold yellow]Warning:[/bold yellow] Failed to open memlog: {e}")
+    if force_cpu_flag:
+        apply_force_cpu()
+        C.print("[bold yellow]CPU-only mode enabled; disabling CUDA/MPS.[/bold yellow]")
     memory_history_path = Path(user_cache_dir("batchalign", "batchalign")) / "memory_history.json"
     memory_history_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -432,7 +438,20 @@ def _dispatch(command, lang, num_speakers,
     if command in ["transcribe", "transcribe_s"]:
         num_workers = min(num_workers, 2) # GPU memory limits
 
-    C.print(f"Using [bold]{num_workers}[/bold] worker processes.\n")
+    shared_models_active = False
+    mp_ctx = None
+    if shared_models_requested:
+        if os.name == "nt":
+            C.print("[bold yellow]Shared models unavailable on Windows (spawn only).[/bold yellow]")
+        elif not force_cpu_preferred() and hasattr(os, "uname") and os.uname().sysname == "Darwin":
+            C.print("[bold yellow]Shared models require --force-cpu on macOS.[/bold yellow]")
+        else:
+            mp_ctx = multiprocessing.get_context("fork")
+            shared_models_active = True
+    if shared_models_active:
+        C.print(f"Using [bold]{num_workers}[/bold] worker processes (shared models).\n")
+    else:
+        C.print(f"Using [bold]{num_workers}[/bold] worker processes.\n")
 
     manager = multiprocessing.Manager() if files else None
     progress_queue = manager.Queue() if manager else None
@@ -599,6 +618,7 @@ def _dispatch(command, lang, num_speakers,
             "total_bytes": total,
             "available_bytes": available,
             "workers": num_workers,
+            "shared_models": shared_models_active,
         }
         record.update(data)
         memlog_fp.write(json.dumps(record) + "\n")
@@ -653,7 +673,16 @@ def _dispatch(command, lang, num_speakers,
                                 processor=render_stage(stage_tasks),
                                 mem=_mem_label("running", available_mem, low_mem))
 
-            with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers) as executor:
+            executor_opts = {}
+            if mp_ctx is not None:
+                executor_opts["mp_context"] = mp_ctx
+            if mp_ctx is not None and command in ["align", "morphotag"]:
+                try:
+                    _get_worker_pipeline(command, lang, num_speakers, **kwargs)
+                except Exception:
+                    pass
+
+            with concurrent.futures.ProcessPoolExecutor(max_workers=num_workers, **executor_opts) as executor:
                 worker_func = partial(_worker_task,
                                       command=command,
                                       lang=lang,

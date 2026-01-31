@@ -45,7 +45,11 @@ class WhisperASRModel(object):
         # Monkey patch
         WhisperForConditionalGeneration._extract_token_timestamps = ett
 
-        device = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
+        from batchalign.utils.device import force_cpu_preferred
+        if force_cpu_preferred():
+            device = torch.device('cpu')
+        else:
+            device = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
 
         L.debug("Initializing whisper model...")
         self.__config = GenerationConfig.from_pretrained(base)
@@ -266,4 +270,3 @@ class WhisperASRModel(object):
 
         L.debug("Whisper Done.")
         return ({"monologues": turns})
-

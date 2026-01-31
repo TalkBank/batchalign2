@@ -74,7 +74,9 @@ def handle_verbosity(verbosity):
 @click.option("--adaptive-workers/--no-adaptive-workers", default=True, help="Adaptively cap workers based on observed memory.")
 @click.option("--adaptive-safety-factor", type=float, default=1.35, show_default=True, help="Safety factor applied to observed worker RSS peaks.")
 @click.option("--adaptive-warmup", type=int, default=2, show_default=True, help="Initial worker count before adaptive cap kicks in.")
-def batchalign(ctx, verbose, workers, memlog, mem_guard, adaptive_workers, adaptive_safety_factor, adaptive_warmup):
+@click.option("--force-cpu/--no-force-cpu", default=False, help="Disable MPS/CUDA and force CPU-only models.")
+@click.option("--shared-models/--no-shared-models", default=False, help="Preload models and fork workers to share read-only memory.")
+def batchalign(ctx, verbose, workers, memlog, mem_guard, adaptive_workers, adaptive_safety_factor, adaptive_warmup, force_cpu, shared_models):
     """process .cha and/or audio files in IN_DIR and dumps them to OUT_DIR using recipe COMMAND"""
 
     ## setup commands ##
@@ -92,6 +94,8 @@ def batchalign(ctx, verbose, workers, memlog, mem_guard, adaptive_workers, adapt
     ctx.obj["adaptive_workers"] = adaptive_workers
     ctx.obj["adaptive_safety_factor"] = adaptive_safety_factor
     ctx.obj["adaptive_warmup"] = adaptive_warmup
+    ctx.obj["force_cpu"] = force_cpu
+    ctx.obj["shared_models"] = shared_models
     # setup config
     from batchalign.utils import config
     ctx.obj["config"] = config.config_read(True)

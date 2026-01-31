@@ -9,7 +9,7 @@ import logging
 L = logging.getLogger("batchalign")
 
 from batchalign.utils.utils import correct_timing
-from batchalign.models import resolve
+from batchalign.models.resolve import resolve
 
 import whisper
 
@@ -93,5 +93,4 @@ class OAIWhisperEngine(BatchalignEngine):
 # tmp = e.generate("./batchalign/tests/pipelines/asr/support/test.mp3", 1)
 # tmp.model_dump()
 # file = "./batchalign/tests/pipelines/asr/support/test.mp3"
-
 

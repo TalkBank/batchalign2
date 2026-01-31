@@ -101,6 +101,28 @@ Date: 2026-01-31
 - **Cons**: unsafe with MPS; fragile across platforms; still duplicates audio tensors; high crash risk on macOS.
 - **Net**: not viable on this hardware.
 
+### Shared-model feasibility matrix (by platform/device/tool)
+Shared-model prefork is only viable when the underlying device supports `fork` safely and model weights stay read-only.
+
+| Platform / Device | Status | Likely viable tools | Constraints |
+| --- | --- | --- | --- |
+| macOS + MPS | **Not safe** | None | Fork + MPS is unsafe; child processes can crash (observed). |
+| macOS + CPU-only | **Possible** | Whisper FA/UTR, Wave2Vec FA, Stanza | Must disable MPS; performance slower but memory sharing works. |
+| Linux + CUDA | **Possible (with caveats)** | Whisper FA/UTR, Wave2Vec FA, Pyannote | CUDA supports fork, but ensure models are initialized before forking; avoid lazy CUDA init in workers. |
+| Linux + CPU-only | **Likely safe** | All CPU-only pipelines | Most consistent environment for prefork sharing. |
+| Windows | **Not viable** | None | Uses spawn, no fork-based sharing. |
+
+Notes:
+- **Whisper / Wave2Vec**: heavy models benefit most from sharing. Prefer prefork only when device is CPU or CUDA and `fork` is supported.
+- **Stanza morphotag**: CPU-bound and large, but may still benefit from prefork on Linux/CPU.
+- **Rev.ai UTR**: remote service; sharing models is irrelevant.
+
+### Proposed CLI flag (macOS CPU-only pathway)
+Introduce a CLI flag (e.g., `--force-cpu` or `--no-mps`) to disable MPS so macOS users can opt into prefork shared-model mode. This keeps the default safe (MPS on), but offers a user-controlled pathway when memory pressure is more important than speed.
+
+### CLI usage (proposed)
+- `batchalign --force-cpu --shared-models align <in> <out>`
+
 ### Option 4: Model-server architecture
 - **Pros**: true single-copy model weights; explicit backpressure; can batch for throughput; avoids fork/MPS issues.
 - **Cons**: higher implementation complexity; new IPC bottlenecks; server crash can stall all work; serialization overhead.

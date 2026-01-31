@@ -10,7 +10,7 @@ import logging
 L = logging.getLogger("batchalign")
 
 from batchalign.utils.utils import correct_timing, silence
-from batchalign.models import resolve
+from batchalign.models.resolve import resolve
 import warnings
 
 from contextlib import redirect_stdout, redirect_stderr
@@ -40,8 +40,12 @@ class WhisperXEngine(BatchalignEngine):
         except ImportError:
             raise ImportError("Cannot import WhisperX, please ensure it is installed.\nHint: install WhisperX by running `pip install git+https://github.com/m-bain/whisperx.git`.")
 
+        from batchalign.utils.device import force_cpu_preferred
         # Determine device at init time to defer torch import
-        self.__device = "cuda" if torch.cuda.is_available() else "cpu"
+        if force_cpu_preferred():
+            self.__device = "cpu"
+        else:
+            self.__device = "cuda" if torch.cuda.is_available() else "cpu"
 
         if lang == "yue":
             language = "yue"
@@ -118,6 +122,4 @@ class WhisperXEngine(BatchalignEngine):
         doc.media = media
 
         return correct_timing(doc)
-
-
 
