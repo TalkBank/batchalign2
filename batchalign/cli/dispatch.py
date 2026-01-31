@@ -608,7 +608,7 @@ def _dispatch(command, lang, num_speakers,
                     )
 
                 def schedule_available():
-                    nonlocal last_low_mem_warn
+                    nonlocal last_low_mem_warn, adaptive_cap_reported
                     while len(future_to_file) < num_workers:
                         if adaptive_workers_enabled:
                             cap = _adaptive_cap()
