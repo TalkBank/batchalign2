@@ -486,5 +486,5 @@ def version(ctx, **kwargs):
     ptr = (pyfiglet.figlet_format("Batchalign2")+"\n" +
            f"Version: [bold]{VERSION_NUMBER.strip()}[/bold], released {RELEASE_DATE.strip()}\n" +
            f"[italic]{RELEASE_NOTES.strip()}[/italic]"+"\n" +
-           "\nDeveloped by Brian MacWhinney and Houjun Liu\ncontributions from Sebastian Song and Franklin Chen")
+           "\nDeveloped by Brian MacWhinney and Houjun Liu\ncontributions from Sebastian Song, Franklin Chen, Sriram Polineni")
     C.print("\n\n"+ptr+"\n\n")
