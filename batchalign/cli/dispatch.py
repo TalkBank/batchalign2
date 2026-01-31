@@ -27,6 +27,7 @@ globase = lambda path, statement: glob(os.path.join(path, statement))
 repath_file = lambda file_path, new_dir: os.path.join(new_dir, Path(file_path).name)
 
 import tempfile
+import json
 import time
 
 import traceback
@@ -348,11 +349,13 @@ def _dispatch(command, lang, num_speakers,
                 # check for ffmpeg
                 if not shutil.which("ffmpeg"):
                     raise ValueError(f"ffmpeg not found in Path! Cannot load input media at {inp_path}.\nHint: Please convert your input audio sample to .wav before proceeding witch Batchalign, or install ffmpeg (https://ffmpeg.org/download.html)")
-                # convert
-                from pydub import AudioSegment
-                seg = AudioSegment.from_file(inp_path, ext)
-                seg.export(inp_path.replace(f".{ext}", ".wav"), format="wav")
-                inp_path = inp_path.replace(f".{ext}", ".wav")
+                wav_path = inp_path.replace(f".{ext}", ".wav")
+                if not os.path.exists(wav_path):
+                    # convert
+                    from pydub import AudioSegment
+                    seg = AudioSegment.from_file(inp_path, ext)
+                    seg.export(wav_path, format="wav")
+                inp_path = wav_path
 
             # repath the file to the output
             rel = os.path.relpath(inp_path, in_dir)
@@ -398,6 +401,21 @@ def _dispatch(command, lang, num_speakers,
 
     # Determine number of workers
     num_workers = kwargs.get("num_workers", ctx.obj.get("workers", os.cpu_count()))
+    memlog_enabled = ctx.obj.get("memlog", False)
+    mem_guard_enabled = ctx.obj.get("mem_guard", False)
+    adaptive_workers_enabled = ctx.obj.get("adaptive_workers", True)
+    adaptive_safety_factor = ctx.obj.get("adaptive_safety_factor", 1.35)
+    adaptive_warmup = max(1, int(ctx.obj.get("adaptive_warmup", 2)))
+    memlog_path = None
+    memlog_fp = None
+    if memlog_enabled:
+        try:
+            os.makedirs(out_dir, exist_ok=True)
+            memlog_path = Path(out_dir) / "batchalign_memlog.jsonl"
+            memlog_fp = open(memlog_path, "a", encoding="utf-8")
+        except Exception as e:
+            memlog_enabled = False
+            console.print(f"[bold yellow]Warning:[/bold yellow] Failed to open memlog: {e}")
 
     # Pre-download stanza resources if needed to avoid interleaved downloads in workers
     if command in ["morphotag", "utseg", "coref"]:
@@ -434,6 +452,7 @@ def _dispatch(command, lang, num_speakers,
     mem_records = {}
     mem_samples = []
     last_low_mem_warn = 0.0
+    adaptive_cap_reported = None
 
     def _format_bytes(count, precision=2):
         if count is None:
@@ -487,6 +506,38 @@ def _dispatch(command, lang, num_speakers,
         if reserve is None:
             return False, total, available
         return (available - est_bytes) < reserve, total, available
+
+    def _adaptive_cap():
+        total, available = _system_memory()
+        reserve = _memory_reserve(total)
+        if reserve is None or available is None:
+            return num_workers
+        if not mem_samples:
+            return min(num_workers, adaptive_warmup)
+        peaks = sorted(mem for _, mem in mem_samples if mem)
+        if not peaks:
+            return min(num_workers, adaptive_warmup)
+        peak_est = peaks[len(peaks) // 2] * adaptive_safety_factor
+        if peak_est <= 0:
+            return num_workers
+        cap = int((available - reserve) // peak_est)
+        return max(1, min(num_workers, cap))
+
+    def _log_event(event, **data):
+        if not memlog_enabled or memlog_fp is None:
+            return
+        total, available = _system_memory()
+        record = {
+            "ts": time.time(),
+            "event": event,
+            "command": command,
+            "total_bytes": total,
+            "available_bytes": available,
+            "workers": num_workers,
+        }
+        record.update(data)
+        memlog_fp.write(json.dumps(record) + "\n")
+        memlog_fp.flush()
 
     try:
         with prog as prog:
@@ -546,6 +597,10 @@ def _dispatch(command, lang, num_speakers,
                     low_mem = False
                     if reserve is not None and available_mem is not None:
                         low_mem = available_mem < reserve
+                    _log_event("submit_worker",
+                               file=str(file_path),
+                               est_bytes=est_bytes,
+                               available_bytes=available_mem)
                     prog.update(
                         tasks[file_path],
                         processor="Processing...",
@@ -555,6 +610,13 @@ def _dispatch(command, lang, num_speakers,
                 def schedule_available():
                     nonlocal last_low_mem_warn
                     while len(future_to_file) < num_workers:
+                        if adaptive_workers_enabled:
+                            cap = _adaptive_cap()
+                            if cap != adaptive_cap_reported:
+                                prog.console.print(f"[dim]Adaptive cap:[/dim] {cap} worker{'s' if cap != 1 else ''}")
+                                adaptive_cap_reported = cap
+                            if len(future_to_file) >= cap:
+                                break
                         try:
                             next_file, next_output = next(file_iter)
                         except StopIteration:
@@ -572,6 +634,11 @@ def _dispatch(command, lang, num_speakers,
                                     f"Throttling new workers."
                                 )
                                 last_low_mem_warn = now
+                            _log_event("throttle",
+                                       file=str(next_file),
+                                       est_bytes=est_bytes,
+                                       available_bytes=available,
+                                       reserve_bytes=reserve)
                             break
                         if throttle and not future_to_file:
                             prog.console.print(
@@ -579,6 +646,16 @@ def _dispatch(command, lang, num_speakers,
                                 f"{_format_bytes(available)} free. "
                                 "Continuing with a single worker."
                             )
+                            _log_event("low_mem_single_worker",
+                                       file=str(next_file),
+                                       est_bytes=est_bytes,
+                                       available_bytes=available)
+                            if mem_guard_enabled:
+                                prog.console.print(
+                                    "[bold red]Memory guard[/bold red]: "
+                                    "aborting to avoid system instability."
+                                )
+                                raise RuntimeError("Memory guard abort: insufficient available memory for new worker.")
                         submit_one(next_file, next_output)
 
                 schedule_available()
@@ -616,6 +693,11 @@ def _dispatch(command, lang, num_speakers,
                                     if reserve is not None and available_mem is not None:
                                         low_mem = available_mem < reserve
                                     prog.update(tasks[file], mem=_mem_label(_format_bytes(peak), available_mem, low_mem))
+                                _log_event("worker_complete",
+                                           file=str(file),
+                                           rss_peak=mem_info.get("rss_peak"),
+                                           rss_end=mem_info.get("rss_end"),
+                                           rss_start=mem_info.get("rss_start"))
                         except Exception as e:
                             final_total = max(task_totals.get(file, 1), 1)
                             prog.update(tasks[file], total=final_total, completed=final_total, processor="[bold red]FAIL[/bold red]")
@@ -627,6 +709,8 @@ def _dispatch(command, lang, num_speakers,
     finally:
         if manager:
             manager.shutdown()
+        if memlog_fp is not None:
+            memlog_fp.close()
 
     if len(errors) > 0:
         C.print()
@@ -655,6 +739,9 @@ def _dispatch(command, lang, num_speakers,
         total, available = _system_memory()
         if total is not None and available is not None:
             C.print(f"\nSystem memory available: {_format_bytes(available)} / {_format_bytes(total)}")
+
+    if memlog_enabled and memlog_path is not None:
+        C.print(f"\n[dim]Memory log written:[/dim] {memlog_path}")
 
     if ctx.obj["verbose"] > 1:
         C.end_capture()
