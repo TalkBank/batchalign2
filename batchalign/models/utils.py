@@ -160,6 +160,12 @@ def _extract_token_timestamps(
 #     return timestamps
 
 
+LAZY_AUDIO_ENABLED = True
+
+def set_lazy_audio_enabled(enabled: bool):
+    global LAZY_AUDIO_ENABLED
+    LAZY_AUDIO_ENABLED = bool(enabled)
+
 @dataclass
 class ASRAudioFile:
     file : str
@@ -177,6 +183,8 @@ class ASRAudioFile:
 
     @classmethod
     def lazy(cls, file_path: str, rate: int, cache_limit: int = 4):
+        if not LAZY_AUDIO_ENABLED:
+            raise RuntimeError("Lazy audio disabled")
         return cls(file_path, torch.empty(0), rate, _lazy=True, _cache_limit=cache_limit)
 
     def _read_frames(self, frame_offset, num_frames):

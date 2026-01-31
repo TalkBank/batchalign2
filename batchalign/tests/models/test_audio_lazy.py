@@ -28,3 +28,17 @@ def test_lazy_chunk_uses_partial_load(monkeypatch):
     assert seen["offset"] == 0
     assert seen["frames"] > 0
     assert chunk.numel() > 0
+
+
+def test_lazy_audio_flag_disables_lazy(monkeypatch):
+    from batchalign.models import utils as utils_module
+
+    utils_module.set_lazy_audio_enabled(False)
+    try:
+        try:
+            ASRAudioFile.lazy("fake.wav", 16000)
+            assert False, "Expected lazy audio to be disabled"
+        except RuntimeError:
+            pass
+    finally:
+        utils_module.set_lazy_audio_enabled(True)

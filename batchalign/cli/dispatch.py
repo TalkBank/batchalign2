@@ -446,6 +446,8 @@ def _dispatch(command, lang, num_speakers,
     adaptive_warmup = max(1, int(ctx.obj.get("adaptive_warmup", 2)))
     force_cpu_flag = ctx.obj.get("force_cpu", False)
     shared_models_requested = ctx.obj.get("shared_models", False)
+    pool_requested = ctx.obj.get("pool", True)
+    lazy_audio_enabled = ctx.obj.get("lazy_audio", True)
     pool_mode_enabled = False
     pool_mode_reason = None
     engine_specs = None
@@ -462,6 +464,10 @@ def _dispatch(command, lang, num_speakers,
     if force_cpu_flag:
         apply_force_cpu()
         C.print("[bold yellow]CPU-only mode enabled; disabling CUDA/MPS.[/bold yellow]")
+    if not lazy_audio_enabled:
+        from batchalign.models.utils import set_lazy_audio_enabled
+        set_lazy_audio_enabled(False)
+        C.print("[bold yellow]Lazy audio disabled; using full audio loads.[/bold yellow]")
     memory_history_path = Path(user_cache_dir("batchalign", "batchalign")) / "memory_history.json"
     memory_history_path.parent.mkdir(parents=True, exist_ok=True)
 
@@ -488,7 +494,7 @@ def _dispatch(command, lang, num_speakers,
             mp_ctx = multiprocessing.get_context("fork")
             shared_models_active = True
     # Determine whether pooled (threaded) execution is safe for this run.
-    if len(files) > 1:
+    if pool_requested and len(files) > 1:
         try:
             engine_specs = pipeline_dispatch.resolve_engine_specs(Cmd2Task[command], lang, num_speakers, **kwargs)
         except Exception as e:

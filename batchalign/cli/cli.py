@@ -16,6 +16,7 @@ from rich.console import Console
 from rich.logging import RichHandler
 
 from batchalign.cli.dispatch import _dispatch
+from batchalign.cli.bench import bench
 from batchalign.models.training.run import cli as train
 
 import pyfiglet
@@ -72,11 +73,13 @@ def handle_verbosity(verbosity):
 @click.option("--memlog", is_flag=True, default=False, help="Write memory telemetry log to OUT_DIR.")
 @click.option("--mem-guard", is_flag=True, default=False, help="Abort early if available memory is too low to start a new worker.")
 @click.option("--adaptive-workers/--no-adaptive-workers", default=True, help="Adaptively cap workers based on observed memory.")
+@click.option("--pool/--no-pool", default=True, help="Allow pooled model execution for multi-file runs.")
+@click.option("--lazy-audio/--no-lazy-audio", default=True, help="Enable lazy audio loading for alignment/ASR.")
 @click.option("--adaptive-safety-factor", type=float, default=1.35, show_default=True, help="Safety factor applied to observed worker RSS peaks.")
 @click.option("--adaptive-warmup", type=int, default=2, show_default=True, help="Initial worker count before adaptive cap kicks in.")
 @click.option("--force-cpu/--no-force-cpu", default=False, help="Disable MPS/CUDA and force CPU-only models.")
 @click.option("--shared-models/--no-shared-models", default=False, help="Preload models and fork workers to share read-only memory (advanced; ignored in pooled mode).")
-def batchalign(ctx, verbose, workers, memlog, mem_guard, adaptive_workers, adaptive_safety_factor, adaptive_warmup, force_cpu, shared_models):
+def batchalign(ctx, verbose, workers, memlog, mem_guard, adaptive_workers, adaptive_safety_factor, adaptive_warmup, pool, lazy_audio, force_cpu, shared_models):
     """process .cha and/or audio files in IN_DIR and dumps them to OUT_DIR using recipe COMMAND"""
 
     ## setup commands ##
@@ -94,6 +97,8 @@ def batchalign(ctx, verbose, workers, memlog, mem_guard, adaptive_workers, adapt
     ctx.obj["adaptive_workers"] = adaptive_workers
     ctx.obj["adaptive_safety_factor"] = adaptive_safety_factor
     ctx.obj["adaptive_warmup"] = adaptive_warmup
+    ctx.obj["pool"] = pool
+    ctx.obj["lazy_audio"] = lazy_audio
     ctx.obj["force_cpu"] = force_cpu
     ctx.obj["shared_models"] = shared_models
     # setup config
@@ -105,6 +110,7 @@ def batchalign(ctx, verbose, workers, memlog, mem_guard, adaptive_workers, adapt
     install()
 
 batchalign.add_command(train, "models")
+batchalign.add_command(bench, "bench")
 
 from batchalign.cli.cache import cache
 batchalign.add_command(cache, "cache")
