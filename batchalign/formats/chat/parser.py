@@ -208,7 +208,8 @@ def chat_parse_doc(lines, special_mor=False):
         "content": [], 
         "langs": [], 
         "media": None,
-        "pid": pid
+        "pid": pid,
+        "ba_special_": {},
     }
 
     tiers = {}
@@ -223,6 +224,13 @@ def chat_parse_doc(lines, special_mor=False):
             # we throw away participants because there are duplicate
             # info of the same thing in @ID
             if "@Participants" in line or ("@Options" in line and "CA" not in line):
+                if "@Options" in line and "CA" not in line:
+                    try:
+                        options = line.strip("@Options:").strip()
+                    except Exception:
+                        options = None
+                    if options:
+                        results.setdefault("ba_special_", {})["chat_options"] = options
                 continue
             # we split because there are multiple languages possible 
             elif "@Languages" in line.strip():
@@ -337,4 +345,3 @@ def chat_parse_doc(lines, special_mor=False):
 
     doc = Document.model_validate(results)
     return doc
-

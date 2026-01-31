@@ -108,7 +108,7 @@ def annotation_clean(content, special=False):
     cleaned_word = re.sub(r"\x15\d+_\d+\x15", '', cleaned_word)
     if not special:
         cleaned_word = re.sub(r"&~\w+", '', cleaned_word)
-    # cleaned_word = cleaned_word.replace("(","").replace(")","")
+    cleaned_word = cleaned_word.replace("(", "").replace(")", "")
     cleaned_word = cleaned_word.replace("[","").replace("]","")
     cleaned_word = cleaned_word.replace("<","").replace(">","")
     cleaned_word = cleaned_word.replace("“","").replace("”","")
@@ -150,6 +150,5 @@ def annotation_clean(content, special=False):
     cleaned_word = re.sub(r"&.", '', cleaned_word)
 
     return cleaned_word
-
 
 
