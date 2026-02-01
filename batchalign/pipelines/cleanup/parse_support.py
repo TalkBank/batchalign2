@@ -6,11 +6,12 @@ Read cleanup support wordlists
 import os 
 import pathlib
 from dataclasses import dataclass
+from typing import Dict
 
 from functools import cache
 
-from batchalign.pipelines.base import *
-from batchalign.document import *
+from batchalign.pipelines.base import BatchalignEngine
+from batchalign.document import Utterance, TokenType, Task
 
 import re
 
@@ -21,8 +22,8 @@ class Replacement:
     lemma_replacement: str
 
 @cache
-def parse(name):
-    # parse support fiel by name, ignoring all lines that
+def parse(name: str) -> Dict[str, Replacement]:
+    # parse support file by name, ignoring all lines that
     # start with #
     dir = pathlib.Path(__file__).parent.resolve()
     try:
@@ -31,15 +32,16 @@ def parse(name):
             lines = [i.strip() for i in lines if i[0] != "#"]
     except FileNotFoundError:
         return {}
-    # split the file by space
-    lines = [i.split(" ") for i in lines]
-
+    
     # serialize into replacement objects
-    result = {}
-    for original, main, lemma in lines:
-        result[original] = Replacement(original=original,
-                                       main_line_replacement=main,
-                                       lemma_replacement=lemma)
+    result: Dict[str, Replacement] = {}
+    for line in lines:
+        parts = line.split(" ")
+        if len(parts) >= 3:
+            original, main, lemma = parts[0], parts[1], parts[2]
+            result[original] = Replacement(original=original,
+                                           main_line_replacement=main,
+                                           lemma_replacement=lemma)
 
     return result
 
@@ -75,7 +77,7 @@ def _mark_utterance(utterance:Utterance, support:str, type:TokenType, lang:str="
 
     # collect text level replacements together
     if utterance.text:
-        for i in text_replace:
-            orig = re.compile(re.escape(i.original), re.IGNORECASE)
-            utterance.text = orig.sub(i.main_line_replacement, utterance.text)
+        for repl in text_replace:
+            orig = re.compile(re.escape(repl.original), re.IGNORECASE)
+            utterance.text = orig.sub(repl.main_line_replacement, utterance.text)
 

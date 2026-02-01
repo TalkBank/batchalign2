@@ -9,11 +9,15 @@ import tempfile
 from batchalign.models.speaker.utils import conv_scale_weights
 
 import torch
+from batchalign.utils.device import force_cpu_preferred
 
 import logging
 
 # compute device
-DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
+if force_cpu_preferred():
+    DEVICE = "cpu"
+else:
+    DEVICE = "cuda" if torch.cuda.is_available() else "mps" if torch.backends.mps.is_available() else "cpu"
 
 # INPUT = "/Users/houjun/Documents/Projects/batchalign2/extern/test.wav"
 # NUM_SPEAKERS = 2
@@ -84,4 +88,3 @@ class NemoSpeakerModel(object):
                     e = s + int(float(line_list[8]) * 1000)
                     speaker_ts.append([s, e, int(line_list[11].split("_")[-1])])
             return speaker_ts
-

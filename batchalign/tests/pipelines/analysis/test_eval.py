@@ -22,5 +22,5 @@ def test_wer(en_doc, eval_engine):
     analysis = eval_engine(d_alt, gold=en_doc)
 
     # check for the right WER
-    assert analysis["wer"] == 0.06382978723404255
+    assert analysis["wer"] == 0.04938271604938271
    

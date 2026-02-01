@@ -1,4 +1,6 @@
 import re
+from typing import Any
+
 from batchalign.document import *
 from batchalign.utils import *
 from batchalign.pipelines.asr.num2lang import NUM2LANG
@@ -19,14 +21,14 @@ def merge_on_wordlist(x):
     if len(x) < 2:
         return x
 
-    emit = []
-    buf = []
+    emit: list[dict[str, str | float]] = []
+    buf: list[dict[str, str | float]] = []
     while len(x) > 0:
         while len(x) > 0 and len(buf) < 2:
             buf.append(x.pop(0))
-        if [i["value"] for i in buf] in compounds:
+        if [str(i["value"]) for i in buf] in compounds:
             emit.append({
-                "value": "".join([i["value"] for i in buf]),
+                "value": "".join([str(i["value"]) for i in buf]),
                 "ts": buf[0]["ts"],
                 "end_ts": buf[-1]["ts"],
                 "type": "text",
@@ -180,7 +182,7 @@ def process_generation(output, lang="eng", utterance_engine=None):
 
         # sometimes, the system outputs two forms with a space as one single
         # word. we need to interpolate the space between them
-        final_words = []
+        final_words: list[list[Any]] = []
         # go through the words, if there is a space, split time in n parts
         for word, (i,o) in words:
             # if there is a dash in the beginning, we join it with the last one
@@ -234,8 +236,8 @@ def process_generation(output, lang="eng", utterance_engine=None):
                     elif lang == "yue":
                         return num2chinese(i, simp=False)
                     else:
-                        if NUM2LANG.get(lang.lower()) is not None:
-                            n2l = NUM2LANG.get(lang.lower())
+                        n2l = NUM2LANG.get(lang.lower())
+                        if n2l is not None:
                             for a,b in list(reversed(n2l.items())):
                                 i = i.replace(a,b).strip()
                         return i

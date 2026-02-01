@@ -141,7 +141,7 @@ class BertCantoneseUtteranceModel(object):
             final_passage.append(self.tokenizer.convert_tokens_to_string(res_toks))
 
         # Step 4: Join processed chunks together into the final passage
-        final_passage = ' '.join(final_passage)
+        final_passage_str = ' '.join(final_passage)
 
         L.debug("Text processing completed. Generating final output...")
         
@@ -175,7 +175,7 @@ class BertCantoneseUtteranceModel(object):
             L.debug(f"Final split passage: {split_passage}")
             return split_passage
             
-        split_passage = custom_sent_tokenize(final_passage)
+        split_passage = custom_sent_tokenize(final_passage_str)
 
         L.debug(f"Final sentences: {split_passage}")
 

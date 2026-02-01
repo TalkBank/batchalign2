@@ -56,7 +56,7 @@ class NemoSpeakerEngine(BatchalignEngine):
         spk = speaker_ids.pop(0)[-1]
 
         for ut in doc.content:
-            if isinstance(ut, Utterance):
+            if isinstance(ut, Utterance) and ut.alignment is not None:
                 ut_start = ut.alignment[0]
                 # peek and check if the next tier starts before
                 # ut_start

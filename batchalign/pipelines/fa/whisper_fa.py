@@ -43,7 +43,7 @@ class WhisperFAEngine(BatchalignEngine):
         # collect utterances 30 secondish segments to be aligned for whisper
         # we have to do this because whisper does poorly with very short segments
         groups = []
-        group = []
+        group: list = []
         seg_start = 0
 
         L.debug(f"Whisper FA finished loading media.")
@@ -147,19 +147,22 @@ class WhisperFAEngine(BatchalignEngine):
             for i_idx,elem in enumerate(alignments):
                 if isinstance(elem, Match):
                     if pauses:
-                        next_elem = i_idx - 1 # remember this is backwards, see above
-                        while next_elem >= 0 and alignments[next_elem].payload == elem.payload:
-                            next_elem -= 1
-                        if next_elem < 0:
+                        next_elem: Match | None = None
+                        next_elem_idx: int = i_idx - 1 # remember this is backwards, see above
+                        while next_elem_idx >= 0 and alignments[next_elem_idx].payload == elem.payload:
+                            next_elem_idx -= 1
+                        if next_elem_idx < 0:
                             next_elem = None
                         else:
-                            next_elem = alignments[next_elem]
-                        grp[elem.reference_payload][0].time = (int(round((timings[elem.payload]*1000 +
-                                                                        grp[0][1][0]))),
-                                                            int(round((timings[elem.payload]*1000 +
-                                                                        grp[0][1][0])))+500 if next_elem == None else
-                                                            int(round((timings[next_elem.payload]*1000 +
-                                                                        grp[0][1][0]))))
+                            next_elem = alignments[next_elem_idx]
+                        if next_elem is None:
+                            next_time = timings[elem.payload]
+                        else:
+                            next_time = timings[next_elem.payload]
+                        grp[elem.reference_payload][0].time = (
+                            int(round((timings[elem.payload] * 1000 + grp[0][1][0]))),
+                            int(round((next_time * 1000 + grp[0][1][0]))) + (500 if next_elem is None else 0),
+                        )
                     else:
                         grp[elem.reference_payload][0].time = (int(round((timings[elem.payload]*1000 +
                                                                           grp[0][1][0]))),
@@ -201,15 +204,21 @@ class WhisperFAEngine(BatchalignEngine):
                         while next_ut < len(doc.content)-1 and (not isinstance(doc.content, Utterance) or doc.content[next_ut].alignment == None):
                             next_ut += 1
                         if next_ut < len(doc.content) and isinstance(doc.content, Utterance) and doc.content[next_ut].alignment:
-                            w.time = (w.time[0], doc.content[next_ut].alignment[0])
+                            next_alignment = doc.content[next_ut].alignment
+                            if next_alignment is not None:
+                                w.time = (w.time[0], next_alignment[0])
                         else:
                             w.time = (w.time[0], w.time[0]+500) # give half a second because we don't know
                     elif not pauses:
-                        w.time = (w.time[0], ut.content[tmp].time[0])
+                        next_time = ut.content[tmp].time
+                        if next_time is not None:
+                            w.time = (w.time[0], next_time[0])
 
                     # just in case, bound the time by the utterance derived timings
-                    if ut.alignment and ut.alignment[0] != None:
-                        w.time = (max(w.time[0], ut.alignment[0]), min(w.time[1], ut.alignment[1]))
+                    if ut.alignment is not None and w.time is not None:
+                        alignment_start, alignment_end = ut.alignment
+                        if alignment_start is not None and alignment_end is not None:
+                            w.time = (max(w.time[0], alignment_start), min(w.time[1], alignment_end))
                     # if we ended up with timings that don't make sense, drop it
                     if w.time and w.time[0] >= w.time[1]:
                         w.time = None

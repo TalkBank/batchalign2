@@ -160,11 +160,43 @@ def _extract_token_timestamps(
 #     return timestamps
 
 
+LAZY_AUDIO_ENABLED = True
+
+def set_lazy_audio_enabled(enabled: bool):
+    global LAZY_AUDIO_ENABLED
+    LAZY_AUDIO_ENABLED = bool(enabled)
+
 @dataclass
 class ASRAudioFile:
     file : str
     tensor : torch.Tensor
     rate : int
+    _lazy : bool = False
+    _cache : dict | None = None
+    _cache_order : list | None = None
+    _cache_limit : int = 4
+
+    def _init_cache(self):
+        if self._cache is None:
+            self._cache = {}
+            self._cache_order = []
+
+    @classmethod
+    def lazy(cls, file_path: str, rate: int, cache_limit: int = 4):
+        if not LAZY_AUDIO_ENABLED:
+            raise RuntimeError("Lazy audio disabled")
+        return cls(file_path, torch.empty(0), rate, _lazy=True, _cache_limit=cache_limit)
+
+    def _read_frames(self, frame_offset, num_frames):
+        import torchaudio
+        if num_frames < 0:
+            audio_arr, rate = torchaudio.load(self.file)
+        else:
+            audio_arr, rate = torchaudio.load(self.file, frame_offset=frame_offset, num_frames=num_frames)
+        if rate != self.rate:
+            from torchaudio import transforms as T
+            audio_arr = T.Resample(rate, self.rate)(audio_arr)
+        return torch.mean(audio_arr.transpose(0, 1), dim=1)
 
     def chunk(self,begin_ms, end_ms):
         """Get a chunk of the audio.
@@ -182,9 +214,32 @@ class ASRAudioFile:
             The returned chunk to supply to the ASR engine.
         """
 
-        data = self.tensor[int(round((begin_ms/1000)*self.rate)):
-                           int(round((end_ms/1000)*self.rate))]
+        begin_frame = int(round((begin_ms / 1000) * self.rate))
+        end_frame = int(round((end_ms / 1000) * self.rate))
+        if end_frame <= begin_frame:
+            return torch.zeros(0)
 
+        if not self._lazy:
+            return self.tensor[begin_frame:end_frame]
+
+        self._init_cache()
+        assert self._cache is not None
+        assert self._cache_order is not None
+        key = (begin_frame, end_frame)
+        if key in self._cache:
+            return self._cache[key]
+        try:
+            data = self._read_frames(begin_frame, end_frame - begin_frame)
+        except Exception:
+            if self.tensor is None or self.tensor.numel() == 0:
+                self.tensor = self._read_frames(0, -1)
+                self._lazy = False
+            data = self.tensor[begin_frame:end_frame]
+        self._cache[key] = data
+        self._cache_order.append(key)
+        if len(self._cache_order) > self._cache_limit:
+            old_key = self._cache_order.pop(0)
+            self._cache.pop(old_key, None)
         return data
 
     def hash_chunk(self, begin_ms, end_ms):
@@ -207,13 +262,14 @@ class ASRAudioFile:
     def hash_all(self):
         """Generate a tiny SHA256 hash of the entire audio file."""
         import hashlib
-        num_samples = self.tensor.numel()
+        data = self.all()
+        num_samples = data.numel()
         
         if num_samples > 100:
             mid = num_samples // 2
-            samples = self.tensor[mid-50:mid+50]
+            samples = data[mid-50:mid+50]
         else:
-            samples = self.tensor
+            samples = data
 
         header = f"{num_samples}|".encode()
         return hashlib.sha256(header + samples.cpu().numpy().tobytes()).hexdigest()
@@ -226,5 +282,13 @@ class ASRAudioFile:
         like `chunk()` but all of the audio
         """
 
+        if not self._lazy:
+            return self.tensor
+        self._init_cache()
+        if self.tensor is None or self.tensor.numel() == 0:
+            try:
+                self.tensor = self._read_frames(0, -1)
+                self._lazy = False
+            except Exception:
+                return torch.zeros(0)
         return self.tensor
-

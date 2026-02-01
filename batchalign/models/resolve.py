@@ -4,7 +4,9 @@ resolve.py
 Resolve model shortcodes + language to huggingface ID
 """
 
-resolver = {
+from typing import Any
+
+resolver: dict[str, dict[str, str | tuple[str, str]]] = {
     "utterance": {
         'eng': "talkbank/CHATUtterance-en",
         "zho": "talkbank/CHATUtterance-zh_CN",
@@ -17,8 +19,11 @@ resolver = {
     }
 }
 
-def resolve(model_class, lang_code):
-    return resolver.get(model_class, {}).get(lang_code)
+def resolve(model_class: str, lang_code: str) -> str | tuple[str, str] | None:
+    class_resolver = resolver.get(model_class)
+    if class_resolver is None:
+        return None
+    return class_resolver.get(lang_code)
 
 
 
