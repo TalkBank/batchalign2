@@ -13,7 +13,7 @@ cc_t2s = OpenCC('t2s')
 cc_s2hk = OpenCC('s2hk')
 
 from batchalign.utils.utils import correct_timing
-from batchalign.models import resolve
+from batchalign.models.resolve import resolve
 
 import whisper
 

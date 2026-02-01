@@ -2,7 +2,7 @@
 # from .whisper import WhisperASRModel, WhisperFAModel
 # from .speaker import NemoSpeakerModel
 # from .utils import ASRAudioFile
-# from .resolve import resolve
+from .resolve import resolve
 # from .wave2vec import Wave2VecFAModel
 
 def __getattr__(name):
