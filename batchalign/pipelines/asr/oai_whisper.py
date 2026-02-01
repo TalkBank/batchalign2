@@ -9,7 +9,7 @@ import logging
 L = logging.getLogger("batchalign")
 
 from batchalign.utils.utils import correct_timing
-from batchalign.models import resolve
+from batchalign.models.resolve import resolve
 
 import whisper
 
