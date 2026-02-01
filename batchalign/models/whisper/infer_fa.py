@@ -65,23 +65,23 @@ class WhisperFAModel(object):
             Return processed audio file and speaker segments.
         """
         import torch
-        import torchaudio
+        from batchalign.models import audio_io
         from torchaudio import transforms as T
 
         # function: load and resample audio (lazy by default)
         try:
-            info = torchaudio.info(f)
+            info = audio_io.info(f)
             sample_rate = info.sample_rate
             lazy_audio = ASRAudioFile.lazy(f, sample_rate)
         except Exception:
-            audio_arr, rate = torchaudio.load(f)
+            audio_arr, rate = audio_io.load(f)
             if rate != self.sample_rate:
                 audio_arr = T.Resample(rate, self.sample_rate)(audio_arr)
             resampled = torch.mean(audio_arr.transpose(0,1), dim=1)
             return ASRAudioFile(f, resampled, self.sample_rate)
 
         if sample_rate != self.sample_rate:
-            audio_arr, rate = torchaudio.load(f)
+            audio_arr, rate = audio_io.load(f)
             audio_arr = T.Resample(rate, self.sample_rate)(audio_arr)
             resampled = torch.mean(audio_arr.transpose(0,1), dim=1)
             return ASRAudioFile(f, resampled, self.sample_rate)

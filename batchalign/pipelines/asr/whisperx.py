@@ -84,10 +84,10 @@ class WhisperXEngine(BatchalignEngine):
         audio = None
         segments = None
         try:
-            import torchaudio
+            from batchalign.models import audio_io
             import torch
 
-            info = torchaudio.info(source_path)
+            info = audio_io.info(source_path)
             sample_rate = info.sample_rate
             num_frames = info.num_frames
             chunk_seconds = 60
@@ -100,7 +100,7 @@ class WhisperXEngine(BatchalignEngine):
             start_frame = 0
             while start_frame < num_frames:
                 end_frame = min(start_frame + chunk_frames, num_frames)
-                audio_arr, rate = torchaudio.load(source_path, frame_offset=start_frame, num_frames=end_frame - start_frame)
+                audio_arr, rate = audio_io.load(source_path, frame_offset=start_frame, num_frames=end_frame - start_frame)
                 if rate != 16000:
                     from torchaudio import transforms as T
                     audio_arr = T.Resample(rate, 16000)(audio_arr)
