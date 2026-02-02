@@ -1213,7 +1213,7 @@ class StanzaEngine(BatchalignEngine):
                     retokenize=retokenize_val,
                     mwt=mwt_val
                 )
-                data = key_gen.serialize_output(item)
+                data = key_gen.serialize_output(item, retokenize=retokenize_val)
                 entries_to_cache.append((key, data))
             except Exception as e:
                 L.debug(f"Failed to cache utterance at index {orig_idx}: {e}")
