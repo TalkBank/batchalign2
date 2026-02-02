@@ -32,7 +32,7 @@ def read_file(f):
         lines = df.readlines()
 
     # coallate results
-    results = []
+    results: list[str] = []
 
     # process lines for tab-deliminated run-on lines
     for line in lines:
@@ -66,7 +66,7 @@ def prep(t):
         chat_files = glob.glob(os.path.join(DIR, "train", "*.txt"))
 
         # prep all the files
-        cleaned_files = sum([read_file(i) for i in chat_files], [])
+        cleaned_files: list[str] = sum([read_file(i) for i in chat_files], [])
 
         with open(os.path.join(DIR, f"{run_name}.train.txt"), 'w') as df:
             df.writelines([i+'\n' for i in cleaned_files])
@@ -88,10 +88,10 @@ def prep(t):
         chat_files = glob.glob(os.path.join(DIR, "val", "*.txt"))
 
         # prep all the files
-        cleaned_files = sum([read_file(i) for i in chat_files], [])
+        cleaned_val_files: list[str] = sum([read_file(i) for i in chat_files], [])
 
         with open(os.path.join(DIR, f"{run_name}.val.txt"), 'w') as df:
-            df.writelines([i+'\n' for i in cleaned_files])
+            df.writelines([i+'\n' for i in cleaned_val_files])
     else:
         L.info(f"Path {os.path.join(DIR, f'{run_name}.val.txt')} exists, skipping prep...")
 

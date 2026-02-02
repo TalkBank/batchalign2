@@ -1,0 +1,6 @@
+[environment]
+python-version = "3.11"
+
+[src]
+root = "batchalign"
+exclude = ["batchalign/tests"]

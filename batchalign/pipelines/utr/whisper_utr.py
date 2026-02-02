@@ -40,4 +40,3 @@ class WhisperUTREngine(BatchalignEngine):
         res = self.__whisper(self.__whisper.load(doc.media.url).all())
 
         return bulletize_doc(res, doc)
-

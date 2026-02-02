@@ -218,7 +218,7 @@ class EvaluationEngine(BatchalignEngine):
         # ie: if we have <extra.payload> <extra.reference> +> substitution
         #     but if we have <extra.reference> <extra.reference> this is 2 insertions
 
-        cleaned_alignment = []
+        cleaned_alignment: list[str | Extra | Match] = []
         # whether we had a "firstname" in reference document and hence are
         # anticipating a payload for it (the actual name) in the next entry in the
         # alignment
@@ -272,7 +272,7 @@ class EvaluationEngine(BatchalignEngine):
         for i in cleaned_alignment:
             if isinstance(i, Extra):
                 diff.append(f"{'+' if i.extra_type == ExtraType.REFERENCE else '-'} {i.key}")
-            else:
+            elif isinstance(i, Match):
                 diff.append(f"  {i.key}")
                 
         # wer = (S+D+I)/N

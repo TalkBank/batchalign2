@@ -2307,5 +2307,8 @@
                 ""
             ]
         }
-    ]
+    ],
+    "ba_special_": {
+        "chat_options": "multi"
+    }
 }

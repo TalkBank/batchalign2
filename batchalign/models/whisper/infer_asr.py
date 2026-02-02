@@ -45,7 +45,11 @@ class WhisperASRModel(object):
         # Monkey patch
         WhisperForConditionalGeneration._extract_token_timestamps = ett
 
-        device = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
+        from batchalign.utils.device import force_cpu_preferred
+        if force_cpu_preferred():
+            device = torch.device('cpu')
+        else:
+            device = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
 
         L.debug("Initializing whisper model...")
         self.__config = GenerationConfig.from_pretrained(base)
@@ -118,20 +122,30 @@ class WhisperASRModel(object):
         import torchaudio
         from torchaudio import transforms as T
 
-        # function: load and resample audio
-        audio_arr, rate = torchaudio.load(f)
+        # function: load and resample audio (lazy by default)
+        try:
+            info = torchaudio.info(f)
+            sample_rate = info.sample_rate
+            lazy_audio = ASRAudioFile.lazy(f, sample_rate)
+        except Exception:
+            audio_arr, rate = torchaudio.load(f)
+            if rate != self.sample_rate:
+                audio_arr = T.Resample(rate, self.sample_rate)(audio_arr)
+            resampled = torch.mean(audio_arr.transpose(0,1), dim=1)
+            return ASRAudioFile(f, resampled, self.sample_rate)
 
-        # resample if needed
-        if rate != self.sample_rate:
+        if sample_rate != self.sample_rate:
+            # Force eager load to resample once if sample rate differs
+            audio_arr, rate = torchaudio.load(f)
             audio_arr = T.Resample(rate, self.sample_rate)(audio_arr)
+            resampled = torch.mean(audio_arr.transpose(0,1), dim=1)
+            return ASRAudioFile(f, resampled, self.sample_rate)
 
-        # transpose and mean
-        resampled = torch.mean(audio_arr.transpose(0,1), dim=1)
-
-        # and return the audio file
-        return ASRAudioFile(f, resampled, self.sample_rate)
+        return lazy_audio
 
     def __call__(self, data, segments=None):
+        if isinstance(data, ASRAudioFile):
+            data = data.all()
         # we now perform the sweep line algorithm to align the
         # segment timestamps against the words
         groups = []
@@ -197,10 +211,18 @@ class WhisperASRModel(object):
 
         L.debug("Whisper Postprocessing...")
         for word in words:
+            timestamp = word.get("timestamp")
+            if not timestamp or len(timestamp) < 2:
+                continue
+            start, end = timestamp
+            if start is None:
+                continue
+            if end is None:
+                end = start + 1
             groups.append({
                 "type": "text",
-                "start": word["timestamp"][0],
-                "end": word["timestamp"][1],
+                "start": start,
+                "end": end,
                 "payload": word["text"]
             })
 
@@ -256,7 +278,7 @@ class WhisperASRModel(object):
                     "elements": current_turn,
                     "speaker": current_speaker[0] if type(current_speaker) == tuple else current_speaker
                 })
-                current_speaker = element["payload"],
+                current_speaker = element["payload"]
                 current_turn = []
 
         turns.append({
@@ -266,4 +288,3 @@ class WhisperASRModel(object):
 
         L.debug("Whisper Done.")
         return ({"monologues": turns})
-

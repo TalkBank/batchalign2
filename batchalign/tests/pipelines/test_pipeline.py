@@ -16,17 +16,17 @@ def test_standard_pipeline(generator, processor, analyzer):
     pipeline = BatchalignPipeline(generator, processor, analyzer)
     result = pipeline("path")
 
-    assert result == PROCESSED_OUTPUT
+    assert result == Document.model_validate(PROCESSED_OUTPUT).model_dump()
 
     pipeline = BatchalignPipeline(generator, analyzer)
     result = pipeline("path")
 
-    assert PROCESSED_OUTPUT_GENERATION == result
+    assert Document.model_validate(PROCESSED_OUTPUT_GENERATION).model_dump() == result
 
     pipeline = BatchalignPipeline(generator, processor)
     result = pipeline("path")
 
-    assert Document.model_validate(PROCESSED_OUTPUT) == result
+    assert Document.model_validate(PROCESSED_OUTPUT).model_dump() == result.model_dump()
 
 def test_pipeline_with_no_generation(processor):
     pipeline = BatchalignPipeline(processor)

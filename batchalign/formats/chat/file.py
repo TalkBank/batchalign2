@@ -57,7 +57,7 @@ class CHATFile(BaseFormat):
                 # get alignment result
                 data = df.readlines()
             # conform result with tab-seperated beginnings
-            raw = []
+            raw: list[str] = []
             # for each value, if its a tab seperated beginning, we
             # concate it with the previous line
             for value in data:

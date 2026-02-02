@@ -72,6 +72,9 @@ setup(
     extras_require={
         'dev': [
             'pytest',
+            'mypy',
+            'pyrefly',
+            'ty',
         ],
         'train': [
             'accelerate~=0.27',

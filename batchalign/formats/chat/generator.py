@@ -46,7 +46,8 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
 
     for i in utterance.content:
         mors.append(i.morphology)
-        gras.append(i.dependency)
+        if i.dependency:
+            gras.append(i.dependency)
         if i.time:
             has_wor = True
             wor_elems.append(re.sub(r"@(\w)(\w\w\w)", r"@\1:\2", f"{i.text} \x15{str(i.time[0])}_{str(i.time[1])}\x15"))
@@ -68,7 +69,7 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
         else:
             coref_elems.append("-")
 
-        if bool(mors[-1]) != bool(gras[-1]):
+        if bool(mors[-1]) != bool(i.dependency):
             warnings.warn(f"Batchalign has detected a mismatch between lengths of mor and gra tiers for utterance; output will not pass CHATTER; line='{main_line}'")
 
 
@@ -91,11 +92,10 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
 
     #### GRA LINE GENERATION ####
     # gra list is not different for MWT tokens so we flatten it
-    gras = [i for j in gras if j for i in j]
-    # assemble gra line
-    gra_line = None
     if len(gras) > 0:
-        result.append(f"%{'u' if special_mor else ''}gra:\t"+" ".join([f"{i.id}|{i.dep_id}|{i.dep_type}" for i in gras]))
+        flat_gras = [i for j in gras if j for i in j]
+        if flat_gras:
+            result.append(f"%{'u' if special_mor else ''}gra:\t"+" ".join([f"{i.id}|{i.dep_id}|{i.dep_type}" for i in flat_gras]))
 
     #### WOR LINE GENERATION ####
     if has_wor and write_wor:
@@ -159,8 +159,8 @@ def generate_chat_preamble(doc, birthdays=[]):
     header = []
     header.append("@Languages:\t"+", ".join(doc.langs))
     header.append("@Participants:\t"+", ".join([f"{i.id} {i.name}" for i in doc.tiers]))
-    # if not check_utterances_ordered(doc):
-    #     header.append("@Options:\tbullets")
+    if doc.ba_special_ and doc.ba_special_.get("chat_options"):
+        header.append(f"@Options:\t{doc.ba_special_['chat_options']}")
     header.append("\n".join([f"@ID:\t{i.lang}|{i.corpus}|{i.id}|{i.birthday}|{i.additional[0]}|{i.additional[1]}|{i.additional[2]}|{i.name}|{i.additional[3]}|{i.additional[4]}|" for i in doc.tiers]))
     for i in birthdays:
         header.append(f"@{i.id}:\t{i.content}")
@@ -168,4 +168,3 @@ def generate_chat_preamble(doc, birthdays=[]):
         header.append(f"@Media:\t{doc.media.name}, {doc.media.type.value}")
 
     return "\n".join(header)
-

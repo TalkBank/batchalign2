@@ -21,6 +21,20 @@ Once you have done this, scroll down to the matching error type to learn more.
 
 ## Tips
 
+### Batch runs are slow or memory-heavy
+Batchalign automatically uses pooled model execution when multiple files are provided, reusing models to reduce memory spikes. If pooling is unsafe for a selected engine, Batchalign falls back to process-based workers automatically. You can adjust concurrency with `--workers`.
+Use `--no-pool` to compare process-only behavior.
+
+### Benchmarking flags
+You can compare performance by disabling features explicitly:
+```
+batchalign bench align ~/ba_data/input ~/ba_data/output --runs 3 --no-pool --no-lazy-audio --no-adaptive-workers
+```
+
+### Audio memory spikes
+Batchalign reads audio lazily for alignment and ASR, loading only needed segments. If your environment cannot do chunked reads, it falls back to a full load automatically.
+Use `--no-lazy-audio` to force full audio loads.
+
 ### ConnectTimeout
 
 ```python

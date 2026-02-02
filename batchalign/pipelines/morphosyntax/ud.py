@@ -1,6 +1,8 @@
 # system utils
 import glob, os, re
+import pathlib
 from itertools import groupby
+from typing import Any, Callable
 
 # pathing tools
 from pathlib import Path
@@ -24,12 +26,14 @@ globase = lambda path, statement: glob.glob(os.path.join(path, statement))
 repath_file = lambda file_path, new_dir: os.path.join(new_dir, pathlib.Path(file_path).name)
 
 
-from batchalign.document import *
-from batchalign.constants import *
-from batchalign.pipelines.base import *
+from batchalign.document import Document, Utterance, Morphology, Task
+from batchalign.constants import ENDING_PUNCT, MOR_PUNCT, CHAT_IGNORE
+from batchalign.pipelines.base import BatchalignEngine
 from batchalign.formats.chat.parser import chat_parse_utterance
 
-from batchalign.utils.dp import *
+from batchalign.utils.dp import (
+    PayloadTarget, ReferenceTarget, Match, Extra, ExtraType, align
+)
 
 import logging
 L = logging.getLogger("batchalign")
@@ -261,11 +265,11 @@ def handler__VERB(word, lang=None):
     polarity = feats.get("Polarity", "")
     polite = feats.get("Polite", "")
 
-    irr = False
+    is_irr = False
     if lang == "en" and tense == "Past":
         from batchalign.pipelines.morphosyntax.en.irr import is_irregular
-        irr = is_irregular(word.lemma, word.text)
-    irr = "irr" if irr else "" 
+        is_irr = is_irregular(word.lemma, word.text)
+    irr = "irr" if is_irr else "" 
 
 
     res = handler(word, lang)
@@ -350,26 +354,26 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
     """
 
     # parse analysis results
-    mor = []
-    gra = []
+    mor: list[str | None] = []
+    gra: list[str] = []
 
     # root indx to point the ending delimiter to
     root = 0
 
     # counter for number of words skipped
-    actual_indicies = []
+    actual_indicies: list[int] = []
     num_skipped = 0
 
     # generating temp "gra" data (array numerical, before shift
     # correction)
-    gra_tmp = []
+    gra_tmp: list[tuple[int, int, str]] = []
 
     # keep track of mwts
-    mwts = []
-    clitics = []
+    mwts: list[list[int]] = []
+    clitics: list[int] = []
     # locations of elements with -ce, -être, -là
     # needs to be joined
-    auxiliaries = []
+    auxiliaries: list[int] = []
 
     # TODO jank 2O(n) parse!
     # get mwts
@@ -500,7 +504,10 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
     while len(clitics) > 0:
         clitic = clitics.pop()
         try:
-            mor_clone[clitic-1] = mor_clone[clitic-1]+"$"+mor_clone[clitic]
+            prev_item = mor_clone[clitic-1]
+            curr_item = mor_clone[clitic]
+            if prev_item is not None and curr_item is not None:
+                mor_clone[clitic-1] = prev_item + "$" + curr_item
         except IndexError:
             pass
         mor_clone[clitic] = None
@@ -515,8 +522,10 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
         while not mor_clone[aux-1]:
             aux -= 1
 
-        if mor_clone[orig_aux]:
-            mor_clone[aux-1] = mor_clone[aux-1]+"~"+mor_clone[orig_aux]
+        orig_item = mor_clone[orig_aux]
+        prev_item = mor_clone[aux-1]
+        if orig_item and prev_item:
+            mor_clone[aux-1] = prev_item + "~" + orig_item
             mor_clone[orig_aux] = None
 
     while len(mwts) > 0:
@@ -538,7 +547,7 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
         # replace in new dict
         mor_clone[mwt_start-1] = mwt_str
 
-    mor_str = (" ".join(filter(lambda x:x, mor_clone))).strip().replace(",", "")
+    mor_str = (" ".join(x for x in mor_clone if x is not None)).strip().replace(",", "")
     gra_str = (" ".join(gra)).strip()
 
     # handle special zeros, see $ZERO$ above
@@ -554,12 +563,12 @@ def parse_sentence(sentence, delimiter=".", special_forms=[], lang="$nospecial$"
 
     # empty utterances fix
     if mor_str.strip() in ["+//.", "+//?", "+//!"]:
-        mor_str=None
-
-    if mor_str == None:
         mor_str = ""
-    if gra_str == None:
-        gra_str = ""
+
+    if mor_str == "":
+        pass  # already empty
+    if gra_str == "":
+        pass  # already empty
 
     if mor_str.strip() == "" or gra_str.strip() == "" or mor_str.strip()==".":
         mor_str = ""
@@ -600,14 +609,14 @@ def tokenizer_processor(tokenized, lang, sent):
     # split tokenized. in case stuff got combined
     tokenized = [j for i in tokenized for j in conform(i).split(" ")]
     # tabulate results
-    res = []
+    res: list[str | tuple] = []
     # align the input sentence and the tokenization results
     payloads = []
     split_passage = sent.split(" ")
     # create alignment backplates, where the split_passage
     # is reference and the tokenized is ptarget
-    targets = []
-    refs = []
+    targets: list[PayloadTarget] = []
+    refs: list[ReferenceTarget] = []
     for indx, i in enumerate(tokenized):
         for char in conform(i):
             if char.strip() != "":
@@ -699,7 +708,7 @@ def adlist_postprocessor(i, lang, adlist):
     return cpy
 
 ######
-def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, nlp, tokenizer_context=None, status_hook:callable = None, **kwargs):
+def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, nlp, tokenizer_context=None, status_hook: Callable | None = None, **kwargs):
 
     L.debug("Starting Stanza...")
     inputs = []
@@ -722,11 +731,12 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, nlp, token
         L.info(f"Stanza processing utterance {indx+1}/{len(doc.content)}")
         if not isinstance(i, Utterance):
             continue
-        if i.override_lang and skipmultilang:
+        utterance = i
+        if utterance.override_lang and skipmultilang:
             continue
 
         # generate simplified version of the line
-        line = str(i)
+        line = str(utterance)
 
         # if we have nothing except a punctuuation, we give up
         if line.strip() in ENDING_PUNCT:
@@ -735,15 +745,15 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, nlp, token
         # every legal utterance will have an ending delimiter
         # so we split it out
         try:
-            ending = i.strip(join_with_spaces=True).split(" ")[-1]
+            ending = utterance.strip(join_with_spaces=True).split(" ")[-1]
         except AttributeError:
-            pass
+            ending = "."
 
         if re.findall(r"\w", ending):
             ending = "."
-            line_cut = i.strip(join_with_spaces=True)
+            line_cut = utterance.strip(join_with_spaces=True)
         else:
-            line_cut = i.strip(join_with_spaces=True)[:-len(ending)].strip()
+            line_cut = utterance.strip(join_with_spaces=True)[:-len(ending)].strip()
 
         # import ipdb
         # ipdb.set_trace()
@@ -752,7 +762,7 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, nlp, token
         # if we don't have anything in line cut, just take the original
         # this is compensating for things that are missing ending decimeters
         if line_cut == '':
-            line_cut = i.strip(join_with_spaces=True)
+            line_cut = utterance.strip(join_with_spaces=True)
             ending = '.'
 
         # clean the sentence
@@ -808,6 +818,8 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, nlp, token
 
 
             # parse the stanza output
+            if not lang:
+                continue
             mor, gra = parse_sentence(sents[0], ending, special_forms_cleaned, lang[0])
             mor = re.sub(r"~part\|s verb\|(\w+)-Ger-S", r"~aux|is verb|\1-Part-Pres-S", mor)
             # breakpoint()
@@ -827,29 +839,31 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, nlp, token
                         i.text = i.morphology[0].lemma
 
                 # split the text up into previous chunks
-                chunks = list(enumerate(doc.content[indx].text.split(" ")))
+                if utterance.text is None:
+                    continue
+                chunks = list(enumerate(utterance.text.split(" ")))
                 # filter out everything that could not possibly align
-                chunks_align = [(i,j) for i,j in chunks
+                chunks_align = [(i, j) for i, j in chunks
                                 if len(j) != 0 and (j[0] not in ["<", "[", "&", "\x15", "(", ")"]) and (j[-1] not in ["]"])
                                                    and ("@" not in j)
                                 and j.strip() not in MOR_PUNCT + CHAT_IGNORE + ["++"]]
                 # hollow out anything we are trying to align, and leave everything else
-                chunks_backplate = [[j] 
+                chunks_backplate: list[list[str | int]] = [[j]
                                     if not (len(j) != 0 and (j[0] not in ["<", "[", "&", "\x15", "(", ")"]) and (j[-1] not in ["]"])
                                     and ("@" not in j)
                                             and j.strip() not in MOR_PUNCT + CHAT_IGNORE + ["++"])
                                     else
                                     []
-                                    for i,j in chunks]
+                                    for i, j in chunks]
                 # render each into a list
-                chunks_chars = []
-                for i,j in chunks_align:
-                    for k in j:
-                        chunks_chars.append(PayloadTarget(k, payload=i))
-                ud_chars = []
-                for i,j in enumerate(ut):
-                    for k in j.text:
-                        ud_chars.append(ReferenceTarget(k, payload=i))
+                chunks_chars: list[PayloadTarget] = []
+                for i_idx, chunk in chunks_align:
+                    for k in chunk:
+                        chunks_chars.append(PayloadTarget(k, payload=i_idx))
+                ud_chars: list[ReferenceTarget] = []
+                for ud_idx, token in enumerate(ut):
+                    for k in token.text:
+                        ud_chars.append(ReferenceTarget(k, payload=ud_idx))
                 creaky = False
                 collected = ""
                 # brrr
@@ -858,22 +872,30 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, nlp, token
                 for i in aligned:
                     if isinstance(i, Match):
                         if not creaky:
-                            if i.reference_payload not in chunks_backplate[i.payload]:
-                                chunks_backplate[i.payload].append(i.reference_payload)
+                            payload_index = i.payload if isinstance(i.payload, int) else None
+                            if payload_index is None:
+                                continue
+                            if i.reference_payload is not None:
+                                chunks_backplate[payload_index].append(i.reference_payload)
                         else:
                             collected += i.key
                     elif isinstance(i, Extra) and i.extra_type == ExtraType.PAYLOAD:
+                        payload_index = i.payload if isinstance(i.payload, int) else None
+                        if payload_index is None:
+                            continue
                         if i.key == "⁎":
                             creaky = not creaky
-                            chunks_backplate[i.payload].append("⁎"+collected+"⁎")
+                            chunks_backplate[payload_index].append("⁎"+collected+"⁎")
                             collected = ""
                         elif creaky:
                             collected += i.key
                         elif not creaky:
-                            chunks_backplate[i.payload].append(i.key)
+                            chunks_backplate[payload_index].append(i.key)
                     # we want to replace the morphology of forms that are not actually
                     # supposed to be analyzed
                     elif isinstance(i, Extra) and i.extra_type == ExtraType.REFERENCE:
+                        if not isinstance(i.payload, int):
+                            continue
                         if ut[i.payload].text not in MOR_PUNCT:
                             ut[i.payload].morphology = [Morphology(
                                 lemma = sents[0].tokens[i.payload].text if len(sents) > 0 and len(sents[0].tokens) > i.payload and sents[0].tokens[i.payload].text != "xbxxx" else ut[i.payload].text,
@@ -887,11 +909,18 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, nlp, token
                     # we don't tag those if there's no morphologyical content
                     continue
                 # resolve all the numbers and flatten
-                chunks_backplate = [j if isinstance(j, str) else ut[j].text
-                                    for i in chunks_backplate
-                                    for j in i]
+                flattened_tokens: list[str] = []
+                for backplate_entry in chunks_backplate:
+                    for token in backplate_entry:
+                        if token is None:
+                            continue
+                        if isinstance(token, str):
+                            flattened_tokens.append(token)
+                        else:
+                            if 0 <= token < len(ut):
+                                flattened_tokens.append(ut[token].text)
 
-                retokenized_ut = " ".join(i for i in chunks_backplate if i.strip() not in ["(", ")"])
+                retokenized_ut = " ".join(token for token in flattened_tokens if token.strip() not in ["(", ")"])
                 retokenized_ut = retokenized_ut.replace("^", "")
                 retokenized_ut = re.sub(r" +", " ", retokenized_ut)
                 retokenized_ut = retokenized_ut.replace("+ \"", "+\"")
@@ -924,12 +953,14 @@ def morphoanalyze(doc: Document, retokenize:bool, skipmultilang:bool, nlp, token
                 # insert morphology into the parsed forms
                 forms, _ = chat_parse_utterance(line, mor, gra, None, None)
 
-                if len(doc.content[indx].content) != len(forms):
+                if not isinstance(utterance.content, list):
+                    continue
+                if len(utterance.content) != len(forms):
                     warnings.warn(f"Generated UD output has length mismatch with the main tier! line='{line}'. Skipping...")
                     continue
 
                 # stitch the morphology back
-                for content, form in zip(doc.content[indx].content, forms):
+                for content, form in zip(utterance.content, forms):
                     content.morphology = form.morphology
                     content.dependency = form.dependency
 
@@ -974,7 +1005,7 @@ class StanzaEngine(BatchalignEngine):
         from stanza.resources.common import download_resources_json, load_resources_json, get_language_resources
 
         # This mirrors the pre-parallel behavior: tokenizer post-processing depends on retokenize/mwt
-        config = {"processors": {"tokenize": "default",
+        config: dict[str, Any] = {"processors": {"tokenize": "default",
                                  "pos": "default",
                                  "lemma": "default",
                                  "depparse": "default"},

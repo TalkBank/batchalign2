@@ -159,7 +159,6 @@ class Utterance(BaseModel):
     time: Optional[Tuple[int,int]] = Field(default=None)
     custom_dependencies: List[CustomLine]  = Field(default=[])
 
-    @computed_field
     @property
     def delim(self) -> str:
         if len(self.content) == 0 or self.content[-1].text not in ENDING_PUNCT:
@@ -168,7 +167,7 @@ class Utterance(BaseModel):
             return self.content[-1].text
 
     @property
-    def alignment(self) -> Tuple[int,int]:
+    def alignment(self) -> Optional[Tuple[int,int]]:
         # MILISCEONDS
         if self.time == None: 
             beginning = None
@@ -194,8 +193,9 @@ class Utterance(BaseModel):
             
             if beginning == None and end == None:
                 return None
-            else:
-                return (beginning, end)
+            if beginning is None or end is None:
+                return None
+            return (beginning, end)
                 
         else: 
             return self.time
@@ -392,7 +392,7 @@ class Document(BaseModel):
         return len(self.content)
 
     @classmethod
-    def new(cls, text:Optional[str] = None, media_path:Optional[str] = None, lang:str="eng"):
+    def new(cls, text: Optional[Union[str, List[Union[Utterance, CustomLine]]]] = None, media_path: Optional[str] = None, lang: str = "eng"):
         # calculate media header, if anything
         media = None
         if media_path:
@@ -400,10 +400,12 @@ class Document(BaseModel):
                           name=Path(media_path).stem,
                           url=media_path)
         # set the content field to be empty, if needed
-        if text == None:
-            text = []
+        if text is None:
+            contents: Union[str, List[Union[Utterance, CustomLine]]] = []
+        else:
+            contents = text
         # create the doc and set language, if needed
-        doc = cls(content=text, media=media)
+        doc = cls(content=contents, media=media)
         if len(doc.tiers) > 0:
             doc.tiers[0].lang = lang
 
@@ -447,5 +449,3 @@ class Document(BaseModel):
     @tiers.setter
     def tiers(self, x):
         raise ValueError("Setting `tiers` globally at the document level has unexpected effect and thus is disabled; please set `tier` of each Utterance or change the field of a tier by setting `doc.tiers[n].value = new`.") 
-
-
