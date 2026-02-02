@@ -85,13 +85,14 @@ class BertCantoneseUtteranceModel(object):
             tokenized_chunk = list(chunk)  # Simply split by characters for Chinese text
             
             # Step 3.2: Pass chunk through the tokenizer and model
-            tokd = self.tokenizer.batch_encode_plus([tokenized_chunk],
-                                  return_tensors='pt',
-                                  truncation=True,
-                                  padding=True,
-                                  max_length=self.max_length,
-                                  is_split_into_words=True).to(self.device)
-
+            tokd = self.tokenizer(
+                [tokenized_chunk],
+                return_tensors="pt",
+                truncation=True,
+                padding=True,
+                max_length=self.max_length,
+                is_split_into_words=True
+            ).to(self.device)
             try:
                 # Pass it through the model
                 res = self.model(**tokd).logits
