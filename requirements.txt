@@ -285,7 +285,7 @@ propcache==0.4.1
     # via
     #   aiohttp
     #   yarl
-protobuf==6.33.4
+protobuf==6.33.5
     # via
     #   onnxruntime
     #   stanza
