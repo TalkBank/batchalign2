@@ -31,8 +31,9 @@ setup(
         "filelock>=3.0.0",
         "nltk>=3.8",
         "praatio>=6.0.0,<6.1.0",
-        "torch>=2.6.0",
-        "torchaudio<2.9",
+        "torch>=2.10.0",
+        "torchaudio>=2.10.0",  # Only uses transforms/functional/pipelines (I/O via soundfile)
+        "soundfile>=0.12.0",  # Audio I/O backend (replaces torchaudio.load/save/info)
         # "pyAudioAnalysis",
         # "hmmlearn==0.3.0",
         # "eyed3",
@@ -53,7 +54,6 @@ setup(
         "matplotlib>=3.8.0,<4.0.0",
         "pyfiglet==1.0.2",
         "setuptools>=78.1.1",
-        "soundfile~=0.12.0",
         "rich-click>=1.7.0",
         "typing-extensions",
         "num2words",
@@ -121,8 +121,14 @@ setup(
         # ]
     },
     include_package_data=True,
+    python_requires='>=3.11',
     classifiers=[
         "Development Status :: 3 - Alpha",
-        "Topic :: Utilities"
+        "Topic :: Utilities",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
+        "Programming Language :: Python :: 3.13",
+        "Programming Language :: Python :: 3.14",
     ]
 )

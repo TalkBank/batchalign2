@@ -17,9 +17,9 @@ def test_lazy_chunk_uses_partial_load(monkeypatch):
             samples = 10
         return torch.zeros(1, samples), 16000
 
-    import torchaudio
-    monkeypatch.setattr(torchaudio, "info", lambda _path: type("Info", (), {"sample_rate": 16000, "num_frames": 16000})(), raising=True)
-    monkeypatch.setattr(torchaudio, "load", _fake_load, raising=True)
+    from batchalign.models import audio_io
+    monkeypatch.setattr(audio_io, "info", lambda _path: type("Info", (), {"sample_rate": 16000, "num_frames": 16000})(), raising=True)
+    monkeypatch.setattr(audio_io, "load", _fake_load, raising=True)
 
     audio = ASRAudioFile.lazy("fake.wav", 16000)
     chunk = audio.chunk(0, 1000)

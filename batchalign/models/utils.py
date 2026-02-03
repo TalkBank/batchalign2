@@ -188,11 +188,11 @@ class ASRAudioFile:
         return cls(file_path, torch.empty(0), rate, _lazy=True, _cache_limit=cache_limit)
 
     def _read_frames(self, frame_offset, num_frames):
-        import torchaudio
+        from batchalign.models import audio_io
         if num_frames < 0:
-            audio_arr, rate = torchaudio.load(self.file)
+            audio_arr, rate = audio_io.load(self.file)
         else:
-            audio_arr, rate = torchaudio.load(self.file, frame_offset=frame_offset, num_frames=num_frames)
+            audio_arr, rate = audio_io.load(self.file, frame_offset=frame_offset, num_frames=num_frames)
         if rate != self.rate:
             from torchaudio import transforms as T
             audio_arr = T.Resample(rate, self.rate)(audio_arr)
