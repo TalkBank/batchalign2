@@ -3,14 +3,14 @@ rev.py
 Support for Rev.ai, a commerical ASR service
 """
 
-from batchalign.document import *
-from batchalign.pipelines.base import *
+from batchalign.document import Document, Utterance, Task
+from batchalign.pipelines.base import BatchalignEngine
 from batchalign.pipelines.asr.utils import *
 from batchalign.utils.config import config_read
 
 from batchalign.pipelines.utr.utils import bulletize_doc
 
-from batchalign.errors import *
+from batchalign.errors import ConfigError
 import warnings 
 
 import time
@@ -25,7 +25,7 @@ L = logging.getLogger("batchalign")
 class RevUTREngine(BatchalignEngine):
     tasks = [ Task.UTTERANCE_TIMING_RECOVERY ]
 
-    def __init__(self, key:str=None, lang="eng"):
+    def __init__(self, key: str | None = None, lang="eng"):
 
         if key == None or key.strip() == "":
             config = config_read()
@@ -39,8 +39,7 @@ class RevUTREngine(BatchalignEngine):
         self.__key = key
         self.__client = None
 
-
-    def process(self, doc, **kwargs):
+    def process(self, doc: Document, **kwargs) -> Document:
         from rev_ai import apiclient, JobStatus
         
         if self.__client is None:
@@ -58,6 +57,7 @@ class RevUTREngine(BatchalignEngine):
             lang = "cmn"
 
         client = self.__client
+        assert client is not None
 
         assert doc.media != None and doc.media.url != None, f"We cannot add utterance timings to something that doesn't have a media path! Provided media tier='{doc.media}'"
 
@@ -99,5 +99,4 @@ class RevUTREngine(BatchalignEngine):
         L.debug(f"done...")
 
         return res
-
 

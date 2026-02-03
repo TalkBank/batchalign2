@@ -6,6 +6,11 @@ import copy
 from batchalign.document import *
 
 class BatchalignEngine(ABC):
+    # Threading safety declaration for pooled execution.
+    # Default to False to prevent unsafe concurrent access.
+    thread_safe = False
+    # Whether the engine can be reused in a pooled in-process run.
+    pool_safe = True
 
     @abstractproperty
     def tasks(self) -> List[Task]:
@@ -43,7 +48,5 @@ class BatchalignEngine(ABC):
         # to update status
         return
         
-
-
 
 

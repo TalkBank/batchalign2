@@ -1,5 +1,6 @@
 # system utils
 import glob, os, re
+import pathlib
 from itertools import groupby
 
 # pathing tools
@@ -24,11 +25,15 @@ globase = lambda path, statement: glob.glob(os.path.join(path, statement))
 repath_file = lambda file_path, new_dir: os.path.join(new_dir, pathlib.Path(file_path).name)
 
 
-from batchalign.document import *
-from batchalign.pipelines.base import *
+from batchalign.document import (
+    Document, Utterance, Form, TokenType, Task, ENDING_PUNCT
+)
+from batchalign.pipelines.base import BatchalignEngine
 from batchalign.formats.chat.parser import chat_parse_utterance
 
-from batchalign.utils.dp import *
+from batchalign.utils.dp import (
+    PayloadTarget, ReferenceTarget, Match, Extra, ExtraType, align
+)
 
 import logging
 L = logging.getLogger("batchalign")
@@ -92,25 +97,25 @@ def process_ut(ut, nlp):
     possible_forms = (sorted(possible_forms, key=lambda x:len(x)))
 
     # get unique short forms
-    unique_short_forms = []
+    unique_short_forms: list[str] = []
     for i in list(reversed(possible_forms))+[" ".join(rollout_to_leaf(pt))]:
-        for j in filter(lambda x:x in i, unique_short_forms):
+        for j in [x for x in unique_short_forms if x in i]:
             i = i.replace(j, "")
-        if i.strip() != "" and len(list(filter(lambda x:i in x, unique_short_forms))) == 0:
+        if i.strip() != "" and len([x for x in unique_short_forms if i in x]) == 0:
             unique_short_forms.append(i)
-    unique_short_forms = reversed(unique_short_forms)
+    unique_short_forms_reversed = list(reversed(unique_short_forms))
     # retokenize (notice we combined forms with " ", so even if the language doesn't delinate
     # by space this should work fine
-    unique_short_forms = [[j for j in i.split(" ") if j != ""] for i in unique_short_forms]
+    unique_split_forms = [[j for j in i.split(" ") if j != ""] for i in unique_short_forms_reversed]
     # drop all single word forms (we will reattach them later---they are usually CCs or SCs)
-    unique_short_forms = [i for i in unique_short_forms if len(i) != 1]
+    unique_split_forms = [i for i in unique_split_forms if len(i) != 1]
     # reattach back to our original forms
     # first, assemble refrencees whose payload will be index into the utterance
     refs = [ReferenceTarget(key=i.text, payload=indx) for indx, i in enumerate(ut.content) if isinstance(i, Form)]
     # our alignments will be the Phrase ID of each unique short form
     # the number doesn't matter, it simply matters how different they are
     payloads = [PayloadTarget(key=j, payload=indx)
-                for indx, i in enumerate(unique_short_forms)
+                for indx, i in enumerate(unique_split_forms)
                 for j in i]
 
     # import random
@@ -135,8 +140,8 @@ def process_ut(ut, nlp):
             new_refs.append(ReferenceTarget(key=i.key, payload=i.payload if i.payload else -1))
 
     # we now sort the references based on their orignial utterance order
-    matches = matches + new_refs
-    matches = sorted(matches, key=lambda x:x.reference_payload if isinstance(x, Match) else x.payload)
+    matches_combined: list[Match | ReferenceTarget] = matches + new_refs
+    matches_combined = sorted(matches_combined, key=lambda x:x.reference_payload if isinstance(x, Match) else x.payload)
 
 
     # for each group, we combine into utterances based on the following heuristics
@@ -144,7 +149,7 @@ def process_ut(ut, nlp):
     current_ut = []
     current_group = -1 # this is the "utterance group" information 
 
-    for indx, i in enumerate(matches):
+    for indx, i in enumerate(matches_combined):
         # this is to cache cases where reference taget is used
         next_payload = -1
         # if something didn't align, we stick it to next
@@ -152,14 +157,14 @@ def process_ut(ut, nlp):
         # next form, we will stick it with the previous form
         if isinstance(i, ReferenceTarget):
             tmp = indx + 1
-            while tmp < len(matches) and not isinstance(matches[tmp], Match):
+            while tmp < len(matches_combined) and not isinstance(matches_combined[tmp], Match):
                 tmp += 1
                 # we found nothing or we found the same group so we just stick to the current one
-            if tmp == len(matches) or matches[tmp].payload == current_group:
+            if tmp == len(matches_combined) or matches_combined[tmp].payload == current_group:
                 current_ut.append(i.payload)
                 continue
             else:
-                next_payload = matches[tmp].payload
+                next_payload = matches_combined[tmp].payload
 
         # in other cases, if our current group is not the previous one
         # (or we are in a new extra and we haven't dealth with that)
@@ -183,15 +188,15 @@ def process_ut(ut, nlp):
     # for every single word drop, we combine it with the next utterance
     # as in---for every single word utterance we make, we just stick it onto the
     # next utterance
-    tmp = utterances[:]
+    utterances_copy = utterances[:]
     utterances = []
     indx = 0
-    comb = []
-    while indx < len(tmp):
-        if len(tmp[indx]) < 3:
-            comb += tmp[indx]
+    comb: list[int] = []
+    while indx < len(utterances_copy):
+        if len(utterances_copy[indx]) < 3:
+            comb += utterances_copy[indx]
         else:
-            utterances.append(comb + tmp[indx])
+            utterances.append(comb + utterances_copy[indx])
             comb = []
         indx += 1
 
@@ -320,9 +325,9 @@ class StanzaUtteranceEngine(BatchalignEngine):
                 continue
 
             # Check cache
-            key = idx_to_key.get(indx)
-            if key and key in cached_results:
-                new_uts = key_gen.deserialize_output(cached_results[key], i)
+            cache_key: str | None = idx_to_key.get(indx)
+            if cache_key and cache_key in cached_results:
+                new_uts = key_gen.deserialize_output(cached_results[cache_key], i)
                 contents += new_uts
                 continue
 
@@ -346,9 +351,9 @@ class StanzaUtteranceEngine(BatchalignEngine):
             try:
                 new_uts = process_ut(i, nlp_obj)
                 # Store for batch caching
-                if key:
+                if cache_key:
                     data = key_gen.serialize_output(new_uts)
-                    new_cached_entries.append((key, data))
+                    new_cached_entries.append((cache_key, data))
             except IndexError:
                 new_uts = [i]
             contents += new_uts
@@ -378,5 +383,4 @@ class StanzaUtteranceEngine(BatchalignEngine):
         # # rollout_form(nlp("Barry and the boys went shopping, and Ronny and Roys went bopping.").sentences[0].constituency)
         # # for ut in doc:
         # ut = doc[0]
-
 

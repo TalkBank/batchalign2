@@ -38,7 +38,7 @@ class Wave2VecFAEngine(BatchalignEngine):
         # collect utterances 30 secondish segments to be aligned for whisper
         # we have to do this because whisper does poorly with very short segments
         groups = []
-        group = []
+        group: list = []
         seg_start = 0
 
         L.debug(f"Wav2Vec FA finished loading media.")

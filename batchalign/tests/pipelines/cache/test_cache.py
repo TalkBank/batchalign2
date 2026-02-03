@@ -405,3 +405,29 @@ class TestConcurrentAccess:
         manager = CacheManager(cache_dir=temp_cache_dir)
         stats = manager.stats()
         assert stats["total_entries"] == 40  # 4 workers * 10 entries each
+
+
+def test_morphotag_cache_preserves_current_timecodes() -> None:
+    key_gen = MorphotagCacheKey()
+    base_forms = [Form(text="hello", type=TokenType.REGULAR)]
+
+    cached_source = Utterance(
+        tier=Tier(id="PAR"),
+        content=base_forms,
+        text="hello \x151_2\x15",
+    )
+    data = key_gen.serialize_output(cached_source, retokenize=True)
+    assert "retokenized_text" in data
+    assert "\x15" not in data["retokenized_text"]
+
+    current = Utterance(
+        tier=Tier(id="PAR"),
+        content=[Form(text="hello", type=TokenType.REGULAR)],
+        text="hello \x159_10\x15",
+    )
+    key_gen.deserialize_output(data, current)
+    assert current.text is not None
+    assert "\x159_10\x15" in current.text
+
+    data_no_retokenize = key_gen.serialize_output(cached_source, retokenize=False)
+    assert "retokenized_text" not in data_no_retokenize

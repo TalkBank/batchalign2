@@ -5,7 +5,7 @@ Training operations helpers
 
 import shutil
 from dataclasses import dataclass
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, Callable
 
 import rich_click as click
 import functools
@@ -72,9 +72,9 @@ class Project:
     # name of the thing being trained
     task: str
     # one argument which is the Project instance
-    prep: callable 
-    train: callable
-    eval: Optional[callable]
+    prep: Callable
+    train: Callable
+    eval: Optional[Callable]
 
 @dataclass
 class Config:
@@ -85,7 +85,7 @@ class Config:
     # wandb configuration
     tracker: Optional[WandbConfig]
     # hyperparemeters
-    params: Dict[str, any]
+    params: Dict[str, Any]
     # where the data should be dumped
     data_dir: str
     # where the saved model should be dumped

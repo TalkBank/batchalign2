@@ -57,7 +57,7 @@ def num2chinese(num, big=False, simp=True, o=False, twoalt=False):
             elif nu > 0 and int(unit) == 2:  # 0002
                 intresult.append(c_twoalt + c_unit2[nu - 1])
                 continue
-            ulist = []
+            ulist: list[str] = []
             unit = unit.zfill(4)
             for nc, ch in enumerate(reversed(unit)):
                 if ch == '0':

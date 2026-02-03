@@ -20,6 +20,7 @@ import hashlib
 import json
 import sqlite3
 import logging
+import re
 from datetime import datetime, timezone
 from typing import Any
 
@@ -27,6 +28,8 @@ from platformdirs import user_cache_dir
 from filelock import FileLock
 
 from batchalign.document import Utterance, Morphology, Dependency
+
+_TIME_CODE_RE = re.compile(r"\x15\d+_\d+\x15")
 
 L = logging.getLogger("batchalign")
 
@@ -141,7 +144,7 @@ class MorphotagCacheKey(CacheKeyGenerator):
         combined = "|".join(key_parts)
         return hashlib.sha256(combined.encode()).hexdigest()
 
-    def serialize_output(self, utterance: Utterance) -> dict[str, Any]:
+    def serialize_output(self, utterance: Utterance, retokenize: bool = False) -> dict[str, Any]:
         """Extract morphology and dependency data from utterance forms.
 
         Args:
@@ -188,9 +191,9 @@ class MorphotagCacheKey(CacheKeyGenerator):
             "dependency": dependency_data,
         }
 
-        # Include retokenized text if present
-        if utterance.text is not None:
-            result["retokenized_text"] = utterance.text
+        # Include retokenized text only when retokenize is enabled.
+        if retokenize and utterance.text is not None:
+            result["retokenized_text"] = _TIME_CODE_RE.sub("", utterance.text).strip()
 
         return result
 
@@ -241,9 +244,19 @@ class MorphotagCacheKey(CacheKeyGenerator):
                     for d in dep_list
                 ]
 
-        # Apply retokenized text if present
+        # Apply retokenized text if present, preserving any existing timecodes.
         if "retokenized_text" in data:
-            utterance.text = data["retokenized_text"]
+            if _TIME_CODE_RE.search(data["retokenized_text"]):
+                L.warning(
+                    "Morphotag cache entry contains timecodes; "
+                    "clearing cache is recommended to avoid stale timestamps."
+                )
+            retok_text = _TIME_CODE_RE.sub("", data["retokenized_text"]).strip()
+            if utterance.text:
+                match = _TIME_CODE_RE.search(utterance.text)
+                if match and not _TIME_CODE_RE.search(retok_text):
+                    retok_text = f"{retok_text} {match.group(0)}".strip()
+            utterance.text = retok_text
 
 
 class UtteranceSegmentationCacheKey(CacheKeyGenerator):

@@ -203,10 +203,10 @@ wreak: wrought, wrough
 """
 
 def is_irregular(lemma, form):
-    proc = [[j.strip() for j in i.split(":")] for i in IRR.strip().split("\n")]
+    proc_list = [[j.strip() for j in i.split(":")] for i in IRR.strip().split("\n")]
     proc = {a.strip():
             [k.strip() for k in b.strip().split(",")]
-            for (a,b) in proc}
+            for (a,b) in proc_list}
 
     res = proc.get(lemma.lower())
     if not res:
