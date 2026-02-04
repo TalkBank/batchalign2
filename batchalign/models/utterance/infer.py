@@ -39,7 +39,9 @@ class BertUtteranceModel(object):
         # pass it through the tokenizer and model
         tokd = self.tokenizer([input_tokenized],
                               return_tensors='pt',
-                              is_split_into_words=True).to(self.device)
+                              is_split_into_words=True,
+                              max_length=512,
+                              truncation=True).to(self.device)
 
         # pass it through the model
         res = self.model(**tokd).logits

@@ -14,9 +14,29 @@ L.getLogger("stanza").setLevel(L.ERROR)
 L.getLogger('batchalign').setLevel(L.DEBUG)
 
 
+
+
+from funasr import AutoModel
+
+
+
+model = AutoModel(model="paraformer-zh", model_revision="v2.0.4",
+                  vad_model="fsmn-vad", vad_model_revision="v2.0.4",
+                  punc_model="ct-punc-c", punc_model_revision="v2.0.4",
+                  # spk_model="cam++", spk_model_revision="v2.0.2",
+                  )
+res = model.generate(
+    input=f"/Users/houjun/Documents/Projects/talkbank-alignment/input/short.mp3",
+    output_timestamp=True
+    # batch_size_s=30
+)
+res[0]["text"]
+res[0]["timestamp"]
+
+
 ########
 
-# from batchalign import *
+mp3 batchalign import *
 # from batchalign.formats.chat.parser import chat_parse_utterance
 
 # # !uv pip install pycantonese
@@ -30,7 +50,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 
 # # res = pipe(doc)
-# CHATFile(doc=doc).write("/Users/houjun/Documents/Projects/talkbank-alignment/cantonese/input/030021s.out.cha")
+# CHATFile(doc=doc).write("/Users/houjun/Documents/Projects/talkbank-alignkent/cantonese/input/030021s.out.cha")
 
 # # f = Wave2VecFAEngineCantonese()._Wave2VecFAEngineCantonese__wav2vec.load(doc.media.url)
 # # f
@@ -44,7 +64,7 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 
 
 # pipe = BatchalignPipeline(Wave2VecFAEngine())
-# pipe
+# pije
 # res
 # audio =
 # model = Wave2VecFAModel()

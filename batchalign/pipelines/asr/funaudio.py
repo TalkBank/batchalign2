@@ -51,36 +51,36 @@ class FunAudioEngine(BatchalignEngine):
     def __init__(self, model="FunAudioLLM/SenseVoiceSmall", lang="yue"):
 
         self.model_dir = model
-        self.__lang = "yue"
+        self.__lang = lang
         
-        self.model = AutoModel(
-            model=self.model_dir,
-            output_timestamps=True,
-            vad_model="fsmn-vad",
-            vad_kwargs={"max_single_segment_time": 30000},
-            device="cpu",  # GPU
-            hub="hf",
-            cache={},
-            language="yue", 
-            use_itn=True,
-            batch_size_s=60,
-            output_timestamp=True,
-            ban_emo_unk =False,
-            merge_vad=True,
-            merge_length_s=15,
-           
-        )
+        if "paraformer" not in model:
+            self.model = AutoModel(
+                model=self.model_dir,
+                output_timestamps=True,
+                vad_model="fsmn-vad",
+                vad_kwargs={"max_single_segment_time": 30000},
+                device="cpu",  # GPU
+                hub="hf",
+                cache={},
+                language="yue", 
+                use_itn=True,
+                batch_size_s=60,
+                output_timestamp=True,
+                ban_emo_unk =False,
+                merge_vad=True,
+                merge_length_s=15,
 
-        if resolve("utterance", self.__lang) != None:
-            L.debug("Initializing utterance model...")
-            if lang != "yue":
-                self.__engine = BertUtteranceModel(resolve("utterance", lang))
-            else:
-                # we have special inference procedure for cantonese
-                self.__engine = BertCantoneseUtteranceModel(resolve("utterance", lang))
-            L.debug("Done.")
+            )
         else:
-            self.__engine = None
+            self.model = AutoModel(
+                model=self.model_dir, model_revision="v2.0.4",
+                vad_model="fsmn-vad", vad_model_revision="v2.0.4",
+                punc_model="ct-punc-c", punc_model_revision="v2.0.4",
+            )
+            
+        L.debug("loading "+str(self.model_dir))
+
+        self.__engine = BertCantoneseUtteranceModel(resolve("utterance", lang))
             
     def replace_cantonese_words(self, text):
         """Function to replace Cantonese words with custom replacements."""
@@ -139,37 +139,36 @@ class FunAudioEngine(BatchalignEngine):
         :param audio_file_path: Path to the audio file to be transcribed.
         :return: A Document object containing the transcription and metadata.
         """
-        res = self.model.generate(
-            input=audio_file_path,
-            cache={},
-            language=self.__lang, 
-            output_timestamps=True,
-            vad_model="fsmn-vad",
-            vad_kwargs={"max_single_segment_time": 60000},
-            ban_emo_unk=False,
-            use_itn=True,
-            batch_size_s=60,
-            merge_vad=True,
-            merge_length_s=15,
-            output_timestamp=True,
-            spk_model="cam++"
-        )
+        if "paraformer" not in self.model_dir:
+            res = self.model.generate(
+                input=audio_file_path,
+                cache={},
+                language=self.__lang, 
+                output_timestamps=True,
+                vad_model="fsmn-vad",
+                vad_kwargs={"max_single_segment_time": 60000},
+                ban_emo_unk=False,
+                use_itn=True,
+                batch_size_s=60,
+                merge_vad=True,
+                merge_length_s=15,
+                output_timestamp=True,
+                spk_model="cam++"
+            )
+        else:
+            res = self.model.generate(input=audio_file_path, output_timestamp=True)
         
         turns = []
 
         for segment in res:  # segment is a dictionary with keys "text" and "timestamp"
-            print("segment:", segment)
-            print(type(segment))
+            L.debug("segment:", segment)
+            L.debug(type(segment))
 
             # Extracting text and timestamps from the segment
             text = segment["text"]
-            print(text)
+            L.debug(text)
             timestamps = segment.get("timestamp")
-            if timestamps is None:
-                continue
-
             # Check if timestamps is a list of tuples
-            utterances = []
             current_utterance = []
             for part in text.split("<|yue|>"):
                 if not part.strip():
@@ -181,6 +180,8 @@ class FunAudioEngine(BatchalignEngine):
              
                     current_utterance.append(content)
                     print(f"current_utterance:{current_utterance}")
+                elif "paraformer" in self.model_dir:
+                    current_utterance.append(parts[0])
 
             large_string = ''.join(current_utterance)
             print(f"Large string: {large_string}")
@@ -188,7 +189,7 @@ class FunAudioEngine(BatchalignEngine):
             turn = []
                 
             # process Cantonese differently
-            if self.__lang == "yue":
+            if self.__lang == "yue" and "paraformer" not in self.model_dir:
                 content = cc.convert(large_string)
                 content = self.replace_cantonese_words(content)
                 content = content.replace("「", "").replace("」", "").replace("。", "").replace("，", "").replace("！", "").replace("？", "")
