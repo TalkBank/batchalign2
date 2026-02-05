@@ -109,7 +109,23 @@ class Wave2VecFAEngine(BatchalignEngine):
                 for p in MOR_PUNCT + ENDING_PUNCT:
                     transcript = [i.replace("_", " ") for i in transcript if i.strip() != p]
                 if (grp[-1][1][1] - grp[0][1][0]) < 20*1000:
-                    res = self.__wav2vec(audio=f.chunk(grp[0][1][0], grp[-1][1][1]), text=transcript)
+                    chunk_start = grp[0][1][0]
+                    chunk_end = grp[-1][1][1]
+                    chunk_duration_ms = chunk_end - chunk_start
+                    # Log segment details before alignment attempt
+                    L.debug(f"Segment {indx+1}: start={chunk_start}ms, end={chunk_end}ms, duration={chunk_duration_ms}ms, words={len(transcript)}")
+                    
+                    # Defensive check: skip segments that are too short for CTC alignment
+                    # CTC requires at least as many frames as target characters
+                    # Wave2Vec outputs ~50 frames/sec, so 1 char needs ~20ms minimum
+                    # Add safety margin: require 80ms per word (avg 4 chars/word * 20ms/char)
+                    min_duration_per_word_ms = 80
+                    min_required_ms = len(transcript) * min_duration_per_word_ms
+                    if chunk_duration_ms < min_required_ms:
+                        L.warning(f"Skipping segment {indx+1}: duration {chunk_duration_ms}ms too short for {len(transcript)} words (need at least {min_required_ms}ms)")
+                        continue
+                    
+                    res = self.__wav2vec(audio=f.chunk(chunk_start, chunk_end), text=transcript)
             except (IndexError, ValueError):
                 # utterance contains nothing or invalid data
                 continue

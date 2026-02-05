@@ -171,7 +171,7 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
             engines.append(FunAudioEngine(model="FunAudioLLM/SenseVoiceSmall"))
         elif engine == "paraformer":
             from batchalign.pipelines.asr.funaudio import FunAudioEngine
-            engines.append(FunAudioEngine(model="paraformer-zh", lang=l"yueang))
+            engines.append(FunAudioEngine(model="paraformer-zh", lang=lang))
         elif engine ==  "funaudio_utr":
             from batchalign.pipelines.utr import FunAudioUTREngine
             engines.append(FunAudioUTREngine(lang=lang))

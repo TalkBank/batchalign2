@@ -132,6 +132,8 @@ batchalign.add_command(cache, "cache")
 @click.option("--pauses", type=bool, default=False, help="Should we try to bullet each word or should we try to add pauses in between words by grouping them? Default: no pauses.", is_flag=True)
 @click.option("--wor/--nowor",
               default=True, help="Should we write word level alignment line? Default to yes.")
+@click.option("--merge-abbrev/--no-merge-abbrev",
+              default=False, help="Merge abbreviations in output. Default: no.")
 @click.pass_context
 def align(ctx, in_dir, out_dir, whisper, wav2vec, iic, wav2vec_yue, tencent, funaudio, **kwargs):
     """Align transcripts against corresponding media files."""
@@ -143,7 +145,7 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, iic, wav2vec_yue, tencent, fun
         )
 
     def writer(doc, output):
-        CHATFile(doc=doc).write(output, write_wor=kwargs.get("wor", True), dont_merge_letters=True)
+        CHATFile(doc=doc).write(output, write_wor=kwargs.get("wor", True), dont_merge_letters=True, merge_abbrev=kwargs.get("merge_abbrev", False))
 
     # Determine FA engine
     if iic:
@@ -187,6 +189,8 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, iic, wav2vec_yue, tencent, fun
               default=False, help="Perform speaker diarization (this flag is ignored with Rev.AI)")
 @click.option("--wor/--nowor",
               default=False, help="Should we write word level alignment line? Default to no.")
+@click.option("--merge-abbrev/--no-merge-abbrev",
+              default=False, help="Merge abbreviations in output. Default: no.")
 @click.option("--lang",
               help="sample language in three-letter ISO 3166-1 alpha-3 code",
               show_default=True,
@@ -227,7 +231,8 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
                                 .replace(".MP4", ".cha")
                                 .replace(".mp3", ".cha")
                                 .replace(".MP3", ".cha"),
-                                write_wor=kwargs.get("wor", False))
+                                write_wor=kwargs.get("wor", False),
+                                merge_abbrev=kwargs.get("merge_abbrev", False))
 
     if kwargs.get("diarize"):
         _dispatch("transcribe_s",
@@ -246,6 +251,8 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
 
 @batchalign.command()
 @common_options
+@click.option("--merge-abbrev/--no-merge-abbrev",
+              default=False, help="Merge abbreviations in output. Default: no.")
 @click.pass_context
 def translate(ctx, in_dir, out_dir, **kwargs):
     """Translate the transcript to English."""
@@ -259,7 +266,7 @@ def translate(ctx, in_dir, out_dir, **kwargs):
         return doc
 
     def writer(doc, output):
-        CHATFile(doc=doc).write(output)
+        CHATFile(doc=doc).write(output, merge_abbrev=kwargs.get("merge_abbrev", False))
 
     _dispatch("translate", "eng", 1, ["cha"], ctx,
               in_dir, out_dir,
@@ -279,6 +286,8 @@ def translate(ctx, in_dir, out_dir, **kwargs):
               help="Comma seperated manual lexicon override")
 @click.option("--override-cache/--use-cache",
               default=False, help="Bypass cache and recompute all utterances.")
+@click.option("--merge-abbrev/--no-merge-abbrev",
+              default=False, help="Merge abbreviations in output. Default: no.")
 @click.pass_context
 def morphotag(ctx, in_dir, out_dir, **kwargs):
     """Perform morphosyntactic analysis on transcripts."""
@@ -305,7 +314,7 @@ def morphotag(ctx, in_dir, out_dir, **kwargs):
         )
 
     def writer(doc, output):
-        CHATFile(doc=doc, special_mor_=doc.ba_special_.get("special_mor_notation", False)).write(output)
+        CHATFile(doc=doc, special_mor_=doc.ba_special_.get("special_mor_notation", False)).write(output, merge_abbrev=kwargs.get("merge_abbrev", False))
 
     _dispatch("morphotag", "eng", 1, ["cha"], ctx,
               in_dir, out_dir,
@@ -316,6 +325,8 @@ def morphotag(ctx, in_dir, out_dir, **kwargs):
 
 @batchalign.command(hidden=True)
 @common_options
+@click.option("--merge-abbrev/--no-merge-abbrev",
+              default=False, help="Merge abbreviations in output. Default: no.")
 @click.pass_context
 def coref(ctx, in_dir, out_dir, **kwargs):
     """Perform coreference analysis on transcripts."""
@@ -327,7 +338,7 @@ def coref(ctx, in_dir, out_dir, **kwargs):
         return doc, {}
 
     def writer(doc, output):
-        CHATFile(doc=doc).write(output)
+        CHATFile(doc=doc).write(output, merge_abbrev=kwargs.get("merge_abbrev", False))
 
     _dispatch("coref", "eng", 1, ["cha"], ctx,
               in_dir, out_dir,
@@ -344,6 +355,8 @@ def coref(ctx, in_dir, out_dir, **kwargs):
               default="eng",
               type=str)
 @click.option("-n", "--num_speakers", type=int, help="number of speakers in the language sample", default=2)
+@click.option("--merge-abbrev/--no-merge-abbrev",
+              default=False, help="Merge abbreviations in output. Default: no.")
 @click.pass_context
 def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
     """Perform morphosyntactic analysis on transcripts."""
@@ -353,7 +366,7 @@ def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
         return CHATFile(path=os.path.abspath(file)).doc
 
     def writer(doc, output):
-        CHATFile(doc=doc).write(output)
+        CHATFile(doc=doc).write(output, merge_abbrev=kwargs.get("merge_abbrev", False))
 
     _dispatch("utseg", lang, num_speakers, ["cha"], ctx,
               in_dir, out_dir,
@@ -377,6 +390,10 @@ def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
               default="eng",
               type=str)
 @click.option("-n", "--num_speakers", type=int, help="number of speakers in the language sample", default=2)
+@click.option("--wor/--nowor",
+              default=False, help="Should we write word level alignment line? Default to no.")
+@click.option("--merge-abbrev/--no-merge-abbrev",
+              default=False, help="Merge abbreviations in output. Default: no.")
 @click.pass_context
 def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, funaudio, whisper_oai, **kwargs):
     """Benchmark ASR utilities for their word accuracy"""
@@ -401,7 +418,9 @@ def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, funaud
             df.write(str(doc["wer"]))
         with open(Path(output).with_suffix(".diff"), 'w') as df:
             df.write(str(doc["diff"]))
-        CHATFile(doc=doc["doc"]).write(str(Path(output).with_suffix(".asr.cha")))
+        CHATFile(doc=doc["doc"]).write(str(Path(output).with_suffix(".asr.cha")),
+                                       write_wor=kwargs.get("wor", False),
+                                       merge_abbrev=kwargs.get("merge_abbrev", False))
 
 
     _dispatch("benchmark", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
