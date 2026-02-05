@@ -432,14 +432,67 @@ def _dispatch(command, lang, num_speakers,
         __tf = tempfile.NamedTemporaryFile(delete=True, mode='w')
         C = Console(file=__tf)
 
-    # process largest inputs first to avoid late stragglers
+    def _get_media_duration(cha_path):
+        """Get duration of associated media file in seconds, for scheduling."""
+        from batchalign.models import audio_io
+        
+        if not cha_path.endswith('.cha'):
+            # Direct media file
+            try:
+                info = audio_io.info(cha_path)
+                return info.num_frames / info.sample_rate if info.sample_rate > 0 else 0
+            except:
+                return 0
+        
+        # For .cha files, find associated media
+        base = os.path.splitext(cha_path)[0]
+        for ext in ['.wav', '.mp3', '.mp4']:
+            media = base + ext
+            if os.path.exists(media):
+                try:
+                    info = audio_io.info(media)
+                    return info.num_frames / info.sample_rate if info.sample_rate > 0 else 0
+                except:
+                    continue
+        return 0  # no media found or all failed
+
+    def _get_cha_metric(cha_path):
+        """Get a processing metric for .cha files: duration if media exists, else utterance count."""
+        duration = _get_media_duration(cha_path)
+        if duration > 0:
+            return duration
+        # No media (e.g., morphotag) — use utterance count as proxy
+        if cha_path.endswith('.cha') and os.path.exists(cha_path):
+            try:
+                with open(cha_path, 'r', encoding='utf-8') as f:
+                    # Count lines starting with *
+                    count = sum(1 for line in f if line.startswith('*'))
+                    return float(count) if count > 0 else 1.0
+            except:
+                return 1.0
+        return 1.0  # fallback
+
+    def _get_media_size(cha_path):
+        """Get size of associated media file, for memory estimation."""
+        if not cha_path.endswith('.cha'):
+            return os.path.getsize(cha_path) if os.path.exists(cha_path) else 0
+        base = os.path.splitext(cha_path)[0]
+        # Check wav first (what align actually uses after conversion)
+        for ext in ['.wav', '.mp3', '.mp4']:
+            media = base + ext
+            if os.path.exists(media):
+                return os.path.getsize(media)
+        return os.path.getsize(cha_path) if os.path.exists(cha_path) else 0
+
+    # Process smallest inputs first (by duration/utterance count) to calibrate adaptive cap quickly
+    # This gives us many completions fast → better estimates → safer scaling
     file_pairs = list(zip(files, outputs))
-    file_pairs.sort(key=lambda fo: os.path.getsize(fo[0]) if os.path.exists(fo[0]) else 0, reverse=True)
+    file_pairs.sort(key=lambda fo: _get_cha_metric(fo[0]))
     if file_pairs:
         files, outputs = map(list, zip(*file_pairs))
     else:
         files, outputs = [], []
-    file_sizes: dict[str, int] = {f: os.path.getsize(f) if os.path.exists(f) else 0 for f in files}
+    file_metrics: dict[str, float] = {f: _get_cha_metric(f) for f in files}
 
     C.print(f"\nMode: [blue]{command}[/blue]; got [bold cyan]{len(files)}[/bold cyan] transcript{'s' if len(files) > 1 else ''} to process from {in_dir}:\n")
 
@@ -567,12 +620,14 @@ def _dispatch(command, lang, num_speakers,
     mem_samples: list = []
     last_low_mem_warn = 0.0
     adaptive_cap_reported = None
-    history_sizes = []
+    history_metrics = []
     history_peaks = []
     history_peak_est = None
+    history_max_peak = None
     history_ratio_est = None
 
     def _load_memory_history():
+        nonlocal history_max_peak
         if not memory_history_path.exists():
             return
         try:
@@ -585,15 +640,18 @@ def _dispatch(command, lang, num_speakers,
         if not command_data:
             return
         peaks = command_data.get("peaks", [])
-        sizes = command_data.get("sizes", [])
+        metrics = command_data.get("metrics", [])
+        max_peak = command_data.get("max_peak")
         if peaks:
             peaks = sorted(int(p) for p in peaks if p)
             if peaks:
                 history_peaks.extend(peaks)
-        if sizes:
-            sizes = [int(s) for s in sizes if s]
-            if sizes:
-                history_sizes.extend(sizes)
+        if metrics:
+            metrics = [float(m) for m in metrics if m]
+            if metrics:
+                history_metrics.extend(metrics)
+        if max_peak:
+            history_max_peak = int(max_peak)
 
     def _persist_memory_history():
         if not mem_records:
@@ -601,9 +659,9 @@ def _dispatch(command, lang, num_speakers,
         records = []
         for path, info in mem_records.items():
             peak = info.get("rss_peak") or info.get("rss_end")
-            size = file_sizes.get(path, 0)
-            if peak and size:
-                records.append((size, peak))
+            metric = file_metrics.get(path, 0)
+            if peak and metric:
+                records.append((metric, peak))
         if not records:
             return
         try:
@@ -615,14 +673,18 @@ def _dispatch(command, lang, num_speakers,
         if payload.get("version") != 1:
             payload = {"version": 1, "commands": {}}
         commands = payload.setdefault("commands", {})
-        data = commands.setdefault(command, {"peaks": [], "sizes": []})
+        data = commands.setdefault(command, {"peaks": [], "metrics": []})
         peaks = data.setdefault("peaks", [])
-        sizes = data.setdefault("sizes", [])
-        for size, peak in records:
+        metrics = data.setdefault("metrics", [])
+        for metric, peak in records:
             peaks.append(int(peak))
-            sizes.append(int(size))
+            metrics.append(float(metric))
         peaks[:] = peaks[-100:]
-        sizes[:] = sizes[-100:]
+        metrics[:] = metrics[-100:]
+        # Track max peak ever seen for safer cap estimation
+        all_peaks = [int(p) for p in peaks if p]
+        if all_peaks:
+            data["max_peak"] = max(all_peaks)
         try:
             memory_history_path.write_text(json.dumps(payload))
         except Exception:
@@ -661,14 +723,16 @@ def _dispatch(command, lang, num_speakers,
             return None
         return max(int(total * 0.10), 2 * 1024 * 1024 * 1024)
 
-    def _estimate_worker_bytes(file_size):
-        ratios = [mem / size for size, mem in mem_samples if size and mem]
+    def _estimate_worker_bytes(file_metric):
+        # Compute memory-per-metric ratios from completed files
+        # (metric = duration in seconds for align, utterance count for morphotag)
+        ratios = [mem / metric for metric, mem in mem_samples if metric and mem]
         if not ratios and history_ratio_est:
             ratios = [history_ratio_est]
         if ratios:
             ratios.sort()
             median_ratio = ratios[len(ratios) // 2]
-            est = int(median_ratio * file_size)
+            est = int(median_ratio * file_metric)
             return max(512 * 1024 * 1024, min(est, 6 * 1024 * 1024 * 1024))
         if history_peak_est:
             return max(512 * 1024 * 1024, min(int(history_peak_est), 6 * 1024 * 1024 * 1024))
@@ -687,15 +751,30 @@ def _dispatch(command, lang, num_speakers,
         total, available = _system_memory()
         reserve = _memory_reserve(total)
         if reserve is None or available is None:
-            return num_workers
+            return min(num_workers, adaptive_warmup)
         peaks = sorted(mem for _, mem in mem_samples if mem)
-        if not peaks and history_peak_est:
+        # Use history max peak if no samples yet (trust previous runs)
+        if not peaks and history_max_peak:
+            peaks = [history_max_peak]
+        elif not peaks and history_peak_est:
             peaks = [history_peak_est]
         if not peaks:
             return min(num_workers, adaptive_warmup)
-        peak_est = peaks[len(peaks) // 2] * adaptive_safety_factor
-        if peak_est <= 0:
-            return num_workers
+        # Require at least 3 fresh samples before P90 (unless using history)
+        if len(mem_samples) < 3 and not history_max_peak:
+            return min(num_workers, adaptive_warmup)
+        # Use P90 instead of median for more conservative estimate
+        p90_idx = min(int(len(peaks) * 0.9), len(peaks) - 1)
+        p90_est = peaks[p90_idx] * adaptive_safety_factor
+        # Also track max observed as absolute ceiling (no safety factor needed)
+        max_observed = peaks[-1]
+        # Incorporate historical worst case even when fresh samples exist
+        if history_max_peak:
+            max_observed = max(max_observed, history_max_peak)
+        # Use whichever is larger for safety
+        peak_est = max(p90_est, max_observed)
+        # Floor: never estimate below 512MB per worker
+        peak_est = max(peak_est, 512 * 1024 * 1024)
         cap = int((available - reserve) // peak_est)
         return max(1, min(num_workers, cap))
 
@@ -722,15 +801,22 @@ def _dispatch(command, lang, num_speakers,
         if history_peaks:
             history_peaks.sort()
             history_peak_est = history_peaks[len(history_peaks) // 2]
-        if history_sizes and history_peaks:
-            ratio_pairs = [peak / size for size, peak in zip(history_sizes, history_peaks) if size and peak]
+            # Use max peak from history if available, otherwise compute from peaks
+            if not history_max_peak:
+                history_max_peak = max(history_peaks)
+        if history_metrics and history_peaks:
+            ratio_pairs = [peak / metric for metric, peak in zip(history_metrics, history_peaks) if metric and peak]
             if ratio_pairs:
                 ratio_pairs.sort()
                 history_ratio_est = ratio_pairs[len(ratio_pairs) // 2]
 
     try:
         with prog as prog:
-            if not pool_mode_enabled and history_peak_est:
+            if not pool_mode_enabled and history_max_peak:
+                prog.console.print(
+                    f"[dim]Adaptive warm start:[/dim] {_format_bytes(history_max_peak)} max peak from history"
+                )
+            elif not pool_mode_enabled and history_peak_est:
                 prog.console.print(
                     f"[dim]Adaptive warm start:[/dim] {_format_bytes(history_peak_est)} median peak from history"
                 )
@@ -883,7 +969,7 @@ def _dispatch(command, lang, num_speakers,
                     def submit_one(file_path, output_path):
                         future = executor.submit(worker_func, (file_path, output_path))
                         future_to_file[future] = file_path
-                        est_bytes = _estimate_worker_bytes(file_sizes.get(file_path, 0))
+                        est_bytes = _estimate_worker_bytes(file_metrics.get(file_path, 0))
                         total_mem, available_mem = _system_memory()
                         reserve = _memory_reserve(total_mem)
                         low_mem = False
@@ -913,7 +999,7 @@ def _dispatch(command, lang, num_speakers,
                                 next_file, next_output = next(file_iter)
                             except StopIteration:
                                 break
-                            est_bytes = _estimate_worker_bytes(file_sizes.get(next_file, 0))
+                            est_bytes = _estimate_worker_bytes(file_metrics.get(next_file, 0))
                             throttle, total, available = _should_throttle(est_bytes)
                             if throttle and future_to_file:
                                 now = time.time()
@@ -978,7 +1064,7 @@ def _dispatch(command, lang, num_speakers,
                                     mem_records[file] = mem_info
                                     peak = mem_info.get("rss_peak") or mem_info.get("rss_end")
                                     if peak:
-                                        mem_samples.append((file_sizes.get(file, 0), peak))
+                                        mem_samples.append((file_metrics.get(file, 0), peak))
                                         total_mem, available_mem = _system_memory()
                                         reserve = _memory_reserve(total_mem)
                                         low_mem = False

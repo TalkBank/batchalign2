@@ -76,7 +76,7 @@ def handle_verbosity(verbosity):
 @click.option("--pool/--no-pool", default=True, help="Allow pooled model execution for multi-file runs.")
 @click.option("--lazy-audio/--no-lazy-audio", default=True, help="Enable lazy audio loading for alignment/ASR.")
 @click.option("--adaptive-safety-factor", type=float, default=1.35, show_default=True, help="Safety factor applied to observed worker RSS peaks.")
-@click.option("--adaptive-warmup", type=int, default=2, show_default=True, help="Initial worker count before adaptive cap kicks in.")
+@click.option("--adaptive-warmup", type=int, default=3, show_default=True, help="Initial worker count before adaptive cap kicks in.")
 @click.option("--force-cpu/--no-force-cpu", default=False, help="Disable MPS/CUDA and force CPU-only models.")
 @click.option("--shared-models/--no-shared-models", default=False, help="Preload models and fork workers to share read-only memory (advanced; ignored in pooled mode).")
 def batchalign(ctx, verbose, workers, memlog, mem_guard, adaptive_workers, adaptive_safety_factor, adaptive_warmup, pool, lazy_audio, force_cpu, shared_models):
