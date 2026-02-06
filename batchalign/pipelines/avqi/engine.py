@@ -253,9 +253,11 @@ class AVQIEngine(BatchalignEngine):
         sv_mono_path = None
 
         try:
+            from batchalign.models import audio_io
+            
             # Convert cs_file to mono
             L.info(f"Converting {cs_path.name} to mono")
-            cs_waveform, cs_sample_rate = torchaudio.load(str(cs_file))
+            cs_waveform, cs_sample_rate = audio_io.load(str(cs_file))
             if cs_waveform.shape[0] > 1:
                 cs_mono = cs_waveform.mean(dim=0, keepdim=True)
             else:
@@ -263,11 +265,11 @@ class AVQIEngine(BatchalignEngine):
 
             # Create mono filename: file_name.cs.[extension].mono
             cs_mono_path = cs_path.parent / f"{cs_path.name}.mono.wav"
-            torchaudio.save(str(cs_mono_path), cs_mono, cs_sample_rate)
+            audio_io.save(str(cs_mono_path), cs_mono, cs_sample_rate)
 
             # Convert sv_file to mono
             L.info(f"Converting {sv_name} to mono")
-            sv_waveform, sv_sample_rate = torchaudio.load(str(sv_file))
+            sv_waveform, sv_sample_rate = audio_io.load(str(sv_file))
             if sv_waveform.shape[0] > 1:
                 sv_mono = sv_waveform.mean(dim=0, keepdim=True)
             else:
@@ -275,7 +277,7 @@ class AVQIEngine(BatchalignEngine):
 
             # Create mono filename: file_name.sv.[extension].mono
             sv_mono_path = sv_file.parent / f"{sv_file.name}.mono.wav"
-            torchaudio.save(str(sv_mono_path), sv_mono, sv_sample_rate)
+            audio_io.save(str(sv_mono_path), sv_mono, sv_sample_rate)
 
             # Calculate AVQI using mono versions
             avqi_score, features = self.calculate_avqi_features(str(cs_mono_path), str(sv_mono_path))

@@ -1,0 +1,4 @@
+[project]
+project_includes = ["batchalign"]
+project_excludes = ["batchalign/tests"]
+python_version = "3.11"

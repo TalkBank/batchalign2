@@ -1,4 +1,4 @@
-from batchalign import cli
+from batchalign.cli.cli import batchalign
 
-if __name__=="__main__":
-    cli()
+if __name__ == "__main__":
+    batchalign()

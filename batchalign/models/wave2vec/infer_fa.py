@@ -29,7 +29,11 @@ class Wave2VecFAModel(object):
         import torch
         import torchaudio
         bundle = torchaudio.pipelines.MMS_FA
-        device = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
+        from batchalign.utils.device import force_cpu_preferred
+        if force_cpu_preferred():
+            device = torch.device('cpu')
+        else:
+            device = torch.device('cuda') if torch.cuda.is_available() else torch.device("mps") if torch.backends.mps.is_available() else torch.device('cpu')
 
         L.debug("Initializing Wave2vec FA model")
         self.model = bundle.get_model().to(device)
@@ -54,21 +58,28 @@ class Wave2VecFAModel(object):
             Return processed audio file and speaker segments.
         """
         import torch
-        import torchaudio
+        from batchalign.models import audio_io
         from torchaudio import transforms as T
 
-        # function: load and resample audio
-        audio_arr, rate = torchaudio.load(f)
+        # function: load and resample audio (lazy by default)
+        try:
+            info = audio_io.info(f)
+            sample_rate = info.sample_rate
+            lazy_audio = ASRAudioFile.lazy(f, sample_rate)
+        except Exception:
+            audio_arr, rate = audio_io.load(f)
+            if rate != self.sample_rate:
+                audio_arr = T.Resample(rate, self.sample_rate)(audio_arr)
+            resampled = torch.mean(audio_arr.transpose(0,1), dim=1)
+            return ASRAudioFile(f, resampled, self.sample_rate)
 
-        # resample if needed
-        if rate != self.sample_rate:
+        if sample_rate != self.sample_rate:
+            audio_arr, rate = audio_io.load(f)
             audio_arr = T.Resample(rate, self.sample_rate)(audio_arr)
+            resampled = torch.mean(audio_arr.transpose(0,1), dim=1)
+            return ASRAudioFile(f, resampled, self.sample_rate)
 
-        # transpose and mean
-        resampled = torch.mean(audio_arr.transpose(0,1), dim=1)
-
-        # and return the audio file
-        return ASRAudioFile(f, resampled, self.sample_rate)
+        return lazy_audio
 
     def __call__(self, audio, text):
         import torch

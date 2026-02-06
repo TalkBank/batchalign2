@@ -9,7 +9,7 @@
 # Copyright © 2024 Brian MacWhinney and the TalkBank Project
 # Developed by Houjun Liu and Brian MacWhinney
 
-from batchalign import cli
+from batchalign.cli import batchalign
 
 if __name__=="__main__":
-    cli()
+    batchalign()
