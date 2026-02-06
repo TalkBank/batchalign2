@@ -59,7 +59,6 @@ setup(
         "typing-extensions",
         "num2words",
         "tiktoken",
-        "pysptk==0.1.18",
         "blobfile",
         "sentencepiece",
         "tencentcloud-sdk-python-common",
