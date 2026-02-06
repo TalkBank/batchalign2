@@ -14,7 +14,7 @@
 # from .speaker import NemoSpeakerEngine
 
 # <<<<<<< HEAD
-# from .fa import WhisperFAEngine, Wave2VecFAEngine, IICFAEngine, Wave2VecFAEngineCantonese
+# from .fa import WhisperFAEngine, Wave2VecFAEngine, Wave2VecFAEngineCantonese
 # from .utr import WhisperUTREngine, RevUTREngine, TencentUTREngine, FunAudioUTREngine
 # =======
 # from .fa import WhisperFAEngine, Wave2VecFAEngine
