@@ -13,6 +13,10 @@ def __getattr__(name):
     elif name == 'Wave2VecFAEngine':
         from .wave2vec_fa import Wave2VecFAEngine
         return Wave2VecFAEngine
+    elif name == 'Wave2VecFAEngineCantonese':
+        from .wave2vec_fa_canto import Wave2VecFAEngineCantonese
+        return Wave2VecFAEngineCantonese
+
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
-__all__ = ['WhisperFAEngine', 'Wave2VecFAEngine']
+__all__ = ['WhisperFAEngine', 'Wave2VecFAEngine', 'Wave2VecFAEngineCantonese']
