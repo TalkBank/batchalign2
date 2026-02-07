@@ -13,6 +13,12 @@ def __getattr__(name):
     elif name == 'RevUTREngine':
         from .rev_utr import RevUTREngine
         return RevUTREngine
+    elif name == 'FunAudioUTREngine':
+        from .funaudio_utr import FunAudioUTREngine
+        return FunAudioUTREngine
+    elif name == 'TencentUTREngine':
+        from .tencent_utr import TencentUTREngine
+        return TencentUTREngine
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
-__all__ = ['WhisperUTREngine', 'RevUTREngine']
+__all__ = ['WhisperUTREngine', 'RevUTREngine', 'FunAudioUTREngine', 'TencentUTREngine']

@@ -19,6 +19,16 @@ def __getattr__(name):
     elif name == 'OAIWhisperEngine':
         from .oai_whisper import OAIWhisperEngine
         return OAIWhisperEngine
+    elif name == 'TencentEngine':
+        from .tencent import TencentEngine
+        return TencentEngine
+    elif name == 'AliyunEngine':
+        from .aliyun import AliyunEngine
+        return AliyunEngine
+    elif name == 'FunAudioEngine':
+        from .funaudio import FunAudioEngine
+        return FunAudioEngine
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
-__all__ = ['WhisperEngine', 'RevEngine', 'WhisperXEngine', 'OAIWhisperEngine']
+__all__ = ['WhisperEngine', 'RevEngine', 'WhisperXEngine', 'OAIWhisperEngine',
+           'TencentEngine', 'AliyunEngine', 'FunAudioEngine']

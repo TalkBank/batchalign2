@@ -151,8 +151,10 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
             from batchalign.pipelines.translate import SeamlessTranslationModel
             engines.append(SeamlessTranslationModel())
         elif engine == "tencent":
+            from batchalign.pipelines.asr.tencent import TencentEngine
             engines.append(TencentEngine(lang=lang))
         elif engine == "tencent_utr":
+            from batchalign.pipelines.utr import TencentUTREngine
             engines.append(TencentUTREngine(lang=lang))
         elif engine == "gtrans":
             from batchalign.pipelines.translate import GoogleTranslateEngine

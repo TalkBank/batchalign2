@@ -1,34 +1,13 @@
-# <<<<<<< HEAD
-# from .pipeline import BatchalignPipeline
-# from .base import BatchalignEngine
-# from .asr import (WhisperEngine, RevEngine, WhisperXEngine,
-#                   TencentEngine, OAIWhisperEngine, AliyunEngine, FunAudioEngine)
-# =======
-# from .pipeline import BatchalignPipeline
-# from .base import BatchalignEngine
-# from .asr import WhisperEngine, RevEngine, WhisperXEngine, OAIWhisperEngine
-# >>>>>>> master
+"""
+Pipelines Module
 
-# from .morphosyntax import StanzaEngine, CorefEngine
-# from .cleanup import NgramRetraceEngine, DisfluencyReplacementEngine
-# from .speaker import NemoSpeakerEngine
+Provides the BatchalignPipeline orchestrator and all processing engines.
+Uses lazy loading to avoid importing heavy dependencies until needed.
 
-# <<<<<<< HEAD
-# from .fa import WhisperFAEngine, Wave2VecFAEngine, Wave2VecFAEngineCantonese
-# from .utr import WhisperUTREngine, RevUTREngine, TencentUTREngine, FunAudioUTREngine
-# =======
-# from .fa import WhisperFAEngine, Wave2VecFAEngine
-# from .utr import WhisperUTREngine, RevUTREngine
-# >>>>>>> master
-
-# from .analysis import EvaluationEngine
-# from .utterance import StanzaUtteranceEngine
-
-# from .translate import SeamlessTranslationModel, GoogleTranslateEngine
-# from .avqi import AVQIEngine
-
-# from .diarization import PyannoteEngine
-# from .opensmile import OpenSMILEEngine
+Engines are typically imported from their subpackages directly, e.g.:
+    from batchalign.pipelines.asr import WhisperEngine
+    from batchalign.pipelines.fa import Wave2VecFAEngine
+"""
 
 def __getattr__(name):
     if name == 'BatchalignPipeline':
@@ -37,8 +16,6 @@ def __getattr__(name):
     if name == 'BatchalignEngine':
         from .base import BatchalignEngine
         return BatchalignEngine
-    
-    # Add common engines for those still using from batchalign.pipelines import ...
     if name == 'StanzaEngine':
         from .morphosyntax import StanzaEngine
         return StanzaEngine
@@ -46,4 +23,4 @@ def __getattr__(name):
         from .utterance import StanzaUtteranceEngine
         return StanzaUtteranceEngine
 
-    raise AttributeError(f"module {__name__} has no attribute {name}")
+    raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
