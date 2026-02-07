@@ -49,6 +49,7 @@ POOL_UNSAFE_ENGINES = {
     "whisper_oai",
     "whisper_fa",
     "wav2vec_fa",
+    "wav2vec_fa_canto",
     "whisper_utr",
     "stanza",
     "stanza_utt",
@@ -65,6 +66,8 @@ POOL_UNSAFE_ENGINES = {
 POOL_SAFE_ENGINES = {
     "rev",
     "rev_utr",
+    "funaudio_utr",
+    "tencent_utr",
     "evaluation",
     "gtrans",
     "replacement",
