@@ -14,79 +14,24 @@ L.getLogger("stanza").setLevel(L.ERROR)
 L.getLogger('batchalign').setLevel(L.DEBUG)
 
 
-
-
-from funasr import AutoModel
-
-
-
-model = AutoModel(model="paraformer-zh", model_revision="v2.0.4",
-                  vad_model="fsmn-vad", vad_model_revision="v2.0.4",
-                  punc_model="ct-punc-c", punc_model_revision="v2.0.4",
-                  # spk_model="cam++", spk_model_revision="v2.0.2",
-                  )
-res = model.generate(
-    input=f"/Users/houjun/Documents/Projects/talkbank-alignment/input/short.mp3",
-    output_timestamp=True
-    # batch_size_s=30
-)
-res[0]["text"]
-res[0]["timestamp"]
-
-
 ########
 
-mp3 batchalign import *
+
+# from batchalign import *
 # from batchalign.formats.chat.parser import chat_parse_utterance
+# from batchalign.formats.chat import CHATFile
 
-# # !uv pip install pycantonese
-# doc = CHATFile(path="/Users/houjun/Documents/Projects/talkbank-alignment/cantonese/input/030021s.cha").doc
+# f = CHATFile(path="../talkbank-alignment/testing_playground/input/test.cha")
+# doc = f.doc
 
-# pipe = BatchalignPipeline(TencentUTREngine(), Wave2VecFAEngineCantonese())
-# doc = pipe(doc)
+# doc[2].content[4].time = (12425, 12825)
+# doc[3].content[4].time = (14425, 14525)
 
-# # [i.alignment for i in doc.content if isinstance(i, Utterance)]
-# # [i.time for i in doc if isinstance(i, Ut]
-
-
-# # res = pipe(doc)
-# CHATFile(doc=doc).write("/Users/houjun/Documents/Projects/talkbank-alignkent/cantonese/input/030021s.out.cha")
-
-# # f = Wave2VecFAEngineCantonese()._Wave2VecFAEngineCantonese__wav2vec.load(doc.media.url)
-# # f
-# # f.tensor.size(0)//f.rate
-# # 1+1
-# # 1+1
+# print(f._CHATFile__generate(f._CHATFile__doc, f._CHATFile__special_mor, write_wor=True))
 
 
-
-
-
-
-# pipe = BatchalignPipeline(Wave2VecFAEngine())
-# pije
-# res
-# audio =
-# model = Wave2VecFAModel()
-# audio = model.load(doc.media.url)
-# 1+1
-# text = str(res[12]).split(".")[0]
-# full_audio = audio
-# # res[12]
-# audio = audio.chunk(12460, 14610)
-# audio
-# res[6][0]
-# 1+1
-# f1 = '饭'
-# f2 = '飯'
-
-# cc.convert(f1)
-
-# doc.langs
-
-# import ipdb
-# ipdb.set_trace()
-
+# doc = Document.new("I've been feeling like a rap god")
+# doc[0][0]
 
 # # 1+1
 # text = "Hello are you the f b i ?"
@@ -104,8 +49,6 @@ mp3 batchalign import *
 
 # 1+1
 
-
-# !uv pip install pycantonese
 
 # doc = CHATFile(path="../talkbank-alignment/input/011116.cha").doc
 # newdoc = Document(content=[doc[4]], langs=["heb"])
