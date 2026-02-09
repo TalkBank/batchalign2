@@ -44,7 +44,12 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
     has_coref = False
     coref_elems = []
 
+    langid = re.findall(r"^\[- (\w+)\]", main_line)
+    if langid:
+        wor_elems.append(f"[- {langid[0]}]")
+
     for i in utterance.content:
+
         mors.append(i.morphology)
         if i.dependency:
             gras.append(i.dependency)
