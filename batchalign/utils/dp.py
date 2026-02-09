@@ -160,7 +160,7 @@ def _hirschberg(reference: Sequence[ReferenceTarget],
     if not payload:
         return [Extra(r.key, ExtraType.REFERENCE, r.payload) for r in reference]
 
-    if len(reference) * len(payload) <= small_cutoff:
+    if len(reference) <= 1 or len(payload) <= 1 or len(reference) * len(payload) <= small_cutoff:
         return _align_small(reference, payload, match_fn, progress)
 
     mid = len(reference) // 2
