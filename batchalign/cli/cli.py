@@ -123,7 +123,6 @@ batchalign.add_command(cache, "cache")
               default=False, help="For utterance timing recovery, OpenAI Whisper (ASR) instead of Rev.AI (default).")
 @click.option("--wav2vec/--whisper_fa",
               default=True, help="Use Whisper instead of Wav2Vec for English (defaults for Whisper for non-English)")
-@click.option("--iic", is_flag=True, default=False, help="Use IIC forced alignment (for Chinese).")
 @click.option("--wav2vec_yue", is_flag=True, default=False, help="Use Wav2Vec with chantonese fixes forced alignment (for Chinese).")
 @click.option("--tencent/--rev",
               default=False, help="Use Tencent instead of Rev.AI (default).")
@@ -135,7 +134,7 @@ batchalign.add_command(cache, "cache")
 @click.option("--merge-abbrev/--no-merge-abbrev",
               default=False, help="Merge abbreviations in output. Default: no.")
 @click.pass_context
-def align(ctx, in_dir, out_dir, whisper, wav2vec, iic, wav2vec_yue, tencent, funaudio, **kwargs):
+def align(ctx, in_dir, out_dir, whisper, wav2vec, wav2vec_yue, tencent, funaudio, **kwargs):
     """Align transcripts against corresponding media files."""
     from batchalign.formats.chat import CHATFile
     def loader(file):
@@ -148,9 +147,7 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, iic, wav2vec_yue, tencent, fun
         CHATFile(doc=doc).write(output, write_wor=kwargs.get("wor", True), dont_merge_letters=True, merge_abbrev=kwargs.get("merge_abbrev", False))
 
     # Determine FA engine
-    if iic:
-        fa_engine = "iic_fa"
-    elif wav2vec_yue:
+    if wav2vec_yue:
         fa_engine = "wav2vec_fa_canto"
     elif not wav2vec:
         fa_engine = "whisper_fa"

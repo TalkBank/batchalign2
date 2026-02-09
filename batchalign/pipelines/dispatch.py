@@ -147,15 +147,14 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
         elif engine == "wav2vec_fa_canto":
             from batchalign.pipelines.fa import Wave2VecFAEngineCantonese
             engines.append(Wave2VecFAEngineCantonese())
-        elif engine == "iic_fa":
-            from batchalign.pipelines.fa import IICFAEngine
-            engines.append(IICFAEngine())
         elif engine == "seamless_translate":
             from batchalign.pipelines.translate import SeamlessTranslationModel
             engines.append(SeamlessTranslationModel())
         elif engine == "tencent":
+            from batchalign.pipelines.asr.tencent import TencentEngine
             engines.append(TencentEngine(lang=lang))
         elif engine == "tencent_utr":
+            from batchalign.pipelines.utr import TencentUTREngine
             engines.append(TencentUTREngine(lang=lang))
         elif engine == "gtrans":
             from batchalign.pipelines.translate import GoogleTranslateEngine
