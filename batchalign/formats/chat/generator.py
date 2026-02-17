@@ -104,7 +104,14 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
 
     #### WOR LINE GENERATION ####
     if has_wor and write_wor:
-        result.append(("%wor:\t"+" ".join(wor_elems)).replace("-\x15", "- \x15"))
+        checked_wor_elems = []
+        for b in wor_elems:
+            b = b.replace("-\x15", "- \x15")
+            b = re.sub("\x15\d_\d\x15", "",b)
+            b = re.sub(" +", " ",b)
+            if b.strip():
+                checked_wor_elems.append(b.strip())
+        result.append(("%wor:\t"+" ".join(checked_wor_elems)))
     if has_coref:
         result.append("%coref:\t"+(", ".join(coref_elems)))
     if utterance.translation != None and utterance.translation.strip() not in ["", ".", "!", "?"]:
