@@ -129,7 +129,7 @@ class CHATFile(BaseFormat):
                 main.append(generate_chat_utterance(i,
                                                     special and doc.langs[0] == "eng",
                                                     write_wor=write_wor,
-                                                    merge_letters=("yue" in doc.langs and (not dont_merge_letters)),
+                                                    merge_letters=(("yue" in doc.langs or "zho" in doc.langs) and (not dont_merge_letters)),
                                                     merge_abbrev=merge_abbrev))
         main.append("@End\n")
 
