@@ -17,17 +17,24 @@ L.getLogger('batchalign').setLevel(L.DEBUG)
 ########
 
 
-# from batchalign import *
+from batchalign import *
+from batchalign.formats.chat import CHATFile
+
+doc = CHATFile(path="../talkbank-alignment/output/short.cha").doc
+doc
+
 # from batchalign.formats.chat.parser import chat_parse_utterance
 # from batchalign.formats.chat import CHATFile
 
 # f = CHATFile(path="../talkbank-alignment/testing_playground/input/test.cha")
 # doc = f.doc
 
-# doc[2].content[4].time = (12425, 12825)
+doc[1].content[0].time = (4,2)
+doc[1].content[2].time = (12425, 12825)
 # doc[3].content[4].time = (14425, 14525)
+f = CHATFile(doc=doc)
 
-# print(f._CHATFile__generate(f._CHATFile__doc, f._CHATFile__special_mor, write_wor=True))
+print(f._CHATFile__generate(f._CHATFile__doc, f._CHATFile__special_mor, write_wor=True))
 
 
 # doc = Document.new("I've been feeling like a rap god")
