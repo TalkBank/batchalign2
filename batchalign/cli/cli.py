@@ -400,6 +400,30 @@ def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, whisper_oai, **
               **kwargs)
     
 
+#################### COMPARE ################################
+
+@batchalign.command()
+@common_options
+@click.option("--lang",
+              help="sample language in three-letter ISO 3166-1 alpha-3 code",
+              show_default=True,
+              default="eng",
+              type=str)
+@click.option("--merge-abbrev/--no-merge-abbrev",
+              default=False, help="Merge abbreviations in output. Default: no.")
+@click.pass_context
+def compare(ctx, in_dir, out_dir, lang, **kwargs):
+    """Compare transcripts against gold-standard references.
+
+    For each FILE.cha in IN_DIR, expects a companion FILE.gold.cha in the
+    same directory.  Runs morphosyntax analysis on the main transcript, then
+    produces a word-level diff stored as %%xsrep / %%xsmor tiers and writes
+    error metrics to a .compare.csv file in OUT_DIR.
+    """
+
+    _dispatch("compare", lang, 1, ["cha"], ctx,
+              in_dir, out_dir, None, None, C, **kwargs)
+
 #################### AVQI ################################
 
 @batchalign.command()

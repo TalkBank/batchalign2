@@ -2,7 +2,7 @@ from typing import Any, Optional
 
 from batchalign.document import (
     Document, Utterance, Form, Tier, Media, MediaType,
-    CustomLine, CustomLineType, Morphology, Dependency, ENDING_PUNCT
+    CustomLine, CustomLineType, Morphology, Dependency, CompareToken, ENDING_PUNCT
 )
 from batchalign.utils import *
 from batchalign.errors import CHATValidationException
@@ -13,6 +13,27 @@ from batchalign.formats.chat.utils import chat_parse_mor, chat_parse_gra
 from batchalign.formats.chat.lexer import lex, TokenType
 
 import re
+
+def _parse_comparison(xsrep_str, xsmor_str=None):
+    """Parse %xsrep and %xsmor lines into a list of CompareToken."""
+    tokens = []
+    xsrep_parts = xsrep_str.split()
+    xsmor_parts = xsmor_str.split() if xsmor_str else [None] * len(xsrep_parts)
+    for word, pos in zip(xsrep_parts, xsmor_parts):
+        if word.startswith("+"):
+            status = "extra_main"
+            word = word[1:]
+            if pos and pos.startswith("+"):
+                pos = pos[1:]
+        elif word.startswith("-"):
+            status = "extra_gold"
+            word = word[1:]
+            if pos and pos.startswith("-"):
+                pos = pos[1:]
+        else:
+            status = "match"
+        tokens.append(CompareToken(text=word, pos=pos, status=status))
+    return tokens
 
 def chat_parse_utterance(text, mor, gra, wor, additional):
     """Encode a CHAT utterance into a Batchalign utterance.
@@ -299,6 +320,8 @@ def chat_parse_doc(lines, special_mor=False):
                 gra = None
                 wor = None
                 translation = None
+                xsrep_line = None
+                xsmor_line = None
                 additional = []
 
                 while raw[0][0] == "%":
@@ -312,6 +335,10 @@ def chat_parse_doc(lines, special_mor=False):
                         wor = line
                     elif beg.strip() == "xtra":
                         translation = line
+                    elif beg.strip() == "xsrep":
+                        xsrep_line = line
+                    elif beg.strip() == "xsmor":
+                        xsmor_line = line
                     else:
                         additional.append(CustomLine(id=beg.strip(),
                                                         type=CustomLineType.DEPENDENT,
@@ -335,6 +362,9 @@ def chat_parse_doc(lines, special_mor=False):
                     "translation": translation,
                     "override_lang": None if len(multilingual) == 0 else multilingual[0]
                 })
+
+                if xsrep_line:
+                    ut.comparison = _parse_comparison(xsrep_line, xsmor_line)
 
                 timing = re.findall(rf"\x15(\d+)_(\d+)\x15", text)
                 if len(timing) != 0:

@@ -8,9 +8,10 @@ identically to torchaudio's I/O functions.
 import tempfile
 from pathlib import Path
 
-import numpy as np
 import pytest
-import torch
+
+np = pytest.importorskip("numpy")
+torch = pytest.importorskip("torch")
 
 from batchalign.models import audio_io
 

@@ -57,6 +57,7 @@ POOL_UNSAFE_ENGINES = {
     "seamless_translate",
     "opensmile_egemaps",
     "opensmile_gemaps",
+    "compare_engine",
     "opensmile_compare",
     "opensmile_eGeMAPSv01b",
 }
@@ -68,6 +69,7 @@ POOL_SAFE_ENGINES = {
     "gtrans",
     "replacement",
     "ngram",
+    "compare_analysis_engine",
 }
 
 warnings.filterwarnings('ignore', category=UserWarning, message='TypedStorage is deprecated')
@@ -195,6 +197,41 @@ def _run_pipeline_for_file(command, pipeline, file, output, loader_info, writer_
             df.write(str(doc["diff"]))
         CHATFile(doc=doc["doc"]).write(str(P(output).with_suffix(".asr.cha")),
                                        write_wor=local_kwargs.get("wor", False))
+
+    elif command == "compare":
+        from pathlib import Path as P
+        # Skip gold files that dispatch picked up
+        if file.endswith(".gold.cha"):
+            return
+
+        # Find companion gold file
+        p = P(file)
+        gold_path = p.parent / (p.stem + ".gold.cha")
+        if not gold_path.exists():
+            raise FileNotFoundError(
+                f"No gold .cha file found for comparison. "
+                f"main: {p.name}, expected: {gold_path.name}, looked in: {str(gold_path)}"
+            )
+
+        main_doc = CHATFile(path=str(p), special_mor_=True).doc
+        gold_doc = CHATFile(path=str(gold_path), special_mor_=True).doc
+
+        # Pipeline: morphosyntax(main) -> compare -> compare_analysis
+        result = pipeline(main_doc, callback=progress_callback, gold=gold_doc)
+
+        # Write annotated CHAT
+        CHATFile(doc=result["doc"]).write(output,
+                                          merge_abbrev=local_kwargs.get("merge_abbrev", False))
+
+        # Write metrics CSV
+        import csv
+        metrics = result["metrics"]
+        csv_path = P(output).with_suffix(".compare.csv")
+        with open(csv_path, 'w', newline='') as f:
+            writer = csv.writer(f)
+            writer.writerow(["metric", "value"])
+            for k, v in metrics.items():
+                writer.writerow([k, v])
 
     elif command == "opensmile":
         from batchalign.document import Document
@@ -347,6 +384,7 @@ Cmd2Task = {
     "coref": "coref",
     "translate": "translate",
     "opensmile": "opensmile",
+    "compare": "morphosyntax,compare,compare_analysis",
 }
 
 # this is the main runner used by all functions
@@ -366,6 +404,7 @@ def _dispatch(command, lang, num_speakers,
         "coref",
         "benchmark",
         "opensmile",
+        "compare",
     }
     if command in worker_handled:
         # Avoid pickling CLI-local loader/writer functions when the worker
@@ -478,7 +517,7 @@ def _dispatch(command, lang, num_speakers,
     memory_history_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Pre-download stanza resources if needed to avoid interleaved downloads in workers
-    if command in ["morphotag", "utseg", "coref"]:
+    if command in ["morphotag", "utseg", "coref", "compare"]:
         try:
             import stanza
             stanza.download_resources_json()

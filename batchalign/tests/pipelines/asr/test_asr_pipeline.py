@@ -1,5 +1,8 @@
 import pytest
 
+# WhisperASRModel → numpy
+pytest.importorskip("numpy")
+
 from batchalign.pipelines import BatchalignPipeline
 from batchalign.models import WhisperASRModel
 

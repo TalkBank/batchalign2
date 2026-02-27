@@ -9,7 +9,7 @@ from batchalign.cli.dispatch import _dispatch
 
 
 @click.command()
-@click.argument("command", type=click.Choice(["align", "transcribe", "transcribe_s", "morphotag", "translate", "utseg", "benchmark", "opensmile", "coref"]))
+@click.argument("command", type=click.Choice(["align", "transcribe", "transcribe_s", "morphotag", "translate", "utseg", "benchmark", "opensmile", "coref", "compare"]))
 @click.argument("in_dir", type=click.Path(exists=True, file_okay=False))
 @click.argument("out_dir", type=click.Path(exists=True, file_okay=False))
 @click.option("--runs", type=int, default=1, show_default=True, help="Number of benchmark runs.")
@@ -33,7 +33,7 @@ def bench(ctx, command, in_dir, out_dir, runs, no_pool, no_lazy_audio, no_adapti
         if workers is not None:
             run_ctx.obj["workers"] = workers
         start = time.time()
-        if command in ["align", "morphotag", "translate", "utseg", "coref"]:
+        if command in ["align", "morphotag", "translate", "utseg", "coref", "compare"]:
             extensions = ["cha"]
         elif command in ["transcribe", "transcribe_s", "benchmark", "opensmile"]:
             extensions = ["wav", "mp3", "mp4"]
