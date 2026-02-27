@@ -10,6 +10,12 @@ def __getattr__(name):
     if name == 'EvaluationEngine':
         from .eval import EvaluationEngine
         return EvaluationEngine
+    if name == 'CompareEngine':
+        from .compare import CompareEngine
+        return CompareEngine
+    if name == 'CompareAnalysisEngine':
+        from .compare import CompareAnalysisEngine
+        return CompareAnalysisEngine
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
-__all__ = ['EvaluationEngine']
+__all__ = ['EvaluationEngine', 'CompareEngine', 'CompareAnalysisEngine']

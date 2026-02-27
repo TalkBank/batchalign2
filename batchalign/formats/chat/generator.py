@@ -123,6 +123,17 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
         if special.content:
             result.append(f"%{special.id}:\t"+special.content)
 
+    #### COMPARISON LINE GENERATION ####
+    if utterance.comparison is not None:
+        xsrep_parts = []
+        xsmor_parts = []
+        for tok in utterance.comparison:
+            prefix = "+" if tok.status == "extra_main" else ("-" if tok.status == "extra_gold" else "")
+            xsrep_parts.append(f"{prefix}{tok.text}")
+            xsmor_parts.append(f"{prefix}{tok.pos or '?'}")
+        result.append(f"%xsrep:\t" + " ".join(xsrep_parts))
+        result.append(f"%xsmor:\t" + " ".join(xsmor_parts))
+
     return "\n".join(result)
 
 def check_utterances_ordered(doc):

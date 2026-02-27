@@ -25,6 +25,8 @@ DEFAULT_PACKAGES = {
     "coref": "stanza_coref",
     "translate": "gtrans",
     "opensmile": "opensmile_egemaps",
+    "compare": "compare_engine",
+    "compare_analysis": "compare_analysis_engine",
 }
 
 LANGUAGE_OVERRIDE_PACKAGES: dict = {
@@ -169,6 +171,12 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
         elif engine == "opensmile_eGeMAPSv01b":
             from batchalign.pipelines.opensmile import OpenSMILEEngine
             engines.append(OpenSMILEEngine(feature_set='eGeMAPSv01b'))
+        elif engine == "compare_engine":
+            from batchalign.pipelines.analysis import CompareEngine
+            engines.append(CompareEngine())
+        elif engine == "compare_analysis_engine":
+            from batchalign.pipelines.analysis import CompareAnalysisEngine
+            engines.append(CompareAnalysisEngine())
 
 
     L.debug(f"Done initalizing packages.")

@@ -33,6 +33,8 @@ class Task(IntEnum):
     COREF = 12
     WER = 13
     TRANSLATE = 14
+    COMPARE = 15
+    COMPARE_ANALYSIS = 16
 
 
     DEBUG__G = 0
@@ -57,6 +59,8 @@ TypeMap = {
     Task.COREF: TaskType.PROCESSING,
     Task.WER: TaskType.ANALYSIS,
     Task.TRANSLATE: TaskType.PROCESSING,
+    Task.COMPARE: TaskType.PROCESSING,
+    Task.COMPARE_ANALYSIS: TaskType.ANALYSIS,
 
     Task.DEBUG__G: TaskType.GENERATION,
     Task.DEBUG__P: TaskType.PROCESSING,
@@ -77,6 +81,8 @@ TaskFriendlyName = {
     Task.COREF:  "Coreference Resolution",
     Task.WER:  "Word Error Rate",
     Task.TRANSLATE:  "Translation",
+    Task.COMPARE:  "Transcript Comparison",
+    Task.COMPARE_ANALYSIS:  "Comparison Analysis",
     Task.DEBUG__G:  "TEST_GENERATION",
     Task.DEBUG__P:  "TEST_PROCESSING",
     Task.DEBUG__A:   "TEST_ANALYSIS",
@@ -99,6 +105,11 @@ class CustomLine(BaseModel):
     id: str # only the raw string com for %com
     type: CustomLineType # % or @
     content: Optional[str] = Field(default=None) # the contents of the line
+
+class CompareToken(BaseModel):
+    text: str # the word (conformed/expanded form)
+    pos: Optional[str] = Field(default=None) # POS tag (uppercased)
+    status: str = Field(default="match") # "match" | "extra_main" | "extra_gold"
 
 class Dependency(BaseModel):
     id: int # first number, 1 indexed
@@ -158,6 +169,7 @@ class Utterance(BaseModel):
     translation: Optional[str] = Field(default=None)
     time: Optional[Tuple[int,int]] = Field(default=None)
     custom_dependencies: List[CustomLine]  = Field(default=[])
+    comparison: Optional[List[CompareToken]] = Field(default=None)
 
     @property
     def delim(self) -> str:

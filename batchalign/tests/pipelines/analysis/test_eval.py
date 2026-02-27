@@ -1,3 +1,8 @@
+import pytest
+
+# eval.py → asr.utils → num2words
+pytest.importorskip("num2words")
+
 from batchalign.pipelines.analysis.eval import EvaluationEngine
 from batchalign.document import *
 from copy import deepcopy

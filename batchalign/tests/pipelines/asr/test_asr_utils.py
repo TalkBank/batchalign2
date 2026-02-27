@@ -1,3 +1,7 @@
+import pytest
+
+pytest.importorskip("num2words")
+
 from batchalign.pipelines.asr.utils import *
 from batchalign.document import *
 

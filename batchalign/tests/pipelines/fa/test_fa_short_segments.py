@@ -19,6 +19,9 @@ History:
 import pytest
 import logging
 from unittest.mock import MagicMock, patch
+
+torch = pytest.importorskip("torch")
+
 from batchalign.document import Document, Utterance, Form, Media, MediaType, TokenType
 
 
