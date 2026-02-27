@@ -202,13 +202,13 @@ class CompareEngine(BatchalignEngine):
         ]
         main_info = []  # (utt_idx, form_idx, Form)
         main_words = []
-        main_punct = {}  # utt_idx -> list of Form
+        main_punct = {}  # utt_idx -> list of (form_idx, Form)
 
         for utt_idx, utt in enumerate(main_utterances):
             main_punct[utt_idx] = []
             for form_idx, form in enumerate(utt.content):
                 if form.text.strip() in MOR_PUNCT + ENDING_PUNCT:
-                    main_punct[utt_idx].append(form)
+                    main_punct[utt_idx].append((form_idx, form))
                     continue
                 if form.text.strip().lower() in fillers:
                     continue
@@ -239,8 +239,10 @@ class CompareEngine(BatchalignEngine):
         alignment = align(conformed_main, conformed_gold, False, match_fn)
 
         # --- 5. Redistribute alignment results per main utterance ---
-        utt_tokens = {i: [] for i in range(len(main_utterances))}
+        # Store (position, CompareToken) pairs so we can interleave punct
+        utt_positioned = {i: [] for i in range(len(main_utterances))}
         current_main_utt = 0
+        last_main_form_idx = -1
         main_cursor = 0
         gold_cursor = 0
 
@@ -248,14 +250,16 @@ class CompareEngine(BatchalignEngine):
             if isinstance(item, Match):
                 orig_main_idx = main_map[main_cursor]
                 main_utt_idx = main_info[orig_main_idx][0]
+                main_form_idx = main_info[orig_main_idx][1]
                 main_form = main_info[orig_main_idx][2]
                 current_main_utt = main_utt_idx
+                last_main_form_idx = main_form_idx
 
-                utt_tokens[main_utt_idx].append(CompareToken(
+                utt_positioned[main_utt_idx].append((main_form_idx, CompareToken(
                     text=item.key,
                     pos=_get_pos(main_form),
                     status="match"
-                ))
+                )))
                 main_cursor += 1
                 gold_cursor += 1
 
@@ -264,14 +268,16 @@ class CompareEngine(BatchalignEngine):
                     # Word in main but not in gold -> extra_main (+)
                     orig_main_idx = main_map[main_cursor]
                     main_utt_idx = main_info[orig_main_idx][0]
+                    main_form_idx = main_info[orig_main_idx][1]
                     main_form = main_info[orig_main_idx][2]
                     current_main_utt = main_utt_idx
+                    last_main_form_idx = main_form_idx
 
-                    utt_tokens[main_utt_idx].append(CompareToken(
+                    utt_positioned[main_utt_idx].append((main_form_idx, CompareToken(
                         text=item.key,
                         pos=_get_pos(main_form),
                         status="extra_main"
-                    ))
+                    )))
                     main_cursor += 1
 
                 else:
@@ -279,25 +285,29 @@ class CompareEngine(BatchalignEngine):
                     orig_gold_idx = gold_map[gold_cursor]
                     gold_form = gold_info[orig_gold_idx][2]
 
-                    utt_tokens[current_main_utt].append(CompareToken(
+                    # Position just after last main form for correct ordering
+                    pos = last_main_form_idx + 0.5
+                    utt_positioned[current_main_utt].append((pos, CompareToken(
                         text=item.key,
                         pos=_get_pos(gold_form),
                         status="extra_gold"
-                    ))
+                    )))
                     gold_cursor += 1
 
-        # --- 6. Add punctuation back as match tokens at end of each utterance ---
+        # --- 6. Merge punctuation at original positions ---
         for utt_idx in range(len(main_utterances)):
-            for form in main_punct[utt_idx]:
-                utt_tokens[utt_idx].append(CompareToken(
+            for form_idx, form in main_punct[utt_idx]:
+                utt_positioned[utt_idx].append((form_idx, CompareToken(
                     text=form.text,
                     pos="PUNCT",
                     status="match"
-                ))
+                )))
+            # Stable sort by position preserves order within same form_idx
+            utt_positioned[utt_idx].sort(key=lambda x: x[0])
 
         # --- 7. Set comparison on each utterance ---
         for utt_idx, utt in enumerate(main_utterances):
-            tokens = utt_tokens[utt_idx]
+            tokens = [tok for _, tok in utt_positioned[utt_idx]]
             utt.comparison = tokens if tokens else None
 
         return doc

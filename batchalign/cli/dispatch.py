@@ -213,7 +213,7 @@ def _run_pipeline_for_file(command, pipeline, file, output, loader_info, writer_
                 f"main: {p.name}, expected: {gold_path.name}, looked in: {str(gold_path)}"
             )
 
-        main_doc = CHATFile(path=str(p), special_mor_=True).doc
+        main_doc = CHATFile(path=str(p)).doc
         gold_doc = CHATFile(path=str(gold_path), special_mor_=True).doc
 
         # Pipeline: morphosyntax(main) -> compare -> compare_analysis
