@@ -193,7 +193,7 @@ networkx==3.4.2
     # via
     #   stanza
     #   torch
-nltk==3.9.2
+nltk==3.9.3
     # via batchalign (setup.py)
 num2words==0.5.14
     # via batchalign (setup.py)
