@@ -317,20 +317,30 @@ class CompareAnalysisEngine(BatchalignEngine):
     tasks = [Task.COMPARE_ANALYSIS]
 
     def analyze(self, doc, **kwargs):
+        from collections import defaultdict
+
         matches = 0
         extra_main = 0
         extra_gold = 0
+
+        # Per-POS counters: pos -> {matches, insertions, deletions}
+        pos_counts = defaultdict(lambda: {"matches": 0, "insertions": 0, "deletions": 0})
 
         for utt in doc.content:
             if not isinstance(utt, Utterance) or utt.comparison is None:
                 continue
             for tok in utt.comparison:
+                if tok.pos == "PUNCT":
+                    continue
                 if tok.status == "match":
                     matches += 1
+                    pos_counts[tok.pos]["matches"] += 1
                 elif tok.status == "extra_main":
                     extra_main += 1
+                    pos_counts[tok.pos]["insertions"] += 1
                 elif tok.status == "extra_gold":
                     extra_gold += 1
+                    pos_counts[tok.pos]["deletions"] += 1
 
         total_gold = matches + extra_gold
         total_main = matches + extra_main
@@ -346,6 +356,15 @@ class CompareAnalysisEngine(BatchalignEngine):
             "total_gold_words": total_gold,
             "total_main_words": total_main,
         }
+
+        # Add per-POS breakdown
+        for pos in sorted(pos_counts.keys()):
+            counts = pos_counts[pos]
+            total = counts["matches"] + counts["deletions"]
+            metrics[f"{pos}:matches"] = counts["matches"]
+            metrics[f"{pos}:insertions"] = counts["insertions"]
+            metrics[f"{pos}:deletions"] = counts["deletions"]
+            metrics[f"{pos}:total"] = total
 
         return {
             "doc": doc,
