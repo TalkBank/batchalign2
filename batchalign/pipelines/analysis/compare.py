@@ -12,6 +12,7 @@ computes error-rate metrics for CSV output.
 
 import re
 import logging
+from collections import Counter
 from batchalign.document import *
 from batchalign.pipelines.base import *
 from batchalign.utils.dp import align, ExtraType, Extra, Match
@@ -151,6 +152,65 @@ def match_fn(x, y):
 # --- End of eval.py duplicates ---
 
 
+def _find_best_segment(gold_tokens, main_tokens, mfn):
+    """Find a rough window using bag-of-words overlap.
+
+    The rough pass is order-invariant: it scores contiguous windows by token
+    multiset overlap with the gold utterance, ignoring order. To keep common
+    words from swallowing later transcript material, it only considers windows
+    near the gold utterance length. Among equally good windows it prefers the
+    latest one, not the earliest. The caller then runs the full Levenshtein
+    aligner inside that window to produce token annotations.
+    """
+    if not gold_tokens or not main_tokens:
+        return 0, 0
+
+    gold_counts = Counter(gold_tokens)
+    gold_len = len(gold_tokens)
+    main_len = len(main_tokens)
+
+    min_window = max(1, gold_len - 2)
+    max_window = min(main_len, gold_len + 2)
+
+    best = (0, min(main_len, gold_len))
+    best_score = -1.0
+    best_len_delta = None
+
+    for span in range(min_window, max_window + 1):
+        window_counts = Counter(main_tokens[:span])
+        overlap = sum(min(window_counts[token], gold_counts[token]) for token in window_counts)
+
+        for start in range(0, main_len - span + 1):
+            if start > 0:
+                left = main_tokens[start - 1]
+                right = main_tokens[start + span - 1]
+
+                overlap -= min(window_counts[left], gold_counts[left])
+                window_counts[left] -= 1
+                overlap += min(window_counts[left], gold_counts[left])
+
+                overlap -= min(window_counts[right], gold_counts[right])
+                window_counts[right] += 1
+                overlap += min(window_counts[right], gold_counts[right])
+
+            score = overlap / gold_len
+            len_delta = abs(span - gold_len)
+            end = start + span
+
+            if score > best_score:
+                best = (start, end)
+                best_score = score
+                best_len_delta = len_delta
+            elif score == best_score:
+                if best_len_delta is None or len_delta < best_len_delta:
+                    best = (start, end)
+                    best_len_delta = len_delta
+                elif len_delta == best_len_delta and end > best[1]:
+                    best = (start, end)
+
+    return best
+
+
 def _get_pos(form):
     """Extract uppercased POS from a Form's morphology, or '?' if absent."""
     if form is not None and form.morphology:
@@ -202,13 +262,10 @@ class CompareEngine(BatchalignEngine):
         ]
         main_info = []  # (utt_idx, form_idx, Form)
         main_words = []
-        main_punct = {}  # utt_idx -> list of (form_idx, Form)
 
         for utt_idx, utt in enumerate(main_utterances):
-            main_punct[utt_idx] = []
             for form_idx, form in enumerate(utt.content):
                 if form.text.strip() in MOR_PUNCT + ENDING_PUNCT:
-                    main_punct[utt_idx].append((form_idx, form))
                     continue
                 if form.text.strip().lower() in fillers:
                     continue
@@ -221,10 +278,13 @@ class CompareEngine(BatchalignEngine):
         ]
         gold_info = []  # (utt_idx, form_idx, Form)
         gold_words = []
+        gold_punct = {}  # utt_idx -> list of (form_idx, Form)
 
         for utt_idx, utt in enumerate(gold_utterances):
+            gold_punct[utt_idx] = []
             for form_idx, form in enumerate(utt.content):
                 if form.text.strip() in MOR_PUNCT + ENDING_PUNCT:
+                    gold_punct[utt_idx].append((form_idx, form))
                     continue
                 if form.text.strip().lower() in fillers:
                     continue
@@ -235,82 +295,119 @@ class CompareEngine(BatchalignEngine):
         conformed_main, main_map = conform_with_mapping(main_words, conform)
         conformed_gold, gold_map = conform_with_mapping(gold_words, conform)
 
-        # --- 4. Align ---
-        alignment = align(conformed_main, conformed_gold, False, match_fn)
+        # --- 4. Partition conformed gold tokens by utterance ---
+        gold_utt_tokens = {i: [] for i in range(len(gold_utterances))}
+        gold_utt_maps = {i: [] for i in range(len(gold_utterances))}
+        for j in range(len(conformed_gold)):
+            orig_idx = gold_map[j]
+            utt_idx = gold_info[orig_idx][0]
+            gold_utt_tokens[utt_idx].append(conformed_gold[j])
+            gold_utt_maps[utt_idx].append(orig_idx)
 
-        # --- 5. Redistribute alignment results per main utterance ---
-        # Store (position, CompareToken) pairs so we can interleave punct
-        utt_positioned = {i: [] for i in range(len(main_utterances))}
-        current_main_utt = 0
-        last_main_form_idx = -1
-        main_cursor = 0
-        gold_cursor = 0
+        # --- 5. Per-utterance alignment ---
+        # For each gold utterance, find a rough last-possible bag-of-words
+        # window in the remaining main tokens, then run Levenshtein inside
+        # that window to produce the annotations.
+        utt_positioned = {i: [] for i in range(len(gold_utterances))}
+        search_start = 0
 
-        for item in alignment:
-            if isinstance(item, Match):
-                orig_main_idx = main_map[main_cursor]
-                main_utt_idx = main_info[orig_main_idx][0]
-                main_form_idx = main_info[orig_main_idx][1]
-                main_form = main_info[orig_main_idx][2]
-                current_main_utt = main_utt_idx
-                last_main_form_idx = main_form_idx
+        for utt_idx in range(len(gold_utterances)):
+            g_tokens = gold_utt_tokens[utt_idx]
+            g_maps = gold_utt_maps[utt_idx]
+            G = len(g_tokens)
 
-                utt_positioned[main_utt_idx].append((main_form_idx, CompareToken(
-                    text=item.key,
-                    pos=_get_pos(main_form),
-                    status="match"
-                )))
-                main_cursor += 1
-                gold_cursor += 1
+            if G == 0:
+                continue
 
-            elif isinstance(item, Extra):
-                if item.extra_type == ExtraType.PAYLOAD:
-                    # Word in main but not in gold -> extra_main (+)
-                    orig_main_idx = main_map[main_cursor]
-                    main_utt_idx = main_info[orig_main_idx][0]
-                    main_form_idx = main_info[orig_main_idx][1]
+            remaining_main = conformed_main[search_start:]
+            win_start, win_end = _find_best_segment(g_tokens, remaining_main, match_fn)
+
+            abs_start = search_start + win_start
+            abs_end = search_start + win_end
+
+            # Align the chosen window against this gold utterance
+            window_main = conformed_main[abs_start:abs_end]
+            utt_alignment = align(window_main, g_tokens, False, match_fn)
+
+            local_main_cursor = 0
+            local_gold_cursor = 0
+            last_gold_form_idx = -1
+
+            for item in utt_alignment:
+                if isinstance(item, Match):
+                    global_main_idx = abs_start + local_main_cursor
+                    orig_main_idx = main_map[global_main_idx]
                     main_form = main_info[orig_main_idx][2]
-                    current_main_utt = main_utt_idx
-                    last_main_form_idx = main_form_idx
+                    orig_gold_idx = g_maps[local_gold_cursor]
+                    gold_form_idx = gold_info[orig_gold_idx][1]
+                    gold_form = gold_info[orig_gold_idx][2]
+                    last_gold_form_idx = gold_form_idx
 
-                    utt_positioned[main_utt_idx].append((main_form_idx, CompareToken(
+                    if main_form.time is not None:
+                        gold_form.time = main_form.time
+                    if main_form.morphology is not None:
+                        gold_form.morphology = main_form.morphology
+                    if main_form.dependency is not None:
+                        gold_form.dependency = main_form.dependency
+
+                    utt_positioned[utt_idx].append((gold_form_idx, CompareToken(
                         text=item.key,
                         pos=_get_pos(main_form),
-                        status="extra_main"
+                        status="match"
                     )))
-                    main_cursor += 1
+                    local_main_cursor += 1
+                    local_gold_cursor += 1
 
-                else:
-                    # Word in gold but not in main -> extra_gold (-)
-                    orig_gold_idx = gold_map[gold_cursor]
-                    gold_form = gold_info[orig_gold_idx][2]
+                elif isinstance(item, Extra):
+                    if item.extra_type == ExtraType.REFERENCE:
+                        orig_gold_idx = g_maps[local_gold_cursor]
+                        gold_form_idx = gold_info[orig_gold_idx][1]
+                        gold_form = gold_info[orig_gold_idx][2]
+                        last_gold_form_idx = gold_form_idx
 
-                    # Position just after last main form for correct ordering
-                    pos = last_main_form_idx + 0.5
-                    utt_positioned[current_main_utt].append((pos, CompareToken(
-                        text=item.key,
-                        pos=_get_pos(gold_form),
-                        status="extra_gold"
-                    )))
-                    gold_cursor += 1
+                        utt_positioned[utt_idx].append((gold_form_idx, CompareToken(
+                            text=item.key,
+                            pos=_get_pos(gold_form),
+                            status="extra_gold"
+                        )))
+                        local_gold_cursor += 1
 
-        # --- 6. Merge punctuation at original positions ---
-        for utt_idx in range(len(main_utterances)):
-            for form_idx, form in main_punct[utt_idx]:
+                    else:
+                        global_main_idx = abs_start + local_main_cursor
+                        orig_main_idx = main_map[global_main_idx]
+                        main_form = main_info[orig_main_idx][2]
+
+                        pos = last_gold_form_idx + 0.5
+                        utt_positioned[utt_idx].append((pos, CompareToken(
+                            text=item.key,
+                            pos=_get_pos(main_form),
+                            status="extra_main"
+                        )))
+                        local_main_cursor += 1
+
+            search_start = abs_end
+
+        # --- 6. Merge punctuation from gold at original positions ---
+        for utt_idx in range(len(gold_utterances)):
+            for form_idx, form in gold_punct[utt_idx]:
                 utt_positioned[utt_idx].append((form_idx, CompareToken(
                     text=form.text,
                     pos="PUNCT",
                     status="match"
                 )))
-            # Stable sort by position preserves order within same form_idx
             utt_positioned[utt_idx].sort(key=lambda x: x[0])
 
-        # --- 7. Set comparison on each utterance ---
-        for utt_idx, utt in enumerate(main_utterances):
+        # --- 7. Set comparison on each gold utterance ---
+        for utt_idx, utt in enumerate(gold_utterances):
             tokens = [tok for _, tok in utt_positioned[utt_idx]]
             utt.comparison = tokens if tokens else None
 
-        return doc
+            timed_forms = [form for form in utt.content if form.time is not None]
+            if timed_forms:
+                utt.time = (timed_forms[0].time[0], timed_forms[-1].time[1])
+                utt.text = None
+
+        return gold
 
 
 class CompareAnalysisEngine(BatchalignEngine):
