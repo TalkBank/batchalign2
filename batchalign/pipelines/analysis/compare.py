@@ -395,6 +395,12 @@ class CompareEngine(BatchalignEngine):
                     pos="PUNCT",
                     status="match"
                 )))
+                # Ensure punctuation forms have morphology so %mor includes
+                # the final delimiter (matches generator's PUNCT|<char> logic)
+                if form.morphology is None:
+                    form.morphology = [Morphology(
+                        pos="PUNCT", lemma=form.text.strip(), feats=""
+                    )]
             utt_positioned[utt_idx].sort(key=lambda x: x[0])
 
         # --- 7. Set comparison on each gold utterance ---
