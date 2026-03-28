@@ -193,7 +193,7 @@ networkx==3.4.2
     # via
     #   stanza
     #   torch
-nltk==3.9.3
+nltk==3.9.4
     # via batchalign (setup.py)
 num2words==0.5.14
     # via batchalign (setup.py)
@@ -361,7 +361,7 @@ regex==2026.1.15
     #   nltk
     #   tiktoken
     #   transformers
-requests==2.32.5
+requests==2.33.0
     # via
     #   huggingface-hub
     #   rev-ai
