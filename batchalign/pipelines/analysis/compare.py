@@ -208,6 +208,11 @@ def _find_best_segment(gold_tokens, main_tokens, mfn):
                 elif len_delta == best_len_delta and end > best[1]:
                     best = (start, end)
 
+    # If no tokens overlap at all, return an empty window so the caller
+    # doesn't consume main tokens that belong to a later gold utterance.
+    if best_score <= 0:
+        return 0, 0
+
     return best
 
 
