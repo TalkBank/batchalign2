@@ -216,7 +216,7 @@ def _run_pipeline_for_file(command, pipeline, file, output, loader_info, writer_
         main_doc = CHATFile(path=str(p)).doc
         gold_doc = CHATFile(path=str(gold_path), special_mor_=True).doc
 
-        # Pipeline: morphosyntax(main) -> compare -> compare_analysis
+        # Pipeline: compare (runs morphosyntax internally) -> compare_analysis
         result = pipeline(main_doc, callback=progress_callback, gold=gold_doc)
 
         # Write annotated CHAT
@@ -384,7 +384,7 @@ Cmd2Task = {
     "coref": "coref",
     "translate": "translate",
     "opensmile": "opensmile",
-    "compare": "morphosyntax,compare,compare_analysis",
+    "compare": "compare,compare_analysis",
 }
 
 # this is the main runner used by all functions

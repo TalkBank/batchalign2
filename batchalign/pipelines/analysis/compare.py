@@ -189,12 +189,26 @@ def conform_with_mapping(words, conform_fn):
 class CompareEngine(BatchalignEngine):
     tasks = [Task.COMPARE]
 
+    def __init__(self):
+        self._stanza = None
+
+    def _get_stanza(self):
+        if self._stanza is None:
+            from batchalign.pipelines.morphosyntax import StanzaEngine
+            self._stanza = StanzaEngine()
+        return self._stanza
+
     def process(self, doc, **kwargs):
         gold = kwargs.get("gold")
         if not gold or not isinstance(gold, Document):
             raise ValueError(
                 f"CompareEngine requires a 'gold' Document kwarg, got '{type(gold)}'"
             )
+
+        # --- 0. Run morphosyntax on both docs if needed ---
+        stanza = self._get_stanza()
+        doc = stanza.process(doc, **{k: v for k, v in kwargs.items() if k != "gold"})
+        gold = stanza.process(gold, **{k: v for k, v in kwargs.items() if k != "gold"})
 
         # --- 1. Extract words from main utterances ---
         main_utterances = [
@@ -246,6 +260,9 @@ class CompareEngine(BatchalignEngine):
         main_cursor = 0
         gold_cursor = 0
 
+        # Track main_form -> gold_form mapping for matched tokens
+        matched_gold_mor = {}  # id(main_form) -> gold_form.morphology
+
         for item in alignment:
             if isinstance(item, Match):
                 orig_main_idx = main_map[main_cursor]
@@ -255,11 +272,19 @@ class CompareEngine(BatchalignEngine):
                 current_main_utt = main_utt_idx
                 last_main_form_idx = main_form_idx
 
+                orig_gold_idx = gold_map[gold_cursor]
+                gold_form = gold_info[orig_gold_idx][2]
+
                 utt_positioned[main_utt_idx].append((main_form_idx, CompareToken(
                     text=item.key,
-                    pos=_get_pos(main_form),
+                    pos=_get_pos(gold_form),
                     status="match"
                 )))
+
+                # Record gold morphology for this main form (first match wins)
+                if id(main_form) not in matched_gold_mor:
+                    matched_gold_mor[id(main_form)] = gold_form.morphology
+
                 main_cursor += 1
                 gold_cursor += 1
 
@@ -294,7 +319,19 @@ class CompareEngine(BatchalignEngine):
                     )))
                     gold_cursor += 1
 
-        # --- 6. Merge punctuation at original positions ---
+        # --- 6. Replace input mor/gra with gold mor ---
+        # Drop input morphology/dependency; copy gold morphology for matches.
+        # Punctuation keeps its existing morphology (e.g. PUNCT|.).
+        for utt in main_utterances:
+            for form in utt.content:
+                if form.text.strip() in MOR_PUNCT + ENDING_PUNCT:
+                    form.dependency = None
+                    continue
+                gold_mor = matched_gold_mor.get(id(form))
+                form.morphology = gold_mor if gold_mor else None
+                form.dependency = None
+
+        # --- 7. Merge punctuation at original positions ---
         for utt_idx in range(len(main_utterances)):
             for form_idx, form in main_punct[utt_idx]:
                 utt_positioned[utt_idx].append((form_idx, CompareToken(
@@ -305,7 +342,7 @@ class CompareEngine(BatchalignEngine):
             # Stable sort by position preserves order within same form_idx
             utt_positioned[utt_idx].sort(key=lambda x: x[0])
 
-        # --- 7. Set comparison on each utterance ---
+        # --- 8. Set comparison on each utterance ---
         for utt_idx, utt in enumerate(main_utterances):
             tokens = [tok for _, tok in utt_positioned[utt_idx]]
             utt.comparison = tokens if tokens else None
