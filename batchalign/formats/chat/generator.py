@@ -131,6 +131,9 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
             prefix = "+" if tok.status == "extra_main" else ("-" if tok.status == "extra_gold" else "")
             xsrep_parts.append(f"{prefix}{tok.text}")
             xsmor_parts.append(f"{prefix}{tok.pos or '?'}")
+        # Strip PUNCT POS from final element, keep the delimiter char (same as %mor)
+        if xsmor_parts and xsrep_parts and xsmor_parts[-1] == "PUNCT":
+            xsmor_parts[-1] = xsrep_parts[-1]
         result.append(f"%xsrep:\t" + " ".join(xsrep_parts))
         result.append(f"%xsmor:\t" + " ".join(xsmor_parts))
 

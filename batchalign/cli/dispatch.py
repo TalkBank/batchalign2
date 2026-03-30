@@ -204,13 +204,17 @@ def _run_pipeline_for_file(command, pipeline, file, output, loader_info, writer_
         if file.endswith(".gold.cha"):
             return
 
-        # Find companion gold file
+        # Find companion gold file: FILE.gold.cha overrides, then
+        # template.gold.cha serves as the default for the whole directory
         p = P(file)
         gold_path = p.parent / (p.stem + ".gold.cha")
         if not gold_path.exists():
+            gold_path = p.parent / "template.gold.cha"
+        if not gold_path.exists():
             raise FileNotFoundError(
                 f"No gold .cha file found for comparison. "
-                f"main: {p.name}, expected: {gold_path.name}, looked in: {str(gold_path)}"
+                f"main: {p.name}, expected: {p.stem}.gold.cha or template.gold.cha, "
+                f"looked in: {str(p.parent)}"
             )
 
         main_doc = CHATFile(path=str(p)).doc
