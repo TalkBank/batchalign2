@@ -227,15 +227,12 @@ def _run_pipeline_for_file(command, pipeline, file, output, loader_info, writer_
         CHATFile(doc=result["doc"]).write(output,
                                           merge_abbrev=local_kwargs.get("merge_abbrev", False))
 
-        # Write metrics CSV
-        import csv
+        # Write metrics as JSON sidecar for consolidated CSV later
+        import json as _json
         metrics = result["metrics"]
-        csv_path = P(output).with_suffix(".compare.csv")
-        with open(csv_path, 'w', newline='') as f:
-            writer = csv.writer(f)
-            writer.writerow(["metric", "value"])
-            for k, v in metrics.items():
-                writer.writerow([k, v])
+        json_path = P(output).with_suffix(".compare.json")
+        with open(json_path, 'w') as f:
+            _json.dump(metrics, f)
 
     elif command == "opensmile":
         from batchalign.document import Document
@@ -1048,6 +1045,38 @@ def _dispatch(command, lang, num_speakers,
             memlog_fp.close()
         if not pool_mode_enabled:
             _persist_memory_history()
+
+    # --- Consolidate per-file compare metrics into a single CSV ---
+    if command == "compare" and outputs:
+        import csv
+        import json as _json
+
+        all_metrics = []  # list of (filename, metrics_dict)
+        all_keys = []     # ordered superset of metric keys
+
+        for output_path in outputs:
+            json_path = Path(output_path).with_suffix(".compare.json")
+            if not json_path.exists():
+                continue
+            try:
+                with open(json_path, 'r') as f:
+                    metrics = _json.load(f)
+                rel = os.path.relpath(output_path, out_dir)
+                all_metrics.append((rel, metrics))
+                for k in metrics:
+                    if k not in all_keys:
+                        all_keys.append(k)
+                json_path.unlink()
+            except Exception:
+                pass
+
+        if all_metrics:
+            csv_path = Path(out_dir) / "compare.csv"
+            with open(csv_path, 'w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(["file"] + all_keys)
+                for filename, metrics in all_metrics:
+                    writer.writerow([filename] + [metrics.get(k, "") for k in all_keys])
 
     if len(errors) > 0:
         C.print()
