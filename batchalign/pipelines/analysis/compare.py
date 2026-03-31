@@ -4,7 +4,7 @@ Engines for transcript comparison against gold-standard references.
 
 CompareEngine (PROCESSING): Aligns main vs gold transcripts word-by-word
 using the same conform/match_fn logic as WER evaluation, then annotates
-each main utterance with comparison tokens (%xsrep / %xsmor).
+each gold utterance with comparison tokens (%xsrep / %xsmor).
 
 CompareAnalysisEngine (ANALYSIS): Reads the comparison annotations and
 computes error-rate metrics for CSV output.
@@ -208,6 +208,11 @@ def _find_best_segment(gold_tokens, main_tokens, mfn):
                 elif len_delta == best_len_delta and end > best[1]:
                     best = (start, end)
 
+    # If no tokens overlap at all, return an empty window so the caller
+    # doesn't consume main tokens that belong to a later gold utterance.
+    if best_score <= 0:
+        return 0, 0
+
     return best
 
 
@@ -249,12 +254,27 @@ def conform_with_mapping(words, conform_fn):
 class CompareEngine(BatchalignEngine):
     tasks = [Task.COMPARE]
 
+    def __init__(self):
+        self._stanza = None
+
+    def _get_stanza(self):
+        if self._stanza is None:
+            from batchalign.pipelines.morphosyntax import StanzaEngine
+            self._stanza = StanzaEngine()
+        return self._stanza
+
     def process(self, doc, **kwargs):
         gold = kwargs.get("gold")
         if not gold or not isinstance(gold, Document):
             raise ValueError(
                 f"CompareEngine requires a 'gold' Document kwarg, got '{type(gold)}'"
             )
+
+        # --- 0. Run morphosyntax on both docs ---
+        stanza = self._get_stanza()
+        non_gold_kwargs = {k: v for k, v in kwargs.items() if k != "gold"}
+        doc = stanza.process(doc, **non_gold_kwargs)
+        gold = stanza.process(gold, **non_gold_kwargs)
 
         # --- 1. Extract words from main utterances ---
         main_utterances = [
@@ -343,16 +363,14 @@ class CompareEngine(BatchalignEngine):
                     gold_form = gold_info[orig_gold_idx][2]
                     last_gold_form_idx = gold_form_idx
 
+                    # Copy timing from main; keep gold's own morphology
                     if main_form.time is not None:
                         gold_form.time = main_form.time
-                    if main_form.morphology is not None:
-                        gold_form.morphology = main_form.morphology
-                    if main_form.dependency is not None:
-                        gold_form.dependency = main_form.dependency
+                    gold_form.dependency = None
 
                     utt_positioned[utt_idx].append((gold_form_idx, CompareToken(
                         text=item.key,
-                        pos=_get_pos(main_form),
+                        pos=_get_pos(gold_form),
                         status="match"
                     )))
                     local_main_cursor += 1
@@ -364,6 +382,8 @@ class CompareEngine(BatchalignEngine):
                         gold_form_idx = gold_info[orig_gold_idx][1]
                         gold_form = gold_info[orig_gold_idx][2]
                         last_gold_form_idx = gold_form_idx
+
+                        gold_form.dependency = None
 
                         utt_positioned[utt_idx].append((gold_form_idx, CompareToken(
                             text=item.key,
@@ -401,6 +421,7 @@ class CompareEngine(BatchalignEngine):
                     form.morphology = [Morphology(
                         pos="PUNCT", lemma=form.text.strip(), feats=""
                     )]
+                form.dependency = None
             utt_positioned[utt_idx].sort(key=lambda x: x[0])
 
         # --- 7. Set comparison on each gold utterance ---
