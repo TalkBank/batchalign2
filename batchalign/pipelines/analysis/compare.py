@@ -329,6 +329,10 @@ class CompareEngine(BatchalignEngine):
         # window in the remaining main tokens, then run Levenshtein inside
         # that window to produce the annotations.
         utt_positioned = {i: [] for i in range(len(gold_utterances))}
+        # Track which main (child) forms land in each gold utterance's window
+        utt_main_forms = {i: [] for i in range(len(gold_utterances))}
+        # Track which main utterance(s) contribute to each gold utterance
+        utt_main_speakers = {i: [] for i in range(len(gold_utterances))}
         search_start = 0
 
         for utt_idx in range(len(gold_utterances)):
@@ -344,6 +348,17 @@ class CompareEngine(BatchalignEngine):
 
             abs_start = search_start + win_start
             abs_end = search_start + win_end
+
+            # Collect unique main forms in the window (deduplicate
+            # across conformed expansions that map to the same form)
+            seen_main = set()
+            for j in range(abs_start, abs_end):
+                orig_idx = main_map[j]
+                if orig_idx not in seen_main:
+                    seen_main.add(orig_idx)
+                    m_utt_idx, m_form_idx, m_form = main_info[orig_idx]
+                    utt_main_forms[utt_idx].append(m_form)
+                    utt_main_speakers[utt_idx].append(m_utt_idx)
 
             # Align the chosen window against this gold utterance
             window_main = conformed_main[abs_start:abs_end]
@@ -363,11 +378,6 @@ class CompareEngine(BatchalignEngine):
                     gold_form = gold_info[orig_gold_idx][2]
                     last_gold_form_idx = gold_form_idx
 
-                    # Copy timing from main; keep gold's own morphology
-                    if main_form.time is not None:
-                        gold_form.time = main_form.time
-                    gold_form.dependency = None
-
                     utt_positioned[utt_idx].append((gold_form_idx, CompareToken(
                         text=item.key,
                         pos=_get_pos(gold_form),
@@ -382,8 +392,6 @@ class CompareEngine(BatchalignEngine):
                         gold_form_idx = gold_info[orig_gold_idx][1]
                         gold_form = gold_info[orig_gold_idx][2]
                         last_gold_form_idx = gold_form_idx
-
-                        gold_form.dependency = None
 
                         utt_positioned[utt_idx].append((gold_form_idx, CompareToken(
                             text=item.key,
@@ -415,21 +423,41 @@ class CompareEngine(BatchalignEngine):
                     pos="PUNCT",
                     status="match"
                 )))
-                # Ensure punctuation forms have morphology so %mor includes
-                # the final delimiter (matches generator's PUNCT|<char> logic)
-                if form.morphology is None:
-                    form.morphology = [Morphology(
-                        pos="PUNCT", lemma=form.text.strip(), feats=""
-                    )]
-                form.dependency = None
             utt_positioned[utt_idx].sort(key=lambda x: x[0])
 
-        # --- 7. Set comparison on each gold utterance ---
+        # --- 7. Replace each gold utterance's main line with the child's
+        #         (main/proposal) forms and set the child's speaker. ---
         for utt_idx, utt in enumerate(gold_utterances):
             tokens = [tok for _, tok in utt_positioned[utt_idx]]
             utt.comparison = tokens if tokens else None
 
-            timed_forms = [form for form in utt.content if form.time is not None]
+            # Replace content with the child/main forms from the window
+            child_forms = utt_main_forms[utt_idx]
+            if child_forms:
+                # Grab the ending punctuation from gold so the utterance
+                # delimiter is preserved
+                gold_ending = [
+                    f for f in utt.content
+                    if f.text.strip() in ENDING_PUNCT
+                ]
+                # Strip dependency from child forms (morphosyntax was run
+                # on the main doc separately; gold structure differs)
+                for f in child_forms:
+                    f.dependency = None
+                utt.content = child_forms + gold_ending
+
+                # Set speaker from the child utterance that contributed
+                # the most forms to this window
+                speaker_indices = utt_main_speakers[utt_idx]
+                if speaker_indices:
+                    # Pick the most common main utterance index
+                    majority_utt_idx = max(
+                        set(speaker_indices), key=speaker_indices.count
+                    )
+                    utt.tier = main_utterances[majority_utt_idx].tier
+
+            # Derive utterance timing from the (now-child) forms
+            timed_forms = [f for f in utt.content if f.time is not None]
             if timed_forms:
                 utt.time = (timed_forms[0].time[0], timed_forms[-1].time[1])
                 utt.text = None
