@@ -15,6 +15,7 @@ DEFAULT_PACKAGES = {
     "asr": "whisper_oai",
     "utr": "whisper_utr",
     "fa": "whisper_fa",
+    "segment": "cantonese_seg",
     "speaker": "pyannote",
     "morphosyntax": "stanza",
     "disfluency": "replacement",
@@ -24,6 +25,8 @@ DEFAULT_PACKAGES = {
     "coref": "stanza_coref",
     "translate": "gtrans",
     "opensmile": "opensmile_egemaps",
+    "compare": "compare_engine",
+    "compare_analysis": "compare_analysis_engine",
 }
 
 LANGUAGE_OVERRIDE_PACKAGES: dict = {
@@ -53,6 +56,8 @@ def resolve_engine_specs(pkg_str, lang, num_speakers=None, **arg_overrides):
     if "fa" in packages:
         if "utr" not in packages:
             packages.append("utr")
+        if "segment" not in packages and lang == "yue":
+            packages.append("segment")
 
     overrides = LANGUAGE_OVERRIDE_PACKAGES.get(lang, {})
     specs = []
@@ -120,6 +125,9 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
         elif engine == "ngram":
             from batchalign.pipelines.cleanup import NgramRetraceEngine
             engines.append(NgramRetraceEngine())
+        elif engine == "cantonese_seg":
+            from batchalign.pipelines.segmentation import CantoneseSegmentationEngine
+            engines.append(CantoneseSegmentationEngine())
         elif engine == "whisper_fa":
             from batchalign.pipelines.fa import WhisperFAEngine
             engines.append(WhisperFAEngine())
@@ -189,6 +197,12 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
         elif engine == "opensmile_eGeMAPSv01b":
             from batchalign.pipelines.opensmile import OpenSMILEEngine
             engines.append(OpenSMILEEngine(feature_set='eGeMAPSv01b'))
+        elif engine == "compare_engine":
+            from batchalign.pipelines.analysis import CompareEngine
+            engines.append(CompareEngine())
+        elif engine == "compare_analysis_engine":
+            from batchalign.pipelines.analysis import CompareAnalysisEngine
+            engines.append(CompareAnalysisEngine())
 
 
     L.debug(f"Done initalizing packages.")

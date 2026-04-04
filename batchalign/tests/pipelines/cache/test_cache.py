@@ -15,6 +15,8 @@ from typing import Any
 
 import pytest
 
+pytest.importorskip("filelock")
+
 from batchalign.document import (
     Utterance, Form, Morphology, Dependency, TokenType, Tier
 )

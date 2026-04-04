@@ -27,12 +27,15 @@ class Task(IntEnum):
     DISFLUENCY_ANALYSIS = 6
     RETRACE_ANALYSIS = 7
     UTTERANCE_TIMING_RECOVERY = 8 # "bulletize"
-    FORCED_ALIGNMENT = 9
-    FEATURE_EXTRACT = 10
-    MORPHOSYNTAX = 11
-    COREF = 12
-    WER = 13
-    TRANSLATE = 14
+    WORD_SEGMENTATION = 9
+    FORCED_ALIGNMENT = 10
+    FEATURE_EXTRACT = 11
+    MORPHOSYNTAX = 12
+    COREF = 13
+    WER = 14
+    TRANSLATE = 15
+    COMPARE = 16
+    COMPARE_ANALYSIS = 17
 
 
     DEBUG__G = 0
@@ -49,6 +52,7 @@ TypeMap = {
     Task.SPEAKER_RECOGNITION: TaskType.PROCESSING,
     Task.UTTERANCE_SEGMENTATION: TaskType.PROCESSING,
     Task.UTTERANCE_TIMING_RECOVERY: TaskType.PROCESSING,
+    Task.WORD_SEGMENTATION: TaskType.PROCESSING,
     Task.FORCED_ALIGNMENT: TaskType.PROCESSING,
     Task.MORPHOSYNTAX: TaskType.PROCESSING,
     Task.FEATURE_EXTRACT: TaskType.ANALYSIS,
@@ -57,6 +61,8 @@ TypeMap = {
     Task.COREF: TaskType.PROCESSING,
     Task.WER: TaskType.ANALYSIS,
     Task.TRANSLATE: TaskType.PROCESSING,
+    Task.COMPARE: TaskType.PROCESSING,
+    Task.COMPARE_ANALYSIS: TaskType.ANALYSIS,
 
     Task.DEBUG__G: TaskType.GENERATION,
     Task.DEBUG__P: TaskType.PROCESSING,
@@ -69,6 +75,7 @@ TaskFriendlyName = {
     Task.SPEAKER_RECOGNITION: "Speaker Recognition",
     Task.UTTERANCE_SEGMENTATION: "Utterance Segmentation",
     Task.UTTERANCE_TIMING_RECOVERY: "Utterance Timing Recovery",
+    Task.WORD_SEGMENTATION: "Word Segmentation",
     Task.FORCED_ALIGNMENT: "Forced Alignment",
     Task.MORPHOSYNTAX: "Morpho-Syntax",
     Task.FEATURE_EXTRACT: "Feature Extraction",
@@ -77,6 +84,8 @@ TaskFriendlyName = {
     Task.COREF:  "Coreference Resolution",
     Task.WER:  "Word Error Rate",
     Task.TRANSLATE:  "Translation",
+    Task.COMPARE:  "Transcript Comparison",
+    Task.COMPARE_ANALYSIS:  "Comparison Analysis",
     Task.DEBUG__G:  "TEST_GENERATION",
     Task.DEBUG__P:  "TEST_PROCESSING",
     Task.DEBUG__A:   "TEST_ANALYSIS",
@@ -99,6 +108,11 @@ class CustomLine(BaseModel):
     id: str # only the raw string com for %com
     type: CustomLineType # % or @
     content: Optional[str] = Field(default=None) # the contents of the line
+
+class CompareToken(BaseModel):
+    text: str # the word (conformed/expanded form)
+    pos: Optional[str] = Field(default=None) # POS tag (uppercased)
+    status: str = Field(default="match") # "match" | "extra_main" | "extra_gold"
 
 class Dependency(BaseModel):
     id: int # first number, 1 indexed
@@ -158,6 +172,7 @@ class Utterance(BaseModel):
     translation: Optional[str] = Field(default=None)
     time: Optional[Tuple[int,int]] = Field(default=None)
     custom_dependencies: List[CustomLine]  = Field(default=[])
+    comparison: Optional[List[CompareToken]] = Field(default=None)
 
     @property
     def delim(self) -> str:

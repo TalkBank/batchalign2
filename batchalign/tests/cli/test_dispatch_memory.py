@@ -4,6 +4,9 @@ from pathlib import Path
 
 import pytest
 
+# cli → cli.py → models.training.run → torch
+pytest.importorskip("torch")
+
 from batchalign.cli import dispatch as dispatch_module
 from batchalign import constants as constants_module
 

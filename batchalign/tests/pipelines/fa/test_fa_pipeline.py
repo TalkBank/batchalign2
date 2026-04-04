@@ -1,3 +1,7 @@
+import pytest
+
+pytest.importorskip("torch")
+
 from batchalign.pipelines import BatchalignPipeline
 
 def test_whisper_fa_pipeline(en_doc):

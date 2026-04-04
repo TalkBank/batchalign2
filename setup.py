@@ -59,6 +59,7 @@ setup(
         "typing-extensions",
         "num2words",
         "tiktoken",
+        "pycantonese",
         "blobfile",
         "sentencepiece",
         "tencentcloud-sdk-python-common",

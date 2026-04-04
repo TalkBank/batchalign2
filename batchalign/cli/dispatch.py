@@ -59,6 +59,7 @@ POOL_UNSAFE_ENGINES = {
     "seamless_translate",
     "opensmile_egemaps",
     "opensmile_gemaps",
+    "compare_engine",
     "opensmile_compare",
     "opensmile_eGeMAPSv01b",
 }
@@ -72,6 +73,8 @@ POOL_SAFE_ENGINES = {
     "gtrans",
     "replacement",
     "ngram",
+    "compare_analysis_engine",
+    "cantonese_seg",
 }
 
 warnings.filterwarnings('ignore', category=UserWarning, message='TypedStorage is deprecated')
@@ -199,6 +202,47 @@ def _run_pipeline_for_file(command, pipeline, file, output, loader_info, writer_
             df.write(str(doc["diff"]))
         CHATFile(doc=doc["doc"]).write(str(P(output).with_suffix(".asr.cha")),
                                        write_wor=local_kwargs.get("wor", False))
+
+    elif command == "compare":
+        from pathlib import Path as P
+        # Skip gold files that dispatch picked up
+        if file.endswith(".gold.cha"):
+            return
+
+        # Find companion gold file: FILE.gold.cha overrides, then
+        # template.gold.cha serves as the default for the whole directory
+        p = P(file)
+        gold_path = p.parent / (p.stem + ".gold.cha")
+        if not gold_path.exists():
+            gold_path = p.parent / "template.gold.cha"
+        if not gold_path.exists():
+            raise FileNotFoundError(
+                f"No gold .cha file found for comparison. "
+                f"main: {p.name}, expected: {p.stem}.gold.cha or template.gold.cha, "
+                f"looked in: {str(p.parent)}"
+            )
+
+        main_doc = CHATFile(path=str(p)).doc
+        gold_doc = CHATFile(path=str(gold_path), special_mor_=True).doc
+
+        # Pipeline: compare (runs morphosyntax internally) -> compare_analysis
+        result = pipeline(main_doc, callback=progress_callback, gold=gold_doc)
+
+        # Write annotated CHAT
+        CHATFile(doc=result["doc"]).write(output,
+                                          merge_abbrev=local_kwargs.get("merge_abbrev", False))
+
+        # Write metrics as JSON sidecar for consolidated CSV later
+        import json as _json
+        metrics = result["metrics"]
+        json_path = P(output).with_suffix(".compare.json")
+        with open(json_path, 'w') as f:
+            _json.dump(metrics, f)
+
+    elif command == "segment":
+        doc = CHATFile(path=os.path.abspath(file)).doc
+        doc = pipeline(doc, callback=progress_callback)
+        CHATFile(doc=doc).write(output)
 
     elif command == "opensmile":
         from batchalign.document import Document
@@ -351,6 +395,8 @@ Cmd2Task = {
     "coref": "coref",
     "translate": "translate",
     "opensmile": "opensmile",
+    "compare": "compare,compare_analysis",
+    "segment": "segment",
 }
 
 # this is the main runner used by all functions
@@ -370,6 +416,8 @@ def _dispatch(command, lang, num_speakers,
         "coref",
         "benchmark",
         "opensmile",
+        "compare",
+        "segment",
     }
     if command in worker_handled:
         # Avoid pickling CLI-local loader/writer functions when the worker
@@ -507,7 +555,7 @@ def _dispatch(command, lang, num_speakers,
     memory_history_path.parent.mkdir(parents=True, exist_ok=True)
 
     # Pre-download stanza resources if needed to avoid interleaved downloads in workers
-    if command in ["morphotag", "utseg", "coref"]:
+    if command in ["morphotag", "utseg", "coref", "compare"]:
         try:
             import stanza
             stanza.download_resources_json()
@@ -1034,6 +1082,38 @@ def _dispatch(command, lang, num_speakers,
             memlog_fp.close()
         if not pool_mode_enabled:
             _persist_memory_history()
+
+    # --- Consolidate per-file compare metrics into a single CSV ---
+    if command == "compare" and outputs:
+        import csv
+        import json as _json
+
+        all_metrics = []  # list of (filename, metrics_dict)
+        all_keys = []     # ordered superset of metric keys
+
+        for output_path in outputs:
+            json_path = Path(output_path).with_suffix(".compare.json")
+            if not json_path.exists():
+                continue
+            try:
+                with open(json_path, 'r') as f:
+                    metrics = _json.load(f)
+                rel = os.path.relpath(output_path, out_dir)
+                all_metrics.append((rel, metrics))
+                for k in metrics:
+                    if k not in all_keys:
+                        all_keys.append(k)
+                json_path.unlink()
+            except Exception:
+                pass
+
+        if all_metrics:
+            csv_path = Path(out_dir) / "compare.csv"
+            with open(csv_path, 'w', newline='') as f:
+                writer = csv.writer(f)
+                writer.writerow(["file"] + all_keys)
+                for filename, metrics in all_metrics:
+                    writer.writerow([filename] + [metrics.get(k, "") for k in all_keys])
 
     if len(errors) > 0:
         C.print()

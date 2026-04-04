@@ -3,6 +3,8 @@ import json
 import pytest
 import pathlib
 
+pytest.importorskip("praatio")
+
 from batchalign.document import *
 from batchalign.formats.textgrid import TextGridFile
 

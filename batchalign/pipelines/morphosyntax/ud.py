@@ -309,6 +309,8 @@ def handler__PUNCT(word, lang=None):
     # otherwise, if its a word, return the word
     elif word.text == "da":
         return "noun|da"
+    elif word.text == "哎呀":
+        return "punct|哎呀"
     elif re.match(r"^['\w-]+$", word.text): # we match text here because .text is the ultumate content
                                         # instead of the lemma, which maybe entirely weird
         if word.text == "もん":
