@@ -179,6 +179,9 @@ def dispatch_pipeline(pkg_str, lang, num_speakers=None, **arg_overrides):
         elif engine == "paraformer":
             from batchalign.pipelines.asr.funaudio import FunAudioEngine
             engines.append(FunAudioEngine(model="paraformer-zh", lang=lang))
+        elif engine == "qwenasr":
+            from batchalign.pipelines.asr.qwenasr import QwenASREngine
+            engines.append(QwenASREngine(model="Qwen/Qwen3-ASR-1.7B", lang=lang))
         elif engine ==  "funaudio_utr":
             from batchalign.pipelines.utr import FunAudioUTREngine
             engines.append(FunAudioUTREngine(lang=lang))

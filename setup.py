@@ -69,6 +69,7 @@ setup(
         "oss2",
         "openai-whisper>=20240930",
         "funasr",
+        "qwen-asr",
         "cos-python-sdk-v5",
         "openai-whisper",
         "llvmlite>=0.44.0",

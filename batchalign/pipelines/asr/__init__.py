@@ -28,7 +28,10 @@ def __getattr__(name):
     elif name == 'FunAudioEngine':
         from .funaudio import FunAudioEngine
         return FunAudioEngine
+    elif name == 'QwenASREngine':
+        from .qwenasr import QwenASREngine
+        return QwenASREngine
     raise AttributeError(f"module '{__name__}' has no attribute '{name}'")
 
 __all__ = ['WhisperEngine', 'RevEngine', 'WhisperXEngine', 'OAIWhisperEngine',
-           'TencentEngine', 'AliyunEngine', 'FunAudioEngine']
+           'TencentEngine', 'AliyunEngine', 'FunAudioEngine', 'QwenASREngine']

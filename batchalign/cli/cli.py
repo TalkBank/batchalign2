@@ -182,6 +182,8 @@ def align(ctx, in_dir, out_dir, whisper, wav2vec, wav2vec_yue, tencent, funaudio
               default=False, help="Use FunAudio instead of Rev.AI (default). Superceeds --whisper.")
 @click.option("--paraformer/--rev",
               default=False, help="Use FunAudio instead of Rev.AI (default). Superceeds --whisper.")
+@click.option("--qwenasr/--rev",
+              default=False, help="Use Qwen3-ASR instead of Rev.AI (default). Superceeds --whisper.")
 @click.option("--diarize/--nodiarize",
               default=False, help="Perform speaker diarization (this flag is ignored with Rev.AI)")
 @click.option("--wor/--nowor",
@@ -217,6 +219,8 @@ def transcribe(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
         asr = "funaudio"
     if kwargs["paraformer"]:
         asr = "paraformer"
+    if kwargs["qwenasr"]:
+        asr = "qwenasr"
 
     def writer(doc, output):
         doc.content.insert(0, CustomLine(id="Comment", type=CustomLineType.INDEPENDENT,
@@ -409,6 +413,8 @@ def segment(ctx, in_dir, out_dir, lang, **kwargs):
               default=False, help="Use the OpenAI's Whisper implementation instead of Rev.AI (default).")
 @click.option("--paraformer/--rev",
               default=False, help="Use FunAudio instead of Rev.AI (default). Superceeds --whisper.")
+@click.option("--qwenasr/--rev",
+              default=False, help="Use Qwen3-ASR instead of Rev.AI (default). Superceeds --whisper.")
 @click.option("--lang",
               help="sample language in three-letter ISO 3166-1 alpha-3 code",
               show_default=True,
@@ -420,7 +426,7 @@ def segment(ctx, in_dir, out_dir, lang, **kwargs):
 @click.option("--merge-abbrev/--no-merge-abbrev",
               default=False, help="Merge abbreviations in output. Default: no.")
 @click.pass_context
-def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, funaudio, whisper_oai, paraformer, **kwargs):
+def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, funaudio, whisper_oai, paraformer, qwenasr, **kwargs):
     """Benchmark ASR utilities for their word accuracy"""
     from batchalign.formats.chat import CHATFile
     def loader(file):
@@ -458,6 +464,8 @@ def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, funaud
         asr = "funaudio"
     if paraformer:
         asr = "paraformer"
+    if qwenasr:
+        asr = "qwenasr"
 
     _dispatch("benchmark", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
               in_dir, out_dir,
