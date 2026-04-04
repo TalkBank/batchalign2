@@ -407,6 +407,8 @@ def segment(ctx, in_dir, out_dir, lang, **kwargs):
               default=False, help="Use Tencent instead of Rev.AI (default).")
 @click.option("--whisper_oai/--rev",
               default=False, help="Use the OpenAI's Whisper implementation instead of Rev.AI (default).")
+@click.option("--paraformer/--rev",
+              default=False, help="Use FunAudio instead of Rev.AI (default). Superceeds --whisper.")
 @click.option("--lang",
               help="sample language in three-letter ISO 3166-1 alpha-3 code",
               show_default=True,
@@ -418,7 +420,7 @@ def segment(ctx, in_dir, out_dir, lang, **kwargs):
 @click.option("--merge-abbrev/--no-merge-abbrev",
               default=False, help="Merge abbreviations in output. Default: no.")
 @click.pass_context
-def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, funaudio, whisper_oai, **kwargs):
+def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, funaudio, whisper_oai, paraformer, **kwargs):
     """Benchmark ASR utilities for their word accuracy"""
     from batchalign.formats.chat import CHATFile
     def loader(file):
@@ -445,11 +447,22 @@ def benchmark(ctx, in_dir, out_dir, lang, num_speakers, whisper, tencent, funaud
                                        write_wor=kwargs.get("wor", False),
                                        merge_abbrev=kwargs.get("merge_abbrev", False))
 
+    asr = "rev"
+    if whisper:
+        asr = "whisper"
+    if tencent:
+        asr = "tencent"
+    if whisper_oai:
+        asr = "whisper_oai"
+    if funaudio:
+        asr = "funaudio"
+    if paraformer:
+        asr = "paraformer"
 
     _dispatch("benchmark", lang, num_speakers, ["mp3", "mp4", "wav"], ctx,
               in_dir, out_dir,
               loader, writer, C,
-              asr="whisper" if whisper else ("funaudio" if funaudio else ("tencent" if tencent else ("whisper_oai" if whisper_oai else "rev"))),
+              asr=asr,
               **kwargs)
     
 
