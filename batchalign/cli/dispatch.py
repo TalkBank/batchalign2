@@ -70,6 +70,7 @@ POOL_SAFE_ENGINES = {
     "replacement",
     "ngram",
     "compare_analysis_engine",
+    "cantonese_seg",
 }
 
 warnings.filterwarnings('ignore', category=UserWarning, message='TypedStorage is deprecated')
@@ -234,6 +235,11 @@ def _run_pipeline_for_file(command, pipeline, file, output, loader_info, writer_
         with open(json_path, 'w') as f:
             _json.dump(metrics, f)
 
+    elif command == "segment":
+        doc = CHATFile(path=os.path.abspath(file)).doc
+        doc = pipeline(doc, callback=progress_callback)
+        CHATFile(doc=doc).write(output)
+
     elif command == "opensmile":
         from batchalign.document import Document
         doc = Document.new(media_path=file, lang=local_kwargs.get("lang", kwargs.get("lang", "eng")))
@@ -386,6 +392,7 @@ Cmd2Task = {
     "translate": "translate",
     "opensmile": "opensmile",
     "compare": "compare,compare_analysis",
+    "segment": "segment",
 }
 
 # this is the main runner used by all functions
@@ -406,6 +413,7 @@ def _dispatch(command, lang, num_speakers,
         "benchmark",
         "opensmile",
         "compare",
+        "segment",
     }
     if command in worker_handled:
         # Avoid pickling CLI-local loader/writer functions when the worker

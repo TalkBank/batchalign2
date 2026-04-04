@@ -348,6 +348,32 @@ def utseg(ctx, in_dir, out_dir, lang, num_speakers, **kwargs):
               in_dir, out_dir,
               loader, writer, C)
 
+#################### SEGMENT ################################
+
+@batchalign.command()
+@common_options
+@click.option("--lang",
+              help="sample language in three-letter ISO 3166-1 alpha-3 code",
+              show_default=True,
+              default="yue",
+              type=str)
+@click.option("--merge-abbrev/--no-merge-abbrev",
+              default=False, help="Merge abbreviations in output. Default: no.")
+@click.pass_context
+def segment(ctx, in_dir, out_dir, lang, **kwargs):
+    """Perform word segmentation on transcripts (Cantonese)."""
+    from batchalign.formats.chat import CHATFile
+
+    def loader(file):
+        return CHATFile(path=os.path.abspath(file)).doc
+
+    def writer(doc, output):
+        CHATFile(doc=doc).write(output, merge_abbrev=kwargs.get("merge_abbrev", False))
+
+    _dispatch("segment", lang, 1, ["cha"], ctx,
+              in_dir, out_dir,
+              loader, writer, C)
+
 #################### BENCHMARK ################################
 
 @batchalign.command()

@@ -58,6 +58,7 @@ setup(
         "typing-extensions",
         "num2words",
         "tiktoken",
+        "pycantonese",
         "blobfile",
         "sentencepiece",
         "googletrans",
