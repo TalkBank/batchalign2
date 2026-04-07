@@ -287,6 +287,8 @@ class CompareEngine(BatchalignEngine):
             for form_idx, form in enumerate(utt.content):
                 if form.text.strip() in MOR_PUNCT + ENDING_PUNCT:
                     continue
+                if _get_pos(form) == "PUNCT":
+                    continue
                 if form.text.strip().lower() in fillers:
                     continue
                 main_info.append((utt_idx, form_idx, form))
@@ -303,7 +305,7 @@ class CompareEngine(BatchalignEngine):
         for utt_idx, utt in enumerate(gold_utterances):
             gold_punct[utt_idx] = []
             for form_idx, form in enumerate(utt.content):
-                if form.text.strip() in MOR_PUNCT + ENDING_PUNCT:
+                if form.text.strip() in MOR_PUNCT + ENDING_PUNCT or _get_pos(form) == "PUNCT":
                     gold_punct[utt_idx].append((form_idx, form))
                     continue
                 if form.text.strip().lower() in fillers:
