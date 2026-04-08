@@ -216,6 +216,30 @@ def _find_best_segment(gold_tokens, main_tokens, mfn):
     return best
 
 
+def _best_rotation(window_tokens, gold_tokens, mfn):
+    """Find the cyclic rotation of *window_tokens* that maximises matches.
+
+    Returns the rotation offset *r* such that
+    ``window_tokens[r:] + window_tokens[:r]`` best aligns to *gold_tokens*.
+    """
+    if len(window_tokens) <= 1:
+        return 0
+
+    best_r = 0
+    best_matches = -1
+    n = len(window_tokens)
+
+    for r in range(n):
+        rotated = window_tokens[r:] + window_tokens[:r]
+        alignment = align(rotated, gold_tokens, False, mfn)
+        matches = sum(1 for item in alignment if isinstance(item, Match))
+        if matches > best_matches:
+            best_matches = matches
+            best_r = r
+
+    return best_r
+
+
 def _get_pos(form):
     """Extract uppercased POS from a Form's morphology, or '?' if absent."""
     if form is not None and form.morphology:
@@ -362,8 +386,13 @@ class CompareEngine(BatchalignEngine):
                     utt_main_forms[utt_idx].append(m_form)
                     utt_main_speakers[utt_idx].append(m_utt_idx)
 
-            # Align the chosen window against this gold utterance
+            # Align the chosen window against this gold utterance,
+            # trying cyclic rotations to avoid spurious del/ins pairs.
             window_main = conformed_main[abs_start:abs_end]
+            window_len = len(window_main)
+            rotation = _best_rotation(window_main, g_tokens, match_fn)
+            if rotation > 0:
+                window_main = window_main[rotation:] + window_main[:rotation]
             utt_alignment = align(window_main, g_tokens, False, match_fn)
 
             local_main_cursor = 0
@@ -372,7 +401,7 @@ class CompareEngine(BatchalignEngine):
 
             for item in utt_alignment:
                 if isinstance(item, Match):
-                    global_main_idx = abs_start + local_main_cursor
+                    global_main_idx = abs_start + (local_main_cursor + rotation) % window_len
                     orig_main_idx = main_map[global_main_idx]
                     main_form = main_info[orig_main_idx][2]
                     orig_gold_idx = g_maps[local_gold_cursor]
@@ -403,7 +432,7 @@ class CompareEngine(BatchalignEngine):
                         local_gold_cursor += 1
 
                     else:
-                        global_main_idx = abs_start + local_main_cursor
+                        global_main_idx = abs_start + (local_main_cursor + rotation) % window_len
                         orig_main_idx = main_map[global_main_idx]
                         main_form = main_info[orig_main_idx][2]
 
@@ -463,6 +492,10 @@ class CompareEngine(BatchalignEngine):
             if timed_forms:
                 utt.time = (timed_forms[0].time[0], timed_forms[-1].time[1])
                 utt.text = None
+
+        # Copy @Media header from the main doc if it has one
+        if doc.media is not None:
+            gold.media = doc.media
 
         return gold
 
