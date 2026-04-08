@@ -159,8 +159,10 @@ def _find_best_segment(gold_tokens, main_tokens, mfn):
     multiset overlap with the gold utterance, ignoring order. To keep common
     words from swallowing later transcript material, it only considers windows
     near the gold utterance length. Among equally good windows it prefers the
-    latest one, not the earliest. The caller then runs the full Levenshtein
-    aligner inside that window to produce token annotations.
+    one with the most positional (in-order) matches, then the latest one as a
+    final tiebreaker (so CHI repetitions / self-corrections beat earlier INV
+    tokens). The caller then runs the full Levenshtein aligner inside that
+    window to produce token annotations.
     """
     if not gold_tokens or not main_tokens:
         return 0, 0
@@ -175,6 +177,7 @@ def _find_best_segment(gold_tokens, main_tokens, mfn):
     best = (0, min(main_len, gold_len))
     best_score = -1.0
     best_len_delta = None
+    best_pos_matches = -1
 
     for span in range(min_window, max_window + 1):
         window_counts = Counter(main_tokens[:span])
@@ -197,16 +200,28 @@ def _find_best_segment(gold_tokens, main_tokens, mfn):
             len_delta = abs(span - gold_len)
             end = start + span
 
+            # Count how many tokens match the gold in the same position
+            pos_matches = sum(
+                1 for k in range(min(span, gold_len))
+                if mfn(main_tokens[start + k], gold_tokens[k])
+            )
+
             if score > best_score:
                 best = (start, end)
                 best_score = score
                 best_len_delta = len_delta
+                best_pos_matches = pos_matches
             elif score == best_score:
                 if best_len_delta is None or len_delta < best_len_delta:
                     best = (start, end)
                     best_len_delta = len_delta
-                elif len_delta == best_len_delta and end > best[1]:
-                    best = (start, end)
+                    best_pos_matches = pos_matches
+                elif len_delta == best_len_delta:
+                    if pos_matches > best_pos_matches:
+                        best = (start, end)
+                        best_pos_matches = pos_matches
+                    elif pos_matches == best_pos_matches and end > best[1]:
+                        best = (start, end)
 
     # If no tokens overlap at all, return an empty window so the caller
     # doesn't consume main tokens that belong to a later gold utterance.
