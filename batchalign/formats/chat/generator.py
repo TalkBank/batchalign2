@@ -11,7 +11,7 @@ import warnings
 # document[3].text = None
 # document[3].model_dump()
 
-def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=True, merge_abbrev=False):
+def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=True, write_mor=True, merge_abbrev=False):
     """Converts at Utterance to a CHAT string.
 
     Parameters
@@ -89,7 +89,7 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
             # I'm sorry. This is just mor line generation; there is actually not that much complexity here
             mor_elems.append("~".join(f"{m.pos}|{m.lemma}{'-' if any([m.feats.startswith(i) for i in UD__GENDERS]) else ('-' if m.feats else '')}{m.feats}"
                                     for m in mor))
-    if len(mor_elems) > 0:
+    if write_mor and len(mor_elems) > 0:
         # if the end is punct, drop the tag
         if mor_elems[-1].startswith("PUNCT"):
             mor_elems[-1] = mor_elems[-1].split("|")[1]
@@ -97,7 +97,7 @@ def generate_chat_utterance(utterance: Utterance, special_mor=False, write_wor=T
 
     #### GRA LINE GENERATION ####
     # gra list is not different for MWT tokens so we flatten it
-    if len(gras) > 0:
+    if write_mor and len(gras) > 0:
         flat_gras = [i for j in gras if j for i in j]
         if flat_gras:
             result.append(f"%{'u' if special_mor else ''}gra:\t"+" ".join([f"{i.id}|{i.dep_id}|{i.dep_type}" for i in flat_gras]))

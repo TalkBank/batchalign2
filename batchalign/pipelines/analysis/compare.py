@@ -159,10 +159,11 @@ def _find_best_segment(gold_tokens, main_tokens, mfn):
     multiset overlap with the gold utterance, ignoring order. To keep common
     words from swallowing later transcript material, it only considers windows
     near the gold utterance length. Among equally good windows it prefers the
-    one with the most positional (in-order) matches, then the latest one as a
-    final tiebreaker (so CHI repetitions / self-corrections beat earlier INV
-    tokens). The caller then runs the full Levenshtein aligner inside that
-    window to produce token annotations.
+    one with the fewest non-matching (wasted) tokens, then the most
+    Levenshtein alignment matches, then the latest one as a final tiebreaker
+    (so CHI repetitions / self-corrections beat earlier INV tokens). The caller then
+    runs the full Levenshtein aligner inside that window to produce token
+    annotations.
     """
     if not gold_tokens or not main_tokens:
         return 0, 0
@@ -176,8 +177,8 @@ def _find_best_segment(gold_tokens, main_tokens, mfn):
 
     best = (0, min(main_len, gold_len))
     best_score = -1.0
-    best_len_delta = None
-    best_pos_matches = -1
+    best_waste = None
+    best_align_matches = -1
 
     for span in range(min_window, max_window + 1):
         window_counts = Counter(main_tokens[:span])
@@ -197,30 +198,29 @@ def _find_best_segment(gold_tokens, main_tokens, mfn):
                 overlap += min(window_counts[right], gold_counts[right])
 
             score = overlap / gold_len
-            len_delta = abs(span - gold_len)
+            waste = span - overlap  # non-matching tokens in the window
             end = start + span
 
-            # Count how many tokens match the gold in the same position
-            pos_matches = sum(
-                1 for k in range(min(span, gold_len))
-                if mfn(main_tokens[start + k], gold_tokens[k])
-            )
+            # Alignment-based match count (Levenshtein) as tiebreaker
+            window = main_tokens[start:end]
+            alignment = align(window, gold_tokens, False, mfn)
+            align_matches = sum(1 for item in alignment if isinstance(item, Match))
 
             if score > best_score:
                 best = (start, end)
                 best_score = score
-                best_len_delta = len_delta
-                best_pos_matches = pos_matches
+                best_waste = waste
+                best_align_matches = align_matches
             elif score == best_score:
-                if best_len_delta is None or len_delta < best_len_delta:
+                if best_waste is None or waste < best_waste:
                     best = (start, end)
-                    best_len_delta = len_delta
-                    best_pos_matches = pos_matches
-                elif len_delta == best_len_delta:
-                    if pos_matches > best_pos_matches:
+                    best_waste = waste
+                    best_align_matches = align_matches
+                elif waste == best_waste:
+                    if align_matches > best_align_matches:
                         best = (start, end)
-                        best_pos_matches = pos_matches
-                    elif pos_matches == best_pos_matches and end > best[1]:
+                        best_align_matches = align_matches
+                    elif align_matches == best_align_matches and end > best[1]:
                         best = (start, end)
 
     # If no tokens overlap at all, return an empty window so the caller

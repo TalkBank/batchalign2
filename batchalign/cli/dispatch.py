@@ -226,6 +226,7 @@ def _run_pipeline_for_file(command, pipeline, file, output, loader_info, writer_
 
         # Write annotated CHAT
         CHATFile(doc=result["doc"]).write(output,
+                                          write_mor=False,
                                           merge_abbrev=local_kwargs.get("merge_abbrev", False))
 
         # Write metrics as JSON sidecar for consolidated CSV later

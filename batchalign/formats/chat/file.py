@@ -93,7 +93,7 @@ class CHATFile(BaseFormat):
             self.__doc = doc
 
 
-    def write(self, path, write_wor=True, merge_abbrev=False):
+    def write(self, path, write_wor=True, write_mor=True, merge_abbrev=False):
         """Write the CHATFile to file.
 
         Parameters
@@ -102,13 +102,13 @@ class CHATFile(BaseFormat):
             Path of where the CHAT file should get str.
         """
 
-        str_doc = self.__generate(self.__doc, self.__special_mor, write_wor=write_wor, merge_abbrev=merge_abbrev)
+        str_doc = self.__generate(self.__doc, self.__special_mor, write_wor=write_wor, write_mor=write_mor, merge_abbrev=merge_abbrev)
 
         with open(path, 'w', encoding="utf-8") as df:
             df.write(str_doc)
 
     @staticmethod
-    def __generate(doc:Document, special=False, write_wor=True, merge_abbrev=False):
+    def __generate(doc:Document, special=False, write_wor=True, write_mor=True, merge_abbrev=False):
         utterances = doc.content
 
         def __get_birthdays(line):
@@ -129,6 +129,7 @@ class CHATFile(BaseFormat):
             else:
                 main.append(generate_chat_utterance(i, special and doc.langs[0] == "eng",
                                                     write_wor=write_wor,
+                                                    write_mor=write_mor,
                                                     merge_abbrev=merge_abbrev))
         main.append("@End\n")
 
