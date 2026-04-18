@@ -159,11 +159,12 @@ def _find_best_segment(gold_tokens, main_tokens, mfn):
     multiset overlap with the gold utterance, ignoring order. To keep common
     words from swallowing later transcript material, it only considers windows
     near the gold utterance length. Among equally good windows it prefers the
-    one with the fewest non-matching (wasted) tokens, then the most
-    Levenshtein alignment matches, then the latest one as a final tiebreaker
-    (so CHI repetitions / self-corrections beat earlier INV tokens). The caller then
-    runs the full Levenshtein aligner inside that window to produce token
-    annotations.
+    one with the most Levenshtein alignment matches (so order is respected and
+    cross-utterance fragments that happen to be dense don't beat in-utterance
+    matches), then fewer non-matching (wasted) tokens, then the latest one as
+    a final tiebreaker (so CHI repetitions / self-corrections beat earlier INV
+    tokens). The caller then runs the full Levenshtein aligner inside that
+    window to produce token annotations.
     """
     if not gold_tokens or not main_tokens:
         return 0, 0
@@ -212,15 +213,15 @@ def _find_best_segment(gold_tokens, main_tokens, mfn):
                 best_waste = waste
                 best_align_matches = align_matches
             elif score == best_score:
-                if best_waste is None or waste < best_waste:
+                if align_matches > best_align_matches:
                     best = (start, end)
                     best_waste = waste
                     best_align_matches = align_matches
-                elif waste == best_waste:
-                    if align_matches > best_align_matches:
+                elif align_matches == best_align_matches:
+                    if best_waste is None or waste < best_waste:
                         best = (start, end)
-                        best_align_matches = align_matches
-                    elif align_matches == best_align_matches and end > best[1]:
+                        best_waste = waste
+                    elif waste == best_waste and end > best[1]:
                         best = (start, end)
 
     # If no tokens overlap at all, return an empty window so the caller
