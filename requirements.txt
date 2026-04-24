@@ -313,6 +313,8 @@ pyannote-pipeline==3.0.1
     # via pyannote-audio
 pyarrow==23.0.0
     # via audformat
+pycantonese==4.2.0
+    # via batchalign (setup.py)
 pycountry==24.6.1
     # via batchalign (setup.py)
 pycparser==3.0
@@ -382,6 +384,8 @@ ruamel-yaml==0.18.17
     # via hyperpyyaml
 ruamel-yaml-clib==0.2.15
     # via ruamel-yaml
+rustling==0.8.0
+    # via pycantonese
 safetensors==0.7.0
     # via
     #   accelerate
@@ -450,7 +454,7 @@ tokenizers==0.22.2
     # via
     #   batchalign (setup.py)
     #   transformers
-torch==2.10.0
+torch==2.8.0
     # via
     #   batchalign (setup.py)
     #   accelerate
@@ -472,7 +476,7 @@ torch-audiomentations==0.12.0
     # via pyannote-audio
 torch-pitch-shift==1.2.5
     # via torch-audiomentations
-torchaudio==2.10.0
+torchaudio==2.8.0
     # via
     #   batchalign (setup.py)
     #   pyannote-audio

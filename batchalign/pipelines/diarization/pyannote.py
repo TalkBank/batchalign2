@@ -47,9 +47,25 @@ class PyannoteEngine(BatchalignEngine):
 
     def process(self, doc: Document, **kwargs) -> Document:
         if self.pipe is None:
-            from pyannote.audio import Pipeline
-            self.pipe = Pipeline.from_pretrained("talkbank/dia-fork")
+            # torch>=2.6 defaults torch.load(weights_only=True), which rejects
+            # pyannote 3.x checkpoints that pickle TorchVersion/Specifications/etc.
+            # The pyannote checkpoint comes from a trusted HF repo, so force
+            # weights_only=False for the duration of the pipeline load.
+            import torch
+            _orig_torch_load = torch.load
+            def _patched_load(*args, **kwargs):
+                kwargs["weights_only"] = False
+                return _orig_torch_load(*args, **kwargs)
+            torch.load = _patched_load
+            try:
+                from pyannote.audio import Pipeline
+                self.pipe = Pipeline.from_pretrained("talkbank/dia-fork")
+            finally:
+                torch.load = _orig_torch_load
         assert doc.media != None and doc.media.url != None, f"We cannot diarize something that doesn't have a media path! Provided media tier='{doc.media}'"
+        if not doc.tiers:
+            L.warning("Skipping diarization: upstream ASR produced no tiers/utterances.")
+            return doc
         res = self.pipe(doc.media.url, num_speakers=self.num_speakers)
 
         speakers = list(set([int(i[-1].split("_")[-1])

@@ -31,8 +31,8 @@ setup(
         "filelock>=3.0.0",
         "nltk>=3.8",
         "praatio>=6.0.0,<6.1.0",
-        "torch>=2.10.0",
-        "torchaudio>=2.10.0",  # Only uses transforms/functional/pipelines (I/O via soundfile)
+        "torch>=2.7,<2.9",
+        "torchaudio>=2.7,<2.9",  # <2.9: keep list_audio_backends; <2.10: keep AudioMetaData — needed by pyannote.audio 3.x (torch.load weights_only patched in batchalign.pipelines.diarization.pyannote)
         "soundfile>=0.12.0",  # Audio I/O backend (replaces torchaudio.load/save/info)
         # "pyAudioAnalysis",
         # "hmmlearn==0.3.0",
@@ -40,10 +40,10 @@ setup(
         "pydub",
         # "imblearn",
         "plotly>=5.3.0",
-        "transformers>=4.38.2",
+        "transformers>=4.38.2,<5",
         "tokenizers>=0.14.1",
         "numba>=0.61.0",
-        "numpy<=2.2",
+        "numpy>=1.24,<2.3",
         "pycountry>=22.3",
         "stanza[transformers]>=1.10.1",
         "scipy~=1.11",
@@ -66,7 +66,7 @@ setup(
         "llvmlite>=0.44.0",
         "praat-parselmouth==0.4.6",  
         "opensmile>=2.5.0",
-        "pyannote.audio",
+        "pyannote.audio>=3.4.0,<4",
         "onnxruntime",
         "certifi>=2025.10.5"
     ],
