@@ -1,3 +1,3 @@
-0.8.2-post.14
-April 24 2026
-pyannote.audio/torchaudio version pin fix for diarization
+0.8.2-post.15
+May 2nd 2026
+more compare fixes

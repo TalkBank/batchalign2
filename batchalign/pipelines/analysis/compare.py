@@ -152,19 +152,34 @@ def match_fn(x, y):
 # --- End of eval.py duplicates ---
 
 
-def _find_best_segment(gold_tokens, main_tokens, mfn):
+def _find_best_segment(gold_tokens, main_tokens, main_utts, mfn):
     """Find a rough window using bag-of-words overlap.
 
     The rough pass is order-invariant: it scores contiguous windows by token
     multiset overlap with the gold utterance, ignoring order. To keep common
     words from swallowing later transcript material, it only considers windows
-    near the gold utterance length. Among equally good windows it prefers the
-    one with the most Levenshtein alignment matches (so order is respected and
-    cross-utterance fragments that happen to be dense don't beat in-utterance
-    matches), then fewer non-matching (wasted) tokens, then the latest one as
-    a final tiebreaker (so CHI repetitions / self-corrections beat earlier INV
-    tokens). The caller then runs the full Levenshtein aligner inside that
-    window to produce token annotations.
+    near the gold utterance length.
+
+    Each candidate window is *projected* to its majority source main utt
+    before scoring — leading and trailing tokens that came from a different
+    main utt are stripped before the bag-of-words overlap is computed, so
+    cross-utterance bleed can't inflate the score. Without this projection
+    a window that straddles two main utterances can outscore both clean
+    same-utt windows (we have seen 10/10 vs the correct 9/10) by counting
+    matching tokens drawn from both sides; the post-pass snap would correct
+    the boundary, but only after that misleading score has already won.
+
+    Tiebreaking, in order:
+
+    1. **Levenshtein align matches** (order-respecting).
+    2. **Latest end position** — repetitions and self-corrections are often
+       the intended match while earlier occurrences are example / prompt
+       utterances, so a later window beats an earlier one even when it
+       carries more disfluences. (This swaps the priority of end vs.
+       waste relative to the original implementation: leaner first
+       occurrences should not silently win over later self-corrections.)
+    3. **Lower waste** (``window_span - overlap``) — when end is also tied,
+       prefer the cleaner window.
     """
     if not gold_tokens or not main_tokens:
         return 0, 0
@@ -182,47 +197,49 @@ def _find_best_segment(gold_tokens, main_tokens, mfn):
     best_align_matches = -1
 
     for span in range(min_window, max_window + 1):
-        window_counts = Counter(main_tokens[:span])
-        overlap = sum(min(window_counts[token], gold_counts[token]) for token in window_counts)
-
         for start in range(0, main_len - span + 1):
-            if start > 0:
-                left = main_tokens[start - 1]
-                right = main_tokens[start + span - 1]
-
-                overlap -= min(window_counts[left], gold_counts[left])
-                window_counts[left] -= 1
-                overlap += min(window_counts[left], gold_counts[left])
-
-                overlap -= min(window_counts[right], gold_counts[right])
-                window_counts[right] += 1
-                overlap += min(window_counts[right], gold_counts[right])
-
-            score = overlap / gold_len
-            waste = span - overlap  # non-matching tokens in the window
             end = start + span
 
-            # Alignment-based match count (Levenshtein) as tiebreaker
-            window = main_tokens[start:end]
+            # Project to majority source-utt by trimming non-majority
+            # tokens at both ends. Score is computed on the projected
+            # window so cross-utt bleed can't inflate the bag overlap.
+            window_utts = main_utts[start:end]
+            majority = Counter(window_utts).most_common(1)[0][0]
+            ts = start
+            while ts < end and main_utts[ts] != majority:
+                ts += 1
+            te = end
+            while te > ts and main_utts[te - 1] != majority:
+                te -= 1
+            if te <= ts:
+                continue
+
+            window = main_tokens[ts:te]
+            window_counts = Counter(window)
+            overlap = sum(min(window_counts[t], gold_counts[t]) for t in window_counts)
+            score = overlap / gold_len
+            waste = (te - ts) - overlap
+
             alignment = align(window, gold_tokens, False, mfn)
             align_matches = sum(1 for item in alignment if isinstance(item, Match))
 
             if score > best_score:
-                best = (start, end)
+                best = (ts, te)
                 best_score = score
                 best_waste = waste
                 best_align_matches = align_matches
             elif score == best_score:
                 if align_matches > best_align_matches:
-                    best = (start, end)
+                    best = (ts, te)
                     best_waste = waste
                     best_align_matches = align_matches
                 elif align_matches == best_align_matches:
-                    if best_waste is None or waste < best_waste:
-                        best = (start, end)
+                    if te > best[1]:
+                        best = (ts, te)
                         best_waste = waste
-                    elif waste == best_waste and end > best[1]:
-                        best = (start, end)
+                    elif te == best[1] and (best_waste is None or waste < best_waste):
+                        best = (ts, te)
+                        best_waste = waste
 
     # If no tokens overlap at all, return an empty window so the caller
     # doesn't consume main tokens that belong to a later gold utterance.
@@ -230,6 +247,85 @@ def _find_best_segment(gold_tokens, main_tokens, mfn):
         return 0, 0
 
     return best
+
+
+def _snap_window_to_majority_utt(abs_start, abs_end, search_start,
+                                 conformed_main, main_map, main_info,
+                                 gold_tokens, mfn):
+    """Snap a rough window to the boundaries of its majority source utt.
+
+    The bag-of-words rough pass picks a window that maximises multiset
+    overlap with the gold utterance. Two failure modes follow from that:
+
+    1. **Trailing overshoot.** The window grows past the natural endpoint
+       to grab a stray matching token from the *next* gold utterance,
+       which then starves that next utterance and cascades misalignment.
+    2. **Leading skip.** A genuine leading main token (e.g. main "she" vs
+       gold "he", a substitution) doesn't match anything in gold's bag, so
+       the rough pass picks a window starting one position later. The
+       skipped token then falls into the gap between iterations and is
+       lost — neither this utterance nor the next picks it up.
+
+    Both are detectable from the source main-utterance index already
+    carried in ``main_info``: tokens that share the window's majority utt
+    belong with this gold utterance; tokens from a different utt do not.
+
+    *Trailing* is the easy direction: pull ``abs_end`` inward while the
+    last token isn't from the majority utt — that strips next-utt bleed.
+
+    *Leading* needs more care. Walking left through every same-utt token
+    would break the bag-of-words ``latest end position`` tiebreaker that
+    the rough pass relies on for repetitions (e.g. main "the cat sat the
+    cat sat" / gold "the cat sat" — the first copy is often a prompt /
+    example utterance, and the rough pass deliberately picks the second).
+    So we bound the leftward walk by the count of *leading*
+    Extra(REFERENCE) items in the alignment: that's the number of gold
+    tokens unmatched at the start, which is exactly the room for
+    substitution material to the left. A clean second-occurrence
+    repetition aligns with zero leading REFs, so no extension occurs.
+    A leading substitution like main "she" vs gold "he" yields one
+    leading REF, so we pull in exactly that one token.
+
+    Source-utt awareness rather than alignment shape is the signal for
+    the trailing trim: a pure-Extra(PAYLOAD)-tail rule would also clip
+    legitimate intra-utt end-of-utterance substitutions (main "slept" vs
+    gold "sat") because DP often places the unmatched main token last.
+    """
+    if abs_end <= abs_start:
+        return abs_start, abs_end
+
+    window_utts = [
+        main_info[main_map[abs_start + k]][0]
+        for k in range(abs_end - abs_start)
+    ]
+    majority = Counter(window_utts).most_common(1)[0][0]
+
+    while abs_end > abs_start and main_info[main_map[abs_end - 1]][0] != majority:
+        abs_end -= 1
+
+    if abs_end <= abs_start:
+        return abs_start, abs_end
+
+    # Leading extension is bounded by the number of unmatched gold tokens
+    # at the start of the alignment. This preserves the latest-tiebreaker
+    # for repetitions while still recovering leading substitutions.
+    window_main = conformed_main[abs_start:abs_end]
+    alignment = align(window_main, gold_tokens, False, mfn)
+    leading_refs = 0
+    for item in alignment:
+        if isinstance(item, Extra) and item.extra_type == ExtraType.REFERENCE:
+            leading_refs += 1
+        else:
+            break
+
+    extended = 0
+    while (extended < leading_refs
+           and abs_start > search_start
+           and main_info[main_map[abs_start - 1]][0] == majority):
+        abs_start -= 1
+        extended += 1
+
+    return abs_start, abs_end
 
 
 def _best_rotation(window_tokens, gold_tokens, mfn):
@@ -357,6 +453,11 @@ class CompareEngine(BatchalignEngine):
         conformed_main, main_map = conform_with_mapping(main_words, conform)
         conformed_gold, gold_map = conform_with_mapping(gold_words, conform)
 
+        # Source main-utterance index for each conformed main token. Used
+        # both inside the rough search (to score windows on their effective
+        # post-trim form) and afterwards by the snap pass.
+        main_utts = [main_info[idx][0] for idx in main_map]
+
         # --- 4. Partition conformed gold tokens by utterance ---
         gold_utt_tokens = {i: [] for i in range(len(gold_utterances))}
         gold_utt_maps = {i: [] for i in range(len(gold_utterances))}
@@ -386,10 +487,26 @@ class CompareEngine(BatchalignEngine):
                 continue
 
             remaining_main = conformed_main[search_start:]
-            win_start, win_end = _find_best_segment(g_tokens, remaining_main, match_fn)
+            remaining_utts = main_utts[search_start:]
+            win_start, win_end = _find_best_segment(
+                g_tokens, remaining_main, remaining_utts, match_fn
+            )
 
             abs_start = search_start + win_start
             abs_end = search_start + win_end
+
+            # Snap the rough window to the source main-utterance boundary
+            # of its majority — extends leftward (bounded by leading
+            # alignment-REF count, so the latest-tiebreaker for in-utt
+            # repetitions is preserved) to absorb leading substitutions
+            # the bag-of-words pass skipped, and trims trailing tokens
+            # that bled in from the next main utt.
+            abs_start, abs_end = _snap_window_to_majority_utt(
+                abs_start, abs_end, search_start,
+                conformed_main, main_map, main_info,
+                g_tokens, match_fn,
+            )
+            window_main = conformed_main[abs_start:abs_end]
 
             # Collect unique main forms in the window (deduplicate
             # across conformed expansions that map to the same form)
@@ -404,9 +521,8 @@ class CompareEngine(BatchalignEngine):
 
             # Align the chosen window against this gold utterance,
             # trying cyclic rotations to avoid spurious del/ins pairs.
-            window_main = conformed_main[abs_start:abs_end]
             window_len = len(window_main)
-            rotation = _best_rotation(window_main, g_tokens, match_fn)
+            rotation = _best_rotation(window_main, g_tokens, match_fn) if window_len > 0 else 0
             if rotation > 0:
                 window_main = window_main[rotation:] + window_main[:rotation]
             utt_alignment = align(window_main, g_tokens, False, match_fn)
