@@ -29,6 +29,9 @@ def __getattr__(name):
     if name == 'CHATFile':
         from .formats.chat import CHATFile
         return CHATFile
+    if name == 'TextGridFile':
+        from .formats.textgrid import TextGridFile
+        return TextGridFile
     # Add other common engines if needed for dispatch.py
     if name in ['WhisperEngine', 'WhisperFAEngine', 'StanzaEngine', 'RevEngine',
                 'NgramRetraceEngine', 'DisfluencyReplacementEngine', 'WhisperUTREngine',
