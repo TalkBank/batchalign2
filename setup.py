@@ -31,7 +31,7 @@ setup(
         "filelock>=3.0.0",
         "nltk>=3.8",
         "praatio>=6.0.0,<6.1.0",
-        "torch>=2.7,<2.9",
+        "torch>=2.7,<2.13",
         "torchaudio>=2.7,<2.9",  # <2.9: keep list_audio_backends; <2.10: keep AudioMetaData — needed by pyannote.audio 3.x (torch.load weights_only patched in batchalign.pipelines.diarization.pyannote)
         "soundfile>=0.12.0",  # Audio I/O backend (replaces torchaudio.load/save/info)
         # "pyAudioAnalysis",
