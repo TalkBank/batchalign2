@@ -40,7 +40,7 @@ setup(
         "pydub",
         # "imblearn",
         "plotly>=5.3.0",
-        "transformers>=4.38.2,<5",
+        "transformers>=4.38.2,<6",
         "tokenizers>=0.14.1",
         "numba>=0.61.0",
         "numpy>=1.24,<2.3",
