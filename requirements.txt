@@ -454,7 +454,7 @@ tokenizers==0.22.2
     # via
     #   batchalign (setup.py)
     #   transformers
-torch==2.12.1
+torch==2.13.0
     # via
     #   batchalign (setup.py)
     #   accelerate
@@ -503,7 +503,7 @@ tqdm==4.67.1
     #   speechbrain
     #   stanza
     #   transformers
-transformers==5.3.0
+transformers==5.5.0
     # via
     #   batchalign (setup.py)
     #   peft
